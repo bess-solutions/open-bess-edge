@@ -1,11 +1,16 @@
 {
-  "$schema": "https://bessai.io/schemas/device-profile/v1.json",
-  "profile_version": "1.0.0",
+  "$schema": "https://bessai.io/schemas/device-profile/v2.json",
+  "profile_version": "2.0.0",
   "device": {
     "manufacturer": "Huawei",
-    "model": "SUN2000",
-    "description": "Huawei SUN2000 series inverter / BESS management unit",
-    "protocol": "ModbusTCP"
+    "model": "SUN2000-(2KTL-6KTL)-L1",
+    "description": "Huawei SUN2000 residential solar inverter with LUNA2000 battery ESS. Single-phase 2-6kW, RS485/WLAN.",
+    "firmware_reference": "SUN2000 Modbus Interface Definition v3.0 (2024)",
+    "protocol": "ModbusTCP",
+    "slave_id_default": 3,
+    "rs485_baud": 9600,
+    "rs485_parity": "N",
+    "rs485_stopbits": 1
   },
   "connection": {
     "byte_order": "BIG",
@@ -14,6 +19,78 @@
     "retries": 3
   },
   "registers": {
+    "inverter_state": {
+      "address": 32089,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 1,
+      "unit": "enum",
+      "description": "Inverter working state: 0=Standby, 256=Running, 512=Fault, 1024=Sleep"
+    },
+    "pv1_voltage": {
+      "address": 32016,
+      "count": 1,
+      "type": "INT16",
+      "access": "RO",
+      "scale": 0.1,
+      "unit": "V",
+      "description": "PV string 1 voltage"
+    },
+    "pv1_current": {
+      "address": 32017,
+      "count": 1,
+      "type": "INT16",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "A",
+      "description": "PV string 1 current"
+    },
+    "pv2_voltage": {
+      "address": 32018,
+      "count": 1,
+      "type": "INT16",
+      "access": "RO",
+      "scale": 0.1,
+      "unit": "V",
+      "description": "PV string 2 voltage"
+    },
+    "pv2_current": {
+      "address": 32019,
+      "count": 1,
+      "type": "INT16",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "A",
+      "description": "PV string 2 current"
+    },
+    "pv_total_power": {
+      "address": 32064,
+      "count": 2,
+      "type": "INT32",
+      "access": "RO",
+      "scale": 0.001,
+      "unit": "kW",
+      "description": "Total PV DC input power"
+    },
+    "ac_voltage": {
+      "address": 32069,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 0.1,
+      "unit": "V",
+      "description": "AC grid voltage (phase A)"
+    },
+    "ac_current": {
+      "address": 32072,
+      "count": 1,
+      "type": "INT32",
+      "access": "RO",
+      "scale": 0.001,
+      "unit": "A",
+      "description": "AC output current"
+    },
     "active_power": {
       "address": 32080,
       "count": 2,
@@ -21,16 +98,178 @@
       "access": "RO",
       "scale": 0.001,
       "unit": "kW",
-      "description": "Active power output of the inverter. Negative = charging."
+      "description": "Active power output. Positive = exporting, Negative = consuming from grid"
     },
-    "soc": {
-      "address": 37004,
+    "reactive_power": {
+      "address": 32082,
+      "count": 2,
+      "type": "INT32",
+      "access": "RO",
+      "scale": 0.001,
+      "unit": "kvar",
+      "description": "Reactive power"
+    },
+    "power_factor": {
+      "address": 32084,
+      "count": 1,
+      "type": "INT16",
+      "access": "RO",
+      "scale": 0.001,
+      "unit": "",
+      "description": "Power factor (-1.000 to 1.000)"
+    },
+    "frequency": {
+      "address": 32085,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "Hz",
+      "description": "Grid frequency"
+    },
+    "internal_temperature": {
+      "address": 32087,
+      "count": 1,
+      "type": "INT16",
+      "access": "RO",
+      "scale": 0.1,
+      "unit": "°C",
+      "description": "Inverter internal temperature"
+    },
+    "daily_energy": {
+      "address": 32114,
+      "count": 2,
+      "type": "UINT32",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "kWh",
+      "description": "Energy generated today"
+    },
+    "total_energy": {
+      "address": 32106,
+      "count": 2,
+      "type": "UINT32",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "kWh",
+      "description": "Total lifetime energy generated"
+    },
+    "alarm1": {
+      "address": 32008,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 1,
+      "unit": "bitmask",
+      "description": "Alarm register 1 (see alarm_bits for decode)"
+    },
+    "alarm2": {
+      "address": 32009,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 1,
+      "unit": "bitmask",
+      "description": "Alarm register 2"
+    },
+    "alarm3": {
+      "address": 32010,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 1,
+      "unit": "bitmask",
+      "description": "Alarm register 3"
+    },
+    "luna_soc": {
+      "address": 37760,
       "count": 1,
       "type": "UINT16",
       "access": "RO",
       "scale": 0.1,
       "unit": "%",
-      "description": "State of Charge of the battery pack."
+      "description": "LUNA2000 State of Charge (0.0–100.0%)"
+    },
+    "luna_soh": {
+      "address": 37761,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 0.1,
+      "unit": "%",
+      "description": "LUNA2000 State of Health (0.0–100.0%)"
+    },
+    "luna_power": {
+      "address": 37765,
+      "count": 2,
+      "type": "INT32",
+      "access": "RO",
+      "scale": 0.001,
+      "unit": "kW",
+      "description": "Battery power. Positive = charging, Negative = discharging"
+    },
+    "luna_voltage": {
+      "address": 37800,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 0.1,
+      "unit": "V",
+      "description": "LUNA2000 pack voltage (350–560V)"
+    },
+    "luna_current": {
+      "address": 37801,
+      "count": 1,
+      "type": "INT16",
+      "access": "RO",
+      "scale": 0.1,
+      "unit": "A",
+      "description": "LUNA2000 current. Positive = charging."
+    },
+    "luna_temperature": {
+      "address": 37752,
+      "count": 1,
+      "type": "INT16",
+      "access": "RO",
+      "scale": 0.1,
+      "unit": "°C",
+      "description": "LUNA2000 pack temperature"
+    },
+    "luna_capacity": {
+      "address": 37758,
+      "count": 2,
+      "type": "UINT32",
+      "access": "RO",
+      "scale": 0.001,
+      "unit": "kWh",
+      "description": "LUNA2000 usable capacity"
+    },
+    "luna_cycle_count": {
+      "address": 37762,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 1,
+      "unit": "cycles",
+      "description": "LUNA2000 charge/discharge cycle count"
+    },
+    "luna_working_mode": {
+      "address": 47086,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "enum",
+      "description": "Battery working mode: 0=Max self-consumption, 1=Fully charged, 2=TOU, 3=Remote dispatch"
+    },
+    "luna_charge_target_soc": {
+      "address": 47087,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.1,
+      "unit": "%",
+      "description": "Target SOC for charge cutoff (0.0–100.0%)"
     },
     "watchdog_heartbeat": {
       "address": 40900,
@@ -39,7 +278,49 @@
       "access": "RW",
       "scale": 1,
       "unit": "count",
-      "description": "Heartbeat counter. Increment and write every WATCHDOG_TIMEOUT seconds to prevent inverter safety shutdown."
+      "description": "Heartbeat counter. Increment and write every WATCHDOG_TIMEOUT seconds."
     }
+  },
+  "alarm_bits": {
+    "alarm1": {
+      "0": "High String Input Reverse",
+      "1": "Module Protection",
+      "2": "Grounding Error",
+      "3": "Low Insulation Resistance",
+      "4": "DC Overvoltage",
+      "5": "Grid AC Overvoltage",
+      "6": "Grid AC Undervoltage",
+      "7": "Grid Overfrequency",
+      "8": "Grid Underfrequency",
+      "9": "Unstable Grid",
+      "10": "Output Overcurrent",
+      "11": "Output DC Component Overhigh",
+      "12": "Anti-Islanding",
+      "13": "Reserved",
+      "14": "Reserved",
+      "15": "Disconnection"
+    },
+    "alarm2": {
+      "0": "AFCI Self-Check Fault",
+      "1": "DC Arc Fault",
+      "2": "PV String Reverse",
+      "3": "PV Module Fault",
+      "4": "Reserved",
+      "5": "Battery Pack Overtemperature",
+      "6": "Battery Pack Undertemperature",
+      "7": "Battery Overcharge",
+      "8": "Battery Overdischarge",
+      "9": "Battery Abnormal",
+      "10": "Reserved",
+      "11": "Active Islanding",
+      "12": "Passive Islanding",
+      "13": "Reactive Power Abnormal",
+      "14": "Electric Arc Fault",
+      "15": "RCMU Alarm"
+    }
+  },
+  "soc": {
+    "address": 37760,
+    "register_alias": "luna_soc"
   }
 }
