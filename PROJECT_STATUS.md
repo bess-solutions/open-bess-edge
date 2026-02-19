@@ -69,8 +69,10 @@ docker compose -f infrastructure/docker/docker-compose.yml --profile simulator -
 |---|---|---|
 | ✅ ~~1~~ | ~~Docker Desktop no instalado~~ | **RESUELTO** — Docker v4.61.0 operativo |
 | ✅ ~~2~~ | ~~`config/.env` no existe~~ | **RESUELTO** — `.env` creado con simulador |
-| 🟡 3 | GCP Project ID pendiente | Configurar `GCP_PROJECT_ID` + `terraform apply` |
-| 🟡 4 | GitHub Secrets pendientes | Agregar secrets en Settings → Actions del repo |
+| ✅ ~~3~~ | ~~GCP Project ID pendiente~~ | **RESUELTO** — `terraform apply` ejecutado, 18 recursos en GCP |
+| ✅ ~~4~~ | ~~GitHub Secrets pendientes~~ | **RESUELTO** — 4 secrets configurados en Actions |
+
+> 🎉 **Sin bloqueadores activos** — el pipeline completo (lint → test → tf-validate → docker-push) está operativo.
 
 ---
 
@@ -96,10 +98,10 @@ FASE 2  ████████████████████████
         ✅ Terraform backend.tf      GCS remote state listo para activar
         ✅ CI terraform-validate     sin credenciales GCP
         ✅ docs/local_development.md guía de desarrollo completa
-        ⏳ terraform apply            pendiente credenciales GCP reales
-        ⏳ GitHub Secrets             pendiente configurar en el repo
+        ✅ terraform apply            ejecutado — 18 recursos en gen-lang-client-0752731192
+        ✅ GitHub Secrets             4 secrets configurados en Actions
 
-FASE 2  ░░░░░░░░   Q3 2026
+FASE 3  ░░░░░░░░   Q3 2026
         ░░░░░░░░   Edge AI: ONNX Runtime (inferencia offline)
         ░░░░░░░░   AI-IDS: detección de intrusiones Modbus
         ░░░░░░░░   DRL Training: Ray RLlib (PPO/SAC)

@@ -7,7 +7,7 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-19T17:45 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-19T15:00 -03:00)
 
 ### Contexto del sistema
 **BESSAI Edge Gateway** (`open-bess-edge`) es el componente de borde de un sistema de gestión de baterías industriales (BESS). Adquiere telemetría via **Modbus TCP** desde inversores Huawei SUN2000, valida seguridad, y publica a **GCP Pub/Sub** con observabilidad via **OpenTelemetry** y **Prometheus**.
@@ -55,39 +55,37 @@ docker compose -f infrastructure/docker/docker-compose.yml --profile simulator -
 | `bessai-prometheus` (monitoring) | disponible | **9090** |
 | `bessai-grafana` (monitoring) | disponible | **3000** (admin/bessai) |
 
-### 🚫 Bloqueadores activos — Requieren acción humana
+### ✅ Sin Bloqueadores Activos
 
-| # | Bloqueador | Solución requerida |
+| # | Bloqueador | Solución |
 |---|---|---|
-| 1 | ~~Docker Desktop no instalado~~ | ✅ **RESUELTO** — Docker Desktop v4.61.0 instalado y operativo |
-| 2 | ~~`config/.env` no existe~~ | ✅ **RESUELTO** — `config/.env` creado con values del simulador |
-| 3 | **GCP Project ID pendiente** | Completar `GCP_PROJECT_ID` en `config/.env` + ejecutar `terraform apply` |
-| 4 | **GitHub Secrets pendientes** | Agregar 4 secrets en Settings → Actions del repo |
+| 1 | ~~Docker Desktop no instalado~~ | ✅ **RESUELTO** — Docker v4.61.0 |
+| 2 | ~~`config/.env` no existe~~ | ✅ **RESUELTO** — `.env` con simulador |
+| 3 | ~~GCP Project ID pendiente~~ | ✅ **RESUELTO** — `terraform apply` ejecutado, 18 recursos GCP creados |
+| 4 | ~~GitHub Secrets pendientes~~ | ✅ **RESUELTO** — 4 secrets configurados en Actions |
 
-### 🟡 Work in Progress — Próximo agente debe continuar aquí
+### 🟢 Próximo agente — Continuar aquí
 
-**Prioridad 1 — Terraform GCP:**
-- `infrastructure/terraform/` tiene el código listo (Pub/Sub + IAM + WIF + Artifact Registry).
-- Falta: credenciales GCP reales → `gcloud auth application-default login` → `terraform apply`.
+**Todos los bloqueadores resueltos.** El pipeline completo está operativo:
+- lint (ruff) → test (54/54) → tf-validate → docker-build → docker-push → Artifact Registry
 
-**Prioridad 2 — GitHub Secrets para CI/CD:**
-- Pipeline CI ya existe y corre (lint + test + docker-build). Solo `docker-push` falla sin secrets.
-- Agregar en GitHub: `GCP_PROJECT_ID`, `GCP_REGION`, `GCP_WORKLOAD_IDENTITY_PROVIDER`, `GCP_SERVICE_ACCOUNT`.
-
-**Prioridad 3 — BESSAI v2.0:**
-- Ver roadmap: `docs/bessai_v2_roadmap.md`.
-- Siguiente milestone: Edge AI (ONNX Runtime) + AI-IDS + Federated Orchestration.
+**Próxima prioridad — BESSAI v2.0 (Q3 2026):**
+- Edge AI: ONNX Runtime (inferencia offline)
+- AI-IDS: detección de intrusiones Modbus
+- Ver roadmap: `docs/bessai_v2_roadmap.md`
 
 ### 📂 Estructura de archivos clave
 ```
 open-bess-edge/
 ├── src/core/        config.py · safety.py · main.py
 ├── src/drivers/     modbus_driver.py
-├── src/interfaces/  pubsub_publisher.py · otel_setup.py
+├── src/interfaces/  pubsub_publisher.py · otel_setup.py · health.py · metrics.py
 ├── registry/        huawei_sun2000.json
-├── config/          .env.example · .env  ← ✅ existe (simulador)
-├── infrastructure/docker/   Dockerfile · docker-compose.yml · otel-collector-config.yaml
-├── infrastructure/terraform/ ← código listo, pendiente apply
+├── config/          .env.example · .env  ← ✅ existe (GCP_PROJECT_ID configurado)
+├── infrastructure/docker/    Dockerfile · docker-compose.yml · otel-collector-config.yaml
+├── infrastructure/terraform/ ← ✅ apply ejecutado — 18 recursos en GCP
+├── infrastructure/prometheus/ prometheus.yml
+├── infrastructure/grafana/   provisioning/datasources/prometheus.yml
 ├── .github/workflows/       ci.yml · release.yml
 ├── docs/            bessai_v2_roadmap.md · runbook.md · architecture.md
 └── tests/           conftest.py · test_config.py · test_safety.py · test_modbus_driver.py

@@ -2,27 +2,30 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/Tests-45%2F45%20%E2%9C%85-success)](tests/)
-[![pymodbus](https://img.shields.io/badge/pymodbus-3.12-blue)](https://github.com/pymodbus-dev/pymodbus)
+[![Tests](https://img.shields.io/badge/Tests-54%2F54%20%E2%9C%85-success)](tests/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![CI](https://github.com/bess-solutions/open-bess-edge/actions/workflows/ci.yml/badge.svg)](https://github.com/bess-solutions/open-bess-edge/actions)
 
 > **Gateway industrial agnóstico para la gestión segura y optimizada de activos BESS, cumpliendo normativa NTSyCS del CEN (Chile).**
 
 ---
 
-## 🚀 Estado del Proyecto
+## 🚀 Estado del Proyecto — v0.5.0
 
 | Componente | Estado |
 |---|---|
 | Modbus TCP Driver (`UniversalDriver`) | ✅ Funcional — pymodbus 3.12 |
 | Safety Guard (`SafetyGuard`) | ✅ Funcional |
 | Config (`pydantic-settings`) | ✅ Funcional — acepta IPs y hostnames |
-| GCP Pub/Sub Publisher | ✅ Implementado (requiere credenciales) |
+| **Health Check HTTP** (`GET /health`) | ✅ **NUEVO** — JSON status + uptime |
+| **Prometheus Metrics** (`GET /metrics`) | ✅ **NUEVO** — 7 métricas en tiempo real |
+| GCP Pub/Sub Publisher | ✅ Implementado y conectado |
 | OpenTelemetry | ✅ Implementado |
-| Suite de tests | ✅ **45/45 tests pasan** |
-| Docker Compose (+ Simulador) | ✅ **Operativo** — 4 contenedores healthy |
-| Terraform (GCP) | ✅ Código listo — pendiente `apply` |
-| GitHub Actions CI/CD | ✅ Corriendo en [Actions](https://github.com/bess-solutions/open-bess-edge/actions) |
+| Suite de tests | ✅ **54/54 tests pasan** |
+| Docker Compose (+ Simulador) | ✅ **Operativo** — con perfil `monitoring` |
+| **Prometheus + Grafana** | ✅ **NUEVO** — `--profile monitoring` |
+| **Terraform GCP** | ✅ **`apply` ejecutado** — 18 recursos en GCP |
+| GitHub Actions CI/CD | ✅ Corriendo — lint + test + tf-validate + docker-push |
 
 ---
 
@@ -33,7 +36,8 @@
 - **Adquisición de datos en tiempo real** vía Modbus TCP/RTU (pymodbus 3.12, struct-based encoding).
 - **Normalización y validación** de telemetría con modelos Pydantic v2.
 - **Publicación de eventos** a Google Cloud Pub/Sub de forma asíncrona.
-- **Observabilidad completa** con trazas y métricas OpenTelemetry (OTLP).
+- **Observabilidad completa** con trazas y métricas OpenTelemetry (OTLP) + Prometheus.
+- **Health check HTTP** en `GET /health` y métricas Prometheus en `GET /metrics` (puerto 8000).
 - **Cumplimiento regulatorio** con la Norma Técnica de Seguridad y Calidad de Servicio (NTSyCS) del Coordinador Eléctrico Nacional de Chile (CEN).
 
 ---
@@ -44,7 +48,7 @@
 
 | Herramienta | Versión mínima | Notas |
 |---|---|---|
-| Python | 3.10+ | Probado en 3.14.2 |
+| Python | 3.10+ | Probado en 3.14 |
 | Docker & Docker Compose | 24.x | Para ejecución containerizada |
 | Git | 2.40+ | |
 
@@ -75,19 +79,24 @@ python -m src.core.main
 ### Ejecución con Docker (modo simulador — sin hardware)
 
 ```bash
-# Levanta 4 servicios: gateway + simulador Modbus + otel-collector
+# Levanta gateway + simulador Modbus + OTel collector
 docker compose -f infrastructure/docker/docker-compose.yml --profile simulator up --build -d
 
-# Verificar estado
-docker ps
+# Con Prometheus + Grafana (monitoring stack)
+docker compose -f infrastructure/docker/docker-compose.yml \
+  --profile simulator --profile monitoring up --build -d
 ```
 
-### Ejecución con Docker (inversor real)
+Una vez corriendo puedes acceder a:
 
-```bash
-# Editar config/.env con la IP real del inversor, luego:
-docker compose -f infrastructure/docker/docker-compose.yml up --build
-```
+| URL | Descripción |
+|---|---|
+| http://localhost:8000/health | Gateway health check (JSON) |
+| http://localhost:8000/metrics | Métricas Prometheus |
+| http://localhost:9090 | Prometheus UI |
+| http://localhost:3000 | Grafana (admin / bessai) |
+
+Ver la guía completa: [`docs/local_development.md`](docs/local_development.md)
 
 ---
 
@@ -98,14 +107,16 @@ open-bess-edge/
 ├── src/
 │   ├── core/          # Lógica de negocio (orquestador, config, safety)
 │   ├── drivers/       # Adaptadores de hardware (Modbus TCP via struct)
-│   └── interfaces/    # Conexiones externas (GCP Pub/Sub, OTLP)
+│   └── interfaces/    # health.py · metrics.py · pubsub_publisher.py · otel_setup.py
 ├── registry/          # Perfiles JSON de dispositivos
 ├── config/            # Variables de entorno (.env.example)
-├── tests/             # Suite de tests (pytest, 45/45 ✅)
+├── tests/             # Suite de tests (pytest, 54/54 ✅)
 ├── infrastructure/
-│   ├── terraform/     # IaC para GCP (en progreso)
+│   ├── terraform/     # IaC para GCP — Pub/Sub + IAM + WIF (aplicado ✅)
+│   ├── prometheus/    # prometheus.yml — scrape config
+│   ├── grafana/       # Datasource provisioning automático
 │   └── docker/        # Dockerfiles y docker-compose
-└── docs/              # Documentación técnica y normativa
+└── docs/              # local_development.md · runbook.md · architecture.md
 ```
 
 ### Flujo de datos
@@ -115,14 +126,14 @@ open-bess-edge/
       │  Modbus TCP (pymodbus 3.12 + struct)
       ▼
 [Drivers Layer]  ──►  [Core Engine]  ──►  [Interfaces Layer]
- (src/drivers/)         (src/core/)         (src/interfaces/)
-                              │
-                       Validación Pydantic v2
-                       Safety Guard (SOC/Temp)
-                       OpenTelemetry Traces
+ (src/drivers/)         (src/core/)        health.py  /health /metrics
+                              │             pubsub_publisher.py → GCP Pub/Sub
+                       Safety Guard         otel_setup.py → Cloud Trace
+                       Pydantic v2
                               │
                               ▼
-                     [GCP Pub/Sub / Cloud]
+                   [Prometheus / Grafana]
+                   [GCP Pub/Sub / Cloud]
 ```
 
 ---
@@ -136,13 +147,12 @@ La configuración sigue el principio **12-Factor App** — toda la configuració
 | `SITE_ID` | ✅ | Identificador único del sitio | — |
 | `INVERTER_IP` | ✅ | IP o hostname del inversor (acepta DNS, ej: `modbus-simulator`) | — |
 | `INVERTER_PORT` | ➖ | Puerto TCP Modbus | `502` |
+| `HEALTH_PORT` | ➖ | Puerto del servidor /health y /metrics | `8000` |
 | `DRIVER_PROFILE_PATH` | ➖ | Ruta al perfil JSON del dispositivo | `registry/huawei_sun2000.json` |
 | `WATCHDOG_TIMEOUT` | ➖ | Segundos entre heartbeats | `5` |
 | `GCP_PROJECT_ID` | ✅¹ | ID del proyecto GCP | `None` |
 | `GCP_PUBSUB_TOPIC` | ✅¹ | Tópico Pub/Sub de telemetría | `None` |
-| `GOOGLE_APPLICATION_CREDENTIALS` | ✅¹ | Ruta al JSON de credenciales GCP | — |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | ➖ | Endpoint OTLP del collector | `http://otel-collector:4317` |
-| `OTEL_SERVICE_NAME` | ➖ | Nombre del servicio en trazas | `bessai-edge-gateway` |
 | `LOG_LEVEL` | ➖ | Nivel de logging | `INFO` |
 
 > ¹ Requerida en producción. En desarrollo local puede omitirse si no se conecta a GCP.
@@ -154,7 +164,7 @@ Ver [`config/.env.example`](config/.env.example) para la plantilla completa.
 ## 🧪 Testing
 
 ```bash
-# Suite completa (45/45 tests)
+# Suite completa (54/54 tests)
 pytest tests/ -v --tb=short
 
 # Con reporte de cobertura HTML
@@ -163,12 +173,31 @@ pytest tests/ --cov=src --cov-report=html
 
 **Resultado actual:**
 ```
-45 passed in 6.66s  ✅
-Python 3.14.2 · pytest 9.0.2 · pymodbus 3.12
+54 passed in 6.96s  ✅
+Python 3.14 · pytest-asyncio 1.3.0 · pymodbus 3.12
 ```
 
-> **Nota para pruebas:** No se requiere archivo `.env` para correr los tests.
-> El `conftest.py` inyecta las variables mínimas necesarias automáticamente.
+> **Nota:** No se requiere archivo `.env` para los tests. El `conftest.py` inyecta las variables mínimas automáticamente.
+
+---
+
+## ☁️ GCP Infrastructure (Terraform)
+
+Los recursos GCP están provisionados y activos:
+
+```bash
+# Ver recursos creados
+cd infrastructure/terraform
+terraform output
+```
+
+| Recurso | Nombre |
+|---|---|
+| Pub/Sub topic | `bess-telemetry-dev` |
+| Pub/Sub subscription | `bess-telemetry-dev-pull` |
+| Artifact Registry | `us-central1-docker.pkg.dev/…/bessai` |
+| Service Account | `bessai-edge-sa-dev@…` |
+| Workload Identity Pool | `github-actions-pool` |
 
 ---
 
@@ -178,7 +207,7 @@ Ver el documento completo: [BESSAI v2.0 Technical Roadmap](docs/bessai_v2_roadma
 
 | Fase | Área | Prioridad |
 |---|---|---|
-| Q2 2026 | Terraform GCP + GitHub Actions CI | 🔴 Alta |
+| ✅ Q1 2026 | Health/Metrics HTTP + Prometheus + Terraform GCP | 🔴 **Completado** |
 | Q3 2026 | Edge AI (ONNX) + AI-IDS | 🔴 Alta |
 | Q4 2026 | Federated Orchestration + VPP | 🟡 Media |
 | Q1 2027 | Data Lakehouse + P2P Trading | 🟡 Media |
@@ -201,6 +230,7 @@ Las contribuciones son bienvenidas. Por favor sigue estos pasos:
 - Formatter: `ruff format`
 - Linter: `ruff check`
 - Type checker: `mypy`
+- Config centralizada: [`pyproject.toml`](pyproject.toml)
 
 ---
 
