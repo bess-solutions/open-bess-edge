@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/Tests-54%2F54%20%E2%9C%85-success)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-73%2F73%20%E2%9C%85-success)](tests/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![CI](https://github.com/bess-solutions/open-bess-edge/actions/workflows/ci.yml/badge.svg)](https://github.com/bess-solutions/open-bess-edge/actions)
 
@@ -17,15 +17,17 @@
 | Modbus TCP Driver (`UniversalDriver`) | ✅ Funcional — pymodbus 3.12 |
 | Safety Guard (`SafetyGuard`) | ✅ Funcional |
 | Config (`pydantic-settings`) | ✅ Funcional — acepta IPs y hostnames |
-| **Health Check HTTP** (`GET /health`) | ✅ **NUEVO** — JSON status + uptime |
-| **Prometheus Metrics** (`GET /metrics`) | ✅ **NUEVO** — 7 métricas en tiempo real |
+| Health Check HTTP (`GET /health`) | ✅ JSON status + uptime |
+| Prometheus Metrics (`GET /metrics`) | ✅ 11 métricas en tiempo real |
+| **AI-IDS** (`ModbusAnomalyDetector`) | ✅ **NUEVO** — IsolationForest + z-score, score 0-1 |
+| **ONNX Dispatcher** (`ONNXDispatcher`) | ✅ **NUEVO** — inferencia offline, fallback seguro |
 | GCP Pub/Sub Publisher | ✅ Implementado y conectado |
 | OpenTelemetry | ✅ Implementado |
-| Suite de tests | ✅ **54/54 tests pasan** |
-| Docker Compose (+ Simulador) | ✅ **Operativo** — con perfil `monitoring` |
-| **Prometheus + Grafana** | ✅ **NUEVO** — `--profile monitoring` |
-| **Terraform GCP** | ✅ **`apply` ejecutado** — 18 recursos en GCP |
-| GitHub Actions CI/CD | ✅ Corriendo — lint + test + tf-validate + docker-push |
+| Suite de tests | ✅ **73/73 tests pasan** |
+| Docker Compose (+ Simulador) | ✅ Operativo — con perfil `monitoring` |
+| Prometheus + Grafana | ✅ `--profile monitoring` |
+| Terraform GCP | ✅ `apply` ejecutado — 18 recursos en GCP |
+| GitHub Actions CI/CD | ✅ lint + test + tf-validate + docker-push |
 
 ---
 
@@ -173,8 +175,8 @@ pytest tests/ --cov=src --cov-report=html
 
 **Resultado actual:**
 ```
-54 passed in 6.96s  ✅
-Python 3.14 · pytest-asyncio 1.3.0 · pymodbus 3.12
+73 passed in 11.89s  ✅
+Python 3.14 · pytest-asyncio 1.3.0 · numpy 2.4.2 · scikit-learn 1.8.0 · onnxruntime 1.24.2
 ```
 
 > **Nota:** No se requiere archivo `.env` para los tests. El `conftest.py` inyecta las variables mínimas automáticamente.
@@ -208,7 +210,7 @@ Ver el documento completo: [BESSAI v2.0 Technical Roadmap](docs/bessai_v2_roadma
 | Fase | Área | Prioridad |
 |---|---|---|
 | ✅ Q1 2026 | Health/Metrics HTTP + Prometheus + Terraform GCP | 🔴 **Completado** |
-| Q3 2026 | Edge AI (ONNX) + AI-IDS | 🔴 Alta |
+| 🟡 Q3 2026 | Edge AI: ONNX ✅ + AI-IDS ✅ + DRL Training (Ray RLlib) | 🔴 **En progreso** |
 | Q4 2026 | Federated Orchestration + VPP | 🟡 Media |
 | Q1 2027 | Data Lakehouse + P2P Trading | 🟡 Media |
 | Q2 2027 | LCA Engine + Carbon Dashboard | 🟢 Estratégica |

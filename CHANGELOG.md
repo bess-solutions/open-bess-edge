@@ -117,6 +117,33 @@ Format: [Semantic Versioning](https://semver.org/) · [Conventional Commits](htt
 
 ---
 
+## [v0.6.0] — 2026-02-19
+
+### Added
+- `src/interfaces/ai_ids.py` — `ModbusAnomalyDetector` (IsolationForest + z-score ensemble)
+  - Score 0-1; threshold=0.65; fail-safe retorna 0.0 antes de `fit()`
+  - Alertas vía `structlog` + `bess_ids_alerts_total` Prometheus counter
+- `src/interfaces/onnx_dispatcher.py` — `ONNXDispatcher` con ONNX Runtime
+  - Carga `models/dispatch_policy.onnx` en CPU (sin internet)
+  - Fallback seguro: retorna `None` si el modelo falta → SafetyGuard toma el control
+- `models/dispatch_policy.onnx` — modelo dummy para tests (`target_kw = soc × 0.8`)
+- `scripts/generate_dummy_onnx.py` — generador de modelo dummy con smoke test
+- 4 nuevas métricas Prometheus en `metrics.py`:
+  - `bess_ids_alerts_total`, `bess_ids_anomaly_score`
+  - `bess_onnx_inference_ms`, `bess_onnx_dispatch_commands_total`
+- 19 nuevos tests: `test_ai_ids.py` (11) + `test_onnx_dispatcher.py` (8)
+
+### Changed
+- `requirements.txt` — agregado `numpy>=1.26.0`, `scikit-learn>=1.4.0`, `onnxruntime>=1.18.0`
+- `src/interfaces/metrics.py` — ampliado de 7 a 11 métricas
+
+### Tests
+```
+73 / 73 passed in 11.89s  (+19 tests vs v0.5.0: 54/54)
+```
+
+---
+
 ## [0.4.1] — 2026-02-19
 
 ### 🐛 Fix — Compatibilidad Docker + Hermetismo Tests

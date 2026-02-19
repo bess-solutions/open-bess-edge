@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-19 v0.5.0 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-19 v0.6.0 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo cada vez que avances una fase.*
 
 ---
@@ -14,11 +14,11 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 
 ---
 
-## ✅ Estado Actual — v0.5.0
+## ✅ Estado Actual — v0.6.0
 
 ### Tests
 ```
-54 / 54 passed ✅   (6.96s · Python 3.14 · pytest-asyncio 1.3.0)
+73 / 73 passed ✅   (11.89s · Python 3.14 · pytest-asyncio 1.3.0)
 ```
 
 ### Módulos implementados
@@ -29,20 +29,22 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 | Seguridad (SOC / Temp) | `src/core/safety.py` | ✅ Completo |
 | Orquestador principal | `src/core/main.py` | ✅ Integrado con HealthServer + métricas Prometheus |
 | Driver Modbus TCP | `src/drivers/modbus_driver.py` | ✅ Compatible pymodbus 3.12 |
-| **Servidor /health y /metrics** | `src/interfaces/health.py` | ✅ **NUEVO** — aiohttp, GET /health (JSON) + GET /metrics |
-| **Prometheus metrics registry** | `src/interfaces/metrics.py` | ✅ **NUEVO** — 7 métricas: cycles, SOC, power, safety_blocks... |
+| Servidor /health y /metrics | `src/interfaces/health.py` | ✅ aiohttp, GET /health (JSON) + GET /metrics |
+| Prometheus metrics registry | `src/interfaces/metrics.py` | ✅ **AMPLIADO v0.6.0** — 11 métricas (+ 4 AI) |
+| **AI-IDS** | `src/interfaces/ai_ids.py` | ✅ **NUEVO** — IsolationForest + z-score, score 0-1, alertas |
+| **ONNX Dispatcher** | `src/interfaces/onnx_dispatcher.py` | ✅ **NUEVO** — inferencia offline, fallback seguro |
+| **Modelo ONNX dummy** | `models/dispatch_policy.onnx` | ✅ **NUEVO** — `target_kw = soc × 0.8` (para tests) |
 | Publicador GCP Pub/Sub | `src/interfaces/pubsub_publisher.py` | ✅ Completo |
 | Observabilidad (OTel) | `src/interfaces/otel_setup.py` | ✅ Completo |
 | Perfil Huawei SUN2000 | `registry/huawei_sun2000.json` | ✅ Completo |
-| Docker Compose + Simulador | `infrastructure/docker/` | ✅ **MEJORADO** — perfil `monitoring` (Prometheus+Grafana) |
-| **Prometheus scrape config** | `infrastructure/prometheus/prometheus.yml` | ✅ **NUEVO** |
-| **Grafana datasource provisioning** | `infrastructure/grafana/provisioning/` | ✅ **NUEVO** |
-| **Terraform backend + tfvars example** | `infrastructure/terraform/backend.tf` | ✅ **NUEVO** |
-| **pyproject.toml** | `pyproject.toml` | ✅ **NUEVO** — ruff/mypy/pytest/coverage centralizados |
-| Tests unitarios | `tests/` | ✅ **54/54** (inc. 9 nuevos tests /health /metrics) |
-| **GitHub Actions CI/CD** | `.github/workflows/` | ✅ **MEJORADO** — +job `terraform-validate` |
-| **Terraform GCP** | `infrastructure/terraform/` | ✅ Código listo — pendiente `apply` |
-| **Guía desarrollo local** | `docs/local_development.md` | ✅ **NUEVO** — setup, tests, Docker, endpoints |
+| Docker Compose + Simulador | `infrastructure/docker/` | ✅ Perfil `monitoring` (Prometheus+Grafana) |
+| Prometheus scrape config | `infrastructure/prometheus/prometheus.yml` | ✅ Activo |
+| Grafana datasource provisioning | `infrastructure/grafana/provisioning/` | ✅ Activo |
+| Terraform GCP | `infrastructure/terraform/` | ✅ `apply` ejecutado — 18 recursos en GCP |
+| pyproject.toml | `pyproject.toml` | ✅ ruff/mypy/pytest/coverage centralizados |
+| Tests unitarios | `tests/` | ✅ **73/73** (inc. 11 AI-IDS + 8 ONNX tests) |
+| GitHub Actions CI/CD | `.github/workflows/` | ✅ lint → test → tf-validate → docker-push |
+| Guía desarrollo local | `docs/local_development.md` | ✅ Completo |
 
 ### 🐳 Stack Docker — OPERATIVO
 
@@ -101,10 +103,12 @@ FASE 2  ████████████████████████
         ✅ terraform apply            ejecutado — 18 recursos en gen-lang-client-0752731192
         ✅ GitHub Secrets             4 secrets configurados en Actions
 
-FASE 3  ░░░░░░░░   Q3 2026
-        ░░░░░░░░   Edge AI: ONNX Runtime (inferencia offline)
-        ░░░░░░░░   AI-IDS: detección de intrusiones Modbus
-        ░░░░░░░░   DRL Training: Ray RLlib (PPO/SAC)
+FASE 3  ████████░░░░░░░░   Q3 2026 — EN PROGRESO
+        ✅ ONNX Inference Engine     src/interfaces/onnx_dispatcher.py
+        ✅ AI-IDS (IsolationForest)  src/interfaces/ai_ids.py
+        ✅ Modelo ONNX dummy         models/dispatch_policy.onnx
+        ░░░░░░░░   DRL Training: Ray RLlib (PPO/SAC) + Gymnasium
+        ░░░░░░░░   Federated Learning (Flower/PySyft)
 
 FASE 3  ░░░░░░░░   Q4 2026
         ░░░░░░░░   VPP: Virtual Power Plant (OpenADR 3.0)
