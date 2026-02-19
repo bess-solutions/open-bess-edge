@@ -7,46 +7,53 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-19T13:32 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-19T17:45 -03:00)
 
 ### Contexto del sistema
-**BESSAI Edge Gateway** (`open-bess-edge`) es el componente de borde de un sistema de gestión de baterías industriales (BESS). Adquiere telemetría via **Modbus TCP** desde inversores Huawei SUN2000, valida seguridad, y publica a **GCP Pub/Sub** con observabilidad via **OpenTelemetry**.
+**BESSAI Edge Gateway** (`open-bess-edge`) es el componente de borde de un sistema de gestión de baterías industriales (BESS). Adquiere telemetría via **Modbus TCP** desde inversores Huawei SUN2000, valida seguridad, y publica a **GCP Pub/Sub** con observabilidad via **OpenTelemetry** y **Prometheus**.
 
-### Estado del código — ✅ COMPLETO, VALIDADO Y DOCKERIZADO
+### Estado del código — ✅ v0.5.0, COMPLETO Y VALIDADO
 
 | Archivo | Estado | Notas |
 |---|---|---|
-| `src/core/config.py` | ✅ Producción | `INVERTER_IP` acepta IPs **y hostnames DNS** (regex validator) |
+| `src/core/config.py` | ✅ Producción | `INVERTER_IP` acepta IPs y hostnames. Nuevo: `HEALTH_PORT=8000` |
 | `src/core/safety.py` | ✅ Producción | check_safety + watchdog_loop async |
-| `src/core/main.py` | ✅ Producción | Orquestador 5 pasos, graceful shutdown SIGINT/SIGTERM |
+| `src/core/main.py` | ✅ Producción | Integrado con HealthServer + Prometheus metrics |
 | `src/drivers/modbus_driver.py` | ✅ Producción | pymodbus 3.12, struct-based encode/decode |
+| `src/interfaces/health.py` | ✅ **NUEVO** | Servidor HTTP /health (JSON) + /metrics (Prometheus) vía aiohttp |
+| `src/interfaces/metrics.py` | ✅ **NUEVO** | Contadores/Gauges: cycles, safety_blocks, SOC, power, cycle_duration |
 | `src/interfaces/pubsub_publisher.py` | ✅ Producción | Async context manager, GCP Pub/Sub, JSON envelope |
-| `src/interfaces/otel_setup.py` | ✅ Producción | TracerProvider + MeterProvider, OTEL_SERVICE_NAME desde settings |
-| `registry/huawei_sun2000.json` | ✅ Producción | 3 registros: active_power, soc, watchdog_heartbeat |
-| `infrastructure/docker/Dockerfile` | ✅ Producción | Multi-stage, non-root user `bess` |
-| `infrastructure/docker/docker-compose.yml` | ✅ **Operativo** | 4 servicios corriendo: gateway + gateway-sim + modbus-simulator + otel-collector |
-| `tests/conftest.py` | ✅ Producción | Variables mínimas de entorno para todos los tests |
-| `tests/test_config.py` | ✅ 15 casos | Usa `_env_file=None` para hermetismo con `config/.env` real |
-| `tests/test_safety.py` | ✅ 16 casos | SOC/Temp boundary conditions, watchdog async, UINT16 wrap |
-| `tests/test_modbus_driver.py` | ✅ 14 casos | Mocked Modbus, connect retries, encode/decode |
-| `.github/workflows/ci.yml` | ✅ Producción | lint → typecheck → test → docker-build → docker-push |
-| `.github/workflows/release.yml` | ✅ Producción | Semver tagging + GitHub Release |
-| `infrastructure/terraform/` | ✅ Código listo | Pub/Sub + IAM + WIF — pendiente `terraform apply` con credenciales GCP |
+| `src/interfaces/otel_setup.py` | ✅ Producción | TracerProvider + MeterProvider |
+| `infrastructure/docker/docker-compose.yml` | ✅ **MEJORADO** | +Perfil `monitoring` (Prometheus+Grafana), port 8000, healthcheck HTTP |
+| `infrastructure/prometheus/prometheus.yml` | ✅ **NUEVO** | Scrape config: gateway:8000 + otel-collector:8888 |
+| `infrastructure/grafana/provisioning/` | ✅ **NUEVO** | Auto-provisioning datasource Prometheus |
+| `infrastructure/terraform/backend.tf` | ✅ **NUEVO** | GCS remote state config (listo para habilitar) |
+| `infrastructure/terraform/terraform.tfvars.example` | ✅ **NUEVO** | Template de variables TF |
+| `pyproject.toml` | ✅ **NUEVO** | Centraliza ruff/mypy/pytest/coverage config |
+| `docs/local_development.md` | ✅ **NUEVO** | Guía completa de desarrollo local |
+| `.github/workflows/ci.yml` | ✅ **MEJORADO** | +Job `terraform-validate` (sin credenciales GCP) |
+| `tests/test_health.py` | ✅ **NUEVO** | 9 tests para /health y /metrics endpoints |
 
-**Suite de tests: 45/45 ✅ en 6.56s — Python 3.14.2 · pytest 9.0.2 · pymodbus 3.12.0**
+**Suite de tests: 54/54 ✅ en 6.96s — Python 3.14 · pytest-asyncio 1.3.0**
 
 ### 🐳 Stack Docker — OPERATIVO
 
-```
+```powershell
+# Modo simulador (básico)
 docker compose -f infrastructure/docker/docker-compose.yml --profile simulator up --build -d
+
+# Con stack de monitoreo completo
+docker compose -f infrastructure/docker/docker-compose.yml --profile simulator --profile monitoring up --build -d
 ```
 
 | Contenedor | Estado | Puerto |
 |---|---|---|
 | `bessai-modbus-simulator` | ✅ healthy | host:5020 → container:502 |
-| `bessai-gateway` | ✅ running | — |
-| `bessai-gateway-sim` | ✅ running | — |
+| `bessai-gateway` | ✅ running | **8000 (/health, /metrics)** |
+| `bessai-gateway-sim` | ✅ running | **8000 (/health, /metrics)** |
 | `bessai-otel-collector` | ✅ running | 4317, 4318, 8888 |
+| `bessai-prometheus` (monitoring) | disponible | **9090** |
+| `bessai-grafana` (monitoring) | disponible | **3000** (admin/bessai) |
 
 ### 🚫 Bloqueadores activos — Requieren acción humana
 
@@ -88,6 +95,15 @@ open-bess-edge/
 
 ### Comando de validación rápida (sin Docker, sin hardware)
 ```powershell
+# Tests
+pytest tests/ -v --tb=short
+# Esperado: 54 passed ✅
+
+# Health endpoint (requiere Docker)
+Invoke-RestMethod http://localhost:8000/health | ConvertTo-Json
+
+# Métricas Prometheus
+Invoke-WebRequest http://localhost:8000/metrics | Select-Object -Exp Content
 .venv\Scripts\Activate.ps1
 pytest tests/ -v --tb=short
 # Expected: 45 passed in ~6.5s ✅
