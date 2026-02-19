@@ -7,37 +7,41 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-19T16:09 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-19T17:34 -03:00)
 
 ### Contexto del sistema
-**BESSAI Edge Gateway** (`open-bess-edge`) es el componente de borde de un sistema de gestión de baterías industriales (BESS). Adquiere telemetría via **Modbus TCP** desde inversores Huawei SUN2000, valida seguridad, y publica a **GCP Pub/Sub** con observabilidad via **OpenTelemetry** y **Prometheus**.
+**BESSAI Edge Gateway** (`open-bess-edge`) es el componente de borde de un sistema de gestión de baterías industriales (BESS). Adquiere telemetría via **Modbus TCP** desde inversores Huawei SUN2000 + batería LUNA2000, valida seguridad, y publica a **GCP Pub/Sub** con observabilidad via **OpenTelemetry** y **Prometheus**.
 
-### Estado del código — ✅ v0.9.0, COMPLETO Y VALIDADO
+### Estado del código — ✅ v1.0.0, COMPLETO Y VALIDADO
 
 | Archivo | Estado | Notas |
 |---|---|---|
 | `src/core/config.py` | ✅ Producción | `INVERTER_IP` acepta IPs y hostnames |
 | `src/core/safety.py` | ✅ Producción | check_safety + watchdog_loop async |
 | `src/core/main.py` | ✅ Producción | Integrado con HealthServer + Prometheus metrics |
-| `src/core/fleet_orchestrator.py` | ✅ **NUEVO v0.8** | Multi-site async polling, weighted SOC, alarms |
+| `src/core/fleet_orchestrator.py` | ✅ v0.8 | Multi-site async polling, weighted SOC, alarms |
 | `src/drivers/modbus_driver.py` | ✅ Producción | pymodbus 3.12, struct-based encode/decode |
+| `src/drivers/luna2000_driver.py` | ✅ **NUEVO v1.0** | LUNA2000 SOC/power/temp/mode FC03+FC06 |
 | `src/interfaces/health.py` | ✅ Producción | /health (JSON) + /metrics (Prometheus) vía aiohttp |
 | `src/interfaces/metrics.py` | ✅ **22 métricas** | v0.5–v0.9 — todas etiquetadas `[site_id]` |
 | `src/interfaces/ai_ids.py` | ✅ Producción | IsolationForest + z-score ensemble, score 0-1 |
 | `src/interfaces/onnx_dispatcher.py` | ✅ Producción | ONNX Runtime offline dispatcher, fallback gracioso |
 | `src/interfaces/vpp_publisher.py` | ✅ v0.7 | VPP OpenADR 3.0: agrega flex, publica EiEvent JSON |
 | `src/interfaces/fl_client.py` | ✅ v0.7 | Flower FL client: datos no salen del edge |
-| `src/interfaces/fl_server.py` | ✅ **NUEVO v0.8** | FedAvg weighted aggregation, simulate_round() |
-| `src/interfaces/lca_engine.py` | ✅ **NUEVO v0.8** | CO₂ avoided (IEA WEO 2024 methodology) |
-| `src/interfaces/lca_config.py` | ✅ **NUEVO v0.8** | 40+ países grid EF DB (IEA + ENTSO-E 2024) |
-| `src/interfaces/p2p_trading.py` | ✅ **NUEVO v0.8** | EnergyCredit (SHA-256), Hyperledger Fabric stub |
-| `src/interfaces/datalake_publisher.py` | ✅ **NUEVO v0.8** | BigQuery streaming + JSONL fallback offline |
-| `src/interfaces/dashboard_api.py` | ✅ **NUEVO v0.9** | REST API 6 endpoints /status /fleet /carbon /p2p |
-| `src/interfaces/alert_manager.py` | ✅ **NUEVO v0.9** | AlertLevel fire/resolve/dedup + Prometheus |
+| `src/interfaces/fl_server.py` | ✅ v0.8 | FedAvg weighted aggregation, simulate_round() |
+| `src/interfaces/lca_engine.py` | ✅ v0.8 | CO₂ avoided (IEA WEO 2024 methodology) |
+| `src/interfaces/lca_config.py` | ✅ v0.8 | 40+ países grid EF DB (IEA + ENTSO-E 2024) |
+| `src/interfaces/p2p_trading.py` | ✅ v0.8 | EnergyCredit (SHA-256), Hyperledger Fabric stub |
+| `src/interfaces/datalake_publisher.py` | ✅ v0.8 | BigQuery streaming + JSONL fallback offline |
+| `src/interfaces/dashboard_api.py` | ✅ v0.9 | REST API 6 endpoints /status /fleet /carbon /p2p |
+| `src/interfaces/alert_manager.py` | ✅ v0.9 | AlertLevel fire/resolve/dedup + Prometheus |
+| `src/interfaces/sun2000_monitor.py` | ✅ **NUEVO v1.0** | SUN2000 full telemetry: PV strings, AC, alarms→AlertMgr |
 | `src/simulation/bess_env.py` | ✅ v0.7 | Gymnasium BESS env: obs(8), action cont., 96 steps/ep |
 | `src/simulation/bess_model.py` | ✅ v0.7 | Física BESS: SOC, degradación Rainflow, térmica RC |
 | `scripts/train_drl_policy.py` | ✅ v0.7 | Ray RLlib PPO training + ONNX export |
 | `infrastructure/helm/bessai-edge/` | ✅ v0.7 | Helm chart completo: deploy, service, HPA, ConfigMap |
+| `infrastructure/grafana/dashboards/bessai_main.json` | ✅ **NUEVO v1.0** | 13 paneles: SOC, power, PV, CO₂, alarms, fleet, FL |
+| `registry/huawei_sun2000.json` | ✅ **v2.0** | 28 registros reales (32xxx PV/AC + 37xxx LUNA2000) |
 | `infrastructure/terraform/` | ✅ Producción | apply ejecutado — 18 recursos en GCP |
 | `.github/workflows/ci.yml` | ✅ v0.9 | 7 jobs: lint→typecheck→test→tf-validate→helm-lint→docker |
 
