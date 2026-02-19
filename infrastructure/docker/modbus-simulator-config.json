@@ -2,34 +2,61 @@
     "server": {
         "listenerAddress": "0.0.0.0",
         "listenerPort": 502,
-        "unitId": 1
+        "protocol": "TCP",
+        "tlsParams": {
+            "description": "path to certificate and private key to enable tls",
+            "privateKey": null,
+            "certificate": null
+        },
+        "logging": {
+            "format": "%(asctime)-15s %(threadName)-15s  %(levelname)-8s %(module)-15s:%(lineno)-8s %(message)s",
+            "logLevel": "INFO"
+        }
+    },
+    "persistence": {
+        "enabled": false,
+        "file": "/data/modbus_registers.json",
+        "saveInterval": 30
     },
     "registers": {
-        "holdingRegisters": [
-            {
-                "address": 32080,
-                "length": 2,
-                "description": "active_power (INT32, scale 0.001 → kW)",
-                "type": "int32",
-                "initialValue": 50000,
-                "comment": "50.0 kW — positive = charging, negative = discharging"
-            },
-            {
-                "address": 37004,
-                "length": 1,
-                "description": "soc (UINT16, scale 0.1 → %)",
-                "type": "uint16",
-                "initialValue": 750,
-                "comment": "75.0 % State of Charge"
-            },
-            {
-                "address": 40900,
-                "length": 1,
-                "description": "watchdog_heartbeat (UINT16, RW)",
-                "type": "uint16",
-                "initialValue": 0,
-                "comment": "Counter written by gateway; wraps at 65535"
-            }
-        ]
+        "description": "SUN2000-2-6KTL-L1 + LUNA2000 simulated registers",
+        "initializeUndefinedRegisters": true,
+        "discreteInput": {},
+        "coils": {},
+        "holdingRegister": {
+            "32089": 256,
+            "32016": 3600,
+            "32017": 850,
+            "32018": 3550,
+            "32019": 820,
+            "32064": 0,
+            "32065": 5800,
+            "32069": 2300,
+            "32080": 0,
+            "32081": 5750,
+            "32085": 5000,
+            "32087": 420,
+            "32008": 0,
+            "32009": 0,
+            "32010": 0,
+            "32114": 0,
+            "32115": 2850,
+            "32106": 8,
+            "32107": 19904,
+            "37752": 260,
+            "37760": 750,
+            "37761": 980,
+            "37762": 88,
+            "37758": 0,
+            "37759": 14000,
+            "37765": 65535,
+            "37766": 63036,
+            "37800": 4750,
+            "37801": 65486,
+            "47086": 0,
+            "47087": 900,
+            "40900": 0
+        },
+        "inputRegister": {}
     }
 }
