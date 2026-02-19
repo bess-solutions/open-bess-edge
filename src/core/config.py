@@ -144,6 +144,16 @@ class Settings(BaseSettings):
     )
 
     # ------------------------------------------------------------------
+    # Health & Metrics HTTP server
+    # ------------------------------------------------------------------
+    HEALTH_PORT: int = Field(
+        default=8000,
+        ge=1,
+        le=65535,
+        description="TCP port for the /health and /metrics HTTP server.",
+    )
+
+    # ------------------------------------------------------------------
     # Derived helpers (not environment variables)
     # ------------------------------------------------------------------
     @property

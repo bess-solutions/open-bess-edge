@@ -1,0 +1,19 @@
+# =============================================================================
+# infrastructure/grafana/provisioning/datasources/prometheus.yml
+# =============================================================================
+# Auto-provisions the Prometheus datasource in Grafana.
+# Grafana loads this file on startup — no manual configuration needed.
+# =============================================================================
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://bessai-prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      timeInterval: "15s"
+      httpMethod: "POST"

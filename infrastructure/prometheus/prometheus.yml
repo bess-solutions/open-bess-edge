@@ -1,0 +1,52 @@
+# =============================================================================
+# infrastructure/prometheus/prometheus.yml
+# =============================================================================
+# Prometheus scrape configuration for the BESSAI monitoring stack.
+# Used by the `monitoring` profile in docker-compose.yml.
+#
+# Scrape targets:
+#   - bessai-gateway-sim:8000/metrics   — Application Prometheus metrics
+#   - bessai-otel-collector:8888/metrics — OTel Collector self-metrics
+# =============================================================================
+
+global:
+  scrape_interval:     15s  # How frequently to scrape targets
+  evaluation_interval: 15s  # How frequently to evaluate rules
+  scrape_timeout:      10s
+
+  external_labels:
+    project: "bessai"
+    component: "edge-gateway"
+
+# ── Alerting (optional — add Alertmanager here when needed) ───────────────────
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
+# ── Scrape Configurations ─────────────────────────────────────────────────────
+scrape_configs:
+
+  # Prometheus self-monitoring
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # BESSAI Edge Gateway application metrics (/metrics endpoint)
+  - job_name: "bessai-gateway"
+    metrics_path: "/metrics"
+    scrape_interval: 10s
+    static_configs:
+      - targets: ["bessai-gateway-sim:8000"]
+        labels:
+          service: "bessai-edge-gateway"
+          environment: "dev"
+
+  # OpenTelemetry Collector self-metrics
+  - job_name: "otel-collector"
+    metrics_path: "/metrics"
+    scrape_interval: 30s
+    static_configs:
+      - targets: ["bessai-otel-collector:8888"]
+        labels:
+          service: "otel-collector"

@@ -11,6 +11,7 @@ Entry point for the async acquisition loop.  Brings together:
 4. ``SafetyGuard``      — validates telemetry before forwarding.
 5. ``PubSubPublisher``  — publishes safe telemetry to GCP Pub/Sub.
 6. ``watchdog_loop``    — background heartbeat task (auto-restarted if it dies).
+7. ``HealthServer``     — HTTP /health + /metrics endpoints on port 8000.
 
 Lifecycle
 ---------
@@ -32,6 +33,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import signal
+import time
 from typing import Any
 
 import structlog
@@ -39,6 +41,16 @@ import structlog
 from src.core.config import get_settings
 from src.core.safety import SafetyGuard
 from src.drivers.modbus_driver import UniversalDriver
+from src.interfaces.health import HealthServer
+from src.interfaces.metrics import (
+    CYCLES_TOTAL,
+    GATEWAY_INFO,
+    LAST_CYCLE_DURATION_S,
+    LAST_POWER_KW,
+    LAST_SOC_PERCENT,
+    PUBLISH_ERRORS_TOTAL,
+    SAFETY_BLOCKS_TOTAL,
+)
 from src.interfaces.otel_setup import configure_otel, get_tracer, shutdown_otel
 from src.interfaces.pubsub_publisher import PubSubPublisher
 
@@ -174,6 +186,15 @@ async def main() -> None:
         )
         return
 
+    # ── Step 5b — Health & Metrics server ────────────────────────────────
+    health_server = HealthServer(
+        site_id=_cfg.SITE_ID,
+        version="0.4.1",
+        port=_cfg.HEALTH_PORT,
+    )
+    # Register static info gauge
+    GATEWAY_INFO.labels(site_id=_cfg.SITE_ID, version="0.4.1").set(1)
+
     # ── Step 5 — Safety guard, publisher, watchdog reference ─────────────
     guard = SafetyGuard(watchdog_interval_s=1.0)
     watchdog_ref: list[asyncio.Task[None]] = []   # mutable single-element ref
@@ -181,13 +202,14 @@ async def main() -> None:
     async with PubSubPublisher(
         project_id=_cfg.GCP_PROJECT_ID,        # type: ignore[attr-defined]
         topic_name=_cfg.GCP_PUBSUB_TOPIC,      # type: ignore[attr-defined]
-    ) as publisher:
+    ) as publisher, health_server.run():
 
         log.info(
             "gateway.started",
             site=_cfg.SITE_ID,
             inverter=_cfg.inverter_ip_str,
             poll_interval_s=_cfg.WATCHDOG_TIMEOUT,
+            health_port=_cfg.HEALTH_PORT,
         )
 
         cycle: int = 0
@@ -195,6 +217,7 @@ async def main() -> None:
         # ── Infinite acquisition loop ─────────────────────────────────────
         while not _shutdown_event.is_set():
             cycle += 1
+            cycle_start = time.monotonic()
 
             with tracer.start_as_current_span("bess.cycle") as span:
                 span.set_attribute("cycle", cycle)
@@ -205,10 +228,21 @@ async def main() -> None:
 
                 if not telemetry:
                     log.warning("cycle.empty_telemetry", cycle=cycle)
+                    health_server.last_cycle_ok = False
                     await asyncio.sleep(_cfg.WATCHDOG_TIMEOUT)
                     continue
 
                 span.set_attribute("tags_acquired", list(telemetry.keys()))
+
+                # Update telemetry gauges
+                if "soc" in telemetry:
+                    LAST_SOC_PERCENT.labels(site_id=_cfg.SITE_ID).set(
+                        float(telemetry["soc"])
+                    )
+                if "active_power" in telemetry:
+                    LAST_POWER_KW.labels(site_id=_cfg.SITE_ID).set(
+                        float(telemetry["active_power"]) / 1000.0
+                    )
 
                 # ── STEP 2: Seguridad ─────────────────────────────────────
                 is_safe = guard.check_safety(telemetry)
@@ -221,10 +255,15 @@ async def main() -> None:
                         telemetry=telemetry,
                         action="HALTING_PUBLISH — manual intervention required",
                     )
-                    # Do NOT publish; wait for next cycle.
-                    # In a real deployment this would trigger a hardware relay.
+                    SAFETY_BLOCKS_TOTAL.labels(
+                        site_id=_cfg.SITE_ID, reason="out_of_range"
+                    ).inc()
+                    health_server.safety_status = "BLOCKED"
+                    health_server.last_cycle_ok = False
                     await asyncio.sleep(_cfg.WATCHDOG_TIMEOUT)
                     continue
+
+                health_server.safety_status = "ok"
 
                 # ── STEP 3: Watchdog ──────────────────────────────────────
                 _ensure_watchdog(guard, driver, watchdog_ref)
@@ -244,7 +283,16 @@ async def main() -> None:
                         cycle=cycle,
                         error=str(exc),
                     )
+                    PUBLISH_ERRORS_TOTAL.labels(site_id=_cfg.SITE_ID).inc()
                     span.record_exception(exc)
+
+                # Update cycle counters
+                CYCLES_TOTAL.labels(site_id=_cfg.SITE_ID).inc()
+                LAST_CYCLE_DURATION_S.labels(site_id=_cfg.SITE_ID).set(
+                    time.monotonic() - cycle_start
+                )
+                health_server.last_cycle = cycle
+                health_server.last_cycle_ok = True
 
                 # ── STEP 5: Ritmo ─────────────────────────────────────────
                 await asyncio.sleep(_cfg.WATCHDOG_TIMEOUT)

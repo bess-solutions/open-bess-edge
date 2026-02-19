@@ -92,7 +92,30 @@ jobs:
           fail_ci_if_error: false
 
   # ─────────────────────────────────────────────────────────────────
-  # Job 4: Docker build (valida que la imagen construye)
+  # Job 4: Terraform validate (no GCP credentials needed)
+  # ─────────────────────────────────────────────────────────────────
+  terraform-validate:
+    name: Terraform validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.7"
+
+      - name: Terraform init (local backend only)
+        run: terraform -chdir=infrastructure/terraform init -backend=false
+
+      - name: Terraform validate
+        run: terraform -chdir=infrastructure/terraform validate
+
+      - name: Terraform fmt check
+        run: terraform -chdir=infrastructure/terraform fmt -check -recursive
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 5: Docker build (valida que la imagen construye)
   # ─────────────────────────────────────────────────────────────────
   docker-build:
     name: Docker build

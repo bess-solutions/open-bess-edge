@@ -1,0 +1,32 @@
+# =============================================================================
+# infrastructure/terraform/terraform.tfvars.example
+# =============================================================================
+# Copia este archivo a terraform.tfvars y completa los valores.
+# NUNCA subas terraform.tfvars a Git (ya está en .gitignore).
+#
+# Uso:
+#   cp terraform.tfvars.example terraform.tfvars
+#   # editar terraform.tfvars
+#   terraform init
+#   terraform workspace new dev
+#   terraform apply
+# =============================================================================
+
+# ── Proyecto GCP ──────────────────────────────────────────────────────────────
+project_id = "mi-proyecto-gcp-123456"
+region     = "us-central1"            # o "southamerica-east1" para latam
+
+# ── Entorno ───────────────────────────────────────────────────────────────────
+# Usado como sufijo en todos los recursos: dev | staging | prod
+environment = "dev"
+
+# ── Pub/Sub ───────────────────────────────────────────────────────────────────
+# El topic real se llamará: <pubsub_topic_name>-<environment>
+pubsub_topic_name              = "bessai-telemetry"
+pubsub_message_retention_days = 7
+
+# ── IAM ───────────────────────────────────────────────────────────────────────
+service_account_name = "bessai-edge"
+
+# ── Artifact Registry ─────────────────────────────────────────────────────────
+artifact_registry_repository = "bessai"

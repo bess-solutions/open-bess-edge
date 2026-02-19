@@ -5,18 +5,28 @@
 #   modbus-simulator  — Simulated Modbus TCP device (dev/test only)
 #   gateway           — The BESSAI Edge Gateway application
 #   otel-collector    — OpenTelemetry Collector (OTLP receiver → console)
+#   prometheus        — Metrics scraper (monitoring profile)
+#   grafana           — Metrics dashboard (monitoring profile)
 #
 # Profiles:
 #   (default)   — gateway + otel-collector  (requires real INVERTER_IP in .env)
-#   simulator   — modbus-simulator + gateway + otel-collector (dev mode)
+#   simulator   — modbus-simulator + gateway-sim + otel-collector (dev mode)
+#   monitoring  — prometheus + grafana (add to any profile for dashboards)
 #
 # Usage:
-#   # Production mode (real inverter):
-#   docker compose -f infrastructure/docker/docker-compose.yml up --build
-#
 #   # Development mode (with Modbus simulator):
 #   docker compose -f infrastructure/docker/docker-compose.yml \
 #     --profile simulator up --build
+#
+#   # Full stack with monitoring dashboards:
+#   docker compose -f infrastructure/docker/docker-compose.yml \
+#     --profile simulator --profile monitoring up --build
+#
+#   # Access:
+#   #   /health    → http://localhost:8000/health
+#   #   /metrics   → http://localhost:8000/metrics
+#   #   Prometheus → http://localhost:9090
+#   #   Grafana    → http://localhost:3000  (admin / bessai)
 # =============================================================================
 
 version: "3.9"
@@ -29,25 +39,26 @@ networks:
 # ── Named volumes ─────────────────────────────────────────────────────────────
 volumes:
   otel-data:
+  prometheus-data:
+  grafana-data:
 
-# ── Services ──────────────────────────────────────────────────────────────────
+    # ── Services ──────────────────────────────────────────────────────────────────
 services:
 
-  # ── Modbus TCP Simulator (dev/test profile only) ──────────────────────────
+  # ── Modbus TCP Simulator (dev/test profile only) ───────────────────────────
   modbus-simulator:
     image: oitc/modbus-server:latest
     container_name: bessai-modbus-simulator
-    profiles: ["simulator"]
+    profiles: [ "simulator" ]
     restart: unless-stopped
     volumes:
       - ./modbus-simulator-config.json:/app/configuration.json:ro
     ports:
-      - "5020:502"    # Exposed on 5020 to avoid needing root on host
+      - "5020:502" # Exposed on 5020 to avoid needing root on host
     networks:
       - bess-net
     healthcheck:
-      test: ["CMD", "python", "-c",
-             "import socket; s=socket.create_connection(('localhost',5020),2); s.close()"]
+      test: [ "CMD", "python", "-c", "import socket; s=socket.create_connection(('localhost',5020),2); s.close()" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -60,26 +71,27 @@ services:
   # ── BESSAI Edge Gateway ────────────────────────────────────────────────────
   gateway:
     build:
-      context: ../../          # project root
+      context: ../../ # project root
       dockerfile: infrastructure/docker/Dockerfile
     image: bessai-edge-gateway:latest
     container_name: bessai-gateway
     restart: unless-stopped
     env_file:
-      - ../../config/.env      # real secrets — NOT committed to git
+      - ../../config/.env # real secrets — NOT committed to git
     environment:
       # Docker-specific overrides (supplement .env values)
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
       PYTHONPATH: "/app"
+    ports:
+      - "8000:8000" # /health and /metrics HTTP endpoints
     networks:
       - bess-net
     depends_on:
       otel-collector:
         condition: service_started
     healthcheck:
-      # Import-only check — validates config loads without crashing
-      test: ["CMD", "python", "-c",
-             "from src.core.config import get_settings; get_settings(); print('OK')"]
+      # Calls /health endpoint to verify the server is up
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -95,7 +107,7 @@ services:
     extends:
       service: gateway
     container_name: bessai-gateway-sim
-    profiles: ["simulator"]
+    profiles: [ "simulator" ]
     environment:
       INVERTER_IP: "modbus-simulator"
       INVERTER_PORT: "502"
@@ -109,19 +121,19 @@ services:
       modbus-simulator:
         condition: service_healthy
 
-  # ── OpenTelemetry Collector ─────────────────────────────────────────────────
+  # ── OpenTelemetry Collector ────────────────────────────────────────────────
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.98.0
     container_name: bessai-otel-collector
     restart: unless-stopped
-    command: ["--config=/etc/otel-collector/config.yaml"]
+    command: [ "--config=/etc/otel-collector/config.yaml" ]
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector/config.yaml:ro
       - otel-data:/var/log/otel
     ports:
-      - "4317:4317"    # OTLP gRPC
-      - "4318:4318"    # OTLP HTTP
-      - "8888:8888"    # OTel Collector metrics (Prometheus scrape)
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+      - "8888:8888" # OTel Collector metrics (Prometheus scrape)
     networks:
       - bess-net
     logging:
@@ -129,3 +141,53 @@ services:
       options:
         max-size: "5m"
         max-file: "3"
+
+  # ── Prometheus (monitoring profile) ───────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.51.2
+    container_name: bessai-prometheus
+    profiles: [ "monitoring" ]
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=7d"
+      - "--web.enable-lifecycle"
+    volumes:
+      - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - bess-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # ── Grafana (monitoring profile) ──────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: bessai-grafana
+    profiles: [ "monitoring" ]
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: bessai
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ../grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - bess-net
+    depends_on:
+      - prometheus
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"

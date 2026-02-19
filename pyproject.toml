@@ -1,0 +1,64 @@
+# pyproject.toml — BESSAI Edge Gateway
+# Centraliza configuración de herramientas: pytest, ruff, mypy
+# Compatible con PEP 517/518 (no es un paquete instalable —  entry point es src/core/main.py)
+
+[tool.pytest.ini_options]
+testpaths       = ["tests"]
+asyncio_mode    = "auto"
+log_cli         = true
+log_cli_level   = "WARNING"
+addopts         = "-v --tb=short"
+
+# ---------------------------------------------------------------------------
+# Ruff — linter + formatter (reemplaza flake8 + black + isort)
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length    = 99
+target-version = "py310"
+src            = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "B",        # bugbear
+    "UP",       # pyupgrade
+    "C90",      # mccabe complexity
+]
+ignore = [
+    "E501",     # line-length (handled by formatter)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "ARG"]   # allow assert + unused args in tests
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# ---------------------------------------------------------------------------
+# Mypy — strict-ish type checking
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version         = "3.10"
+warn_return_any        = true
+warn_unused_configs    = true
+ignore_missing_imports = true
+no_error_summary       = true
+exclude                = ["^tests/integration/"]
+
+[[tool.mypy.overrides]]
+module = ["pymodbus.*", "gcloud.*", "opentelemetry.*", "prometheus_client.*"]
+ignore_missing_imports = true
+
+# ---------------------------------------------------------------------------
+# Coverage
+# ---------------------------------------------------------------------------
+[tool.coverage.run]
+source   = ["src"]
+omit     = ["src/**/__init__.py"]
+
+[tool.coverage.report]
+fail_under  = 80
+show_missing = true
