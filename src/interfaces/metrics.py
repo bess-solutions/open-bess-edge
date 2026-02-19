@@ -22,6 +22,7 @@ from prometheus_client import (
 )
 
 __all__ = [
+    # v0.5.0
     "CYCLES_TOTAL",
     "SAFETY_BLOCKS_TOTAL",
     "PUBLISH_ERRORS_TOTAL",
@@ -30,6 +31,12 @@ __all__ = [
     "LAST_CYCLE_DURATION_S",
     "CONTENT_TYPE_LATEST",
     "generate_metrics",
+    # v0.6.0 — AI-IDS
+    "IDS_ALERTS_TOTAL",
+    "IDS_ANOMALY_SCORE",
+    # v0.6.0 — ONNX Dispatcher
+    "ONNX_INFERENCE_MS",
+    "ONNX_DISPATCH_COMMANDS_TOTAL",
 ]
 
 # ---------------------------------------------------------------------------
@@ -57,6 +64,32 @@ PUBLISH_ERRORS_TOTAL: Counter = Counter(
 CONNECT_RETRIES_TOTAL: Counter = Counter(
     "bess_modbus_connect_retries_total",
     "Total Modbus TCP connection retries.",
+    ["site_id"],
+)
+
+# v0.6.0 — AI-IDS counters & gauges
+IDS_ALERTS_TOTAL: Counter = Counter(
+    "bess_ids_alerts_total",
+    "Total number of Modbus anomaly alerts raised by the AI-IDS.",
+    ["site_id", "reason"],
+)
+
+IDS_ANOMALY_SCORE: Gauge = Gauge(
+    "bess_ids_anomaly_score",
+    "Latest AI-IDS ensemble anomaly score (0 = normal, 1 = highly anomalous).",
+    ["site_id"],
+)
+
+# v0.6.0 — ONNX Dispatcher gauges & counters
+ONNX_INFERENCE_MS: Gauge = Gauge(
+    "bess_onnx_inference_ms",
+    "Wall-clock duration of the last ONNX model inference in milliseconds.",
+    ["site_id"],
+)
+
+ONNX_DISPATCH_COMMANDS_TOTAL: Counter = Counter(
+    "bess_onnx_dispatch_commands_total",
+    "Total number of dispatch commands produced by the ONNX model.",
     ["site_id"],
 )
 
@@ -92,3 +125,4 @@ GATEWAY_INFO: Gauge = Gauge(
 def generate_metrics() -> bytes:
     """Return the current metrics snapshot as Prometheus text format."""
     return generate_latest(REGISTRY)
+

@@ -54,3 +54,13 @@ prometheus_client>=0.20.0
 # HTTP server — Health check & metrics endpoint
 # ---------------------------------------------------------------------------
 aiohttp>=3.9.5
+
+# ---------------------------------------------------------------------------
+# Edge AI — AI-IDS (Modbus anomaly detection) + ONNX inference engine
+# ---------------------------------------------------------------------------
+# Numerical computing (required by scikit-learn and onnxruntime)
+numpy>=1.26.0
+# IsolationForest for Modbus anomaly detection (AI-IDS)
+scikit-learn>=1.4.0
+# ONNX Runtime for offline dispatch policy inference
+onnxruntime>=1.18.0
