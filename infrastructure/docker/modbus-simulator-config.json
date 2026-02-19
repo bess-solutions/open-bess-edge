@@ -1,0 +1,35 @@
+{
+    "server": {
+        "listenerAddress": "0.0.0.0",
+        "listenerPort": 502,
+        "unitId": 1
+    },
+    "registers": {
+        "holdingRegisters": [
+            {
+                "address": 32080,
+                "length": 2,
+                "description": "active_power (INT32, scale 0.001 → kW)",
+                "type": "int32",
+                "initialValue": 50000,
+                "comment": "50.0 kW — positive = charging, negative = discharging"
+            },
+            {
+                "address": 37004,
+                "length": 1,
+                "description": "soc (UINT16, scale 0.1 → %)",
+                "type": "uint16",
+                "initialValue": 750,
+                "comment": "75.0 % State of Charge"
+            },
+            {
+                "address": 40900,
+                "length": 1,
+                "description": "watchdog_heartbeat (UINT16, RW)",
+                "type": "uint16",
+                "initialValue": 0,
+                "comment": "Counter written by gateway; wraps at 65535"
+            }
+        ]
+    }
+}

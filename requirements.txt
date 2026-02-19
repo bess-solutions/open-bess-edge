@@ -1,0 +1,46 @@
+# =============================================================================
+# BESSAI Edge Gateway — Python Dependencies (pinned)
+# Python >= 3.10  (tested on 3.14)
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Async runtime (stdlib — no install needed, listed for documentation)
+# asyncio is part of the Python standard library since 3.4
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Industrial Protocol — Modbus
+# ---------------------------------------------------------------------------
+pymodbus>=3.7.0
+
+# ---------------------------------------------------------------------------
+# Data validation & settings management
+# ---------------------------------------------------------------------------
+pydantic>=2.9.0
+pydantic-settings>=2.5.0
+
+# ---------------------------------------------------------------------------
+# Observability — OpenTelemetry
+# ---------------------------------------------------------------------------
+opentelemetry-api>=1.27.0
+opentelemetry-sdk>=1.27.0
+opentelemetry-exporter-otlp>=1.27.0
+opentelemetry-exporter-otlp-proto-grpc>=1.27.0
+opentelemetry-instrumentation>=0.48b0
+
+# ---------------------------------------------------------------------------
+# Cloud Messaging — GCP Pub/Sub (async)
+# ---------------------------------------------------------------------------
+gcloud-aio-pubsub>=6.1.0
+
+# ---------------------------------------------------------------------------
+# Utilities
+# ---------------------------------------------------------------------------
+# YAML configuration parsing
+PyYAML>=6.0.1
+# Structured logging
+structlog>=24.1.0
+# HTTP client (async, for REST interfaces)
+httpx>=0.27.0
+# Retry logic
+tenacity>=8.3.0

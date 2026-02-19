@@ -1,0 +1,45 @@
+{
+  "$schema": "https://bessai.io/schemas/device-profile/v1.json",
+  "profile_version": "1.0.0",
+  "device": {
+    "manufacturer": "Huawei",
+    "model": "SUN2000",
+    "description": "Huawei SUN2000 series inverter / BESS management unit",
+    "protocol": "ModbusTCP"
+  },
+  "connection": {
+    "byte_order": "BIG",
+    "word_order": "BIG",
+    "timeout_seconds": 3,
+    "retries": 3
+  },
+  "registers": {
+    "active_power": {
+      "address": 32080,
+      "count": 2,
+      "type": "INT32",
+      "access": "RO",
+      "scale": 0.001,
+      "unit": "kW",
+      "description": "Active power output of the inverter. Negative = charging."
+    },
+    "soc": {
+      "address": 37004,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 0.1,
+      "unit": "%",
+      "description": "State of Charge of the battery pack."
+    },
+    "watchdog_heartbeat": {
+      "address": 40900,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "count",
+      "description": "Heartbeat counter. Increment and write every WATCHDOG_TIMEOUT seconds to prevent inverter safety shutdown."
+    }
+  }
+}

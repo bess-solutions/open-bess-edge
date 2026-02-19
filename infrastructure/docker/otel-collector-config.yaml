@@ -1,0 +1,60 @@
+# =============================================================================
+# OpenTelemetry Collector — BESSAI Edge Gateway Configuration
+# Used by docker-compose.yml
+# =============================================================================
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "0.0.0.0:4317"
+      http:
+        endpoint: "0.0.0.0:4318"
+
+processors:
+  batch:
+    timeout: 10s
+    send_batch_size: 1000
+
+  memory_limiter:
+    check_interval: 5s
+    limit_mib: 256
+    spike_limit_mib: 64
+
+  resource:
+    attributes:
+      - key: deployment.environment
+        value: "production"
+        action: insert
+
+exporters:
+  # Log spans/metrics to stdout — replace with your backend exporter
+  # (e.g. googlecloud, datadog, jaeger) in production.
+  logging:
+    loglevel: info
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+  # Example: Google Cloud Monitoring / Trace (uncomment if using GCP)
+  # googlecloud:
+  #   project: "${GCP_PROJECT_ID}"
+
+extensions:
+  health_check:
+    endpoint: "0.0.0.0:13133"
+  pprof:
+    endpoint: "0.0.0.0:1777"
+  zpages:
+    endpoint: "0.0.0.0:55679"
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    traces:
+      receivers:  [otlp]
+      processors: [memory_limiter, batch]
+      exporters:  [logging]
+    metrics:
+      receivers:  [otlp]
+      processors: [memory_limiter, batch]
+      exporters:  [logging]

@@ -1,0 +1,106 @@
+# =============================================================================
+# BESSAI Edge Gateway — .gitignore
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+# Pytest / coverage
+.pytest_cache/
+.cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+# Ruff / linters
+.ruff_cache/
+
+# ---------------------------------------------------------------------------
+# Docker & environment files
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.log
+logs/
+docker-compose.override.yml
+
+# ---------------------------------------------------------------------------
+# Terraform
+# ---------------------------------------------------------------------------
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# ---------------------------------------------------------------------------
+# IDEs — VSCode
+# ---------------------------------------------------------------------------
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+*.code-workspace
+
+# IDEs — JetBrains (PyCharm, IntelliJ, etc.)
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.idea_modules/
+
+# ---------------------------------------------------------------------------
+# Local data files
+# ---------------------------------------------------------------------------
+*.db
+*.sqlite3
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+
+# ---------------------------------------------------------------------------
+# OS artifacts
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini

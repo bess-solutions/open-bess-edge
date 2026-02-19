@@ -1,0 +1,131 @@
+# =============================================================================
+# BESSAI Edge Gateway — Docker Compose Stack
+# =============================================================================
+# Services:
+#   modbus-simulator  — Simulated Modbus TCP device (dev/test only)
+#   gateway           — The BESSAI Edge Gateway application
+#   otel-collector    — OpenTelemetry Collector (OTLP receiver → console)
+#
+# Profiles:
+#   (default)   — gateway + otel-collector  (requires real INVERTER_IP in .env)
+#   simulator   — modbus-simulator + gateway + otel-collector (dev mode)
+#
+# Usage:
+#   # Production mode (real inverter):
+#   docker compose -f infrastructure/docker/docker-compose.yml up --build
+#
+#   # Development mode (with Modbus simulator):
+#   docker compose -f infrastructure/docker/docker-compose.yml \
+#     --profile simulator up --build
+# =============================================================================
+
+version: "3.9"
+
+# ── Shared network ────────────────────────────────────────────────────────────
+networks:
+  bess-net:
+    driver: bridge
+
+# ── Named volumes ─────────────────────────────────────────────────────────────
+volumes:
+  otel-data:
+
+# ── Services ──────────────────────────────────────────────────────────────────
+services:
+
+  # ── Modbus TCP Simulator (dev/test profile only) ──────────────────────────
+  modbus-simulator:
+    image: oitc/modbus-server:latest
+    container_name: bessai-modbus-simulator
+    profiles: ["simulator"]
+    restart: unless-stopped
+    volumes:
+      - ./modbus-simulator-config.json:/app/configuration.json:ro
+    ports:
+      - "5020:502"    # Exposed on 5020 to avoid needing root on host
+    networks:
+      - bess-net
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import socket; s=socket.create_connection(('localhost',502),2); s.close()"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # ── BESSAI Edge Gateway ────────────────────────────────────────────────────
+  gateway:
+    build:
+      context: ../../          # project root
+      dockerfile: infrastructure/docker/Dockerfile
+    image: bessai-edge-gateway:latest
+    container_name: bessai-gateway
+    restart: unless-stopped
+    env_file:
+      - ../../config/.env      # real secrets — NOT committed to git
+    environment:
+      # Docker-specific overrides (supplement .env values)
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
+      PYTHONPATH: "/app"
+    networks:
+      - bess-net
+    depends_on:
+      otel-collector:
+        condition: service_started
+    healthcheck:
+      # Import-only check — validates config loads without crashing
+      test: ["CMD", "python", "-c",
+             "from src.core.config import get_settings; get_settings(); print('OK')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # ── Gateway (simulator mode override) ─────────────────────────────────────
+  gateway-sim:
+    extends:
+      service: gateway
+    container_name: bessai-gateway-sim
+    profiles: ["simulator"]
+    environment:
+      INVERTER_IP: "modbus-simulator"
+      INVERTER_PORT: "502"
+      SITE_ID: "SITE-SIM-001"
+      # GCP not needed in simulator mode — use fake values
+      GCP_PROJECT_ID: "local-dev"
+      GCP_PUBSUB_TOPIC: "bess-telemetry-sim"
+    depends_on:
+      otel-collector:
+        condition: service_started
+      modbus-simulator:
+        condition: service_healthy
+
+  # ── OpenTelemetry Collector ─────────────────────────────────────────────────
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.98.0
+    container_name: bessai-otel-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otel-collector/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector/config.yaml:ro
+      - otel-data:/var/log/otel
+    ports:
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP
+      - "8888:8888"    # OTel Collector metrics (Prometheus scrape)
+    networks:
+      - bess-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "3"
