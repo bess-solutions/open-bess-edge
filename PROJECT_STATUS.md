@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-19 v0.4.0-dev · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-19 v0.4.1 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo cada vez que avances una fase.*
 
 ---
@@ -14,39 +14,53 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 
 ---
 
-## ✅ Estado Actual — v0.4.0-dev
+## ✅ Estado Actual — v0.4.1
 
 ### Tests
 ```
-45 / 45 passed ✅   (6.6s · Python 3.14.2 · pymodbus 3.12)
+45 / 45 passed ✅   (6.56s · Python 3.14.2 · pymodbus 3.12)
 ```
 
 ### Módulos implementados
 
 | Módulo | Archivo | Estado |
 |---|---|---|
-| Configuración | `src/core/config.py` | ✅ Completo |
+| Configuración | `src/core/config.py` | ✅ Completo — acepta IPs **y hostnames** |
 | Seguridad (SOC / Temp) | `src/core/safety.py` | ✅ Completo |
 | Orquestador principal | `src/core/main.py` | ✅ Completo |
 | Driver Modbus TCP | `src/drivers/modbus_driver.py` | ✅ Compatible pymodbus 3.12 |
 | Publicador GCP Pub/Sub | `src/interfaces/pubsub_publisher.py` | ✅ Completo |
 | Observabilidad (OTel) | `src/interfaces/otel_setup.py` | ✅ Completo |
 | Perfil Huawei SUN2000 | `registry/huawei_sun2000.json` | ✅ Completo |
-| Docker Compose + Simulador | `infrastructure/docker/` | ✅ Con profile `simulator` |
+| Docker Compose + Simulador | `infrastructure/docker/` | ✅ **OPERATIVO** — 4 contenedores healthy |
 | Tests unitarios | `tests/` | ✅ 45/45 |
-| **GitHub Actions CI/CD** | `.github/workflows/` | ✅ `ci.yml` + `release.yml` |
-| **Terraform GCP** | `infrastructure/terraform/` | ✅ Pub/Sub + IAM + WIF |
+| **GitHub Actions CI/CD** | `.github/workflows/` | ✅ `ci.yml` + `release.yml` corriendo |
+| **Terraform GCP** | `infrastructure/terraform/` | ✅ Código listo — pendiente `apply` |
 | **Simulador Modbus** | `infrastructure/docker/modbus-simulator-config.json` | ✅ Registros SUN2000 simulados |
 | **Documentación técnica** | `docs/` | ✅ Roadmap + Runbook + ADRs |
+
+### 🐳 Stack Docker — OPERATIVO
+
+```powershell
+# Levantar el stack completo con simulador:
+docker compose -f infrastructure/docker/docker-compose.yml --profile simulator up --build -d
+```
+
+| Contenedor | Estado | Puerto |
+|---|---|---|
+| `bessai-modbus-simulator` | ✅ healthy | `host:5020` → `container:502` |
+| `bessai-gateway` | ✅ running | — |
+| `bessai-gateway-sim` | ✅ running | — |
+| `bessai-otel-collector` | ✅ running | 4317, 4318, 8888 |
 
 ### Bloqueadores activos
 
 | # | Bloqueador | Acción requerida |
 |---|---|---|
-| 🔴 1 | Docker Desktop no instalado | Instalar manualmente |
-| 🔴 2 | `config/.env` no existe | Copiar `.env.example` y completar `SITE_ID` e `INVERTER_IP` |
-| 🟡 3 | GCP Project ID pendiente | Configurar `GCP_PROJECT_ID` y ejecutar `terraform apply` |
-| 🟡 4 | GitHub Secrets pendientes | Agregar `GCP_WORKLOAD_IDENTITY_PROVIDER`, `GCP_SERVICE_ACCOUNT`, `GCP_REGION`, `GCP_PROJECT_ID` en Settings del repo |
+| ✅ ~~1~~ | ~~Docker Desktop no instalado~~ | **RESUELTO** — Docker v4.61.0 operativo |
+| ✅ ~~2~~ | ~~`config/.env` no existe~~ | **RESUELTO** — `.env` creado con simulador |
+| 🟡 3 | GCP Project ID pendiente | Configurar `GCP_PROJECT_ID` + `terraform apply` |
+| 🟡 4 | GitHub Secrets pendientes | Agregar secrets en Settings → Actions del repo |
 
 ---
 
@@ -56,10 +70,11 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 v0.3.0  ████████████████████████
         Tests 45/45 ✅ · Python 3.14 · pymodbus 3.12
 
-FASE 1  ████████████████████████  HOY ──────────────────────────────►
-        ✅ GitHub Actions CI/CD  (ci.yml + release.yml)
-        ✅ Terraform GCP         (Pub/Sub + IAM + WIF + Artifact Registry)
-        ✅ Simulador Modbus       (docker-compose profile simulator)
+FASE 1  ████████████████████████  ✅ COMPLETADO — 2026-02-19 ─────────────────────────────►
+        ✅ GitHub Actions CI/CD  (ci.yml + release.yml) — corriendo
+        ✅ Terraform GCP         (Pub/Sub + IAM + WIF + Artifact Registry) — código listo
+        ✅ Simulador Modbus       (docker-compose profile simulator) — healthy
+        ✅ Docker stack           (4 contenedores operativos)
         ✅ Docs                   (roadmap + runbook + architecture ADRs)
         ⏳ terraform apply        (pendiente credenciales GCP reales)
         ⏳ GitHub Secrets         (pendiente configurar en el repo)
@@ -200,3 +215,4 @@ pytest tests/ -v --tb=short
 |---|---|---|
 | 2026-02-19 | v0.3.0 | Creación inicial. Tests 45/45, Python 3.14, pymodbus 3.12 |
 | 2026-02-19 | v0.4.0-dev | CI/CD (GitHub Actions), Terraform GCP (Pub/Sub + IAM + WIF), simulador Modbus, docs (roadmap + runbook + ADRs) |
+| 2026-02-19 | v0.4.1 | Docker stack operativo. Fix: `INVERTER_IP` acepta hostnames, healthcheck puerto 5020, tests herméticos con `_env_file=None` |

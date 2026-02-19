@@ -16,13 +16,13 @@
 |---|---|
 | Modbus TCP Driver (`UniversalDriver`) | ✅ Funcional — pymodbus 3.12 |
 | Safety Guard (`SafetyGuard`) | ✅ Funcional |
-| Config (`pydantic-settings`) | ✅ Funcional — Python 3.14 |
+| Config (`pydantic-settings`) | ✅ Funcional — acepta IPs y hostnames |
 | GCP Pub/Sub Publisher | ✅ Implementado (requiere credenciales) |
 | OpenTelemetry | ✅ Implementado |
 | Suite de tests | ✅ **45/45 tests pasan** |
-| Docker Compose | 🔄 En progreso |
-| Terraform (GCP) | 🔄 Pendiente |
-| GitHub Actions CI | 🔄 Pendiente |
+| Docker Compose (+ Simulador) | ✅ **Operativo** — 4 contenedores healthy |
+| Terraform (GCP) | ✅ Código listo — pendiente `apply` |
+| GitHub Actions CI/CD | ✅ Corriendo en [Actions](https://github.com/bess-solutions/open-bess-edge/actions) |
 
 ---
 
@@ -52,7 +52,7 @@
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/your-org/open-bess-edge.git
+git clone https://github.com/bess-solutions/open-bess-edge.git
 cd open-bess-edge
 
 # 2. Crear y activar entorno virtual
@@ -72,9 +72,20 @@ cp config/.env.example config/.env
 python -m src.core.main
 ```
 
-### Ejecución con Docker
+### Ejecución con Docker (modo simulador — sin hardware)
 
 ```bash
+# Levanta 4 servicios: gateway + simulador Modbus + otel-collector
+docker compose -f infrastructure/docker/docker-compose.yml --profile simulator up --build -d
+
+# Verificar estado
+docker ps
+```
+
+### Ejecución con Docker (inversor real)
+
+```bash
+# Editar config/.env con la IP real del inversor, luego:
 docker compose -f infrastructure/docker/docker-compose.yml up --build
 ```
 
@@ -123,7 +134,7 @@ La configuración sigue el principio **12-Factor App** — toda la configuració
 | Variable | Requerida | Descripción | Default |
 |---|---|---|---|
 | `SITE_ID` | ✅ | Identificador único del sitio | — |
-| `INVERTER_IP` | ✅ | Dirección IPv4/IPv6 del inversor | — |
+| `INVERTER_IP` | ✅ | IP o hostname del inversor (acepta DNS, ej: `modbus-simulator`) | — |
 | `INVERTER_PORT` | ➖ | Puerto TCP Modbus | `502` |
 | `DRIVER_PROFILE_PATH` | ➖ | Ruta al perfil JSON del dispositivo | `registry/huawei_sun2000.json` |
 | `WATCHDOG_TIMEOUT` | ➖ | Segundos entre heartbeats | `5` |
