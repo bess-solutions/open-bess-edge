@@ -1,7 +1,7 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-19 v0.6.0 · **Responsable:** Equipo TCI-GECOMP  
-> *Actualiza este archivo cada vez que avances una fase.*
+> **Actualizado:** 2026-02-19 v0.9.0 · **Responsable:** Equipo TCI-GECOMP  
+> *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
 
@@ -14,37 +14,42 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 
 ---
 
-## ✅ Estado Actual — v0.6.0
+## ✅ Estado Actual — v0.9.0
 
 ### Tests
 ```
-73 / 73 passed ✅   (11.89s · Python 3.14 · pytest-asyncio 1.3.0)
+183 / 183 passed ✅   (8.53s · Python 3.14 · pytest-asyncio)
 ```
 
 ### Módulos implementados
 
-| Módulo | Archivo | Estado |
-|---|---|---|
-| Configuración | `src/core/config.py` | ✅ Completo — acepta IPs y hostnames, `HEALTH_PORT=8000` |
-| Seguridad (SOC / Temp) | `src/core/safety.py` | ✅ Completo |
-| Orquestador principal | `src/core/main.py` | ✅ Integrado con HealthServer + métricas Prometheus |
-| Driver Modbus TCP | `src/drivers/modbus_driver.py` | ✅ Compatible pymodbus 3.12 |
-| Servidor /health y /metrics | `src/interfaces/health.py` | ✅ aiohttp, GET /health (JSON) + GET /metrics |
-| Prometheus metrics registry | `src/interfaces/metrics.py` | ✅ **AMPLIADO v0.6.0** — 11 métricas (+ 4 AI) |
-| **AI-IDS** | `src/interfaces/ai_ids.py` | ✅ **NUEVO** — IsolationForest + z-score, score 0-1, alertas |
-| **ONNX Dispatcher** | `src/interfaces/onnx_dispatcher.py` | ✅ **NUEVO** — inferencia offline, fallback seguro |
-| **Modelo ONNX dummy** | `models/dispatch_policy.onnx` | ✅ **NUEVO** — `target_kw = soc × 0.8` (para tests) |
-| Publicador GCP Pub/Sub | `src/interfaces/pubsub_publisher.py` | ✅ Completo |
-| Observabilidad (OTel) | `src/interfaces/otel_setup.py` | ✅ Completo |
-| Perfil Huawei SUN2000 | `registry/huawei_sun2000.json` | ✅ Completo |
-| Docker Compose + Simulador | `infrastructure/docker/` | ✅ Perfil `monitoring` (Prometheus+Grafana) |
-| Prometheus scrape config | `infrastructure/prometheus/prometheus.yml` | ✅ Activo |
-| Grafana datasource provisioning | `infrastructure/grafana/provisioning/` | ✅ Activo |
-| Terraform GCP | `infrastructure/terraform/` | ✅ `apply` ejecutado — 18 recursos en GCP |
-| pyproject.toml | `pyproject.toml` | ✅ ruff/mypy/pytest/coverage centralizados |
-| Tests unitarios | `tests/` | ✅ **73/73** (inc. 11 AI-IDS + 8 ONNX tests) |
-| GitHub Actions CI/CD | `.github/workflows/` | ✅ lint → test → tf-validate → docker-push |
-| Guía desarrollo local | `docs/local_development.md` | ✅ Completo |
+| Módulo | Archivo | Versión | Estado |
+|---|---|---|---|
+| Configuración | `src/core/config.py` | v0.5 | ✅ Producción |
+| Seguridad (SOC / Temp) | `src/core/safety.py` | v0.5 | ✅ Producción |
+| Orquestador principal | `src/core/main.py` | v0.5 | ✅ Producción |
+| Fleet Orchestrator | `src/core/fleet_orchestrator.py` | **v0.8** | ✅ **NUEVO** |
+| Driver Modbus TCP | `src/drivers/modbus_driver.py` | v0.5 | ✅ Producción |
+| Servidor /health + /metrics | `src/interfaces/health.py` | v0.5 | ✅ Producción |
+| Prometheus metrics (22 total) | `src/interfaces/metrics.py` | **v0.9** | ✅ **AMPLIADO** |
+| AI-IDS | `src/interfaces/ai_ids.py` | v0.6 | ✅ Producción |
+| ONNX Dispatcher | `src/interfaces/onnx_dispatcher.py` | v0.6 | ✅ Producción |
+| VPP Publisher (OpenADR 3.0) | `src/interfaces/vpp_publisher.py` | v0.7 | ✅ Producción |
+| FL Client (Flower) | `src/interfaces/fl_client.py` | v0.7 | ✅ Producción |
+| FL Server (FedAvg) | `src/interfaces/fl_server.py` | **v0.8** | ✅ **NUEVO** |
+| LCA Carbon Engine | `src/interfaces/lca_engine.py` | **v0.8** | ✅ **NUEVO** |
+| LCA Config (40+ países) | `src/interfaces/lca_config.py` | **v0.8** | ✅ **NUEVO** |
+| P2P Energy Trading | `src/interfaces/p2p_trading.py` | **v0.8** | ✅ **NUEVO** |
+| DataLake Publisher (BigQuery) | `src/interfaces/datalake_publisher.py` | **v0.8** | ✅ **NUEVO** |
+| Dashboard REST API | `src/interfaces/dashboard_api.py` | **v0.9** | ✅ **NUEVO** |
+| Alert Manager | `src/interfaces/alert_manager.py` | **v0.9** | ✅ **NUEVO** |
+| BESS Gymnasium Env | `src/simulation/bess_env.py` | v0.7 | ✅ Producción |
+| BESS Physics Model | `src/simulation/bess_model.py` | v0.7 | ✅ Producción |
+| ONNX modelo dummy | `models/dispatch_policy.onnx` | v0.6 | ✅ Producción |
+| DRL training script | `scripts/train_drl_policy.py` | v0.7 | ✅ Producción |
+| Helm chart | `infrastructure/helm/bessai-edge/` | v0.7 | ✅ Completo |
+| Terraform GCP | `infrastructure/terraform/` | v0.5 | ✅ 18 recursos |
+| GitHub Actions CI/CD | `.github/workflows/ci.yml` | **v0.9** | ✅ 7 jobs |
 
 ### 🐳 Stack Docker — OPERATIVO
 
@@ -65,139 +70,129 @@ docker compose -f infrastructure/docker/docker-compose.yml --profile simulator -
 | `bessai-prometheus` (monitoring) | disponible | **`9090`** |
 | `bessai-grafana` (monitoring) | disponible | **`3000`** (admin/bessai) |
 
+### Dashboard REST API (v0.9.0)
+
+```powershell
+# Ejecutar dashboard localmente
+python -m uvicorn src.interfaces.dashboard_api:app --port 8080
+
+# Endpoints disponibles
+GET /api/v1/status   → SOC, power, temp, AI-IDS, ONNX
+GET /api/v1/fleet    → n_sites, avg_SOC, flex_kW, alarms
+GET /api/v1/carbon   → CO₂ avoided, EF, trees equivalent
+GET /api/v1/p2p      → credits minted, kWh, pending
+GET /api/v1/version  → version, build_date
+GET /api/v1/health   → ok / degraded
+```
+
+### Prometheus — 22 métricas activas
+
+| Categoría | Métricas |
+|---|---|
+| v0.5 — Base | `cycles_total`, `safety_blocks`, `soc_%`, `power_kw`, `cycle_duration_s` |
+| v0.6 — AI | `ids_alerts_total`, `ids_anomaly_score`, `onnx_inference_ms`, `onnx_dispatch_commands` |
+| v0.7 — VPP + FL | `vpp_flex_capacity_kw`, `vpp_events_published`, `fl_rounds_total`, `fl_train_loss` |
+| v0.8 — LCA + Fleet + P2P + DL | `carbon_avoided_kg`, `carbon_intensity_g_kwh`, `fleet_sites_active`, `fleet_total_capacity_kwh`, `energy_credits_minted`, `energy_credits_kwh`, `datalake_rows_published` |
+
 ### Bloqueadores activos
 
-| # | Bloqueador | Acción requerida |
-|---|---|---|
-| ✅ ~~1~~ | ~~Docker Desktop no instalado~~ | **RESUELTO** — Docker v4.61.0 operativo |
-| ✅ ~~2~~ | ~~`config/.env` no existe~~ | **RESUELTO** — `.env` creado con simulador |
-| ✅ ~~3~~ | ~~GCP Project ID pendiente~~ | **RESUELTO** — `terraform apply` ejecutado, 18 recursos en GCP |
-| ✅ ~~4~~ | ~~GitHub Secrets pendientes~~ | **RESUELTO** — 4 secrets configurados en Actions |
-
-> 🎉 **Sin bloqueadores activos** — el pipeline completo (lint → test → tf-validate → docker-push) está operativo.
+> 🎉 **Sin bloqueadores activos** — pipeline CI/CD (7 jobs) operativo.
 
 ---
 
 ## 🗺️ Roadmap
 
 ```
-v0.3.0  ████████████████████████
-        Tests 45/45 ✅ · Python 3.14 · pymodbus 3.12
-
-FASE 1  ████████████████████████  ✅ COMPLETADO — 2026-02-19 ►
-        ✅ GitHub Actions CI/CD  (ci.yml + release.yml)
-        ✅ Terraform GCP         (Pub/Sub + IAM + WIF + Artifact Registry)
-        ✅ Simulador Modbus       (docker-compose profile simulator) — healthy
-        ✅ Docker stack           (4 contenedores operativos)
-        ✅ Docs                   (roadmap + runbook + architecture ADRs)
-
-FASE 2  ████████████████████████  ✅ COMPLETADO — 2026-02-19 ►
-        ✅ GET /health (JSON)       src/interfaces/health.py
-        ✅ GET /metrics (Prometheus) src/interfaces/metrics.py
-        ✅ pyproject.toml           ruff + mypy + pytest + coverage centralizados
-        ✅ Tests /health + /metrics  9 nuevos tests (54 total)
-        ✅ Monitoring stack          Prometheus + Grafana via --profile monitoring
-        ✅ Terraform backend.tf      GCS remote state listo para activar
-        ✅ CI terraform-validate     sin credenciales GCP
-        ✅ docs/local_development.md guía de desarrollo completa
-        ✅ terraform apply            ejecutado — 18 recursos en gen-lang-client-0752731192
-        ✅ GitHub Secrets             4 secrets configurados en Actions
-
-FASE 3  ████████░░░░░░░░   Q3 2026 — EN PROGRESO
-        ✅ ONNX Inference Engine     src/interfaces/onnx_dispatcher.py
-        ✅ AI-IDS (IsolationForest)  src/interfaces/ai_ids.py
-        ✅ Modelo ONNX dummy         models/dispatch_policy.onnx
-        ░░░░░░░░   DRL Training: Ray RLlib (PPO/SAC) + Gymnasium
-        ░░░░░░░░   Federated Learning (Flower/PySyft)
-
-FASE 3  ░░░░░░░░   Q4 2026
-        ░░░░░░░░   VPP: Virtual Power Plant (OpenADR 3.0)
-        ░░░░░░░░   Federated Learning (Flower)
-
-FASE 4  ░░░░░░░░   Q1 2027
-        ░░░░░░░░   Data Lakehouse Global (Delta Lake + Iceberg)
-        ░░░░░░░░   P2P Energy Trading (Hyperledger Fabric)
-
-FASE 5  ░░░░░░░░   Q2 2027
-        ░░░░░░░░   LCA Engine (huella de carbono en tiempo real)
-        ░░░░░░░░   Carbon Dashboard (CO₂ evitado, vida útil extendida)
+v0.5.0  ████████████████████████  ✅ Modbus + Safety + Prometheus
+v0.6.0  ████████████████████████  ✅ AI-IDS + ONNX Dispatcher
+v0.7.0  ████████████████████████  ✅ VPP + FL Client + Gymnasium + Helm
+v0.8.0  ████████████████████████  ✅ FL Server + LCA + Fleet + P2P + DataLake
+v0.9.0  ████████████████████████  ✅ Dashboard API + Alert Manager + CI/CD Helm
+v1.0.0  ████████░░░░░░░░░░░░░░░░  🔄 Grafana Dashboards + Full Integration Test
+v1.1.0  ░░░░░░░░░░░░░░░░░░░░░░░░  📋 Huawei SUN2000 live integration
+v2.0.0  ░░░░░░░░░░░░░░░░░░░░░░░░  📋 Multi-site planetary scale
 ```
 
 ---
 
-## 🏗️ Arquitectura del Sistema
+## 🏗️ Arquitectura del Sistema (v0.9.0)
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    BESSAI Edge Gateway                   │
-│                                                         │
-│  [BESS / Inversor]                                      │
-│       │ Modbus TCP (pymodbus 3.12)                      │
-│       ▼                                                  │
-│  ┌──────────────┐    ┌──────────────┐                   │
-│  │  UniversalDriver  │  SafetyGuard │                   │
-│  │  (struct I/O)│    │  SOC + Temp  │                   │
-│  └──────┬───────┘    └──────┬───────┘                   │
-│         │                   │                           │
-│         └────────┬──────────┘                           │
-│                  ▼                                       │
-│           ┌─────────────┐                               │
-│           │ Orquestador │ ← config.py (pydantic-settings)│
-│           │  main.py    │                               │
-│           └──────┬──────┘                               │
-│                  │                                       │
-│       ┌──────────┴──────────┐                           │
-│       ▼                     ▼                           │
-│  [GCP Pub/Sub]        [OTel Collector]                  │
-│  (telemetría JSON)    (trazas + métricas)               │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                    BESSAI Edge Gateway v0.9.0                    │
+│                                                                   │
+│  [BESS / Inversor]                                                │
+│       │ Modbus TCP (pymodbus 3.12)                               │
+│       ▼                                                           │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐       │
+│  │ UniversalDriver│  │ SafetyGuard  │    │  AI-IDS      │       │
+│  │ (struct I/O) │   │ SOC + Temp   │    │ (IsolForest) │       │
+│  └──────┬───────┘   └──────┬───────┘    └──────┬───────┘       │
+│         └──────────────────┼───────────────────┘               │
+│                            ▼                                     │
+│                   ┌─────────────┐                               │
+│                   │ Orquestador │◄── DashboardState             │
+│                   │  main.py    │                               │
+│                   └──────┬──────┘                               │
+│         ┌────────────────┼────────────────┐                     │
+│         ▼                ▼                ▼                     │
+│  [ONNX Dispatcher]  [LCA Engine]    [P2P Trader]               │
+│  [VPP Publisher]    [FL Server]     [DataLake]                 │
+│  [Fleet Orch.]      [Alert Mgr]     [Dashboard API :8080]      │
+│         │                ▼                                       │
+│  [GCP Pub/Sub]    [BigQuery DL]                                 │
+│  [OTel → Prometheus → Grafana]                                  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 📁 Estructura del Repositorio
+## 📁 Estructura del Repositorio (v0.9.0)
 
 ```
 open-bess-edge/
-├── 📄 README.md                     ← Documentación principal
-├── 📄 PROJECT_STATUS.md             ← ESTE ARCHIVO
-├── 📄 CHANGELOG.md                  ← Historial + AGENT HANDOFF
-├── 📄 requirements.txt              ← Dependencias de producción
-├── 📄 requirements-dev.txt          ← Dependencias de desarrollo
-├── 📄 pytest.ini                    ← Config de tests
+├── 📄 README.md
+├── 📄 PROJECT_STATUS.md         ← ESTE ARCHIVO
+├── 📄 CHANGELOG.md              ← Historial + AGENT HANDOFF
+├── 📄 requirements.txt          ← Deps producción (actualizado v0.9.0)
+├── 📄 requirements-dev.txt      ← Deps desarrollo
 │
 ├── 📂 src/
 │   ├── 📂 core/
-│   │   ├── config.py               ← Settings (pydantic-settings)
-│   │   ├── safety.py               ← Guard de seguridad
-│   │   └── main.py                 ← Orquestador principal
+│   │   ├── config.py
+│   │   ├── safety.py
+│   │   ├── main.py
+│   │   └── fleet_orchestrator.py  ← NEW v0.8
 │   ├── 📂 drivers/
-│   │   └── modbus_driver.py        ← Driver Modbus TCP universal
+│   │   └── modbus_driver.py
 │   └── 📂 interfaces/
-│       ├── pubsub_publisher.py     ← GCP Pub/Sub async
-│       └── otel_setup.py           ← OpenTelemetry bootstrap
+│       ├── health.py, metrics.py       ← base
+│       ├── ai_ids.py, onnx_dispatcher.py  ← v0.6
+│       ├── vpp_publisher.py, fl_client.py ← v0.7
+│       ├── fl_server.py, lca_engine.py    ← v0.8
+│       ├── lca_config.py, p2p_trading.py  ← v0.8
+│       ├── datalake_publisher.py          ← v0.8
+│       ├── dashboard_api.py               ← v0.9 NEW
+│       └── alert_manager.py              ← v0.9 NEW
 │
-├── 📂 registry/
-│   └── huawei_sun2000.json         ← Perfil del dispositivo
+├── 📂 src/simulation/
+│   ├── bess_env.py              ← Gymnasium BESS (v0.7)
+│   └── bess_model.py            ← física BESS (v0.7)
 │
-├── 📂 config/
-│   └── .env.example                ← Template de variables de entorno
+├── 📂 tests/                    ← 183 tests / 183 ✅
 │
-├── 📂 tests/
-│   ├── conftest.py                 ← Fixtures globales
-│   ├── test_config.py              ← 15 tests
-│   ├── test_safety.py              ← 16 tests
-│   └── test_modbus_driver.py       ← 14 tests
+├── 📂 scripts/
+│   ├── generate_dummy_onnx.py
+│   └── train_drl_policy.py      ← Ray RLlib PPO (v0.7)
 │
 ├── 📂 infrastructure/
-│   ├── 📂 docker/
-│   │   ├── Dockerfile              ← Multi-stage, non-root
-│   │   ├── docker-compose.yml      ← Stack completo
-│   │   └── otel-collector-config.yaml
-│   └── 📂 terraform/               ← ⚠️ VACÍO — pendiente
+│   ├── 📂 docker/               ← Docker Compose + Dockerfile
+│   ├── 📂 helm/bessai-edge/     ← Helm chart v0.7
+│   ├── 📂 terraform/            ← GCP (18 recursos)
+│   └── 📂 grafana/              ← Grafana provisioning
 │
-└── 📂 docs/
-    └── bessai_v2_roadmap.md        ← Roadmap técnico v2.0
+└── 📂 .github/workflows/
+    └── ci.yml                   ← 7 jobs CI/CD (v0.9)
 ```
 
 ---
@@ -214,11 +209,15 @@ GCP_PROJECT_ID=my-bess-project
 GCP_PUBSUB_TOPIC=bess-telemetry
 GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/gcp-key.json
 
-# Opcionales
-INVERTER_PORT=502
-WATCHDOG_TIMEOUT=5
-LOG_LEVEL=INFO
-OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+# Dashboard API (v0.9)
+DASHBOARD_API_KEY=           # vacío = dev mode (no auth)
+
+# P2P Trading
+P2P_LEDGER_ENDPOINT=http://localhost:7050/api/v1/invoke
+
+# DataLake
+BIGQUERY_PROJECT_ID=my-bess-project
+BIGQUERY_DATASET=bessai_telemetry
 ```
 
 ---
@@ -229,16 +228,21 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt -r requirements-dev.txt
+pip install gymnasium>=0.29.0
 pytest tests/ -v --tb=short
-# 45 passed ✅
+# 183 passed ✅ en ~8.5s
 ```
 
 ---
 
-## 📌 Historial de Actualizaciones de este archivo
+## 📌 Historial de Actualizaciones
 
-| Fecha | Versión | Cambio |
-|---|---|---|
-| 2026-02-19 | v0.3.0 | Creación inicial. Tests 45/45, Python 3.14, pymodbus 3.12 |
-| 2026-02-19 | v0.4.0-dev | CI/CD (GitHub Actions), Terraform GCP (Pub/Sub + IAM + WIF), simulador Modbus, docs (roadmap + runbook + ADRs) |
-| 2026-02-19 | v0.4.1 | Docker stack operativo. Fix: `INVERTER_IP` acepta hostnames, healthcheck puerto 5020, tests herméticos con `_env_file=None` |
+| Fecha | Versión | Tests | Cambio |
+|---|---|---|---|
+| 2026-02-19 | v0.3.0 | 45/45 | Creación inicial |
+| 2026-02-19 | v0.4.0 | 45/45 | CI/CD, Terraform GCP, simulador Modbus |
+| 2026-02-19 | v0.5.0 | 54/54 | /health, /metrics, pyproject.toml, monitoring stack |
+| 2026-02-19 | v0.6.0 | 73/73 | AI-IDS, ONNX Dispatcher, modelo dummy |
+| 2026-02-19 | v0.7.0 | 108/108 | VPP, FL Client, BESSEnv, Helm, Ray RLlib |
+| 2026-02-19 | v0.8.0 | 159/159 | FL Server, LCA, Fleet, P2P, DataLake, 22 métricas |
+| 2026-02-19 | v0.9.0 | 183/183 | Dashboard API, Alert Manager, CI Helm job |

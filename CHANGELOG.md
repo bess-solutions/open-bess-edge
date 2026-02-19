@@ -7,34 +7,41 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-19T15:36 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-19T16:09 -03:00)
 
 ### Contexto del sistema
 **BESSAI Edge Gateway** (`open-bess-edge`) es el componente de borde de un sistema de gestión de baterías industriales (BESS). Adquiere telemetría via **Modbus TCP** desde inversores Huawei SUN2000, valida seguridad, y publica a **GCP Pub/Sub** con observabilidad via **OpenTelemetry** y **Prometheus**.
 
-### Estado del código — ✅ v0.7.0, COMPLETO Y VALIDADO
+### Estado del código — ✅ v0.9.0, COMPLETO Y VALIDADO
 
 | Archivo | Estado | Notas |
 |---|---|---|
-| `src/core/config.py` | ✅ Producción | `INVERTER_IP` acepta IPs y hostnames; `HEALTH_PORT=8000` |
+| `src/core/config.py` | ✅ Producción | `INVERTER_IP` acepta IPs y hostnames |
 | `src/core/safety.py` | ✅ Producción | check_safety + watchdog_loop async |
 | `src/core/main.py` | ✅ Producción | Integrado con HealthServer + Prometheus metrics |
+| `src/core/fleet_orchestrator.py` | ✅ **NUEVO v0.8** | Multi-site async polling, weighted SOC, alarms |
 | `src/drivers/modbus_driver.py` | ✅ Producción | pymodbus 3.12, struct-based encode/decode |
 | `src/interfaces/health.py` | ✅ Producción | /health (JSON) + /metrics (Prometheus) vía aiohttp |
-| `src/interfaces/metrics.py` | ✅ **AMPLIADO** | 15 métricas (+ VPP_FLEX, VPP_EVENTS, FL_ROUNDS, FL_LOSS) |
-| `src/interfaces/ai_ids.py` | ✅ Producción | AI-IDS: IsolationForest + z-score ensemble, score 0-1 |
+| `src/interfaces/metrics.py` | ✅ **22 métricas** | v0.5–v0.9 — todas etiquetadas `[site_id]` |
+| `src/interfaces/ai_ids.py` | ✅ Producción | IsolationForest + z-score ensemble, score 0-1 |
 | `src/interfaces/onnx_dispatcher.py` | ✅ Producción | ONNX Runtime offline dispatcher, fallback gracioso |
-| `src/interfaces/vpp_publisher.py` | ✅ **NUEVO** | VPP OpenADR 3.0: agrega flex, publica EiEvent JSON |
-| `src/interfaces/fl_client.py` | ✅ **NUEVO** | Flower FL client: datos no salen del edge |
-| `src/simulation/bess_env.py` | ✅ **NUEVO** | Gymnasium BESS env: obs(8), action cont., 96 steps/ep |
-| `src/simulation/bess_model.py` | ✅ **NUEVO** | Física BESS: SOC, degradación Rainflow, térmica RC |
-| `models/dispatch_policy.onnx` | ✅ Producción | Modelo dummy (soc×0.8). Reemplazar con Ray RLlib export. |
-| `scripts/generate_dummy_onnx.py` | ✅ Producción | Genera el modelo dummy + smoke test |
-| `scripts/train_drl_policy.py` | ✅ **NUEVO** | Ray RLlib PPO training + ONNX export |
-| `infrastructure/helm/bessai-edge/` | ✅ **NUEVO** | Helm chart completo: deploy, service, HPA, ConfigMap, SA |
+| `src/interfaces/vpp_publisher.py` | ✅ v0.7 | VPP OpenADR 3.0: agrega flex, publica EiEvent JSON |
+| `src/interfaces/fl_client.py` | ✅ v0.7 | Flower FL client: datos no salen del edge |
+| `src/interfaces/fl_server.py` | ✅ **NUEVO v0.8** | FedAvg weighted aggregation, simulate_round() |
+| `src/interfaces/lca_engine.py` | ✅ **NUEVO v0.8** | CO₂ avoided (IEA WEO 2024 methodology) |
+| `src/interfaces/lca_config.py` | ✅ **NUEVO v0.8** | 40+ países grid EF DB (IEA + ENTSO-E 2024) |
+| `src/interfaces/p2p_trading.py` | ✅ **NUEVO v0.8** | EnergyCredit (SHA-256), Hyperledger Fabric stub |
+| `src/interfaces/datalake_publisher.py` | ✅ **NUEVO v0.8** | BigQuery streaming + JSONL fallback offline |
+| `src/interfaces/dashboard_api.py` | ✅ **NUEVO v0.9** | REST API 6 endpoints /status /fleet /carbon /p2p |
+| `src/interfaces/alert_manager.py` | ✅ **NUEVO v0.9** | AlertLevel fire/resolve/dedup + Prometheus |
+| `src/simulation/bess_env.py` | ✅ v0.7 | Gymnasium BESS env: obs(8), action cont., 96 steps/ep |
+| `src/simulation/bess_model.py` | ✅ v0.7 | Física BESS: SOC, degradación Rainflow, térmica RC |
+| `scripts/train_drl_policy.py` | ✅ v0.7 | Ray RLlib PPO training + ONNX export |
+| `infrastructure/helm/bessai-edge/` | ✅ v0.7 | Helm chart completo: deploy, service, HPA, ConfigMap |
 | `infrastructure/terraform/` | ✅ Producción | apply ejecutado — 18 recursos en GCP |
+| `.github/workflows/ci.yml` | ✅ v0.9 | 7 jobs: lint→typecheck→test→tf-validate→helm-lint→docker |
 
-**Suite de tests: 108/108 ✅ en 8.47s — Python 3.14 · gymnasium 0.29**
+**Suite de tests: 183/183 ✅ en 8.53s — Python 3.14**
 
 ### 🐳 Stack Docker — OPERATIVO
 
