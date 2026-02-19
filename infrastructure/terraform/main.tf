@@ -28,7 +28,6 @@ resource "google_project_service" "apis" {
     "pubsub.googleapis.com",
     "secretmanager.googleapis.com",
     "artifactregistry.googleapis.com",
-    "cloudrun.googleapis.com",
     "monitoring.googleapis.com",
     "cloudtrace.googleapis.com",
   ])
@@ -173,6 +172,10 @@ resource "google_iam_workload_identity_pool_provider" "github" {
     "attribute.actor"      = "assertion.actor"
     "attribute.repository" = "assertion.repository"
   }
+
+  # Restrict to the BESSAI repo only — GCP requires attribute_condition to
+  # reference at least one of the mapped provider claims.
+  attribute_condition = "assertion.repository == 'bess-solutions/open-bess-edge'"
 
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
