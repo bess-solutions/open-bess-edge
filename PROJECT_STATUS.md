@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-19 v1.0.0 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-19 v1.0.1 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,11 +14,20 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 
 ---
 
-## ✅ Estado Actual — v1.0.0
+## ✅ Estado Actual — v1.0.1
 
 ### Tests
 ```
 228 / 228 passed ✅   (10.02s · Python 3.14 · pytest-asyncio)
+```
+
+### Stack Docker — Métricas en vivo (confirmado 2026-02-19)
+```
+bess_cycles_total{site_id="SITE-CL-001"}    39      ← ciclos completados
+bess_last_power_kw{site_id="SITE-CL-001"}   376.8   ← kW desde Modbus
+bess_publish_errors_total                   39      ← GCP no configurado (esperado)
+Grafana v10.4.2                             OK      ← localhost:3000 admin/bessai
+Prometheus v2.51.2                          OK      ← localhost:9090
 ```
 
 ### Módulos implementados
@@ -53,26 +62,33 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 | Grafana Dashboard | `infrastructure/grafana/dashboards/bessai_main.json` | **v1.0** | ✅ **NUEVO** 13 paneles |
 | Terraform GCP | `infrastructure/terraform/` | v0.5 | ✅ 18 recursos |
 | Registro Modbus | `registry/huawei_sun2000.json` | **v2.0** | ✅ 28 registros reales |
+| Modbus Simulator | `infrastructure/docker/modbus_sim/` | **v1.0.1** | ✅ pymodbus server, 22 registros |
+| Sim Config (oitc) | `infrastructure/docker/modbus-simulator-config.json` | **v1.0.1** | ✅ puerto 502, SUN2000+LUNA2000 |
 | GitHub Actions CI/CD | `.github/workflows/ci.yml` | v0.9 | ✅ 7 jobs |
 
-### 🐳 Stack Docker — OPERATIVO
+### 🐳 Stack Docker — ✅ COMPLETAMENTE OPERATIVO (v1.0.1)
+
+> **Fix v1.0.1:** La imagen `oitc/modbus-server` ignoraba `configuration.json`. Se corrigió montando nuestro config directamente sobre `/app/modbus_server.json` con `listenerPort: 502`. Stack validado con métricas Modbus reales.
 
 ```powershell
-# Modo simulador básico:
-docker compose -f infrastructure/docker/docker-compose.yml --profile simulator up --build -d
+# Stack completo con simulador + monitoreo:
+docker compose -f infrastructure/docker/docker-compose.yml --profile simulator --profile monitoring up -d
 
-# Con stack de monitoreo (Prometheus + Grafana):
-docker compose -f infrastructure/docker/docker-compose.yml --profile simulator --profile monitoring up --build -d
+# Verificar:
+curl http://localhost:8000/health    # gateway health
+curl http://localhost:8000/metrics   # prometheus metrics
+# Grafana:    http://localhost:3000   (admin / bessai)
+# Prometheus: http://localhost:9090
 ```
 
-| Contenedor | Estado | Puerto |
+| Contenedor | Estado verificado | Puerto |
 |---|---|---|
-| `bessai-modbus-simulator` | ✅ healthy | `host:5020` → `container:502` |
-| `bessai-gateway` | ✅ running | **`8000`** (/health, /metrics) |
-| `bessai-gateway-sim` | ✅ running | **`8000`** (/health, /metrics) |
+| `bessai-modbus-simulator` | ✅ **healthy** — escucha en 502 | `host:5020` → `container:502` |
+| `bessai-gateway` | ✅ **healthy** — ciclos activos | **`8000`** (/health, /metrics) |
+| `bessai-gateway-sim` | ✅ running — conectado al sim | **`8000`** (/health, /metrics) |
 | `bessai-otel-collector` | ✅ running | 4317, 4318, 8888 |
-| `bessai-prometheus` (monitoring) | disponible | **`9090`** |
-| `bessai-grafana` (monitoring) | disponible | **`3000`** (admin/bessai) |
+| `bessai-prometheus` | ✅ **HTTP 200** | **`9090`** |
+| `bessai-grafana` | ✅ **database:ok** v10.4.2 | **`3000`** (admin/bessai) |
 
 ### Dashboard REST API (v0.9.0)
 
@@ -112,7 +128,8 @@ v0.6.0  ████████████████████████
 v0.7.0  ████████████████████████  ✅ VPP + FL Client + Gymnasium + Helm
 v0.8.0  ████████████████████████  ✅ FL Server + LCA + Fleet + P2P + DataLake
 v0.9.0  ████████████████████████  ✅ Dashboard API + Alert Manager + CI/CD Helm
-v1.0.0  ████████░░░░░░░░░░░░░░░░  🔄 Grafana Dashboards + Full Integration Test
+v1.0.0  ████████████████████████  ✅ Grafana Dashboards + LUNA2000 driver + 228 tests
+v1.0.1  ████████████████████████  ✅ Docker stack corregido y 100% operativo
 v1.1.0  ░░░░░░░░░░░░░░░░░░░░░░░░  📋 Huawei SUN2000 live integration
 v2.0.0  ░░░░░░░░░░░░░░░░░░░░░░░░  📋 Multi-site planetary scale
 ```
@@ -250,3 +267,5 @@ pytest tests/ -v --tb=short
 | 2026-02-19 | v0.7.0 | 108/108 | VPP, FL Client, BESSEnv, Helm, Ray RLlib |
 | 2026-02-19 | v0.8.0 | 159/159 | FL Server, LCA, Fleet, P2P, DataLake, 22 métricas |
 | 2026-02-19 | v0.9.0 | 183/183 | Dashboard API, Alert Manager, CI Helm job |
+| 2026-02-19 | v1.0.0 | 228/228 | LUNA2000 driver, SUN2000 monitor, Grafana 13 paneles, registry v2.0 |
+| 2026-02-19 | v1.0.1 | 228/228 | Fix Docker: simulador Modbus oitc corregido, stack 100% operativo |
