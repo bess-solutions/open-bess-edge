@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-19 v0.9.0 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-19 v1.0.0 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,11 +14,11 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 
 ---
 
-## ✅ Estado Actual — v0.9.0
+## ✅ Estado Actual — v1.0.0
 
 ### Tests
 ```
-183 / 183 passed ✅   (8.53s · Python 3.14 · pytest-asyncio)
+228 / 228 passed ✅   (10.02s · Python 3.14 · pytest-asyncio)
 ```
 
 ### Módulos implementados
@@ -28,28 +28,32 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 | Configuración | `src/core/config.py` | v0.5 | ✅ Producción |
 | Seguridad (SOC / Temp) | `src/core/safety.py` | v0.5 | ✅ Producción |
 | Orquestador principal | `src/core/main.py` | v0.5 | ✅ Producción |
-| Fleet Orchestrator | `src/core/fleet_orchestrator.py` | **v0.8** | ✅ **NUEVO** |
+| Fleet Orchestrator | `src/core/fleet_orchestrator.py` | v0.8 | ✅ Producción |
 | Driver Modbus TCP | `src/drivers/modbus_driver.py` | v0.5 | ✅ Producción |
+| LUNA2000 Driver | `src/drivers/luna2000_driver.py` | **v1.0** | ✅ **NUEVO** |
 | Servidor /health + /metrics | `src/interfaces/health.py` | v0.5 | ✅ Producción |
-| Prometheus metrics (22 total) | `src/interfaces/metrics.py` | **v0.9** | ✅ **AMPLIADO** |
+| Prometheus metrics (22 total) | `src/interfaces/metrics.py` | v0.9 | ✅ Producción |
 | AI-IDS | `src/interfaces/ai_ids.py` | v0.6 | ✅ Producción |
 | ONNX Dispatcher | `src/interfaces/onnx_dispatcher.py` | v0.6 | ✅ Producción |
 | VPP Publisher (OpenADR 3.0) | `src/interfaces/vpp_publisher.py` | v0.7 | ✅ Producción |
 | FL Client (Flower) | `src/interfaces/fl_client.py` | v0.7 | ✅ Producción |
-| FL Server (FedAvg) | `src/interfaces/fl_server.py` | **v0.8** | ✅ **NUEVO** |
-| LCA Carbon Engine | `src/interfaces/lca_engine.py` | **v0.8** | ✅ **NUEVO** |
-| LCA Config (40+ países) | `src/interfaces/lca_config.py` | **v0.8** | ✅ **NUEVO** |
-| P2P Energy Trading | `src/interfaces/p2p_trading.py` | **v0.8** | ✅ **NUEVO** |
-| DataLake Publisher (BigQuery) | `src/interfaces/datalake_publisher.py` | **v0.8** | ✅ **NUEVO** |
-| Dashboard REST API | `src/interfaces/dashboard_api.py` | **v0.9** | ✅ **NUEVO** |
-| Alert Manager | `src/interfaces/alert_manager.py` | **v0.9** | ✅ **NUEVO** |
+| FL Server (FedAvg) | `src/interfaces/fl_server.py` | v0.8 | ✅ Producción |
+| LCA Carbon Engine | `src/interfaces/lca_engine.py` | v0.8 | ✅ Producción |
+| LCA Config (40+ países) | `src/interfaces/lca_config.py` | v0.8 | ✅ Producción |
+| P2P Energy Trading | `src/interfaces/p2p_trading.py` | v0.8 | ✅ Producción |
+| DataLake Publisher (BigQuery) | `src/interfaces/datalake_publisher.py` | v0.8 | ✅ Producción |
+| Dashboard REST API | `src/interfaces/dashboard_api.py` | v0.9 | ✅ Producción |
+| Alert Manager | `src/interfaces/alert_manager.py` | v0.9 | ✅ Producción |
+| SUN2000 Monitor | `src/interfaces/sun2000_monitor.py` | **v1.0** | ✅ **NUEVO** |
 | BESS Gymnasium Env | `src/simulation/bess_env.py` | v0.7 | ✅ Producción |
 | BESS Physics Model | `src/simulation/bess_model.py` | v0.7 | ✅ Producción |
 | ONNX modelo dummy | `models/dispatch_policy.onnx` | v0.6 | ✅ Producción |
 | DRL training script | `scripts/train_drl_policy.py` | v0.7 | ✅ Producción |
 | Helm chart | `infrastructure/helm/bessai-edge/` | v0.7 | ✅ Completo |
+| Grafana Dashboard | `infrastructure/grafana/dashboards/bessai_main.json` | **v1.0** | ✅ **NUEVO** 13 paneles |
 | Terraform GCP | `infrastructure/terraform/` | v0.5 | ✅ 18 recursos |
-| GitHub Actions CI/CD | `.github/workflows/ci.yml` | **v0.9** | ✅ 7 jobs |
+| Registro Modbus | `registry/huawei_sun2000.json` | **v2.0** | ✅ 28 registros reales |
+| GitHub Actions CI/CD | `.github/workflows/ci.yml` | v0.9 | ✅ 7 jobs |
 
 ### 🐳 Stack Docker — OPERATIVO
 
