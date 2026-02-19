@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-19 v0.4.1 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-19 v0.5.0 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo cada vez que avances una fase.*
 
 ---
@@ -14,44 +14,54 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 
 ---
 
-## ✅ Estado Actual — v0.4.1
+## ✅ Estado Actual — v0.5.0
 
 ### Tests
 ```
-45 / 45 passed ✅   (6.56s · Python 3.14.2 · pymodbus 3.12)
+54 / 54 passed ✅   (6.96s · Python 3.14 · pytest-asyncio 1.3.0)
 ```
 
 ### Módulos implementados
 
 | Módulo | Archivo | Estado |
 |---|---|---|
-| Configuración | `src/core/config.py` | ✅ Completo — acepta IPs **y hostnames** |
+| Configuración | `src/core/config.py` | ✅ Completo — acepta IPs y hostnames, `HEALTH_PORT=8000` |
 | Seguridad (SOC / Temp) | `src/core/safety.py` | ✅ Completo |
-| Orquestador principal | `src/core/main.py` | ✅ Completo |
+| Orquestador principal | `src/core/main.py` | ✅ Integrado con HealthServer + métricas Prometheus |
 | Driver Modbus TCP | `src/drivers/modbus_driver.py` | ✅ Compatible pymodbus 3.12 |
+| **Servidor /health y /metrics** | `src/interfaces/health.py` | ✅ **NUEVO** — aiohttp, GET /health (JSON) + GET /metrics |
+| **Prometheus metrics registry** | `src/interfaces/metrics.py` | ✅ **NUEVO** — 7 métricas: cycles, SOC, power, safety_blocks... |
 | Publicador GCP Pub/Sub | `src/interfaces/pubsub_publisher.py` | ✅ Completo |
 | Observabilidad (OTel) | `src/interfaces/otel_setup.py` | ✅ Completo |
 | Perfil Huawei SUN2000 | `registry/huawei_sun2000.json` | ✅ Completo |
-| Docker Compose + Simulador | `infrastructure/docker/` | ✅ **OPERATIVO** — 4 contenedores healthy |
-| Tests unitarios | `tests/` | ✅ 45/45 |
-| **GitHub Actions CI/CD** | `.github/workflows/` | ✅ `ci.yml` + `release.yml` corriendo |
+| Docker Compose + Simulador | `infrastructure/docker/` | ✅ **MEJORADO** — perfil `monitoring` (Prometheus+Grafana) |
+| **Prometheus scrape config** | `infrastructure/prometheus/prometheus.yml` | ✅ **NUEVO** |
+| **Grafana datasource provisioning** | `infrastructure/grafana/provisioning/` | ✅ **NUEVO** |
+| **Terraform backend + tfvars example** | `infrastructure/terraform/backend.tf` | ✅ **NUEVO** |
+| **pyproject.toml** | `pyproject.toml` | ✅ **NUEVO** — ruff/mypy/pytest/coverage centralizados |
+| Tests unitarios | `tests/` | ✅ **54/54** (inc. 9 nuevos tests /health /metrics) |
+| **GitHub Actions CI/CD** | `.github/workflows/` | ✅ **MEJORADO** — +job `terraform-validate` |
 | **Terraform GCP** | `infrastructure/terraform/` | ✅ Código listo — pendiente `apply` |
-| **Simulador Modbus** | `infrastructure/docker/modbus-simulator-config.json` | ✅ Registros SUN2000 simulados |
-| **Documentación técnica** | `docs/` | ✅ Roadmap + Runbook + ADRs |
+| **Guía desarrollo local** | `docs/local_development.md` | ✅ **NUEVO** — setup, tests, Docker, endpoints |
 
 ### 🐳 Stack Docker — OPERATIVO
 
 ```powershell
-# Levantar el stack completo con simulador:
+# Modo simulador básico:
 docker compose -f infrastructure/docker/docker-compose.yml --profile simulator up --build -d
+
+# Con stack de monitoreo (Prometheus + Grafana):
+docker compose -f infrastructure/docker/docker-compose.yml --profile simulator --profile monitoring up --build -d
 ```
 
 | Contenedor | Estado | Puerto |
 |---|---|---|
 | `bessai-modbus-simulator` | ✅ healthy | `host:5020` → `container:502` |
-| `bessai-gateway` | ✅ running | — |
-| `bessai-gateway-sim` | ✅ running | — |
+| `bessai-gateway` | ✅ running | **`8000`** (/health, /metrics) |
+| `bessai-gateway-sim` | ✅ running | **`8000`** (/health, /metrics) |
 | `bessai-otel-collector` | ✅ running | 4317, 4318, 8888 |
+| `bessai-prometheus` (monitoring) | disponible | **`9090`** |
+| `bessai-grafana` (monitoring) | disponible | **`3000`** (admin/bessai) |
 
 ### Bloqueadores activos
 
@@ -70,14 +80,24 @@ docker compose -f infrastructure/docker/docker-compose.yml --profile simulator u
 v0.3.0  ████████████████████████
         Tests 45/45 ✅ · Python 3.14 · pymodbus 3.12
 
-FASE 1  ████████████████████████  ✅ COMPLETADO — 2026-02-19 ─────────────────────────────►
-        ✅ GitHub Actions CI/CD  (ci.yml + release.yml) — corriendo
-        ✅ Terraform GCP         (Pub/Sub + IAM + WIF + Artifact Registry) — código listo
+FASE 1  ████████████████████████  ✅ COMPLETADO — 2026-02-19 ►
+        ✅ GitHub Actions CI/CD  (ci.yml + release.yml)
+        ✅ Terraform GCP         (Pub/Sub + IAM + WIF + Artifact Registry)
         ✅ Simulador Modbus       (docker-compose profile simulator) — healthy
         ✅ Docker stack           (4 contenedores operativos)
         ✅ Docs                   (roadmap + runbook + architecture ADRs)
-        ⏳ terraform apply        (pendiente credenciales GCP reales)
-        ⏳ GitHub Secrets         (pendiente configurar en el repo)
+
+FASE 2  ████████████████████████  ✅ COMPLETADO — 2026-02-19 ►
+        ✅ GET /health (JSON)       src/interfaces/health.py
+        ✅ GET /metrics (Prometheus) src/interfaces/metrics.py
+        ✅ pyproject.toml           ruff + mypy + pytest + coverage centralizados
+        ✅ Tests /health + /metrics  9 nuevos tests (54 total)
+        ✅ Monitoring stack          Prometheus + Grafana via --profile monitoring
+        ✅ Terraform backend.tf      GCS remote state listo para activar
+        ✅ CI terraform-validate     sin credenciales GCP
+        ✅ docs/local_development.md guía de desarrollo completa
+        ⏳ terraform apply            pendiente credenciales GCP reales
+        ⏳ GitHub Secrets             pendiente configurar en el repo
 
 FASE 2  ░░░░░░░░   Q3 2026
         ░░░░░░░░   Edge AI: ONNX Runtime (inferencia offline)
