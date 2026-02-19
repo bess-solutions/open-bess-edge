@@ -47,6 +47,17 @@ __all__ = [
     # v0.7.0 — Federated Learning
     "FL_ROUNDS_TOTAL",
     "FL_TRAIN_LOSS",
+    # v0.8.0 — LCA Carbon Engine
+    "CARBON_AVOIDED_KG",
+    "CARBON_INTENSITY_G_KWH",
+    # v0.8.0 — Fleet Orchestrator
+    "FLEET_SITES_ACTIVE",
+    "FLEET_TOTAL_CAPACITY_KWH",
+    # v0.8.0 — P2P Energy Trading
+    "ENERGY_CREDITS_MINTED_TOTAL",
+    "ENERGY_CREDITS_KWH",
+    # v0.8.0 — DataLake Publisher
+    "DATALAKE_ROWS_PUBLISHED_TOTAL",
 ]
 
 # ---------------------------------------------------------------------------
@@ -126,6 +137,52 @@ FL_ROUNDS_TOTAL: Counter = Counter(
 FL_TRAIN_LOSS: Gauge = Gauge(
     "bess_fl_train_loss",
     "Local training loss from the last federated learning round.",
+    ["site_id"],
+)
+
+# v0.8.0 — LCA Carbon Engine
+CARBON_AVOIDED_KG: Gauge = Gauge(
+    "bess_carbon_avoided_kg",
+    "Cumulative CO₂ avoided (kg) by BESS vs grid baseline (lifetime).",
+    ["site_id"],
+)
+
+CARBON_INTENSITY_G_KWH: Gauge = Gauge(
+    "bess_carbon_intensity_g_kwh",
+    "Grid carbon emission factor (gCO₂eq/kWh) used by the LCA engine.",
+    ["site_id"],
+)
+
+# v0.8.0 — Fleet Orchestrator
+FLEET_SITES_ACTIVE: Gauge = Gauge(
+    "bess_fleet_sites_active",
+    "Number of BESSAI edge sites currently registered in the fleet.",
+    ["site_id"],
+)
+
+FLEET_TOTAL_CAPACITY_KWH: Gauge = Gauge(
+    "bess_fleet_total_capacity_kwh",
+    "Total nameplate BESS capacity (kWh) across all active fleet sites.",
+    ["site_id"],
+)
+
+# v0.8.0 — P2P Energy Trading
+ENERGY_CREDITS_MINTED_TOTAL: Counter = Counter(
+    "bess_energy_credits_minted_total",
+    "Total number of energy credits minted (one per BESS discharge event).",
+    ["site_id"],
+)
+
+ENERGY_CREDITS_KWH: Counter = Counter(
+    "bess_energy_credits_kwh_total",
+    "Total kWh represented by minted energy credits.",
+    ["site_id"],
+)
+
+# v0.8.0 — DataLake Publisher
+DATALAKE_ROWS_PUBLISHED_TOTAL: Counter = Counter(
+    "bess_datalake_rows_published_total",
+    "Total telemetry rows published to the DataLake (BigQuery or local JSONL).",
     ["site_id"],
 )
 
