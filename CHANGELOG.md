@@ -7,12 +7,12 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-19T15:00 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-19T15:09 -03:00)
 
 ### Contexto del sistema
 **BESSAI Edge Gateway** (`open-bess-edge`) es el componente de borde de un sistema de gestión de baterías industriales (BESS). Adquiere telemetría via **Modbus TCP** desde inversores Huawei SUN2000, valida seguridad, y publica a **GCP Pub/Sub** con observabilidad via **OpenTelemetry** y **Prometheus**.
 
-### Estado del código — ✅ v0.5.0, COMPLETO Y VALIDADO
+### Estado del código — ✅ v0.6.0, COMPLETO Y VALIDADO
 
 | Archivo | Estado | Notas |
 |---|---|---|
@@ -20,21 +20,19 @@
 | `src/core/safety.py` | ✅ Producción | check_safety + watchdog_loop async |
 | `src/core/main.py` | ✅ Producción | Integrado con HealthServer + Prometheus metrics |
 | `src/drivers/modbus_driver.py` | ✅ Producción | pymodbus 3.12, struct-based encode/decode |
-| `src/interfaces/health.py` | ✅ **NUEVO** | Servidor HTTP /health (JSON) + /metrics (Prometheus) vía aiohttp |
-| `src/interfaces/metrics.py` | ✅ **NUEVO** | Contadores/Gauges: cycles, safety_blocks, SOC, power, cycle_duration |
+| `src/interfaces/health.py` | ✅ Producción | Servidor HTTP /health (JSON) + /metrics (Prometheus) vía aiohttp |
+| `src/interfaces/metrics.py` | ✅ **AMPLIADO** | +4 métricas AI: IDS_ALERTS, IDS_SCORE, ONNX_MS, ONNX_CMDS |
+| `src/interfaces/ai_ids.py` | ✅ **NUEVO** | AI-IDS: IsolationForest + z-score ensemble, score 0-1, alertas Prometheus |
+| `src/interfaces/onnx_dispatcher.py` | ✅ **NUEVO** | ONNX Runtime offline dispatcher, fallback gracioso si no hay modelo |
 | `src/interfaces/pubsub_publisher.py` | ✅ Producción | Async context manager, GCP Pub/Sub, JSON envelope |
 | `src/interfaces/otel_setup.py` | ✅ Producción | TracerProvider + MeterProvider |
-| `infrastructure/docker/docker-compose.yml` | ✅ **MEJORADO** | +Perfil `monitoring` (Prometheus+Grafana), port 8000, healthcheck HTTP |
-| `infrastructure/prometheus/prometheus.yml` | ✅ **NUEVO** | Scrape config: gateway:8000 + otel-collector:8888 |
-| `infrastructure/grafana/provisioning/` | ✅ **NUEVO** | Auto-provisioning datasource Prometheus |
-| `infrastructure/terraform/backend.tf` | ✅ **NUEVO** | GCS remote state config (listo para habilitar) |
-| `infrastructure/terraform/terraform.tfvars.example` | ✅ **NUEVO** | Template de variables TF |
-| `pyproject.toml` | ✅ **NUEVO** | Centraliza ruff/mypy/pytest/coverage config |
-| `docs/local_development.md` | ✅ **NUEVO** | Guía completa de desarrollo local |
-| `.github/workflows/ci.yml` | ✅ **MEJORADO** | +Job `terraform-validate` (sin credenciales GCP) |
-| `tests/test_health.py` | ✅ **NUEVO** | 9 tests para /health y /metrics endpoints |
+| `models/dispatch_policy.onnx` | ✅ **NUEVO** | Modelo dummy (SOC×0.8). Reemplazar con export de Ray RLlib. |
+| `scripts/generate_dummy_onnx.py` | ✅ **NUEVO** | Genera el modelo dummy + smoke test integrado |
+| `infrastructure/docker/docker-compose.yml` | ✅ Producción | Perfil `monitoring` (Prometheus+Grafana), port 8000 |
+| `infrastructure/prometheus/prometheus.yml` | ✅ Producción | Scrape config: gateway:8000 + otel-collector:8888 |
+| `infrastructure/terraform/` | ✅ Producción | apply ejecutado — 18 recursos en GCP |
 
-**Suite de tests: 54/54 ✅ en 6.96s — Python 3.14 · pytest-asyncio 1.3.0**
+**Suite de tests: 73/73 ✅ en 11.89s — Python 3.14 · pytest-asyncio 1.3.0**
 
 ### 🐳 Stack Docker — OPERATIVO
 
@@ -66,13 +64,12 @@ docker compose -f infrastructure/docker/docker-compose.yml --profile simulator -
 
 ### 🟢 Próximo agente — Continuar aquí
 
-**Todos los bloqueadores resueltos.** El pipeline completo está operativo:
-- lint (ruff) → test (54/54) → tf-validate → docker-build → docker-push → Artifact Registry
+**Todos los bloqueadores resueltos.** El pipeline completo está operativo.
 
-**Próxima prioridad — BESSAI v2.0 (Q3 2026):**
-- Edge AI: ONNX Runtime (inferencia offline)
-- AI-IDS: detección de intrusiones Modbus
-- Ver roadmap: `docs/bessai_v2_roadmap.md`
+**Próxima prioridad — BESSAI v0.7.0 (Edge AI Fase 2):**
+- DRL Training: Ray RLlib (PPO/SAC) + Gymnasium + pandapower simulator
+- Federated Learning: Flower (flwr) — solo gradientes salen del edge
+- Ver roadmap: `docs/bessai_v2_roadmap.md` — Fase 2 aún en progreso
 
 ### 📂 Estructura de archivos clave
 ```
