@@ -115,7 +115,31 @@ jobs:
         run: terraform -chdir=infrastructure/terraform fmt -check -recursive
 
   # ─────────────────────────────────────────────────────────────────
-  # Job 5: Docker build (valida que la imagen construye)
+  # Job 5: Helm lint & template validation
+  # ─────────────────────────────────────────────────────────────────
+  helm-lint:
+    name: Helm lint & template
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: "3.14.0"
+
+      - name: Helm lint
+        run: helm lint infrastructure/helm/bessai-edge/
+
+      - name: Helm template dry-run
+        run: |
+          helm template bessai-test infrastructure/helm/bessai-edge/ \
+            --set config.inverterIp=10.0.1.50 \
+            --set config.siteId=CI-TEST \
+            | head -60
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 6: Docker build (valida que la imagen construye)
   # ─────────────────────────────────────────────────────────────────
   docker-build:
     name: Docker build
