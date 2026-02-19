@@ -7,32 +7,34 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-19T15:09 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-19T15:36 -03:00)
 
 ### Contexto del sistema
 **BESSAI Edge Gateway** (`open-bess-edge`) es el componente de borde de un sistema de gestión de baterías industriales (BESS). Adquiere telemetría via **Modbus TCP** desde inversores Huawei SUN2000, valida seguridad, y publica a **GCP Pub/Sub** con observabilidad via **OpenTelemetry** y **Prometheus**.
 
-### Estado del código — ✅ v0.6.0, COMPLETO Y VALIDADO
+### Estado del código — ✅ v0.7.0, COMPLETO Y VALIDADO
 
 | Archivo | Estado | Notas |
 |---|---|---|
-| `src/core/config.py` | ✅ Producción | `INVERTER_IP` acepta IPs y hostnames. Nuevo: `HEALTH_PORT=8000` |
+| `src/core/config.py` | ✅ Producción | `INVERTER_IP` acepta IPs y hostnames; `HEALTH_PORT=8000` |
 | `src/core/safety.py` | ✅ Producción | check_safety + watchdog_loop async |
 | `src/core/main.py` | ✅ Producción | Integrado con HealthServer + Prometheus metrics |
 | `src/drivers/modbus_driver.py` | ✅ Producción | pymodbus 3.12, struct-based encode/decode |
-| `src/interfaces/health.py` | ✅ Producción | Servidor HTTP /health (JSON) + /metrics (Prometheus) vía aiohttp |
-| `src/interfaces/metrics.py` | ✅ **AMPLIADO** | +4 métricas AI: IDS_ALERTS, IDS_SCORE, ONNX_MS, ONNX_CMDS |
-| `src/interfaces/ai_ids.py` | ✅ **NUEVO** | AI-IDS: IsolationForest + z-score ensemble, score 0-1, alertas Prometheus |
-| `src/interfaces/onnx_dispatcher.py` | ✅ **NUEVO** | ONNX Runtime offline dispatcher, fallback gracioso si no hay modelo |
-| `src/interfaces/pubsub_publisher.py` | ✅ Producción | Async context manager, GCP Pub/Sub, JSON envelope |
-| `src/interfaces/otel_setup.py` | ✅ Producción | TracerProvider + MeterProvider |
-| `models/dispatch_policy.onnx` | ✅ **NUEVO** | Modelo dummy (SOC×0.8). Reemplazar con export de Ray RLlib. |
-| `scripts/generate_dummy_onnx.py` | ✅ **NUEVO** | Genera el modelo dummy + smoke test integrado |
-| `infrastructure/docker/docker-compose.yml` | ✅ Producción | Perfil `monitoring` (Prometheus+Grafana), port 8000 |
-| `infrastructure/prometheus/prometheus.yml` | ✅ Producción | Scrape config: gateway:8000 + otel-collector:8888 |
+| `src/interfaces/health.py` | ✅ Producción | /health (JSON) + /metrics (Prometheus) vía aiohttp |
+| `src/interfaces/metrics.py` | ✅ **AMPLIADO** | 15 métricas (+ VPP_FLEX, VPP_EVENTS, FL_ROUNDS, FL_LOSS) |
+| `src/interfaces/ai_ids.py` | ✅ Producción | AI-IDS: IsolationForest + z-score ensemble, score 0-1 |
+| `src/interfaces/onnx_dispatcher.py` | ✅ Producción | ONNX Runtime offline dispatcher, fallback gracioso |
+| `src/interfaces/vpp_publisher.py` | ✅ **NUEVO** | VPP OpenADR 3.0: agrega flex, publica EiEvent JSON |
+| `src/interfaces/fl_client.py` | ✅ **NUEVO** | Flower FL client: datos no salen del edge |
+| `src/simulation/bess_env.py` | ✅ **NUEVO** | Gymnasium BESS env: obs(8), action cont., 96 steps/ep |
+| `src/simulation/bess_model.py` | ✅ **NUEVO** | Física BESS: SOC, degradación Rainflow, térmica RC |
+| `models/dispatch_policy.onnx` | ✅ Producción | Modelo dummy (soc×0.8). Reemplazar con Ray RLlib export. |
+| `scripts/generate_dummy_onnx.py` | ✅ Producción | Genera el modelo dummy + smoke test |
+| `scripts/train_drl_policy.py` | ✅ **NUEVO** | Ray RLlib PPO training + ONNX export |
+| `infrastructure/helm/bessai-edge/` | ✅ **NUEVO** | Helm chart completo: deploy, service, HPA, ConfigMap, SA |
 | `infrastructure/terraform/` | ✅ Producción | apply ejecutado — 18 recursos en GCP |
 
-**Suite de tests: 73/73 ✅ en 11.89s — Python 3.14 · pytest-asyncio 1.3.0**
+**Suite de tests: 108/108 ✅ en 8.47s — Python 3.14 · gymnasium 0.29**
 
 ### 🐳 Stack Docker — OPERATIVO
 
@@ -66,10 +68,11 @@ docker compose -f infrastructure/docker/docker-compose.yml --profile simulator -
 
 **Todos los bloqueadores resueltos.** El pipeline completo está operativo.
 
-**Próxima prioridad — BESSAI v0.7.0 (Edge AI Fase 2):**
-- DRL Training: Ray RLlib (PPO/SAC) + Gymnasium + pandapower simulator
-- Federated Learning: Flower (flwr) — solo gradientes salen del edge
-- Ver roadmap: `docs/bessai_v2_roadmap.md` — Fase 2 aún en progreso
+**Próxima prioridad — BESSAI v0.8.0 (Edge AI Fase 3):**
+- DRL Training real: Ray RLlib en servidor, export a ONNX, despliegue en edge
+- Federated Orchestration: servidor FL con Flower, FedAvg con N>=3 sitios
+- VPP real: conectar a broker OpenADR 3.0
+- Ver roadmap: `docs/bessai_v2_roadmap.md` — FASE 3 50% completada
 
 ### 📂 Estructura de archivos clave
 ```
@@ -114,6 +117,28 @@ docker ps  # Verificar 4 contenedores: healthy/running
 
 All notable changes to this project are documented here.  
 Format: [Semantic Versioning](https://semver.org/) · [Conventional Commits](https://www.conventionalcommits.org/)
+
+---
+
+## [v0.7.0] — 2026-02-19
+
+### Added
+- `src/simulation/bess_env.py` — `BESSEnv` (Gymnasium): obs(8), action continuo [-50,50], 96 steps/ep
+- `src/simulation/bess_model.py` — `BESSPhysicsModel`: SOC, degradación Rainflow approx, térmica RC
+- `src/interfaces/vpp_publisher.py` — `VPPPublisher` + `OpenADREvent` (OpenADR 3.0 JSON)
+- `src/interfaces/fl_client.py` — `BESSAIFlowerClient` (Flower NumPyClient): datos en edge, solo pesos salen
+- `scripts/train_drl_policy.py` — entrenamiento PPO con Ray RLlib + export ONNX
+- `infrastructure/helm/bessai-edge/` — Helm chart completo: Chart.yaml, values.yaml, deployment, HPA, ConfigMap, SA
+- 4 nuevas métricas Prometheus: `bess_vpp_flex_capacity_kw`, `bess_vpp_events_published_total`, `bess_fl_rounds_total`, `bess_fl_train_loss`
+- 35 nuevos tests: `test_bess_env.py` (15) + `test_vpp_publisher.py` (11) + `test_fl_client.py` (8) + 1 fix
+
+### Dependencies
+- Agregado `gymnasium>=0.29.0` a requirements.txt
+
+### Tests
+```
+108 / 108 passed in 8.47s  (+35 tests vs v0.6.0: 73/73)
+```
 
 ---
 

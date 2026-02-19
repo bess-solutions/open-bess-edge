@@ -1,0 +1,116 @@
+# infrastructure/helm/bessai-edge/values.yaml
+# Default values for bessai-edge chart.
+# Override per environment with: helm install --values my-values.yaml
+
+# ─── Container image ───────────────────────────────────────────────────────
+image:
+  repository: europe-docker.pkg.dev/REPLACE_PROJECT/bessai-repo/bessai-edge
+  pullPolicy: IfNotPresent
+  # Overridden by CI/CD pipeline with the git SHA tag
+  tag: "latest"
+
+imagePullSecrets: []
+
+# ─── Replica count ─────────────────────────────────────────────────────────
+replicaCount: 1
+
+# ─── Service ───────────────────────────────────────────────────────────────
+service:
+  type: ClusterIP
+  port: 8000         # /health and /metrics
+
+# ─── Ingress ───────────────────────────────────────────────────────────────
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: bessai-edge.cluster.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+# ─── Resources ─────────────────────────────────────────────────────────────
+resources:
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+
+# ─── Horizontal Pod Autoscaler ─────────────────────────────────────────────
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 75
+
+# ─── BESSAI configuration (maps to .env variables) ─────────────────────────
+config:
+  siteId: "edge-site-001"
+  inverterIp: "modbus-simulator"
+  inverterPort: 502
+  healthPort: 8000
+  logLevel: "INFO"
+  gcpProjectId: ""      # override in prod
+  pubsubTopic: ""        # override in prod
+  watchdogTimeoutS: 30
+
+# ─── ONNX model mount ──────────────────────────────────────────────────────
+onnxModel:
+  enabled: true
+  # Mount a ConfigMap or PVC containing dispatch_policy.onnx
+  mountPath: "/app/models"
+  # Set to PVC name to use persistent storage for models
+  pvcName: ""
+  # Set to 'configmap' to mount from ConfigMap (small models only)
+  source: "pvc"
+
+# ─── Probes ────────────────────────────────────────────────────────────────
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 15
+  periodSeconds: 30
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+# ─── Security context ──────────────────────────────────────────────────────
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# ─── Node selection ────────────────────────────────────────────────────────
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# ─── Service Account ───────────────────────────────────────────────────────
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# ─── Prometheus ServiceMonitor ─────────────────────────────────────────────
+serviceMonitor:
+  enabled: false
+  namespace: monitoring
+  interval: 30s
+  path: /metrics

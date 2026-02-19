@@ -8,6 +8,10 @@ All counters / gauges defined here are imported by the main orchestrator
 and updated at each acquisition cycle.
 
 Endpoint: GET /metrics  (served by the health server on port 8000)
+
+v0.5.0: base metrics (cycles, safety, SOC, power, cycle_duration)
+v0.6.0: AI-IDS and ONNX Dispatcher metrics
+v0.7.0: VPP Publisher and Federated Learning metrics
 """
 
 from __future__ import annotations
@@ -37,6 +41,12 @@ __all__ = [
     # v0.6.0 — ONNX Dispatcher
     "ONNX_INFERENCE_MS",
     "ONNX_DISPATCH_COMMANDS_TOTAL",
+    # v0.7.0 — VPP Publisher
+    "VPP_FLEX_CAPACITY_KW",
+    "VPP_EVENTS_PUBLISHED_TOTAL",
+    # v0.7.0 — Federated Learning
+    "FL_ROUNDS_TOTAL",
+    "FL_TRAIN_LOSS",
 ]
 
 # ---------------------------------------------------------------------------
@@ -90,6 +100,32 @@ ONNX_INFERENCE_MS: Gauge = Gauge(
 ONNX_DISPATCH_COMMANDS_TOTAL: Counter = Counter(
     "bess_onnx_dispatch_commands_total",
     "Total number of dispatch commands produced by the ONNX model.",
+    ["site_id"],
+)
+
+# v0.7.0 — VPP Publisher metrics
+VPP_FLEX_CAPACITY_KW: Gauge = Gauge(
+    "bess_vpp_flex_capacity_kw",
+    "Total aggregated flexible capacity (kW) available across registered sites.",
+    ["site_id"],
+)
+
+VPP_EVENTS_PUBLISHED_TOTAL: Counter = Counter(
+    "bess_vpp_events_published_total",
+    "Total number of OpenADR 3.0 flex dispatch events published.",
+    ["site_id"],
+)
+
+# v0.7.0 — Federated Learning metrics
+FL_ROUNDS_TOTAL: Counter = Counter(
+    "bess_fl_rounds_total",
+    "Total federated learning rounds completed (local fit() calls).",
+    ["site_id"],
+)
+
+FL_TRAIN_LOSS: Gauge = Gauge(
+    "bess_fl_train_loss",
+    "Local training loss from the last federated learning round.",
     ["site_id"],
 )
 
