@@ -7,12 +7,12 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-19T17:34 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-19T19:13 -03:00)
 
 ### Contexto del sistema
 **BESSAI Edge Gateway** (`open-bess-edge`) es el componente de borde de un sistema de gestión de baterías industriales (BESS). Adquiere telemetría via **Modbus TCP** desde inversores Huawei SUN2000 + batería LUNA2000, valida seguridad, y publica a **GCP Pub/Sub** con observabilidad via **OpenTelemetry** y **Prometheus**.
 
-### Estado del código — ✅ v1.0.0, COMPLETO Y VALIDADO
+### Estado del código — ✅ v1.0.1, DOCKER STACK OPERATIVO
 
 | Archivo | Estado | Notas |
 |---|---|---|
@@ -45,9 +45,9 @@
 | `infrastructure/terraform/` | ✅ Producción | apply ejecutado — 18 recursos en GCP |
 | `.github/workflows/ci.yml` | ✅ v0.9 | 7 jobs: lint→typecheck→test→tf-validate→helm-lint→docker |
 
-**Suite de tests: 183/183 ✅ en 8.53s — Python 3.14**
+**Suite de tests: 228/228 ✅ en 10.02s — Python 3.14**
 
-### 🐳 Stack Docker — OPERATIVO
+### 🐳 Stack Docker — ✅ 100% OPERATIVO (v1.0.1)
 
 ```powershell
 # Modo simulador (básico)
