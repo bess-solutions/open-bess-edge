@@ -52,13 +52,14 @@ services:
     profiles: [ "simulator" ]
     restart: unless-stopped
     volumes:
-      - ./modbus-simulator-config.json:/app/configuration.json:ro
+      # Mount our config directly over the image's default config file
+      - ./modbus-simulator-config.json:/app/modbus_server.json:ro
     ports:
       - "5020:502" # Exposed on 5020 to avoid needing root on host
     networks:
       - bess-net
     healthcheck:
-      test: [ "CMD", "python", "-c", "import socket; s=socket.create_connection(('localhost',5020),2); s.close()" ]
+      test: [ "CMD", "python", "-c", "import socket; s=socket.create_connection(('localhost',502),2); s.close()" ]
       interval: 10s
       timeout: 5s
       retries: 5
