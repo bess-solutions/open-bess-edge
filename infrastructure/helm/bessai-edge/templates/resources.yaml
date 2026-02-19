@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "bessai-edge.fullname" . }}-config
+  labels:
+    {{- include "bessai-edge.labels" . | nindent 4 }}
+data:
+  SITE_ID: {{ .Values.config.siteId | quote }}
+  INVERTER_IP: {{ .Values.config.inverterIp | quote }}
+  INVERTER_PORT: {{ .Values.config.inverterPort | quote }}
+  HEALTH_PORT: {{ .Values.config.healthPort | quote }}
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  GCP_PROJECT_ID: {{ .Values.config.gcpProjectId | quote }}
+  PUBSUB_TOPIC: {{ .Values.config.pubsubTopic | quote }}
+  WATCHDOG_TIMEOUT_S: {{ .Values.config.watchdogTimeoutS | quote }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "bessai-edge.fullname" . }}
+  labels:
+    {{- include "bessai-edge.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "bessai-edge.selectorLabels" . | nindent 4 }}
+---
+{{- if .Values.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "bessai-edge.fullname" . }}
+  labels:
+    {{- include "bessai-edge.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "bessai-edge.fullname" . }}
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
+{{- end }}
+---
+{{- if .Values.serviceAccount.create }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "bessai-edge.serviceAccountName" . }}
+  labels:
+    {{- include "bessai-edge.labels" . | nindent 4 }}
+  {{- with .Values.serviceAccount.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

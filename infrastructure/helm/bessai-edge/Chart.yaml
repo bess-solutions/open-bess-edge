@@ -1,0 +1,31 @@
+apiVersion: v2
+name: bessai-edge
+description: BESSAI Edge Gateway — Kubernetes Helm chart
+
+# Chart type: application (not library)
+type: application
+
+# Chart version (follows SemVer — bump on chart changes)
+version: 0.7.0
+
+# Application version deployed by this chart
+appVersion: "0.7.0"
+
+home: https://github.com/bess-solutions/open-bess-edge
+sources:
+  - https://github.com/bess-solutions/open-bess-edge
+
+maintainers:
+  - name: TCI-GECOMP
+    email: ops@bess-solutions.cl
+
+keywords:
+  - bess
+  - iot
+  - energy
+  - modbus
+  - prometheus
+  - edge-ai
+
+annotations:
+  category: IoT/Edge
