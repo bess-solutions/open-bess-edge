@@ -23,12 +23,24 @@ In application code that needs a module-level reference::
 
 from __future__ import annotations
 
+import re
 from functools import lru_cache
 from pathlib import Path
-from typing import Optional
+from typing import Annotated, Optional
 
-from pydantic import Field, IPvAnyAddress
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Accepts IPv4, IPv6 (simplified), Docker service names and DNS hostnames
+# A hostname label: starts/ends with alnum, may contain hyphens.
+_HOST_RE = re.compile(
+    r"^("
+    r"(?:\d{1,3}\.){3}\d{1,3}"                        # IPv4
+    r"|(?:[0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}"   # IPv6 (simplified)
+    r"|(?:[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)*"  # optional domain labels
+    r"[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?"   # final label (allows hyphens)
+    r")$"
+)
 
 
 class Settings(BaseSettings):
@@ -59,11 +71,23 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------
     # Inverter / BESS device connection
     # ------------------------------------------------------------------
-    INVERTER_IP: IPvAnyAddress = Field(
+    INVERTER_IP: str = Field(
         ...,
-        description="IPv4 or IPv6 address of the inverter Modbus endpoint.",
-        examples=["192.168.1.100"],
+        description="IPv4, IPv6 address or DNS hostname of the inverter Modbus endpoint.",
+        examples=["192.168.1.100", "modbus-simulator"],
     )
+
+    @field_validator("INVERTER_IP", mode="before")
+    @classmethod
+    def validate_inverter_host(cls, v: object) -> str:
+        """Accept IPv4, IPv6, or a DNS hostname (e.g. Docker service names)."""
+        s = str(v).strip()
+        if not _HOST_RE.match(s):
+            raise ValueError(
+                f"INVERTER_IP must be a valid IP address or hostname, got: {s!r}"
+            )
+        return s
+
     INVERTER_PORT: int = Field(
         default=502,
         ge=1,
@@ -124,8 +148,8 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------
     @property
     def inverter_ip_str(self) -> str:
-        """Return the inverter IP as a plain string for pymodbus."""
-        return str(self.INVERTER_IP)
+        """Return the inverter host as a plain string for pymodbus."""
+        return self.INVERTER_IP
 
     @property
     def driver_profile_abs(self) -> Path:

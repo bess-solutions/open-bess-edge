@@ -47,7 +47,7 @@ services:
       - bess-net
     healthcheck:
       test: ["CMD", "python", "-c",
-             "import socket; s=socket.create_connection(('localhost',502),2); s.close()"]
+             "import socket; s=socket.create_connection(('localhost',5020),2); s.close()"]
       interval: 10s
       timeout: 5s
       retries: 5

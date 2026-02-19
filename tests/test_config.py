@@ -51,7 +51,9 @@ _VALID_ENV: dict[str, str] = {
 def _make_settings(**overrides: str) -> "config_module.Settings":
     env = {**_VALID_ENV, **overrides}
     with patch.dict(os.environ, env, clear=True):
-        return config_module.Settings()  # type: ignore[call-arg]
+        # _env_file=None makes pydantic-settings ignore the real config/.env
+        # so tests are hermetic even when the file exists on disk.
+        return config_module.Settings(_env_file=None)  # type: ignore[call-arg]
 
 
 # ---------------------------------------------------------------------------
@@ -63,13 +65,13 @@ class TestRequiredFields:
         env = {k: v for k, v in _VALID_ENV.items() if k != "SITE_ID"}
         with patch.dict(os.environ, env, clear=True):
             with pytest.raises(ValidationError, match="SITE_ID"):
-                config_module.Settings()  # type: ignore[call-arg]
+                config_module.Settings(_env_file=None)  # type: ignore[call-arg]
 
     def test_missing_inverter_ip_raises(self) -> None:
         env = {k: v for k, v in _VALID_ENV.items() if k != "INVERTER_IP"}
         with patch.dict(os.environ, env, clear=True):
             with pytest.raises(ValidationError, match="INVERTER_IP"):
-                config_module.Settings()  # type: ignore[call-arg]
+                config_module.Settings(_env_file=None)  # type: ignore[call-arg]
 
 
 # ---------------------------------------------------------------------------
@@ -84,17 +86,18 @@ class TestFieldTypes:
 
     def test_inverter_ip_parsed(self) -> None:
         s = _make_settings()
-        # pydantic stores IPvAnyAddress as an IPv4Address object
-        assert str(s.INVERTER_IP) == "192.168.1.100"
+        # Now str type — accepts IPs and hostnames
+        assert s.INVERTER_IP == "192.168.1.100"
 
     def test_inverter_ip_invalid_raises(self) -> None:
+        # Invalid: contains characters not valid in IPs or hostnames
         with pytest.raises(ValidationError):
-            _make_settings(INVERTER_IP="not-an-ip")
+            _make_settings(INVERTER_IP="not an ip!")
 
     def test_inverter_port_default(self) -> None:
         env = {k: v for k, v in _VALID_ENV.items() if k != "INVERTER_PORT"}
         with patch.dict(os.environ, env, clear=True):
-            s = config_module.Settings()  # type: ignore[call-arg]
+            s = config_module.Settings(_env_file=None)  # type: ignore[call-arg]
         assert s.INVERTER_PORT == 502
 
     def test_inverter_port_zero_raises(self) -> None:
@@ -108,7 +111,7 @@ class TestFieldTypes:
     def test_watchdog_timeout_default(self) -> None:
         env = {k: v for k, v in _VALID_ENV.items() if k != "WATCHDOG_TIMEOUT"}
         with patch.dict(os.environ, env, clear=True):
-            s = config_module.Settings()  # type: ignore[call-arg]
+            s = config_module.Settings(_env_file=None)  # type: ignore[call-arg]
         assert s.WATCHDOG_TIMEOUT == 5
 
     def test_driver_profile_path_default(self) -> None:
@@ -117,7 +120,7 @@ class TestFieldTypes:
             if k != "DRIVER_PROFILE_PATH"
         }
         with patch.dict(os.environ, env, clear=True):
-            s = config_module.Settings()  # type: ignore[call-arg]
+            s = config_module.Settings(_env_file=None)  # type: ignore[call-arg]
         assert s.DRIVER_PROFILE_PATH == "registry/huawei_sun2000.json"
 
 
