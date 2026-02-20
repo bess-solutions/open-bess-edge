@@ -43,7 +43,7 @@ try:
     _FLWR_AVAILABLE = True
 except ImportError:
     _FLWR_AVAILABLE = False
-    FedAvg = None
+    FedAvg = None  # type: ignore[assignment,misc]
 
 
 @dataclass

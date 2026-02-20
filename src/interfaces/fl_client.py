@@ -34,7 +34,7 @@ try:
     import flwr as fl  # type: ignore[import-untyped]
 
     _FLWR_AVAILABLE = True
-    _NumPyClientBase = fl.client.NumPyClient
+    _NumPyClientBase = fl.client.NumPyClient  # type: ignore[attr-defined]
 except ImportError:
     _FLWR_AVAILABLE = False
 
