@@ -4,6 +4,7 @@ tests/test_luna2000_driver.py
 Tests for the LUNA2000 battery ESS driver.
 All tests use mock Modbus registers — no real hardware needed.
 """
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock
@@ -17,6 +18,7 @@ from src.drivers.luna2000_driver import (
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_register_mock(values: dict[int, list[int]]):
     """Return a mock Modbus client that returns preset register values."""
@@ -36,15 +38,15 @@ def _make_register_mock(values: dict[int, list[int]]):
 
 # Realistic register values for a 10 kWh LUNA2000 at 60% SOC
 _LUNA_REGS: dict[int, list[int]] = {
-    37752: [0x0106],        # temp = 262 * 0.1 = 26.2°C
-    37760: [600],           # SOC = 600 * 0.1 = 60.0%
-    37761: [980],           # SOH = 980 * 0.1 = 98.0%
-    37762: [123],           # cycles = 123
-    37758: [0, 10000],      # capacity = 10000 * 0.001 = 10.0 kWh
-    37765: [0xFFFF, 0xD8F0],# power = INT32(-10000*0.001=-10kW) discharging
-    37800: [4800],          # voltage = 4800*0.1 = 480 V
-    37801: [0xFFD2],        # current INT16(-46*0.1=-4.6A) discharging
-    47086: [0],             # mode = MAX_SELF_CONSUMPTION
+    37752: [0x0106],  # temp = 262 * 0.1 = 26.2°C
+    37760: [600],  # SOC = 600 * 0.1 = 60.0%
+    37761: [980],  # SOH = 980 * 0.1 = 98.0%
+    37762: [123],  # cycles = 123
+    37758: [0, 10000],  # capacity = 10000 * 0.001 = 10.0 kWh
+    37765: [0xFFFF, 0xD8F0],  # power = INT32(-10000*0.001=-10kW) discharging
+    37800: [4800],  # voltage = 4800*0.1 = 480 V
+    37801: [0xFFD2],  # current INT16(-46*0.1=-4.6A) discharging
+    47086: [0],  # mode = MAX_SELF_CONSUMPTION
 }
 
 
@@ -53,9 +55,14 @@ class TestLUNATelemetry:
 
     def _make_tel(self, **kwargs) -> LUNATelemetry:
         defaults = dict(
-            soc_pct=60.0, soh_pct=98.0, power_kw=-3.0,
-            voltage_v=480.0, current_a=-6.25, temperature_c=26.2,
-            cycle_count=123, capacity_kwh=10.0,
+            soc_pct=60.0,
+            soh_pct=98.0,
+            power_kw=-3.0,
+            voltage_v=480.0,
+            current_a=-6.25,
+            temperature_c=26.2,
+            cycle_count=123,
+            capacity_kwh=10.0,
         )
         return LUNATelemetry(**{**defaults, **kwargs})
 
@@ -77,9 +84,20 @@ class TestLUNATelemetry:
     def test_to_dict_contains_all_keys(self):
         tel = self._make_tel()
         d = tel.to_dict()
-        for k in ("soc_pct", "soh_pct", "power_kw", "voltage_v", "current_a",
-                  "temperature_c", "cycle_count", "capacity_kwh", "working_mode",
-                  "is_charging", "is_discharging", "timestamp"):
+        for k in (
+            "soc_pct",
+            "soh_pct",
+            "power_kw",
+            "voltage_v",
+            "current_a",
+            "temperature_c",
+            "cycle_count",
+            "capacity_kwh",
+            "working_mode",
+            "is_charging",
+            "is_discharging",
+            "timestamp",
+        ):
             assert k in d, f"missing key: {k}"
 
     def test_to_dict_rounds_values(self):

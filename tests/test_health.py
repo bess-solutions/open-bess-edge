@@ -4,6 +4,7 @@ tests/test_health.py
 Unit tests for the HealthServer (HTTP /health and /metrics endpoints).
 Uses aiohttp.test_utils.TestClient to make real HTTP calls to the server.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -30,6 +31,7 @@ async def client(health_server: HealthServer) -> AsyncGenerator[TestClient, None
 # ---------------------------------------------------------------------------
 # /health endpoint
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_health_returns_200_when_ok(client: TestClient) -> None:
@@ -80,6 +82,7 @@ async def test_root_redirects_to_health(client: TestClient) -> None:
 # /metrics endpoint
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_metrics_returns_200(client: TestClient) -> None:
     resp = await client.get("/metrics")
@@ -106,6 +109,7 @@ async def test_metrics_contains_expected_metric_names(client: TestClient) -> Non
 # ---------------------------------------------------------------------------
 # HealthServer lifecycle
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_serve_forever_can_be_cancelled(health_server: HealthServer) -> None:

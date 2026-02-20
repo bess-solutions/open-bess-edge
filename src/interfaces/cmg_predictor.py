@@ -45,6 +45,7 @@ log = structlog.get_logger(__name__)
 try:
     import numpy as np
     import onnxruntime as ort  # type: ignore[import-untyped]
+
     _ONNX_AVAILABLE = True
 except ImportError:
     _ONNX_AVAILABLE = False
@@ -54,10 +55,30 @@ except ImportError:
 # ── Chilean SEN seasonal CMg profile (CLP/kWh) — mean by hour (empirical)
 # Source: Coordinador Eléctrico Nacional PMGD 2023-2024 aggregate
 _HOURLY_MEAN_CMG: list[float] = [
-    38.2, 36.1, 34.8, 34.1, 33.9, 35.2,   # 00-05  Off-peak
-    42.1, 58.3, 71.2, 61.4, 48.3, 38.9,   # 06-11  Morning ramp
-    29.4, 24.1, 22.8, 21.3, 22.1, 28.7,   # 12-17  Solar trough
-    44.2, 62.3, 78.4, 71.2, 58.3, 46.1,   # 18-23  Evening peak
+    38.2,
+    36.1,
+    34.8,
+    34.1,
+    33.9,
+    35.2,  # 00-05  Off-peak
+    42.1,
+    58.3,
+    71.2,
+    61.4,
+    48.3,
+    38.9,  # 06-11  Morning ramp
+    29.4,
+    24.1,
+    22.8,
+    21.3,
+    22.1,
+    28.7,  # 12-17  Solar trough
+    44.2,
+    62.3,
+    78.4,
+    71.2,
+    58.3,
+    46.1,  # 18-23  Evening peak
 ]
 
 # Peak hours in Chilean SEN (where discharge is most valuable)
@@ -113,7 +134,7 @@ class CMgPredictor:
         self,
         node: str = "Maitencillo",
         model_path: str | Path = "models/price_predictor.onnx",
-        history_window: int = 72,   # 3 days of hourly data
+        history_window: int = 72,  # 3 days of hourly data
         alpha: float = 0.3,
     ) -> None:
         self.node = node
@@ -123,7 +144,7 @@ class CMgPredictor:
 
         # Rolling history buffer: list of (hour, cmg) tuples
         self._history: list[tuple[int, float]] = []
-        self._session: object | None = None   # ort.InferenceSession
+        self._session: object | None = None  # ort.InferenceSession
         self._input_name: str | None = None
         self._onnx_loaded: bool = False
 
@@ -180,12 +201,13 @@ class CMgPredictor:
         """
         try:
             import csv
+
             count = 0
             with open(csv_path, newline="", encoding="utf-8") as f:
                 reader = csv.DictReader(f)
                 rows = sorted(reader, key=lambda r: (r.get("fecha", ""), r.get("hora", "0")))
                 # Use last history_window rows
-                for row in rows[-self.history_window:]:
+                for row in rows[-self.history_window :]:
                     try:
                         h = int(float(row.get("hora", row.get("hour", 0))))
                         cmg = float(row.get("cmg_clp_kwh", row.get("costo_marginal", 0)))
@@ -193,7 +215,9 @@ class CMgPredictor:
                         count += 1
                     except (ValueError, KeyError):
                         continue
-            log.info("cmg_predictor.history_loaded", node=self.node, rows=count, path=str(csv_path))
+            log.info(
+                "cmg_predictor.history_loaded", node=self.node, rows=count, path=str(csv_path)
+            )
             return count
         except Exception as exc:
             log.warning("cmg_predictor.history_load_failed", error=str(exc), path=str(csv_path))
@@ -248,19 +272,23 @@ class CMgPredictor:
                 weight = (offset - 12) / 12
                 predicted = (1 - weight) * predicted + weight * _HOURLY_MEAN_CMG[h]
 
-            forecasts.append(PriceForecast(
-                hour=h,
-                cmg_clp_kwh=round(predicted, 2),
-                confidence=round(confidence, 3),
-                method="exponential_smoothing",
-            ))
+            forecasts.append(
+                PriceForecast(
+                    hour=h,
+                    cmg_clp_kwh=round(predicted, 2),
+                    confidence=round(confidence, 3),
+                    method="exponential_smoothing",
+                )
+            )
 
         return forecasts
 
     def _predict_onnx(self, current_hour: int, current_cmg: float) -> list[PriceForecast]:
         """ONNX model inference for 24h price forecast."""
         recent_vals = [v for _, v in self._history[-24:]] if self._history else [current_cmg]
-        recent_mean = statistics.mean(recent_vals) if recent_vals else _HOURLY_MEAN_CMG[current_hour]
+        recent_mean = (
+            statistics.mean(recent_vals) if recent_vals else _HOURLY_MEAN_CMG[current_hour]
+        )
         recent_std = statistics.stdev(recent_vals) if len(recent_vals) > 1 else 5.0
         lag_1h = self._history[-1][1] if self._history else current_cmg
         lag_24h = self._history[-24][1] if len(self._history) >= 24 else recent_mean
@@ -269,17 +297,22 @@ class CMgPredictor:
 
         for offset in range(1, 25):
             h = (current_hour + offset) % 24
-            features = np.array([[
-                50.0,                    # soc_pct placeholder (updated by orchestrator)
-                h,                       # hour_of_day
-                0.0,                     # day_of_week (unknown)
-                recent_mean,             # recent_mean_cmg
-                recent_std,              # recent_std_cmg
-                float(h in _PEAK_HOURS),            # peak_flag
-                float(h in _SOLAR_TROUGH_HOURS),    # solar_hour_flag
-                lag_1h,                  # lag_1h
-                lag_24h,                 # lag_24h
-            ]], dtype=np.float32)
+            features = np.array(
+                [
+                    [
+                        50.0,  # soc_pct placeholder (updated by orchestrator)
+                        h,  # hour_of_day
+                        0.0,  # day_of_week (unknown)
+                        recent_mean,  # recent_mean_cmg
+                        recent_std,  # recent_std_cmg
+                        float(h in _PEAK_HOURS),  # peak_flag
+                        float(h in _SOLAR_TROUGH_HOURS),  # solar_hour_flag
+                        lag_1h,  # lag_1h
+                        lag_24h,  # lag_24h
+                    ]
+                ],
+                dtype=np.float32,
+            )
 
             try:
                 assert self._session is not None
@@ -291,12 +324,14 @@ class CMgPredictor:
                 predicted = self._smooth[h]
                 confidence = 0.3
 
-            forecasts.append(PriceForecast(
-                hour=h,
-                cmg_clp_kwh=round(max(0.0, predicted), 2),
-                confidence=confidence,
-                method="onnx",
-            ))
+            forecasts.append(
+                PriceForecast(
+                    hour=h,
+                    cmg_clp_kwh=round(max(0.0, predicted), 2),
+                    confidence=confidence,
+                    method="onnx",
+                )
+            )
 
         return forecasts
 

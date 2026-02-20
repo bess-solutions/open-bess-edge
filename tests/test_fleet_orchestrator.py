@@ -15,24 +15,35 @@ from src.core.fleet_orchestrator import (
 )
 
 
-def _make_telemetry(site_id: str, soc: float = 70.0, power: float = 0.0,
-                    cap: float = 100.0, avail: float = 50.0,
-                    anomaly: float = 0.0) -> SiteTelemetry:
+def _make_telemetry(
+    site_id: str,
+    soc: float = 70.0,
+    power: float = 0.0,
+    cap: float = 100.0,
+    avail: float = 50.0,
+    anomaly: float = 0.0,
+) -> SiteTelemetry:
     return SiteTelemetry(
-        site_id=site_id, soc_pct=soc, power_kw=power, temp_c=25.0,
-        capacity_kwh=cap, available_kw=avail, anomaly_score=anomaly,
+        site_id=site_id,
+        soc_pct=soc,
+        power_kw=power,
+        temp_c=25.0,
+        capacity_kwh=cap,
+        available_kw=avail,
+        anomaly_score=anomaly,
     )
 
 
 def _make_proxy(site_id: str, **kw) -> SiteProxy:
     def fn(sid: str) -> SiteTelemetry:
         return _make_telemetry(sid, **kw)
-    return SiteProxy(host="localhost", site_id=site_id, capacity_kwh=kw.get("cap", 100.0),
-                     telemetry_fn=fn)
+
+    return SiteProxy(
+        host="localhost", site_id=site_id, capacity_kwh=kw.get("cap", 100.0), telemetry_fn=fn
+    )
 
 
 class TestFleetOrchestrator:
-
     def test_register_site_increases_n_sites(self):
         orch = FleetOrchestrator()
         orch.register_site("A", _make_proxy("A"))

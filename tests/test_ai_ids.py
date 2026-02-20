@@ -23,19 +23,21 @@ from src.interfaces.ai_ids import ModbusAnomalyDetector, ModbusFrame
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 def _normal_frame(timing_ms: float = 10.0) -> ModbusFrame:
     """Return a typical normal Modbus read frame."""
-    return ModbusFrame(fc_code=3, address=0x1000, count=10, timing_ms=timing_ms,
-                       soc_pct=75.0, power_kw=50.0)
+    return ModbusFrame(
+        fc_code=3, address=0x1000, count=10, timing_ms=timing_ms, soc_pct=75.0, power_kw=50.0
+    )
 
 
 def _anomalous_frame() -> ModbusFrame:
     """Return a frame that mimics a Modbus reconnaissance attack."""
     return ModbusFrame(
-        fc_code=1,          # Coil read — unusual for this inverter
-        address=0xFFFF,     # Max address range scan
-        count=125,          # Max registers in one request
-        timing_ms=500.0,    # Very slow response — possible MITM
+        fc_code=1,  # Coil read — unusual for this inverter
+        address=0xFFFF,  # Max address range scan
+        count=125,  # Max registers in one request
+        timing_ms=500.0,  # Very slow response — possible MITM
         soc_pct=75.0,
         power_kw=50.0,
     )
@@ -50,6 +52,7 @@ def _normal_traffic(n: int = 80) -> list[ModbusFrame]:
 # Tests — ModbusFrame
 # ---------------------------------------------------------------------------
 
+
 def test_modbus_frame_feature_shape():
     """Feature vector must have exactly 6 elements."""
     frame = _normal_frame()
@@ -59,12 +62,13 @@ def test_modbus_frame_feature_shape():
 
 def test_modbus_frame_feature_values():
     """Feature vector contains the correct values in correct order."""
-    frame = ModbusFrame(fc_code=3, address=0x1000, count=10,
-                        timing_ms=15.5, soc_pct=80.0, power_kw=30.0)
+    frame = ModbusFrame(
+        fc_code=3, address=0x1000, count=10, timing_ms=15.5, soc_pct=80.0, power_kw=30.0
+    )
     f = frame.to_features()
-    assert f[0] == 3          # fc_code
-    assert f[1] == 0x1000     # address
-    assert f[2] == 10         # count
+    assert f[0] == 3  # fc_code
+    assert f[1] == 0x1000  # address
+    assert f[2] == 10  # count
     assert f[3] == pytest.approx(15.5)
     assert f[4] == pytest.approx(80.0)
     assert f[5] == pytest.approx(30.0)
@@ -73,6 +77,7 @@ def test_modbus_frame_feature_values():
 # ---------------------------------------------------------------------------
 # Tests — Unfitted detector (fail-safe)
 # ---------------------------------------------------------------------------
+
 
 def test_unfitted_detector_returns_zero():
     """Before fit(), score() must return 0.0 (fail-safe, no false positives)."""
@@ -92,6 +97,7 @@ def test_unfitted_detector_alerting_safe():
 # ---------------------------------------------------------------------------
 # Tests — After fitting
 # ---------------------------------------------------------------------------
+
 
 def test_fit_with_enough_samples():
     """fit() with ≥ min_fit_samples should set _fitted = True."""
@@ -137,6 +143,7 @@ def test_anomalous_timing_high_score_after_fit():
 # Tests — Score range
 # ---------------------------------------------------------------------------
 
+
 def test_score_always_in_0_1_range():
     """score() must always return a value in [0, 1]."""
     detector = ModbusAnomalyDetector(min_fit_samples=50)
@@ -149,6 +156,7 @@ def test_score_always_in_0_1_range():
 # ---------------------------------------------------------------------------
 # Tests — Z-score timing (works without IsolationForest)
 # ---------------------------------------------------------------------------
+
 
 def test_zscore_timing_without_isolation_forest():
     """Z-score should increase monotonically with timing deviation."""

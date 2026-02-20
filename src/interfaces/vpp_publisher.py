@@ -40,6 +40,7 @@ class SiteCapacity:
         max_power_kw:   Max charge/discharge power at this site (kW).
         available_kw:   Currently dispatchable power (signed: + discharge, - charge).
     """
+
     site_id: str
     soc_pct: float
     max_power_kw: float
@@ -54,6 +55,7 @@ class OpenADREvent:
     Fields follow the OpenADR 3.0 YAML schema:
     https://github.com/openadr/openADR3-EPRI
     """
+
     event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     program_id: str = "BESSAI-VPP-001"
     event_name: str = "FLEX_DISPATCH"
@@ -65,21 +67,24 @@ class OpenADREvent:
 
     def to_json(self) -> str:
         """Serialize to OpenADR 3.0 JSON format."""
-        return json.dumps({
-            "objectType": "EVENT",
-            "programID": self.program_id,
-            "eventName": self.event_name,
-            "priority": self.priority,
-            "targets": self.targets,
-            "reportDescriptors": None,
-            "payloadDescriptors": self.payload_descriptors,
-            "intervalPeriod": {
-                "start": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(self.created_at)),
-                "duration": "PT15M",
-                "randomizeStart": "PT0S",
+        return json.dumps(
+            {
+                "objectType": "EVENT",
+                "programID": self.program_id,
+                "eventName": self.event_name,
+                "priority": self.priority,
+                "targets": self.targets,
+                "reportDescriptors": None,
+                "payloadDescriptors": self.payload_descriptors,
+                "intervalPeriod": {
+                    "start": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(self.created_at)),
+                    "duration": "PT15M",
+                    "randomizeStart": "PT0S",
+                },
+                "intervals": self.intervals,
             },
-            "intervals": self.intervals,
-        }, indent=2)
+            indent=2,
+        )
 
 
 class VPPPublisher:
@@ -158,20 +163,21 @@ class VPPPublisher:
             return None
 
         # Build event
-        targets = [
-            {"type": "RESOURCE_NAME", "values": [s.site_id]}
-            for s in self._sites.values()
+        targets = [{"type": "RESOURCE_NAME", "values": [s.site_id]} for s in self._sites.values()]
+        intervals = [
+            {
+                "id": 1,
+                "payloads": [{"type": "SIMPLE", "values": [dispatch_kw]}],
+            }
         ]
-        intervals = [{
-            "id": 1,
-            "payloads": [{"type": "SIMPLE", "values": [dispatch_kw]}],
-        }]
-        payload_descriptors = [{
-            "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-            "payloadType": "SIMPLE",
-            "units": "KW",
-            "currency": None,
-        }]
+        payload_descriptors = [
+            {
+                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                "payloadType": "SIMPLE",
+                "units": "KW",
+                "currency": None,
+            }
+        ]
 
         event = OpenADREvent(
             program_id=self.program_id,

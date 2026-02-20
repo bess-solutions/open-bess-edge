@@ -12,7 +12,6 @@ from src.interfaces.lca_engine import LCAConfig, LCAEngine
 
 
 class TestLCAConfig:
-
     def test_database_contains_chile(self):
         assert "CL" in GRID_EMISSION_FACTORS_G_KWH
         assert GRID_EMISSION_FACTORS_G_KWH["CL"] > 0
@@ -30,7 +29,6 @@ class TestLCAConfig:
 
 
 class TestLCAEngine:
-
     def _engine(self, region: str = "CL", capacity: float = 100.0) -> LCAEngine:
         config = LCAConfig(region=region, capacity_kwh=capacity)
         return LCAEngine(config=config)

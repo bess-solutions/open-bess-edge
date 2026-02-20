@@ -217,4 +217,3 @@ GATEWAY_INFO: Gauge = Gauge(
 def generate_metrics() -> bytes:
     """Return the current metrics snapshot as Prometheus text format."""
     return generate_latest(REGISTRY)
-

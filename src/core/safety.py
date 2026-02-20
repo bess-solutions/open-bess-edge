@@ -65,8 +65,8 @@ class SafetyGuard:
     # ------------------------------------------------------------------
     # Safety limits  (engineering units, same as telemetry dict values)
     # ------------------------------------------------------------------
-    SOC_MIN: float = 5.0    # % — below this: deep-discharge risk
-    SOC_MAX: float = 98.0   # % — above this: overcharge risk
+    SOC_MIN: float = 5.0  # % — below this: deep-discharge risk
+    SOC_MAX: float = 98.0  # % — above this: overcharge risk
     TEMP_MAX: float = 45.0  # °C — above this: thermal runaway risk
 
     # Watchdog counter wraps at UINT16 max
@@ -190,14 +190,10 @@ class SafetyGuard:
                 await asyncio.sleep(self._watchdog_interval_s)
 
                 # Wrap counter within UINT16 range
-                self._heartbeat_counter = (
-                    self._heartbeat_counter + 1
-                ) % (self._WATCHDOG_MAX + 1)
+                self._heartbeat_counter = (self._heartbeat_counter + 1) % (self._WATCHDOG_MAX + 1)
 
                 try:
-                    await driver.write_tag(
-                        "watchdog_heartbeat", float(self._heartbeat_counter)
-                    )
+                    await driver.write_tag("watchdog_heartbeat", float(self._heartbeat_counter))
                     consecutive_failures = 0  # reset on success
                     log.debug(
                         "watchdog.heartbeat.sent",

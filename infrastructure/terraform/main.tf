@@ -65,7 +65,7 @@ resource "google_pubsub_subscription" "telemetry_pull" {
   labels  = local.common_labels
 
   ack_deadline_seconds       = 60
-  message_retention_duration = "604800s"  # 7 days
+  message_retention_duration = "604800s" # 7 days
   retain_acked_messages      = false
   enable_message_ordering    = false
 

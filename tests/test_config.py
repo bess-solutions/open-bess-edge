@@ -60,6 +60,7 @@ def _make_settings(**overrides: str) -> config_module.Settings:
 # Required field validation
 # ---------------------------------------------------------------------------
 
+
 class TestRequiredFields:
     def test_missing_site_id_raises(self) -> None:
         env = {k: v for k, v in _VALID_ENV.items() if k != "SITE_ID"}
@@ -77,6 +78,7 @@ class TestRequiredFields:
 # ---------------------------------------------------------------------------
 # Field types and values
 # ---------------------------------------------------------------------------
+
 
 class TestFieldTypes:
     def test_site_id_is_string(self) -> None:
@@ -115,10 +117,7 @@ class TestFieldTypes:
         assert s.WATCHDOG_TIMEOUT == 5
 
     def test_driver_profile_path_default(self) -> None:
-        env = {
-            k: v for k, v in _VALID_ENV.items()
-            if k != "DRIVER_PROFILE_PATH"
-        }
+        env = {k: v for k, v in _VALID_ENV.items() if k != "DRIVER_PROFILE_PATH"}
         with patch.dict(os.environ, env, clear=True):
             s = config_module.Settings(_env_file=None)  # type: ignore[call-arg]
         assert s.DRIVER_PROFILE_PATH == "registry/huawei_sun2000.json"
@@ -127,6 +126,7 @@ class TestFieldTypes:
 # ---------------------------------------------------------------------------
 # Derived properties
 # ---------------------------------------------------------------------------
+
 
 class TestDerivedProperties:
     def test_inverter_ip_str_is_string(self) -> None:
@@ -147,6 +147,7 @@ class TestDerivedProperties:
 # ---------------------------------------------------------------------------
 # Singleton
 # ---------------------------------------------------------------------------
+
 
 class TestSingleton:
     def test_get_settings_returns_same_instance(self) -> None:

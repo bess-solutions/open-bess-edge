@@ -13,7 +13,6 @@ from src.interfaces.p2p_trading import EnergyCredit, LedgerResult, P2PEnergyTrad
 
 
 class TestEnergyCredit:
-
     def test_credit_has_unique_id(self):
         c1 = EnergyCredit(site_id="A", kwh=5.0)
         c2 = EnergyCredit(site_id="A", kwh=5.0)
@@ -41,7 +40,6 @@ class TestEnergyCredit:
 
 
 class TestP2PEnergyTrader:
-
     def _trader(self, site_id: str = "test-site") -> P2PEnergyTrader:
         return P2PEnergyTrader(site_id=site_id, dry_run=True)
 

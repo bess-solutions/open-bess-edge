@@ -21,8 +21,8 @@ from src.simulation.bess_model import BESSPhysicsModel
 # BESSPhysicsModel tests
 # ===========================================================================
 
-class TestBESSPhysicsModel:
 
+class TestBESSPhysicsModel:
     def _model(self, soc: float = 0.5) -> BESSPhysicsModel:
         return BESSPhysicsModel(capacity_kwh=100.0, max_power_kw=50.0, initial_soc=soc)
 
@@ -91,9 +91,11 @@ class TestBESSPhysicsModel:
 # BESSEnv tests (does not require gymnasium installed)
 # ===========================================================================
 
+
 def _has_gymnasium() -> bool:
     try:
         import gymnasium  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -101,9 +103,9 @@ def _has_gymnasium() -> bool:
 
 @pytest.mark.skipif(not _has_gymnasium(), reason="gymnasium not installed")
 class TestBESSEnv:
-
     def _env(self) -> BESSEnv:  # noqa: F821
         from src.simulation.bess_env import BESSEnv
+
         return BESSEnv(capacity_kwh=100.0, max_power_kw=50.0)
 
     def test_reset_returns_correct_obs_shape(self):
@@ -139,6 +141,7 @@ class TestBESSEnv:
 
     def test_discharge_at_high_price_positive_reward(self):
         from src.simulation.bess_env import _DEFAULT_PRICE_PROFILE, BESSEnv
+
         # Advance to peak-price timestep (step 73 ≈ 110 EUR/MWh)
         peak_step = int(np.argmax(_DEFAULT_PRICE_PROFILE))
         env = BESSEnv(capacity_kwh=100.0, max_power_kw=50.0, noise_std=0.0)
@@ -150,6 +153,7 @@ class TestBESSEnv:
 
     def test_render_ansi_returns_string(self):
         from src.simulation.bess_env import BESSEnv
+
         env = BESSEnv(render_mode="ansi")
         env.reset()
         text = env.render()

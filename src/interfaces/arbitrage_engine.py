@@ -135,7 +135,9 @@ class ArbitrageSchedule:
             "projected_net_clp": round(self.projected_net_clp),
             "n_charge_hours": self.n_charge_hours,
             "n_discharge_hours": self.n_discharge_hours,
-            "hourly_schedule": [slot.to_dict() for slot in sorted(self.slots, key=lambda s: s.hour)],
+            "hourly_schedule": [
+                slot.to_dict() for slot in sorted(self.slots, key=lambda s: s.hour)
+            ],
         }
 
 
@@ -198,13 +200,15 @@ class ArbitrageEngine:
 
         # Cheapest N hours → charge candidates
         charge_hours = {
-            f.hour for f in sorted_by_price[:self.max_charge_hours]
+            f.hour
+            for f in sorted_by_price[: self.max_charge_hours]
             if f.cmg_clp_kwh < self._price_threshold(forecasts, "low")
         }
 
         # Most expensive N hours → discharge candidates
         discharge_hours = {
-            f.hour for f in sorted_by_price[-self.max_discharge_hours:]
+            f.hour
+            for f in sorted_by_price[-self.max_discharge_hours :]
             if f.cmg_clp_kwh > self._price_threshold(forecasts, "high")
         }
 
@@ -230,7 +234,7 @@ class ArbitrageEngine:
                 power_kw = min(self.max_power_kw, energy_needed)
                 delta_soc = (power_kw / self.capacity_kwh) * 100
                 soc = min(self.max_soc_pct, soc + delta_soc)
-                revenue = -power_kw * fc.cmg_clp_kwh / 1000   # cost (negative revenue)
+                revenue = -power_kw * fc.cmg_clp_kwh / 1000  # cost (negative revenue)
                 total_cost += abs(revenue)
 
             elif h in discharge_hours and soc > self.min_soc_pct:
@@ -248,15 +252,17 @@ class ArbitrageEngine:
                 power_kw = 0.0
                 revenue = 0.0
 
-            slots.append(DispatchSlot(
-                hour=h,
-                action=action,
-                power_kw=round(power_kw, 1),
-                forecast=fc,
-                soc_before_pct=round(soc_before, 1),
-                soc_after_pct=round(soc, 1),
-                revenue_clp=round(revenue * 1000),  # convert back to CLP
-            ))
+            slots.append(
+                DispatchSlot(
+                    hour=h,
+                    action=action,
+                    power_kw=round(power_kw, 1),
+                    forecast=fc,
+                    soc_before_pct=round(soc_before, 1),
+                    soc_after_pct=round(soc, 1),
+                    revenue_clp=round(revenue * 1000),  # convert back to CLP
+                )
+            )
 
         net = total_revenue - total_cost
         log.info(
@@ -294,7 +300,7 @@ class ArbitrageEngine:
         prices = [f.cmg_clp_kwh for f in forecasts]
         mean = sum(prices) / len(prices)
         variance = sum((p - mean) ** 2 for p in prices) / len(prices)
-        std = variance ** 0.5
+        std = variance**0.5
 
         if level == "low":
             return float(mean - 0.5 * std)

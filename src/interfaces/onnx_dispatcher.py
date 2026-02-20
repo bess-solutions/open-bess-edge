@@ -44,6 +44,7 @@ from .metrics import ONNX_DISPATCH_COMMANDS_TOTAL, ONNX_INFERENCE_MS
 
 try:
     import onnxruntime as ort  # type: ignore[import-untyped]
+
     _ONNX_AVAILABLE = True
 except ImportError:  # pragma: no cover
     _ONNX_AVAILABLE = False
@@ -64,6 +65,7 @@ class DispatchResult:
         inference_ms:  Wall-clock time of inference in milliseconds.
         model_path:    Which model produced this result.
     """
+
     __slots__ = ("target_kw", "inference_ms", "model_path")
 
     def __init__(self, target_kw: float, inference_ms: float, model_path: str) -> None:
@@ -73,8 +75,7 @@ class DispatchResult:
 
     def __repr__(self) -> str:
         return (
-            f"DispatchResult(target_kw={self.target_kw:.2f}, "
-            f"inference_ms={self.inference_ms:.2f})"
+            f"DispatchResult(target_kw={self.target_kw:.2f}, inference_ms={self.inference_ms:.2f})"
         )
 
 
@@ -160,9 +161,7 @@ class ONNXDispatcher:
             log.debug("onnx_dispatcher.fallback_mode", site_id=self.site_id)
             return None
 
-        features = np.array(
-            [[soc_pct, power_kw, temp_c, hour_of_day]], dtype=np.float32
-        )
+        features = np.array([[soc_pct, power_kw, temp_c, hour_of_day]], dtype=np.float32)
 
         t0 = time.perf_counter()
         try:

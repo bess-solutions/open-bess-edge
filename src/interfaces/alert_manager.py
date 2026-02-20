@@ -45,6 +45,7 @@ class AlertLevel(str, Enum):
 @dataclass
 class Alert:
     """Represents one fired alert event."""
+
     alert_id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     level: AlertLevel = AlertLevel.INFO
     name: str = ""
@@ -91,9 +92,9 @@ class AlertManager:
     ) -> None:
         self.site_id = site_id
         self.dedup_window_s = dedup_window_s
-        self._active: dict[str, Alert] = {}          # name → Alert
+        self._active: dict[str, Alert] = {}  # name → Alert
         self._history: deque[Alert] = deque(maxlen=max_history)
-        self._fire_times: dict[str, float] = {}      # name → last fired ts
+        self._fire_times: dict[str, float] = {}  # name → last fired ts
 
     # ------------------------------------------------------------------
     # Public API
@@ -132,13 +133,9 @@ class AlertManager:
 
         # Prometheus
         if level == AlertLevel.CRITICAL:
-            SAFETY_BLOCKS_TOTAL.labels(
-                site_id=self.site_id, reason=name
-            ).inc()
+            SAFETY_BLOCKS_TOTAL.labels(site_id=self.site_id, reason=name).inc()
         elif level == AlertLevel.WARNING and name.startswith("IDS"):
-            IDS_ALERTS_TOTAL.labels(
-                site_id=self.site_id, reason=name
-            ).inc()
+            IDS_ALERTS_TOTAL.labels(site_id=self.site_id, reason=name).inc()
 
         log.warning(
             "alert.fired",

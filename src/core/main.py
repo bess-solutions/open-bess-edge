@@ -96,6 +96,7 @@ def _handle_signal(sig: signal.Signals) -> None:
 # Helper — read all configured tags in one cycle
 # ---------------------------------------------------------------------------
 
+
 async def _acquire(driver: UniversalDriver) -> dict[str, Any]:
     """
     Read ``_ACQUISITION_TAGS`` from the device.  Tags that fail are logged
@@ -113,6 +114,7 @@ async def _acquire(driver: UniversalDriver) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Helper — ensure the watchdog task is alive; (re)start if needed
 # ---------------------------------------------------------------------------
+
 
 def _ensure_watchdog(
     guard: SafetyGuard,
@@ -151,6 +153,7 @@ def _ensure_watchdog(
 # ---------------------------------------------------------------------------
 # Main coroutine
 # ---------------------------------------------------------------------------
+
 
 async def main() -> None:  # noqa: C901
     """
@@ -197,15 +200,17 @@ async def main() -> None:  # noqa: C901
 
     # ── Step 5 — Safety guard, publisher, watchdog reference ─────────────
     guard = SafetyGuard(watchdog_interval_s=1.0)
-    watchdog_ref: list[asyncio.Task[None]] = []   # mutable single-element ref
+    watchdog_ref: list[asyncio.Task[None]] = []  # mutable single-element ref
 
     assert _cfg.GCP_PROJECT_ID is not None, "GCP_PROJECT_ID must be set"
     assert _cfg.GCP_PUBSUB_TOPIC is not None, "GCP_PUBSUB_TOPIC must be set"
-    async with PubSubPublisher(
-        project_id=_cfg.GCP_PROJECT_ID,
-        topic_name=_cfg.GCP_PUBSUB_TOPIC,
-    ) as publisher, health_server.run():
-
+    async with (
+        PubSubPublisher(
+            project_id=_cfg.GCP_PROJECT_ID,
+            topic_name=_cfg.GCP_PUBSUB_TOPIC,
+        ) as publisher,
+        health_server.run(),
+    ):
         log.info(
             "gateway.started",
             site=_cfg.SITE_ID,
@@ -238,9 +243,7 @@ async def main() -> None:  # noqa: C901
 
                 # Update telemetry gauges
                 if "soc" in telemetry:
-                    LAST_SOC_PERCENT.labels(site_id=_cfg.SITE_ID).set(
-                        float(telemetry["soc"])
-                    )
+                    LAST_SOC_PERCENT.labels(site_id=_cfg.SITE_ID).set(float(telemetry["soc"]))
                 if "active_power" in telemetry:
                     LAST_POWER_KW.labels(site_id=_cfg.SITE_ID).set(
                         float(telemetry["active_power"]) / 1000.0
@@ -257,9 +260,7 @@ async def main() -> None:  # noqa: C901
                         telemetry=telemetry,
                         action="HALTING_PUBLISH — manual intervention required",
                     )
-                    SAFETY_BLOCKS_TOTAL.labels(
-                        site_id=_cfg.SITE_ID, reason="out_of_range"
-                    ).inc()
+                    SAFETY_BLOCKS_TOTAL.labels(site_id=_cfg.SITE_ID, reason="out_of_range").inc()
                     health_server.safety_status = "BLOCKED"
                     health_server.last_cycle_ok = False
                     await asyncio.sleep(_cfg.WATCHDOG_TIMEOUT)

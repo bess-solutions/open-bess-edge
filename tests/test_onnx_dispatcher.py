@@ -28,6 +28,7 @@ DUMMY_MODEL_PATH = Path("models/dispatch_policy.onnx")
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _has_model() -> bool:
     return DUMMY_MODEL_PATH.exists()
 
@@ -35,6 +36,7 @@ def _has_model() -> bool:
 def _has_onnxruntime() -> bool:
     try:
         import onnxruntime  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -43,6 +45,7 @@ def _has_onnxruntime() -> bool:
 # ---------------------------------------------------------------------------
 # Tests — No model (fallback mode)
 # ---------------------------------------------------------------------------
+
 
 def test_dispatcher_missing_model_returns_none():
     """When model file does not exist, infer() must return None (graceful fallback)."""
@@ -71,6 +74,7 @@ def test_dispatcher_not_loaded_by_default():
 # Tests — DispatchResult
 # ---------------------------------------------------------------------------
 
+
 def test_dispatch_result_attributes():
     """DispatchResult must expose target_kw, inference_ms, model_path."""
     result = DispatchResult(target_kw=42.5, inference_ms=0.75, model_path="models/test.onnx")
@@ -90,6 +94,7 @@ def test_dispatch_result_repr():
 # ---------------------------------------------------------------------------
 # Tests — With real ONNX model (skipped if model or onnxruntime not available)
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.skipif(
     not _has_model() or not _has_onnxruntime(),

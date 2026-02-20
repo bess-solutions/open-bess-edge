@@ -27,7 +27,6 @@ def _client_result(noise: float = 0.0) -> tuple[list[np.ndarray], int]:
 
 
 class TestBESSAIFLServer:
-
     def test_init_defaults(self):
         server = BESSAIFLServer()
         assert server.config.num_rounds == 10

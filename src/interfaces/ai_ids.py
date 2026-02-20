@@ -34,6 +34,7 @@ from .metrics import IDS_ALERTS_TOTAL, IDS_ANOMALY_SCORE
 
 try:
     from sklearn.ensemble import IsolationForest  # type: ignore[import-untyped]
+
     _SKLEARN_AVAILABLE = True
 except ImportError:  # pragma: no cover
     _SKLEARN_AVAILABLE = False
@@ -59,6 +60,7 @@ class ModbusFrame:
         power_kw:     Active power kW at time of read (context feature).
         timestamp:    Unix timestamp of the read (seconds since epoch).
     """
+
     fc_code: int = 3
     address: int = 0
     count: int = 1
@@ -70,8 +72,7 @@ class ModbusFrame:
     def to_features(self) -> np.ndarray:
         """Return a 1-D numpy array of numeric features for the detector."""
         return np.array(
-            [self.fc_code, self.address, self.count, self.timing_ms,
-             self.soc_pct, self.power_kw],
+            [self.fc_code, self.address, self.count, self.timing_ms, self.soc_pct, self.power_kw],
             dtype=np.float64,
         )
 
@@ -139,7 +140,9 @@ class ModbusAnomalyDetector:
         else:
             log.debug(
                 "ai_ids.fit_skipped",
-                reason="insufficient_samples" if len(frames) < self.min_fit_samples else "sklearn_unavailable",
+                reason="insufficient_samples"
+                if len(frames) < self.min_fit_samples
+                else "sklearn_unavailable",
                 n_frames=len(frames),
                 required=self.min_fit_samples,
             )

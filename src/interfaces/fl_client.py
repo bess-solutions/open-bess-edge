@@ -32,10 +32,12 @@ log = structlog.get_logger(__name__)
 
 try:
     import flwr as fl  # type: ignore[import-untyped]
+
     _FLWR_AVAILABLE = True
     _NumPyClientBase = fl.client.NumPyClient
 except ImportError:
     _FLWR_AVAILABLE = False
+
     # Stub base class for environments without flwr installed
     class _NumPyClientBase:  # type: ignore[no-redef]
         pass
@@ -51,6 +53,7 @@ class FLConfig:
         LOCAL_EPOCHS:       Local training epochs per round.
         FRACTION_FIT:       Fraction of clients selected per round.
     """
+
     MIN_FIT_CLIENTS: int = 3
     MIN_EVAL_CLIENTS: int = 2
     NUM_ROUNDS: int = 10
@@ -133,9 +136,7 @@ class BESSAIFlowerClient(_NumPyClientBase):  # type: ignore[misc,valid-type]
         )
         return self._weights, n_samples, {"train_loss": train_loss}
 
-    def evaluate(
-        self, parameters: list[np.ndarray], config: dict
-    ) -> tuple[float, int, dict]:
+    def evaluate(self, parameters: list[np.ndarray], config: dict) -> tuple[float, int, dict]:
         """Evaluate global model on local validation data.
 
         Returns:

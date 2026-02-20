@@ -13,17 +13,16 @@ from src.interfaces.fl_client import BESSAIFlowerClient, FLConfig
 def _initial_weights() -> list[np.ndarray]:
     """Simple 4-layer weight init matching a dispatch policy network."""
     return [
-        np.random.randn(4, 16).astype(np.float32),    # layer 0 weights
-        np.zeros(16, dtype=np.float32),                # layer 0 bias
-        np.random.randn(16, 8).astype(np.float32),     # layer 1 weights
-        np.zeros(8, dtype=np.float32),                 # layer 1 bias
-        np.random.randn(8, 1).astype(np.float32),      # layer 2 weights
-        np.zeros(1, dtype=np.float32),                 # layer 2 bias
+        np.random.randn(4, 16).astype(np.float32),  # layer 0 weights
+        np.zeros(16, dtype=np.float32),  # layer 0 bias
+        np.random.randn(16, 8).astype(np.float32),  # layer 1 weights
+        np.zeros(8, dtype=np.float32),  # layer 1 bias
+        np.random.randn(8, 1).astype(np.float32),  # layer 2 weights
+        np.zeros(1, dtype=np.float32),  # layer 2 bias
     ]
 
 
 class TestBESSAIFlowerClient:
-
     def test_get_parameters_returns_copies(self):
         weights = _initial_weights()
         client = BESSAIFlowerClient(weights, site_id="test-001")

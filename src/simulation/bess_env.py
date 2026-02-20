@@ -33,16 +33,20 @@ import numpy as np
 try:
     import gymnasium as gym
     from gymnasium import spaces
+
     _GYM_AVAILABLE = True
 except ImportError:
     _GYM_AVAILABLE = False
+
     # Stubs for environments without gymnasium installed
     class gym:  # type: ignore[no-redef]
         class Env:
             pass
+
     class spaces:  # type: ignore[no-redef]
         class Box:
             pass
+
 
 from .bess_model import BESSPhysicsModel
 
@@ -51,27 +55,209 @@ __all__ = ["BESSEnv"]
 # ---------------------------------------------------------------------------
 # Synthetic market price profile (ENTSO-E average day-ahead, normalised)
 # ---------------------------------------------------------------------------
-_DEFAULT_PRICE_PROFILE = np.array([
-    28, 25, 22, 20, 19, 22, 35, 55, 70, 72, 65, 60,
-    58, 60, 63, 70, 80, 95, 110, 105, 90, 70, 50, 35,
-    28, 25, 22, 20, 19, 22, 35, 55, 70, 72, 65, 60,
-    58, 60, 63, 70, 80, 95, 110, 105, 90, 70, 50, 35,
-    28, 25, 22, 20, 19, 22, 35, 55, 70, 72, 65, 60,
-    58, 60, 63, 70, 80, 95, 110, 105, 90, 70, 50, 35,
-    28, 25, 22, 20, 19, 22, 35, 55, 70, 72, 65, 60,
-    58, 60, 63, 70, 80, 95, 110, 105, 90, 70, 50, 35,
-], dtype=np.float32)  # 96 values (15-min intervals, EUR/MWh)
+_DEFAULT_PRICE_PROFILE = np.array(
+    [
+        28,
+        25,
+        22,
+        20,
+        19,
+        22,
+        35,
+        55,
+        70,
+        72,
+        65,
+        60,
+        58,
+        60,
+        63,
+        70,
+        80,
+        95,
+        110,
+        105,
+        90,
+        70,
+        50,
+        35,
+        28,
+        25,
+        22,
+        20,
+        19,
+        22,
+        35,
+        55,
+        70,
+        72,
+        65,
+        60,
+        58,
+        60,
+        63,
+        70,
+        80,
+        95,
+        110,
+        105,
+        90,
+        70,
+        50,
+        35,
+        28,
+        25,
+        22,
+        20,
+        19,
+        22,
+        35,
+        55,
+        70,
+        72,
+        65,
+        60,
+        58,
+        60,
+        63,
+        70,
+        80,
+        95,
+        110,
+        105,
+        90,
+        70,
+        50,
+        35,
+        28,
+        25,
+        22,
+        20,
+        19,
+        22,
+        35,
+        55,
+        70,
+        72,
+        65,
+        60,
+        58,
+        60,
+        63,
+        70,
+        80,
+        95,
+        110,
+        105,
+        90,
+        70,
+        50,
+        35,
+    ],
+    dtype=np.float32,
+)  # 96 values (15-min intervals, EUR/MWh)
 
-_DEFAULT_SOLAR_PROFILE = np.array([
-    0, 0, 0, 0, 0, 0, 0.02, 0.08, 0.18, 0.32, 0.50, 0.72,
-    0.85, 0.90, 0.88, 0.80, 0.65, 0.44, 0.22, 0.06, 0.01, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0.02, 0.08, 0.18, 0.32, 0.50, 0.72,
-    0.85, 0.90, 0.88, 0.80, 0.65, 0.44, 0.22, 0.06, 0.01, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0.02, 0.08, 0.18, 0.32, 0.50, 0.72,
-    0.85, 0.90, 0.88, 0.80, 0.65, 0.44, 0.22, 0.06, 0.01, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0.02, 0.08, 0.18, 0.32, 0.50, 0.72,
-    0.85, 0.90, 0.88, 0.80, 0.65, 0.44, 0.22, 0.06, 0.01, 0, 0, 0,
-], dtype=np.float32)
+_DEFAULT_SOLAR_PROFILE = np.array(
+    [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.02,
+        0.08,
+        0.18,
+        0.32,
+        0.50,
+        0.72,
+        0.85,
+        0.90,
+        0.88,
+        0.80,
+        0.65,
+        0.44,
+        0.22,
+        0.06,
+        0.01,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.02,
+        0.08,
+        0.18,
+        0.32,
+        0.50,
+        0.72,
+        0.85,
+        0.90,
+        0.88,
+        0.80,
+        0.65,
+        0.44,
+        0.22,
+        0.06,
+        0.01,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.02,
+        0.08,
+        0.18,
+        0.32,
+        0.50,
+        0.72,
+        0.85,
+        0.90,
+        0.88,
+        0.80,
+        0.65,
+        0.44,
+        0.22,
+        0.06,
+        0.01,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.02,
+        0.08,
+        0.18,
+        0.32,
+        0.50,
+        0.72,
+        0.85,
+        0.90,
+        0.88,
+        0.80,
+        0.65,
+        0.44,
+        0.22,
+        0.06,
+        0.01,
+        0,
+        0,
+        0,
+    ],
+    dtype=np.float32,
+)
 
 
 class BESSEnv(gym.Env):
@@ -105,8 +291,12 @@ class BESSEnv(gym.Env):
         self.noise_std = noise_std
         self.render_mode = render_mode
 
-        self._price_profile = price_profile if price_profile is not None else _DEFAULT_PRICE_PROFILE.copy()
-        self._solar_profile = solar_profile if solar_profile is not None else _DEFAULT_SOLAR_PROFILE.copy()
+        self._price_profile = (
+            price_profile if price_profile is not None else _DEFAULT_PRICE_PROFILE.copy()
+        )
+        self._solar_profile = (
+            solar_profile if solar_profile is not None else _DEFAULT_SOLAR_PROFILE.copy()
+        )
         self._episode_steps = len(self._price_profile)  # 96
 
         # Physics model
@@ -123,7 +313,7 @@ class BESSEnv(gym.Env):
         # Observation space: 8 features, all normalised to [-1, 1] / [0, 1]
         self.observation_space = spaces.Box(
             low=np.array([0.0, -1.0, 0.0, -1.0, -1.0, 0.0, 0.0, 0.0], dtype=np.float32),
-            high=np.array([1.0,  1.0, 1.0,  1.0,  1.0, 1.0, 1.0, 1.0], dtype=np.float32),
+            high=np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=np.float32),
             dtype=np.float32,
         )
 
@@ -150,9 +340,7 @@ class BESSEnv(gym.Env):
         self._episode_degradation = 0.0
         return self._observe(), {}
 
-    def step(
-        self, action: np.ndarray
-    ) -> tuple[np.ndarray, SupportsFloat, bool, bool, dict]:
+    def step(self, action: np.ndarray) -> tuple[np.ndarray, SupportsFloat, bool, bool, dict]:
         """Execute one 15-minute dispatch timestep.
 
         Returns:
@@ -171,7 +359,9 @@ class BESSEnv(gym.Env):
         revenue = -energy_kwh * price / 1000.0  # EUR (sell when negative kW)
 
         # Costs
-        degradation_cost = physics["degradation"] * self.capacity_kwh * 200.0  # 200 EUR/kWh replacement
+        degradation_cost = (
+            physics["degradation"] * self.capacity_kwh * 200.0
+        )  # 200 EUR/kWh replacement
         thermal_penalty = max(0.0, physics["temp_c"] - 45.0) * 5.0  # EUR per °C above 45
         safety_penalty = 0.0 if self._bess.is_safe else 50.0
 
@@ -214,16 +404,19 @@ class BESSEnv(gym.Env):
         price = self._price_profile[min(self._step_idx, self._episode_steps - 1)]
         solar = self._solar_profile[min(self._step_idx, self._episode_steps - 1)]
 
-        return np.array([
-            self._bess.soc,                                # [0, 1]
-            self._bess.temp_c / self._bess.max_temp_c,    # [0, 1]
-            self._bess.cumulative_degradation,             # [0, ~0.05]
-            math.sin(angle),                               # [-1, 1]
-            math.cos(angle),                               # [-1, 1]
-            price / 200.0,                                 # normalised ~[0, 1]
-            solar,                                         # [0, 1]
-            min(self._step_idx / self._episode_steps, 1.0),  # [0, 1] progress
-        ], dtype=np.float32)
+        return np.array(
+            [
+                self._bess.soc,  # [0, 1]
+                self._bess.temp_c / self._bess.max_temp_c,  # [0, 1]
+                self._bess.cumulative_degradation,  # [0, ~0.05]
+                math.sin(angle),  # [-1, 1]
+                math.cos(angle),  # [-1, 1]
+                price / 200.0,  # normalised ~[0, 1]
+                solar,  # [0, 1]
+                min(self._step_idx / self._episode_steps, 1.0),  # [0, 1] progress
+            ],
+            dtype=np.float32,
+        )
 
     def _noisy_price(self, idx: int) -> float:
         price = self._price_profile[min(idx, self._episode_steps - 1)]

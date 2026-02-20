@@ -44,6 +44,7 @@ BUILD_DATE = "2026-02-19"
 
 try:
     from aiohttp import web
+
     _AIOHTTP_AVAILABLE = True
 except ImportError:
     _AIOHTTP_AVAILABLE = False
@@ -228,17 +229,21 @@ class DashboardAPI:
         return self._json_response(self.state.to_p2p_dict())
 
     async def handle_version(self, request: Any) -> Any:
-        return self._json_response({
-            "version": VERSION,
-            "build_date": BUILD_DATE,
-            "project": "BESSAI Edge Gateway",
-        })
+        return self._json_response(
+            {
+                "version": VERSION,
+                "build_date": BUILD_DATE,
+                "project": "BESSAI Edge Gateway",
+            }
+        )
 
     async def handle_health(self, request: Any) -> Any:
-        return self._json_response({
-            "status": "ok" if self.state.is_safe else "degraded",
-            "site_id": self.state.site_id,
-        })
+        return self._json_response(
+            {
+                "status": "ok" if self.state.is_safe else "degraded",
+                "site_id": self.state.site_id,
+            }
+        )
 
     async def handle_schedule(self, request: Any) -> Any:
         """Compute and return optimal 24h arbitrage dispatch schedule."""
@@ -246,6 +251,7 @@ class DashboardAPI:
             return self._unauthorized()
 
         import datetime
+
         current_hour = datetime.datetime.now().hour
 
         # Fast path: return cached schedule if computed within last 15 minutes
@@ -256,9 +262,11 @@ class DashboardAPI:
             return self._json_response(self.state._schedule_dict)
 
         # Compute fresh schedule
-        node = query.get("node", self.state.schedule_node) if (
-            query := dict(request.rel_url.query)
-        ) else self.state.schedule_node
+        node = (
+            query.get("node", self.state.schedule_node)
+            if (query := dict(request.rel_url.query))
+            else self.state.schedule_node
+        )
 
         predictor = CMgPredictor(node=node)
         predictor.load()
@@ -276,9 +284,7 @@ class DashboardAPI:
 
         result = schedule.to_api_dict()
         result["computed_at"] = datetime.datetime.utcnow().isoformat() + "Z"
-        result["predictor_method"] = (
-            forecasts[0].method if forecasts else "unknown"
-        )
+        result["predictor_method"] = forecasts[0].method if forecasts else "unknown"
 
         # Cache
         self.state._schedule_dict = result

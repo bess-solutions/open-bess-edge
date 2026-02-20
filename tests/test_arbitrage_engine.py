@@ -16,6 +16,7 @@ from src.interfaces.cmg_predictor import _HOURLY_MEAN_CMG, CMgPredictor, PriceFo
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
+
 @pytest.fixture
 def flat_forecasts() -> list[PriceForecast]:
     """24 forecasts with identical prices — no arbitrage opportunity."""
@@ -62,6 +63,7 @@ def small_engine() -> ArbitrageEngine:
 
 # ── Unit Tests: DispatchSlot ──────────────────────────────────────────────────
 
+
 class TestDispatchSlot:
     def test_to_dict_keys(self, spread_forecasts: list[PriceForecast]):
         slot = DispatchSlot(
@@ -88,6 +90,7 @@ class TestDispatchSlot:
 
 # ── Unit Tests: ArbitrageSchedule ────────────────────────────────────────────
 
+
 class TestArbitrageSchedule:
     def test_summary_returns_string(self):
         sched = ArbitrageSchedule(
@@ -100,7 +103,9 @@ class TestArbitrageSchedule:
         assert "Test" in s
         assert "100" in s
 
-    def test_to_api_dict_structure(self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]):
+    def test_to_api_dict_structure(
+        self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]
+    ):
         sched = engine.compute(spread_forecasts, current_soc_pct=50.0)
         d = sched.to_api_dict()
         assert "node" in d
@@ -111,31 +116,44 @@ class TestArbitrageSchedule:
 
 # ── Unit Tests: ArbitrageEngine ───────────────────────────────────────────────
 
+
 class TestArbitrageEngine:
-    def test_compute_returns_schedule(self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]):
+    def test_compute_returns_schedule(
+        self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]
+    ):
         sched = engine.compute(spread_forecasts, current_soc_pct=50.0)
         assert isinstance(sched, ArbitrageSchedule)
 
-    def test_compute_24_slots(self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]):
+    def test_compute_24_slots(
+        self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]
+    ):
         sched = engine.compute(spread_forecasts, current_soc_pct=50.0)
         assert len(sched.slots) == 24
 
-    def test_all_hours_present(self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]):
+    def test_all_hours_present(
+        self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]
+    ):
         sched = engine.compute(spread_forecasts)
         hours = {s.hour for s in sched.slots}
         assert hours == set(range(24))
 
-    def test_soc_never_below_min(self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]):
+    def test_soc_never_below_min(
+        self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]
+    ):
         sched = engine.compute(spread_forecasts, current_soc_pct=50.0)
         for slot in sched.slots:
             assert slot.soc_after_pct >= engine.min_soc_pct - 0.1  # float tolerance
 
-    def test_soc_never_above_max(self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]):
+    def test_soc_never_above_max(
+        self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]
+    ):
         sched = engine.compute(spread_forecasts, current_soc_pct=50.0)
         for slot in sched.slots:
             assert slot.soc_after_pct <= engine.max_soc_pct + 0.1
 
-    def test_no_discharge_below_min_soc(self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]):
+    def test_no_discharge_below_min_soc(
+        self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]
+    ):
         # Start at minimum SOC — no discharge should happen
         sched = engine.compute(spread_forecasts, current_soc_pct=engine.min_soc_pct)
         discharge_slots = [s for s in sched.slots if s.action == "discharge"]
@@ -150,12 +168,16 @@ class TestArbitrageEngine:
         assert sched.n_charge_hours <= engine.max_charge_hours
         assert sched.n_discharge_hours <= engine.max_discharge_hours
 
-    def test_flat_prices_no_arbitrage(self, engine: ArbitrageEngine, flat_forecasts: list[PriceForecast]):
+    def test_flat_prices_no_arbitrage(
+        self, engine: ArbitrageEngine, flat_forecasts: list[PriceForecast]
+    ):
         sched = engine.compute(flat_forecasts, current_soc_pct=50.0)
         # With uniform prices, spread is zero → no charge/discharge threshold met
         assert sched.n_discharge_hours == 0 or sched.projected_net_clp <= 0
 
-    def test_spread_prices_positive_net(self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]):
+    def test_spread_prices_positive_net(
+        self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]
+    ):
         sched = engine.compute(spread_forecasts, current_soc_pct=50.0)
         # SEN has strong enough spread to generate net positive revenue
         assert sched.projected_net_clp >= 0
@@ -180,25 +202,33 @@ class TestArbitrageEngine:
         # Full battery should have more discharge revenue than starting empty
         assert sched_full.projected_revenue_clp >= sched_empty.projected_revenue_clp
 
-    def test_daily_roe_estimate_reasonable(self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]):
+    def test_daily_roe_estimate_reasonable(
+        self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]
+    ):
         sched = engine.compute(spread_forecasts, current_soc_pct=50.0)
         roe = engine.daily_roe_estimate(sched)
         # ROE should be between 0% and 100% per year for a sensible schedule
         assert -0.5 <= roe <= 1.0
 
-    def test_dispatch_slot_actions_valid(self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]):
+    def test_dispatch_slot_actions_valid(
+        self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]
+    ):
         sched = engine.compute(spread_forecasts, current_soc_pct=50.0)
         valid_actions = {"charge", "discharge", "hold"}
         for slot in sched.slots:
             assert slot.action in valid_actions
 
-    def test_charge_slots_positive_power(self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]):
+    def test_charge_slots_positive_power(
+        self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]
+    ):
         sched = engine.compute(spread_forecasts, current_soc_pct=30.0)
         for slot in sched.slots:
             if slot.action == "charge":
                 assert slot.power_kw > 0
 
-    def test_discharge_slots_negative_power(self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]):
+    def test_discharge_slots_negative_power(
+        self, engine: ArbitrageEngine, spread_forecasts: list[PriceForecast]
+    ):
         sched = engine.compute(spread_forecasts, current_soc_pct=80.0)
         for slot in sched.slots:
             if slot.action == "discharge":
@@ -206,6 +236,7 @@ class TestArbitrageEngine:
 
 
 # ── Integration test: Predictor → Engine pipeline ────────────────────────────
+
 
 class TestArbitrageIntegration:
     def test_full_pipeline(self):

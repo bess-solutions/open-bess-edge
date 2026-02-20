@@ -12,7 +12,6 @@ from src.interfaces.dashboard_api import DashboardState
 
 
 class TestDashboardState:
-
     def _state(self) -> DashboardState:
         s = DashboardState(site_id="test-001")
         s.soc_pct = 72.5
@@ -68,6 +67,7 @@ class TestDashboardState:
 
     def test_uptime_is_positive(self):
         import time as _time
+
         s = DashboardState()
         s.started_at = _time.time() - 1.0  # force 1 second of uptime
         d = s.to_status_dict()
@@ -138,4 +138,3 @@ class TestArbitrageIntegrationWithState:
         roe = engine.daily_roe_estimate(schedule)
         assert isinstance(roe, float)
         assert roe >= -0.5
-

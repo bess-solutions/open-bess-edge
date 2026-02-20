@@ -39,6 +39,7 @@ log = structlog.get_logger(__name__)
 try:
     import flwr as fl
     from flwr.server.strategy import FedAvg  # type: ignore[import-untyped]
+
     _FLWR_AVAILABLE = True
 except ImportError:
     _FLWR_AVAILABLE = False
@@ -57,6 +58,7 @@ class FedAvgConfig:
         fraction_fit:           Fraction of available clients selected per round.
         fraction_evaluate:      Fraction selected for evaluation.
     """
+
     num_rounds: int = 10
     min_fit_clients: int = 3
     min_evaluate_clients: int = 2
@@ -68,6 +70,7 @@ class FedAvgConfig:
 @dataclass
 class FLRoundResult:
     """Result of a single federated learning round."""
+
     round_num: int
     aggregated_loss: float
     num_clients_fit: int
@@ -201,9 +204,7 @@ class BESSAIFLServer:
             server_address: Host:port to bind the gRPC server.
         """
         if not _FLWR_AVAILABLE:
-            raise RuntimeError(
-                "Flower not installed. Run: pip install flwr>=1.5"
-            )
+            raise RuntimeError("Flower not installed. Run: pip install flwr>=1.5")
 
         strategy = FedAvg(
             fraction_fit=self.config.fraction_fit,
