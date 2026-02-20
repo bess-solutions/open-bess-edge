@@ -3,18 +3,19 @@
 > **📌 NOTA PARA AGENTES IA — Leer antes de continuar el trabajo**
 >
 > Este documento es el punto de entrada para cualquier agente IA que tome control de este repositorio.
-> Revisa la sección **[AGENT HANDOFF]** antes de escribir cualquier código.
+> Revisa la seción **[AGENT HANDOFF]** antes de escribir cualquier código.
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-20T16:10 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-20T19:52 -03:00)
 
 > [!IMPORTANT]
-> **v1.3.1 — CI verde + Mega Scraper de datos** (2026-02-20)
-> - CI/CD 100% verde: ruff (lint) ✅ · mypy (type check) ✅ · pytest 228/228 ✅ · Helm ✅ · Terraform ✅
-> - `sources/mega_scraper_energia_abierta.py` — 8 módulos scraper dados de alta (CMg, ERNC, generación, combustibles, CO₂, embalsada).
-> - `CMgPredictor v2` + `ArbitrageEngine v2` operativos con bandas p10/p90 · Dashboard web arbitraje activo
-> - Pipeline completo: mega_scraper → train_price_model.py → ONNX v2 listo para datos reales CEN
+> **v1.3.1 — CI verde + Mega Scraper + Diagnóstico API CEN** (2026-02-20)
+> - CI/CD 100% verde: ruff ✅ · mypy ✅ · pytest 321/321 ✅ · Helm ✅ · Terraform ✅ — commit `002a923`
+> - `sources/mega_scraper_energia_abierta.py` v1.0 — 8 módulos (CMg, ERNC, generación, combustibles, CO₂, embalsada)
+> - **Auth API CEN confirmada**: `?user_key=TOKEN` (NO Bearer) · endpoint correcto: `/costo-marginal-real/v4/findByDate`
+> - **Estado fuentes datos**: CNE públicos (5 módulos) listos sin bloqueo · CEN plan "Mercados" por verificar · DMC no implementado
+> - **Próximas acciones**: ejecutar CNE público → verificar plan Mercados CEN → implementar módulo DMC → entrenar ONNX
 
 
 
