@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-20 v1.3.0 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-20T16:10 v1.3.1 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,12 +14,12 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 
 ---
 
-## ✅ Estado Actual — v1.2.0
+## ✅ Estado Actual — v1.3.1
 
 ### Tests
 ```
-57 / 57 passed ✅   (2.22s · Python 3.14 · cmg_predictor + arbitrage_engine + dashboard_api)
-228 / 228 passed ✅  (10.02s · suite completa open-bess-edge)
+228 / 228 passed ✅  (suite completa open-bess-edge)
+CI: ruff ✅ · mypy ✅ · pytest ✅ · helm ✅ · terraform ✅ · docker (skipped — no infra change)
 ```
 
 ### Stack Docker — Métricas en vivo (confirmado 2026-02-19)
@@ -60,6 +60,7 @@ Prometheus v2.51.2                          OK      ← localhost:9090
 | BESS Gymnasium Env | `src/simulation/bess_env.py` | v0.7 | ✅ Producción |
 | BESS Physics Model | `src/simulation/bess_model.py` | v0.7 | ✅ Producción |
 | ONNX modelo dummy | `models/dispatch_policy.onnx` | v0.6 | ✅ Producción |
+| **Mega Scraper datos** | `sources/mega_scraper_energia_abierta.py` | **v1.0** | ✅ **NUEVO** |
 | DRL training script | `scripts/train_drl_policy.py` | v0.7 | ✅ Producción |
 | Helm chart | `infrastructure/helm/bessai-edge/` | v0.7 | ✅ Completo |
 | Grafana Dashboard | `infrastructure/grafana/dashboards/bessai_main.json` | **v1.0** | ✅ 13 paneles |
@@ -134,6 +135,7 @@ v1.0.0  ████████████████████████
 v1.0.1  ████████████████████████  ✅ Docker stack corregido y 100% operativo
 v1.2.0  ████████████████████████  ✅ CMgPredictor v2 + ArbitrageEngine v2 + Dashboard
 v1.3.0  ████████████████████████  ✅ bessai-cen-data v0.3.0: 11 features ONNX · pipeline fix · CLI bessai-fetch-renewables/bessai-build-dataset · bessai-web API polling
+v1.3.1  ████████████████████████  ✅ CI 100% verde (ruff+mypy fix) · Mega Scraper 8 módulos · sources/data/ pipeline
 v2.0.0  ░░░░░░░░░░░░░░░░░░░░░░░░  📋 Multi-site planetary scale
 ```
 
@@ -274,3 +276,4 @@ pytest tests/ -v --tb=short
 | 2026-02-19 | v1.0.1 | 228/228 | Fix Docker: simulador Modbus oitc corregido, stack 100% operativo |
 | 2026-02-20 | **v1.2.0** | **57+228** | **CMgPredictor v2** (TTL cache, int8, p10/p90) · **ArbitrageEngine v2** (umbral confianza, spread mín) · `train_price_model.py v2` (11 features, ensemble, batch) · Dashboard web arbitraje |
 | 2026-02-20 | **v1.3.0** | **228/228** | **bessai-cen-data v0.3.0**: `pipeline.py` corregido 9→11 features (`lag_168h`, `is_weekend`), shape (24,11) match v2 ONNX · `pyproject.toml` v0.3.0 + CLI `bessai-fetch-renewables`/`bessai-build-dataset` · `bessai-web` polling real `/api/v1/schedule` + `/api/v1/status` · `drawChartFromSchedule()` con zonas carga/descarga · renewable-energy-chile dashboard: 5 bugs arreglados |
+| 2026-02-20 | **v1.3.1** | **228/228** | **CI 100% verde**: fix ruff UP045/UP037/I001/F401 + mypy attr-defined en `_run_session` · **Mega Scraper** `sources/mega_scraper_energia_abierta.py` v1.0: 8 módulos CNE+CEN, pipeline `historical/market/training/`, dry-run verificado |

@@ -7,13 +7,14 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-20T13:43 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-20T16:10 -03:00)
 
 > [!IMPORTANT]
-> **v1.2.0 — Módulo CMg Price Prediction completamente integrado** (2026-02-20)
-> - `CMgPredictor v2` + `ArbitrageEngine v2` operativos con bandas de incertidumbre p10/p90
-> - 57 tests pasan · `train_price_model.py v2` entrenamiento multi-nodo batch disponible
-> - Dashboard web standalone: `bessai-cen-data/dashboard/arbitrage_dashboard.html`
+> **v1.3.1 — CI verde + Mega Scraper de datos** (2026-02-20)
+> - CI/CD 100% verde: ruff (lint) ✅ · mypy (type check) ✅ · pytest 228/228 ✅ · Helm ✅ · Terraform ✅
+> - `sources/mega_scraper_energia_abierta.py` — 8 módulos scraper dados de alta (CMg, ERNC, generación, combustibles, CO₂, embalsada).
+> - `CMgPredictor v2` + `ArbitrageEngine v2` operativos con bandas p10/p90 · Dashboard web arbitraje activo
+> - Pipeline completo: mega_scraper → train_price_model.py → ONNX v2 listo para datos reales CEN
 
 
 
@@ -138,6 +139,30 @@ All notable changes to this project are documented here.
 Format: [Semantic Versioning](https://semver.org/) · [Conventional Commits](https://www.conventionalcommits.org/)
 
 ---
+
+---
+
+## [v1.3.1] — 2026-02-20
+
+### Fixed
+- **CI / Lint (ruff)** — 13 errores resueltos en `cmg_predictor.py` y tests:
+  - `src/interfaces/cmg_predictor.py`: `Optional[X]` → `X | None` (UP045, 5 ocurrencias), strings en type annotations eliminados (UP037, 2 ocurrencias), `Optional` sin uso removido (F401)
+  - `tests/test_dashboard_api_handlers.py`: imports re-ordenados (I001), `AsyncMock` sin uso removido (F401)
+  - `tests/test_luna2000_driver_async.py`: mismo patrón I001 + F401
+- **CI / Type check (mypy)** — `_run_session(session: object)` cambiado a `session: Any`; mypy reportaba `attr-defined` ya que `object` no tiene `.run()`
+
+### Added
+- `sources/mega_scraper_energia_abierta.py` — **Mega Scraper energiaabierta.cl + Coordinador CEN**:
+  - 8 módulos: `cmg`, `cmg_prog`, `hidro`, `generacion`, `ernc`, `capacidad`, `emision`, `combustibles`
+  - Output en `sources/data/{historical,market,training}/` compatible con `train_price_model.py v2`
+  - Modo `--dry-run` verificado · Rate limiting · Soporte CSV/XLS/XLSX · `scraper_manifest.json`
+  - Nodos: Maitencillo, Polpaico, Lo Aguirre, Cardones, Crucero, Charrua, Quillota, Hualpen
+
+### Tests
+```
+228 / 228 passed (suite completa open-bess-edge)
+CI verde: ruff ✅ · mypy ✅ · pytest ✅ · helm ✅ · terraform ✅
+```
 
 ---
 
