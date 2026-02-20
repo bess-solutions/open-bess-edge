@@ -20,11 +20,10 @@ import json
 import time
 import uuid
 from dataclasses import dataclass, field
-from typing import Optional
 
 import structlog
 
-from .metrics import VPP_FLEX_CAPACITY_KW, VPP_EVENTS_PUBLISHED_TOTAL
+from .metrics import VPP_EVENTS_PUBLISHED_TOTAL, VPP_FLEX_CAPACITY_KW
 
 __all__ = ["SiteCapacity", "VPPPublisher", "OpenADREvent"]
 
@@ -135,7 +134,7 @@ class VPPPublisher:
             return 0.0
         return sum(s.soc_pct for s in self._sites.values()) / len(self._sites)
 
-    def publish_event(self, flex_request_kw: Optional[float] = None) -> Optional[OpenADREvent]:
+    def publish_event(self, flex_request_kw: float | None = None) -> OpenADREvent | None:
         """Aggregate flex capacity and publish an OpenADR 3.0 event.
 
         Args:

@@ -7,7 +7,6 @@ Unit tests for FleetOrchestrator, SiteProxy, and FleetSummary.
 from __future__ import annotations
 
 import pytest
-
 from src.core.fleet_orchestrator import (
     FleetOrchestrator,
     FleetSummary,

@@ -22,7 +22,6 @@ import asyncio
 import time
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Optional
 
 import structlog
 
@@ -119,7 +118,7 @@ class LUNADriver:
         self.host = host
         self.port = port
         self.slave_id = slave_id
-        self._client: Optional[object] = None
+        self._client: object | None = None
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -135,7 +134,7 @@ class LUNADriver:
                 retries=2,
             )
         except ImportError:
-            raise RuntimeError("pymodbus not installed")
+            raise RuntimeError("pymodbus not installed") from None
 
     def _read_regs(self, address: int, count: int) -> list[int]:
         """Read holding registers (FC03). Returns list of raw uint16 values."""
@@ -144,7 +143,7 @@ class LUNADriver:
             address=address, count=count, slave=self.slave_id
         )
         if result.isError():
-            raise IOError(f"Modbus read error addr={address}: {result}")
+            raise OSError(f"Modbus read error addr={address}: {result}")
         return list(result.registers)
 
     def _write_reg(self, address: int, value: int) -> None:
@@ -154,7 +153,7 @@ class LUNADriver:
             address=address, value=value, slave=self.slave_id
         )
         if result.isError():
-            raise IOError(f"Modbus write error addr={address}: {result}")
+            raise OSError(f"Modbus write error addr={address}: {result}")
 
     @staticmethod
     def _to_int32(hi: int, lo: int) -> int:
@@ -173,7 +172,7 @@ class LUNADriver:
     # Context manager
     # ------------------------------------------------------------------
 
-    async def __aenter__(self) -> "LUNADriver":
+    async def __aenter__(self) -> LUNADriver:
         self._client = self._make_client()
         connected = await asyncio.get_event_loop().run_in_executor(
             None, self._client.connect  # type: ignore

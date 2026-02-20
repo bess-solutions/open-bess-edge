@@ -21,14 +21,13 @@ import asyncio
 import time
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Optional
 
 import structlog
 
 from .alert_manager import AlertLevel, AlertManager
 from .metrics import (
-    LAST_SOC_PERCENT,
     LAST_POWER_KW,
+    LAST_SOC_PERCENT,
 )
 
 __all__ = [
@@ -103,7 +102,7 @@ class InverterState(IntEnum):
     UNKNOWN         = 9999
 
     @classmethod
-    def from_raw(cls, raw: int) -> "InverterState":
+    def from_raw(cls, raw: int) -> InverterState:
         try:
             return cls(raw)
         except ValueError:
@@ -148,9 +147,9 @@ class SUN2000Telemetry:
     total_energy_kwh: float = 0.0
 
     # LUNA2000 battery (None if not connected)
-    batt_soc_pct: Optional[float] = None
-    batt_power_kw: Optional[float] = None
-    batt_temperature_c: Optional[float] = None
+    batt_soc_pct: float | None = None
+    batt_power_kw: float | None = None
+    batt_temperature_c: float | None = None
 
     @property
     def is_safe(self) -> bool:
@@ -216,14 +215,14 @@ class SUN2000Monitor:
         port: int = 502,
         slave_id: int = 3,
         site_id: str = "edge",
-        alert_mgr: Optional[AlertManager] = None,
+        alert_mgr: AlertManager | None = None,
     ) -> None:
         self.host = host
         self.port = port
         self.slave_id = slave_id
         self.site_id = site_id
         self.alert_mgr = alert_mgr or AlertManager(site_id)
-        self._client: Optional[object] = None
+        self._client: object | None = None
 
     # ------------------------------------------------------------------
     # Modbus helpers
@@ -235,7 +234,7 @@ class SUN2000Monitor:
             address=address, count=count, slave=self.slave_id
         )
         if r.isError():
-            raise IOError(f"read error addr={address}: {r}")
+            raise OSError(f"read error addr={address}: {r}")
         return list(r.registers)
 
     @staticmethod
@@ -255,7 +254,7 @@ class SUN2000Monitor:
     # Context manager
     # ------------------------------------------------------------------
 
-    async def __aenter__(self) -> "SUN2000Monitor":
+    async def __aenter__(self) -> SUN2000Monitor:
         from pymodbus.client import ModbusTcpClient  # type: ignore
         self._client = ModbusTcpClient(self.host, port=self.port, timeout=3)
         ok = await asyncio.get_event_loop().run_in_executor(
@@ -332,7 +331,7 @@ class SUN2000Monitor:
                 tel.batt_power_kw = self._i32(*pwr_regs) * 0.001
                 bt_raw = self._read(REG_LUNA_TEMP, 1)[0]
                 tel.batt_temperature_c = self._i16(bt_raw) * 0.1
-            except IOError:
+            except OSError:
                 log.debug("sun2000.luna_not_connected")
 
             return tel

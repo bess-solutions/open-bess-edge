@@ -17,12 +17,11 @@ v0.7.0: VPP Publisher and Federated Learning metrics
 from __future__ import annotations
 
 from prometheus_client import (
+    CONTENT_TYPE_LATEST,
     REGISTRY,
-    CollectorRegistry,
     Counter,
     Gauge,
     generate_latest,
-    CONTENT_TYPE_LATEST,
 )
 
 __all__ = [

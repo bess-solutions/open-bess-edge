@@ -20,9 +20,7 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
 from src.core.safety import SafetyGuard
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -110,7 +108,7 @@ class TestWatchdogLoop:
     ) -> None:
         """RuntimeError must be raised after 2 consecutive write failures."""
         driver = MagicMock()
-        driver.write_tag = AsyncMock(side_effect=IOError("Modbus error"))
+        driver.write_tag = AsyncMock(side_effect=OSError("Modbus error"))
 
         with pytest.raises(RuntimeError, match="consecutive"):
             await guard.watchdog_loop(driver)

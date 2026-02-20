@@ -12,7 +12,6 @@ import tempfile
 from pathlib import Path
 
 import pytest
-
 from src.interfaces.datalake_publisher import DataLakePublisher, TelemetryRow
 
 

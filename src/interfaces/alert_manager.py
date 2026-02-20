@@ -26,7 +26,6 @@ import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 import structlog
 
@@ -53,7 +52,7 @@ class Alert:
     site_id: str = "edge"
     timestamp: float = field(default_factory=time.time)
     resolved: bool = False
-    resolved_at: Optional[float] = None
+    resolved_at: float | None = None
 
     def resolve(self) -> None:
         self.resolved = True
@@ -105,7 +104,7 @@ class AlertManager:
         level: AlertLevel,
         name: str,
         message: str = "",
-    ) -> Optional[Alert]:
+    ) -> Alert | None:
         """Fire a new alert (with deduplication).
 
         Args:
@@ -190,7 +189,7 @@ class AlertManager:
         return [a.to_dict() for a in self._active.values()]
 
     def summary(self) -> dict:
-        counts = defaultdict(int)
+        counts: dict[str, int] = defaultdict(int)
         for a in self._active.values():
             counts[a.level.value] += 1
         return {

@@ -33,7 +33,6 @@ import time
 import uuid
 from collections import deque
 from dataclasses import asdict, dataclass, field
-from typing import Optional
 
 import structlog
 
@@ -93,9 +92,9 @@ class LedgerResult:
     """Result of a ledger publication attempt."""
     success: bool
     credit_id: str
-    tx_id: Optional[str] = None         # Fabric transaction ID
-    block_number: Optional[int] = None  # Block height on the channel
-    error: Optional[str] = None
+    tx_id: str | None = None         # Fabric transaction ID
+    block_number: int | None = None  # Block height on the channel
+    error: str | None = None
     latency_ms: float = 0.0
 
 

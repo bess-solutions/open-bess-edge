@@ -6,17 +6,13 @@ All tests use mock Modbus registers — no real hardware needed.
 """
 from __future__ import annotations
 
-import asyncio
-from unittest.mock import MagicMock, patch
-
-import pytest
+from unittest.mock import MagicMock
 
 from src.drivers.luna2000_driver import (
     BatteryMode,
     LUNADriver,
     LUNATelemetry,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

@@ -24,8 +24,8 @@ model has been trained yet, following the fail-safe principle of the roadmap.
 from __future__ import annotations
 
 import time
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Optional, Sequence
 
 import numpy as np
 import structlog
@@ -101,7 +101,7 @@ class ModbusAnomalyDetector:
         self.min_fit_samples = min_fit_samples
         self.site_id = site_id
 
-        self._iso_forest: Optional[IsolationForest] = None
+        self._iso_forest: IsolationForest | None = None
         self._fitted: bool = False
         self._baseline_timings: list[float] = []
         self._timing_mean: float = 0.0

@@ -36,7 +36,6 @@ import time
 from collections import deque
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Optional
 
 import structlog
 
@@ -111,14 +110,14 @@ class DataLakePublisher:
         self.batch_size = batch_size
         self._buffer: deque[TelemetryRow] = deque(maxlen=buffer_size)
         self._local_path = Path(local_buffer_path)
-        self._client: Optional[object] = None   # bigquery.Client when available
+        self._client: object | None = None   # bigquery.Client when available
         self._published_total: int = 0
 
     # ------------------------------------------------------------------
     # Async context manager
     # ------------------------------------------------------------------
 
-    async def __aenter__(self) -> "DataLakePublisher":
+    async def __aenter__(self) -> DataLakePublisher:
         if _BQ_AVAILABLE and self.project_id:
             try:
                 self._client = bigquery.Client(project=self.project_id)

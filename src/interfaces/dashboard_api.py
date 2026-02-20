@@ -11,6 +11,7 @@ Provides a read-only JSON API for real-time edge intelligence:
   GET /api/v1/onnx         → AI dispatch status (last command, conf, latency)
   GET /api/v1/ids          → AI-IDS status (score, alert count, trained)
   GET /api/v1/p2p          → P2P energy credits (count, kWh, pending)
+  GET /api/v1/schedule     → Optimal 24h arbitrage schedule (CMg forecast)
   GET /api/v1/version      → Software version and build metadata
 
 Auth: Bearer token via DASHBOARD_API_KEY env var (empty = no auth in dev mode)
@@ -27,9 +28,12 @@ from __future__ import annotations
 
 import os
 import time
-from typing import Any, Optional
+from typing import Any
 
 import structlog
+
+from src.interfaces.arbitrage_engine import ArbitrageEngine
+from src.interfaces.cmg_predictor import CMgPredictor
 
 __all__ = ["DashboardAPI", "DashboardState"]
 
@@ -71,7 +75,7 @@ class DashboardState:
         self.ids_trained: bool = False
 
         # ONNX Dispatcher
-        self.onnx_dispatch_kw: Optional[float] = None
+        self.onnx_dispatch_kw: float | None = None
         self.onnx_inference_ms: float = 0.0
         self.onnx_dispatch_count: int = 0
         self.onnx_available: bool = False
@@ -92,6 +96,14 @@ class DashboardState:
         self.p2p_credits_minted: int = 0
         self.p2p_credits_kwh: float = 0.0
         self.p2p_pending: int = 0
+
+        # Arbitrage Schedule (updated every 15 min)
+        self.schedule_node: str = site_id
+        self.schedule_last_updated: float = 0.0
+        self.schedule_net_clp: float = 0.0
+        self.schedule_charge_hours: int = 0
+        self.schedule_discharge_hours: int = 0
+        self._schedule_dict: dict | None = None
 
     def to_status_dict(self) -> dict[str, Any]:
         """Full site status snapshot."""
@@ -161,15 +173,15 @@ class DashboardAPI:
 
     def __init__(
         self,
-        state: Optional[DashboardState] = None,
+        state: DashboardState | None = None,
         port: int = 8080,
         api_key: str = "",
     ) -> None:
         self.state = state or DashboardState()
         self.port = port
         self.api_key = api_key or os.getenv("DASHBOARD_API_KEY", "")
-        self._app: Optional[Any] = None
-        self._runner: Optional[Any] = None
+        self._app: Any | None = None
+        self._runner: Any | None = None
 
     # ------------------------------------------------------------------
     # Route handlers
@@ -180,7 +192,7 @@ class DashboardAPI:
         if not self.api_key:
             return True
         auth = request.headers.get("Authorization", "")
-        return auth == f"Bearer {self.api_key}"
+        return bool(auth == f"Bearer {self.api_key}")
 
     def _json_response(self, data: dict) -> Any:
         return web.Response(
@@ -228,6 +240,62 @@ class DashboardAPI:
             "site_id": self.state.site_id,
         })
 
+    async def handle_schedule(self, request: Any) -> Any:
+        """Compute and return optimal 24h arbitrage dispatch schedule."""
+        if not await self._check_auth(request):
+            return self._unauthorized()
+
+        import datetime
+        current_hour = datetime.datetime.now().hour
+
+        # Fast path: return cached schedule if computed within last 15 minutes
+        if (
+            self.state._schedule_dict is not None
+            and (time.time() - self.state.schedule_last_updated) < 900
+        ):
+            return self._json_response(self.state._schedule_dict)
+
+        # Compute fresh schedule
+        node = query.get("node", self.state.schedule_node) if (
+            query := dict(request.rel_url.query)
+        ) else self.state.schedule_node
+
+        predictor = CMgPredictor(node=node)
+        predictor.load()
+        forecasts = predictor.predict_next_24h(
+            current_hour=current_hour,
+            current_cmg=self.state.soc_pct if self.state.soc_pct > 0 else None,
+        )
+
+        engine = ArbitrageEngine(
+            capacity_kwh=float(request.rel_url.query.get("capacity_kwh", 1000.0)),
+            max_power_kw=float(request.rel_url.query.get("max_power_kw", 500.0)),
+            node=node,
+        )
+        schedule = engine.compute(forecasts, current_soc_pct=self.state.soc_pct)
+
+        result = schedule.to_api_dict()
+        result["computed_at"] = datetime.datetime.utcnow().isoformat() + "Z"
+        result["predictor_method"] = (
+            forecasts[0].method if forecasts else "unknown"
+        )
+
+        # Cache
+        self.state._schedule_dict = result
+        self.state.schedule_last_updated = time.time()
+        self.state.schedule_net_clp = schedule.projected_net_clp
+        self.state.schedule_charge_hours = schedule.n_charge_hours
+        self.state.schedule_discharge_hours = schedule.n_discharge_hours
+
+        log.info(
+            "dashboard_api.schedule_computed",
+            node=node,
+            net_clp=schedule.projected_net_clp,
+            n_charge=schedule.n_charge_hours,
+            n_discharge=schedule.n_discharge_hours,
+        )
+        return self._json_response(result)
+
     # ------------------------------------------------------------------
     # Lifecycle
     # ------------------------------------------------------------------
@@ -242,6 +310,7 @@ class DashboardAPI:
         self._app.router.add_get("/api/v1/fleet", self.handle_fleet)
         self._app.router.add_get("/api/v1/carbon", self.handle_carbon)
         self._app.router.add_get("/api/v1/p2p", self.handle_p2p)
+        self._app.router.add_get("/api/v1/schedule", self.handle_schedule)
         self._app.router.add_get("/api/v1/version", self.handle_version)
         self._app.router.add_get("/api/v1/health", self.handle_health)
 

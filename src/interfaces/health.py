@@ -28,12 +28,12 @@ from __future__ import annotations
 import asyncio
 import json
 import time
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 from aiohttp import web
 
-from src.interfaces.metrics import CONTENT_TYPE_LATEST, generate_metrics
+from src.interfaces.metrics import generate_metrics
 
 __all__ = ["HealthServer"]
 

@@ -6,20 +6,16 @@ All tests use mock Modbus clients — no real hardware needed.
 """
 from __future__ import annotations
 
-import pytest
-from unittest.mock import MagicMock
-
+from src.interfaces.alert_manager import AlertManager
 from src.interfaces.sun2000_monitor import (
+    _ALARM1_BITS,
+    _ALARM2_BITS,
     InverterState,
     PVStringData,
     SUN2000Monitor,
     SUN2000Telemetry,
     decode_alarm_register,
-    _ALARM1_BITS,
-    _ALARM2_BITS,
 )
-from src.interfaces.alert_manager import AlertManager
-
 
 # ---------------------------------------------------------------------------
 # Helpers

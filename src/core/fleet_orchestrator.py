@@ -28,8 +28,8 @@ from __future__ import annotations
 
 import asyncio
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Optional
 
 import structlog
 
@@ -97,13 +97,13 @@ class SiteProxy:
         host: str,
         site_id: str = "unknown",
         capacity_kwh: float = 100.0,
-        telemetry_fn=None,
+        telemetry_fn: Callable[[str], SiteTelemetry] | None = None,
     ) -> None:
         self.host = host
         self.site_id = site_id
         self.capacity_kwh = capacity_kwh
         self._telemetry_fn = telemetry_fn
-        self._last_telemetry: Optional[SiteTelemetry] = None
+        self._last_telemetry: SiteTelemetry | None = None
 
     async def fetch_telemetry(self) -> SiteTelemetry:
         """Fetch current telemetry from this site.
@@ -129,7 +129,7 @@ class SiteProxy:
         return stub
 
     @property
-    def last_telemetry(self) -> Optional[SiteTelemetry]:
+    def last_telemetry(self) -> SiteTelemetry | None:
         return self._last_telemetry
 
 
@@ -186,11 +186,11 @@ class FleetOrchestrator:
         """
         coros = [proxy.fetch_telemetry() for proxy in self._sites.values()]
         results = await asyncio.gather(*coros, return_exceptions=True)
-        telemetries = []
+        telemetries: list[SiteTelemetry] = []
         for result in results:
-            if isinstance(result, Exception):
+            if isinstance(result, BaseException):
                 log.error("fleet.poll_error", error=str(result))
-            else:
+            elif isinstance(result, SiteTelemetry):
                 telemetries.append(result)
         return telemetries
 

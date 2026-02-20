@@ -28,11 +28,10 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
 import structlog
 
-from .lca_config import GRID_EMISSION_FACTORS_G_KWH, BATTERY_EMBODIED_CO2_KG_KWH
+from .lca_config import BATTERY_EMBODIED_CO2_KG_KWH, GRID_EMISSION_FACTORS_G_KWH
 from .metrics import (
     CARBON_AVOIDED_KG,
     CARBON_INTENSITY_G_KWH,
@@ -58,7 +57,7 @@ class LCAConfig:
     capacity_kwh: float = 100.0
     design_cycles: int = 4_000
     embodied_co2_per_kwh_kg: float = 0.0  # auto-set from BATTERY_EMBODIED_CO2_KG_KWH
-    grid_emission_factor: Optional[float] = None  # gCO₂eq/kWh
+    grid_emission_factor: float | None = None  # gCO₂eq/kWh
 
 
 @dataclass
@@ -93,7 +92,7 @@ class LCAEngine:
 
     def __init__(
         self,
-        config: Optional[LCAConfig] = None,
+        config: LCAConfig | None = None,
         site_id: str = "edge",
     ) -> None:
         self.config = config or LCAConfig()

@@ -26,7 +26,7 @@ Grading:
 from __future__ import annotations
 
 import math
-from typing import Any, Optional, SupportsFloat
+from typing import SupportsFloat
 
 import numpy as np
 
@@ -93,10 +93,10 @@ class BESSEnv(gym.Env):
         capacity_kwh: float = 100.0,
         max_power_kw: float = 50.0,
         dt_minutes: float = 15.0,
-        price_profile: Optional[np.ndarray] = None,
-        solar_profile: Optional[np.ndarray] = None,
+        price_profile: np.ndarray | None = None,
+        solar_profile: np.ndarray | None = None,
         noise_std: float = 3.0,
-        render_mode: Optional[str] = None,
+        render_mode: str | None = None,
     ) -> None:
         super().__init__()
         self.capacity_kwh = capacity_kwh
@@ -139,8 +139,8 @@ class BESSEnv(gym.Env):
     def reset(
         self,
         *,
-        seed: Optional[int] = None,
-        options: Optional[dict] = None,
+        seed: int | None = None,
+        options: dict | None = None,
     ) -> tuple[np.ndarray, dict]:
         """Reset environment to start of a new episode."""
         super().reset(seed=seed)
@@ -194,7 +194,7 @@ class BESSEnv(gym.Env):
         }
         return self._observe(), reward, terminated, truncated, info
 
-    def render(self) -> Optional[str]:
+    def render(self) -> str | None:  # type: ignore[override]
         if self.render_mode == "ansi":
             return (
                 f"Step {self._step_idx:03d}/096 | "
@@ -228,4 +228,4 @@ class BESSEnv(gym.Env):
     def _noisy_price(self, idx: int) -> float:
         price = self._price_profile[min(idx, self._episode_steps - 1)]
         noise = float(np.random.normal(0, self.noise_std))
-        return max(0.0, price + noise)
+        return float(max(0.0, price + noise))

@@ -6,19 +6,16 @@ Uses fully mocked ModbusTcpClient to simulate a real SUN2000 device.
 """
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
-import pytest
-
-from src.drivers.luna2000_driver import LUNADriver, BatteryMode, LUNATelemetry
+from src.drivers.luna2000_driver import BatteryMode, LUNADriver
 from src.interfaces.sun2000_monitor import (
-    SUN2000Monitor,
-    InverterState,
-    decode_alarm_register,
     _ALARM1_BITS,
     _ALARM2_BITS,
+    InverterState,
+    SUN2000Monitor,
+    decode_alarm_register,
 )
-
 
 # ---------------------------------------------------------------------------
 # Realistic SUN2000 register dataset (12:00 sunny day, 60% SOC)

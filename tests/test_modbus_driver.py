@@ -21,14 +21,13 @@ Covers:
 
 from __future__ import annotations
 
-import json
 import asyncio
+import json
 from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, PropertyMock
 
 import pytest
-
 from src.drivers.modbus_driver import (
     DriverConfigError,
     ModbusReadError,

@@ -15,9 +15,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.simulation.bess_model import BESSPhysicsModel
-
 
 # ===========================================================================
 # BESSPhysicsModel tests
@@ -104,7 +102,7 @@ def _has_gymnasium() -> bool:
 @pytest.mark.skipif(not _has_gymnasium(), reason="gymnasium not installed")
 class TestBESSEnv:
 
-    def _env(self) -> "BESSEnv":  # noqa: F821
+    def _env(self) -> BESSEnv:  # noqa: F821
         from src.simulation.bess_env import BESSEnv
         return BESSEnv(capacity_kwh=100.0, max_power_kw=50.0)
 
@@ -135,12 +133,12 @@ class TestBESSEnv:
         env = self._env()
         env.reset()
         terminated = False
-        for i in range(96):
+        for _i in range(96):
             _, _, terminated, _, _ = env.step(np.array([0.0]))
         assert terminated is True
 
     def test_discharge_at_high_price_positive_reward(self):
-        from src.simulation.bess_env import BESSEnv, _DEFAULT_PRICE_PROFILE
+        from src.simulation.bess_env import _DEFAULT_PRICE_PROFILE, BESSEnv
         # Advance to peak-price timestep (step 73 ≈ 110 EUR/MWh)
         peak_step = int(np.argmax(_DEFAULT_PRICE_PROFILE))
         env = BESSEnv(capacity_kwh=100.0, max_power_kw=50.0, noise_std=0.0)

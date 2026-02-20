@@ -7,12 +7,11 @@ Uses aiohttp.test_utils.TestClient to make real HTTP calls to the server.
 from __future__ import annotations
 
 import asyncio
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
 import pytest
 import pytest_asyncio
 from aiohttp.test_utils import TestClient, TestServer
-
 from src.interfaces.health import HealthServer
 
 

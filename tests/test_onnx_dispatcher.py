@@ -15,13 +15,9 @@ Tests cover:
 
 from __future__ import annotations
 
-import asyncio
-import os
 from pathlib import Path
 
-import numpy as np
 import pytest
-
 from src.interfaces.onnx_dispatcher import DispatchResult, ONNXDispatcher
 
 # Path where the dummy model will be placed by the generate script

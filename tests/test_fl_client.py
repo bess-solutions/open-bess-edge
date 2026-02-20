@@ -7,8 +7,6 @@ Unit tests for BESSAIFlowerClient.
 from __future__ import annotations
 
 import numpy as np
-import pytest
-
 from src.interfaces.fl_client import BESSAIFlowerClient, FLConfig
 
 
