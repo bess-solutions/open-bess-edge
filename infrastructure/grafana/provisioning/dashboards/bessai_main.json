@@ -1,0 +1,697 @@
+{
+    "__inputs": [
+        {
+            "name": "DS_PROMETHEUS",
+            "label": "Prometheus",
+            "description": "",
+            "type": "datasource",
+            "pluginId": "prometheus",
+            "pluginName": "Prometheus"
+        }
+    ],
+    "__requires": [
+        {
+            "type": "grafana",
+            "id": "grafana",
+            "name": "Grafana",
+            "version": "10.0.0"
+        },
+        {
+            "type": "datasource",
+            "id": "prometheus",
+            "name": "Prometheus",
+            "version": "1.0.0"
+        },
+        {
+            "type": "panel",
+            "id": "gauge",
+            "name": "Gauge",
+            "version": ""
+        },
+        {
+            "type": "panel",
+            "id": "timeseries",
+            "name": "Time series",
+            "version": ""
+        },
+        {
+            "type": "panel",
+            "id": "stat",
+            "name": "Stat",
+            "version": ""
+        },
+        {
+            "type": "panel",
+            "id": "table",
+            "name": "Table",
+            "version": ""
+        }
+    ],
+    "annotations": {
+        "list": []
+    },
+    "description": "BESSAI Edge Gateway — SUN2000 + LUNA2000 System Overview",
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 1,
+    "id": null,
+    "links": [],
+    "panels": [
+        {
+            "id": 1,
+            "type": "gauge",
+            "title": "🔋 LUNA2000 SOC",
+            "gridPos": {
+                "x": 0,
+                "y": 0,
+                "w": 4,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "percent",
+                    "min": 0,
+                    "max": 100,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "red",
+                                "value": null
+                            },
+                            {
+                                "color": "orange",
+                                "value": 20
+                            },
+                            {
+                                "color": "green",
+                                "value": 40
+                            }
+                        ]
+                    }
+                }
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ]
+                },
+                "orientation": "auto",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
+            },
+            "targets": [
+                {
+                    "expr": "bess_soc_percent{site_id=~\"$site\"}",
+                    "legendFormat": "SOC %",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "type": "gauge",
+            "title": "🤖 AI-IDS Score",
+            "gridPos": {
+                "x": 4,
+                "y": 0,
+                "w": 4,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "percentunit",
+                    "min": 0,
+                    "max": 1,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "orange",
+                                "value": 0.5
+                            },
+                            {
+                                "color": "red",
+                                "value": 0.7
+                            }
+                        ]
+                    }
+                }
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ]
+                },
+                "orientation": "auto"
+            },
+            "targets": [
+                {
+                    "expr": "bess_ids_anomaly_score{site_id=~\"$site\"}",
+                    "legendFormat": "IDS Score",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "type": "stat",
+            "title": "⚡ AC Power",
+            "gridPos": {
+                "x": 8,
+                "y": 0,
+                "w": 4,
+                "h": 4
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "kwatt",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "blue",
+                                "value": null
+                            }
+                        ]
+                    }
+                }
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ]
+                },
+                "colorMode": "background",
+                "graphMode": "area"
+            },
+            "targets": [
+                {
+                    "expr": "bess_power_kw{site_id=~\"$site\"}",
+                    "legendFormat": "Power kW",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "type": "stat",
+            "title": "🌡️ Temperature",
+            "gridPos": {
+                "x": 12,
+                "y": 0,
+                "w": 4,
+                "h": 4
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "celsius",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "blue",
+                                "value": null
+                            },
+                            {
+                                "color": "green",
+                                "value": 20
+                            },
+                            {
+                                "color": "orange",
+                                "value": 45
+                            },
+                            {
+                                "color": "red",
+                                "value": 55
+                            }
+                        ]
+                    }
+                }
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ]
+                },
+                "colorMode": "background"
+            },
+            "targets": [
+                {
+                    "expr": "bess_temperature_c{site_id=~\"$site\"}",
+                    "legendFormat": "°C",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "type": "stat",
+            "title": "🌱 CO₂ Avoided",
+            "gridPos": {
+                "x": 16,
+                "y": 0,
+                "w": 4,
+                "h": 4
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "kg",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                }
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ]
+                },
+                "colorMode": "background",
+                "graphMode": "area"
+            },
+            "targets": [
+                {
+                    "expr": "bess_carbon_avoided_kg{site_id=~\"$site\"}",
+                    "legendFormat": "kg CO₂",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "type": "stat",
+            "title": "⚠️ Active Alarms",
+            "gridPos": {
+                "x": 20,
+                "y": 0,
+                "w": 4,
+                "h": 4
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "orange",
+                                "value": 1
+                            },
+                            {
+                                "color": "red",
+                                "value": 3
+                            }
+                        ]
+                    }
+                }
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ]
+                },
+                "colorMode": "background"
+            },
+            "targets": [
+                {
+                    "expr": "bess_safety_blocks_total{site_id=~\"$site\"}",
+                    "legendFormat": "Safety Blocks",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "type": "timeseries",
+            "title": "⚡ AC Power & Battery Power (kW)",
+            "gridPos": {
+                "x": 0,
+                "y": 8,
+                "w": 12,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "kwatt",
+                    "custom": {
+                        "lineWidth": 2,
+                        "fillOpacity": 10
+                    }
+                }
+            },
+            "options": {
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "targets": [
+                {
+                    "expr": "bess_power_kw{site_id=~\"$site\"}",
+                    "legendFormat": "AC Power",
+                    "refId": "A"
+                },
+                {
+                    "expr": "bess_global_loss{site_id=~\"$site\"}",
+                    "legendFormat": "FL Global Loss",
+                    "refId": "B"
+                }
+            ]
+        },
+        {
+            "id": 8,
+            "type": "timeseries",
+            "title": "🔋 SOC & Battery Power",
+            "gridPos": {
+                "x": 12,
+                "y": 8,
+                "w": 12,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "percent",
+                    "custom": {
+                        "lineWidth": 2,
+                        "fillOpacity": 10
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Battery Power"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "kwatt"
+                            },
+                            {
+                                "id": "custom.axisPlacement",
+                                "value": "right"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "targets": [
+                {
+                    "expr": "bess_soc_percent{site_id=~\"$site\"}",
+                    "legendFormat": "SOC %",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 9,
+            "type": "timeseries",
+            "title": "☀️ PV Generation & IDS Score",
+            "gridPos": {
+                "x": 0,
+                "y": 16,
+                "w": 12,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "kwatt",
+                    "custom": {
+                        "lineWidth": 2
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "IDS Score"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percentunit"
+                            },
+                            {
+                                "id": "custom.axisPlacement",
+                                "value": "right"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "targets": [
+                {
+                    "expr": "rate(bess_energy_discharged_kwh{site_id=~\"$site\"}[5m]) * 12",
+                    "legendFormat": "Discharged kW",
+                    "refId": "A"
+                },
+                {
+                    "expr": "bess_ids_anomaly_score{site_id=~\"$site\"}",
+                    "legendFormat": "IDS Score",
+                    "refId": "B"
+                }
+            ]
+        },
+        {
+            "id": 10,
+            "type": "timeseries",
+            "title": "🌡️ Temperatures (°C)",
+            "gridPos": {
+                "x": 12,
+                "y": 16,
+                "w": 12,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "celsius",
+                    "custom": {
+                        "lineWidth": 2
+                    }
+                }
+            },
+            "targets": [
+                {
+                    "expr": "bess_temperature_c{site_id=~\"$site\"}",
+                    "legendFormat": "Inverter Temp",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 11,
+            "type": "timeseries",
+            "title": "🏭 Fleet Sites Active",
+            "gridPos": {
+                "x": 0,
+                "y": 24,
+                "w": 8,
+                "h": 6
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "custom": {
+                        "lineWidth": 2,
+                        "fillOpacity": 20
+                    }
+                }
+            },
+            "targets": [
+                {
+                    "expr": "bess_fleet_sites_active{site_id=~\"$site\"}",
+                    "legendFormat": "Sites Active",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 12,
+            "type": "timeseries",
+            "title": "🔗 FL Rounds & P2P Credits",
+            "gridPos": {
+                "x": 8,
+                "y": 24,
+                "w": 8,
+                "h": 6
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "custom": {
+                        "lineWidth": 2
+                    }
+                }
+            },
+            "targets": [
+                {
+                    "expr": "bess_fl_rounds_total{site_id=~\"$site\"}",
+                    "legendFormat": "FL Rounds",
+                    "refId": "A"
+                },
+                {
+                    "expr": "bess_energy_credits_minted_total{site_id=~\"$site\"}",
+                    "legendFormat": "P2P Credits",
+                    "refId": "B"
+                }
+            ]
+        },
+        {
+            "id": 13,
+            "type": "stat",
+            "title": "🌿 Carbon Intensity",
+            "gridPos": {
+                "x": 16,
+                "y": 24,
+                "w": 8,
+                "h": 6
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "g/kWh",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "orange",
+                                "value": 200
+                            },
+                            {
+                                "color": "red",
+                                "value": 400
+                            }
+                        ]
+                    }
+                }
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ]
+                },
+                "colorMode": "background"
+            },
+            "targets": [
+                {
+                    "expr": "bess_carbon_intensity_g_kwh{site_id=~\"$site\"}",
+                    "legendFormat": "g/kWh",
+                    "refId": "A"
+                }
+            ]
+        }
+    ],
+    "refresh": "10s",
+    "schemaVersion": 38,
+    "tags": [
+        "bessai",
+        "bess",
+        "energy",
+        "solar",
+        "battery"
+    ],
+    "templating": {
+        "list": [
+            {
+                "current": {},
+                "datasource": {
+                    "type": "prometheus",
+                    "uid": "${DS_PROMETHEUS}"
+                },
+                "definition": "label_values(bess_soc_percent, site_id)",
+                "name": "site",
+                "label": "Site",
+                "type": "query",
+                "multi": true,
+                "includeAll": true,
+                "allValue": ".*",
+                "refresh": 2
+            }
+        ]
+    },
+    "time": {
+        "from": "now-1h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "BESSAI Edge — SUN2000 + LUNA2000",
+    "uid": "bessai-main-v1",
+    "version": 1
+}
