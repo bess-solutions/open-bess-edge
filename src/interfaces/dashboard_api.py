@@ -283,7 +283,7 @@ class DashboardAPI:
         schedule = engine.compute(forecasts, current_soc_pct=self.state.soc_pct)
 
         result = schedule.to_api_dict()
-        result["computed_at"] = datetime.datetime.utcnow().isoformat() + "Z"
+        result["computed_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
         result["predictor_method"] = forecasts[0].method if forecasts else "unknown"
 
         # Cache
