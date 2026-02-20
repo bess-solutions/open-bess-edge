@@ -36,7 +36,6 @@ from __future__ import annotations
 
 import time
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import structlog
@@ -95,15 +94,15 @@ class ONNXDispatcher:
     ) -> None:
         self.model_path = Path(model_path)
         self.site_id = site_id
-        self._session: Optional[ort.InferenceSession] = None  # type: ignore[name-defined]
-        self._input_name: Optional[str] = None
+        self._session: ort.InferenceSession | None = None  # type: ignore[name-defined]
+        self._input_name: str | None = None
         self._loaded: bool = False
 
     # ------------------------------------------------------------------
     # Context manager (async-compatible but synchronous internally)
     # ------------------------------------------------------------------
 
-    async def __aenter__(self) -> "ONNXDispatcher":
+    async def __aenter__(self) -> ONNXDispatcher:
         self._load()
         return self
 
@@ -152,7 +151,7 @@ class ONNXDispatcher:
         power_kw: float,
         temp_c: float,
         hour_of_day: float,
-    ) -> Optional[DispatchResult]:
+    ) -> DispatchResult | None:
         """Run ONNX inference and return dispatch recommendation.
 
         Returns ``None`` if the model is not loaded (fallback mode).

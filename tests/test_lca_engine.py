@@ -7,9 +7,8 @@ Unit tests for LCAEngine and LCAConfig.
 from __future__ import annotations
 
 import pytest
-
+from src.interfaces.lca_config import BATTERY_EMBODIED_CO2_KG_KWH, GRID_EMISSION_FACTORS_G_KWH
 from src.interfaces.lca_engine import LCAConfig, LCAEngine
-from src.interfaces.lca_config import GRID_EMISSION_FACTORS_G_KWH, BATTERY_EMBODIED_CO2_KG_KWH
 
 
 class TestLCAConfig:

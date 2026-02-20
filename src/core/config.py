@@ -26,7 +26,6 @@ from __future__ import annotations
 import re
 from functools import lru_cache
 from pathlib import Path
-from typing import Annotated, Optional
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -118,11 +117,11 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------
     # GCP Cloud Integration
     # ------------------------------------------------------------------
-    GCP_PROJECT_ID: Optional[str] = Field(
+    GCP_PROJECT_ID: str | None = Field(
         default=None,
         description="Google Cloud project ID. Required in production.",
     )
-    GCP_PUBSUB_TOPIC: Optional[str] = Field(
+    GCP_PUBSUB_TOPIC: str | None = Field(
         default=None,
         description="GCP Pub/Sub topic name for telemetry. Required in production.",
     )
@@ -190,7 +189,7 @@ class _LazySettings:
     fail if no ``.env`` file exists, e.g. in unit tests).
     """
 
-    _instance: Optional[Settings] = None
+    _instance: Settings | None = None
 
     def _resolve(self) -> Settings:
         if self._instance is None:

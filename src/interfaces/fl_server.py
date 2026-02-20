@@ -26,7 +26,6 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
 import numpy as np
 import structlog
@@ -95,9 +94,9 @@ class BESSAIFLServer:
 
     def __init__(
         self,
-        config: Optional[FedAvgConfig] = None,
+        config: FedAvgConfig | None = None,
         site_id: str = "fl-server",
-        model_weights: Optional[list[np.ndarray]] = None,
+        model_weights: list[np.ndarray] | None = None,
     ) -> None:
         self.config = config or FedAvgConfig()
         self.site_id = site_id
@@ -169,7 +168,7 @@ class BESSAIFLServer:
         # Compute pseudo-loss as mean L2 norm of weight updates
         losses = []
         for weights, _ in client_results:
-            for w, g in zip(weights, self._global_weights):
+            for w, g in zip(weights, self._global_weights, strict=False):
                 losses.append(float(np.mean(np.abs(w.astype(np.float64) - g.astype(np.float64)))))
         aggregated_loss = float(np.mean(losses)) if losses else 0.0
 

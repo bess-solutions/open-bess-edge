@@ -149,7 +149,7 @@ class SafetyGuard:
     # Public API — watchdog coroutine
     # ------------------------------------------------------------------
 
-    async def watchdog_loop(self, driver: "UniversalDriver") -> None:
+    async def watchdog_loop(self, driver: UniversalDriver) -> None:
         """
         Continuously refresh the device watchdog heartbeat register.
 

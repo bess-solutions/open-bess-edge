@@ -7,9 +7,7 @@ Unit tests for BESSAIFLServer — FedAvg aggregation and simulation rounds.
 from __future__ import annotations
 
 import numpy as np
-import pytest
-
-from src.interfaces.fl_server import BESSAIFLServer, FedAvgConfig, FLRoundResult
+from src.interfaces.fl_server import BESSAIFLServer, FLRoundResult
 
 
 def _weights() -> list[np.ndarray]:
@@ -46,7 +44,7 @@ class TestBESSAIFLServer:
         client_w, n = _client_result()
         server = BESSAIFLServer(model_weights=_weights())
         result = server.federated_avg([(client_w, n)])
-        for r, c in zip(result, client_w):
+        for r, c in zip(result, client_w, strict=False):
             np.testing.assert_allclose(r, c, rtol=1e-5)
 
     def test_federated_avg_weighted_mean(self):
@@ -54,7 +52,7 @@ class TestBESSAIFLServer:
         w = _weights()
         server = BESSAIFLServer(model_weights=_weights())
         result = server.federated_avg([(w, 100), (w, 100)])
-        for r, ww in zip(result, w):
+        for r, ww in zip(result, w, strict=False):
             np.testing.assert_allclose(r, ww, rtol=1e-4)
 
     def test_federated_avg_more_samples_dominate(self):

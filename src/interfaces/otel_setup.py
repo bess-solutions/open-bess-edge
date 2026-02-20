@@ -26,8 +26,6 @@ Usage
 
 from __future__ import annotations
 
-from typing import Optional
-
 import structlog
 from opentelemetry import metrics, trace
 from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import (
@@ -47,8 +45,8 @@ from src.core.config import settings
 log: structlog.BoundLogger = structlog.get_logger(__name__)
 
 # Internal state — set once by configure_otel()
-_tracer_provider: Optional[TracerProvider] = None
-_meter_provider: Optional[MeterProvider] = None
+_tracer_provider: TracerProvider | None = None
+_meter_provider: MeterProvider | None = None
 
 _INSTRUMENTATION_SCOPE = "bessai.edge"
 

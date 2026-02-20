@@ -25,7 +25,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 import structlog
-from gcloud.aio.pubsub import PubsubMessage, PublisherClient
+from gcloud.aio.pubsub import PublisherClient, PubsubMessage
 
 from src.core.config import get_settings
 
@@ -72,7 +72,7 @@ class PubSubPublisher:
     # Context-manager support
     # ------------------------------------------------------------------
 
-    async def __aenter__(self) -> "PubSubPublisher":
+    async def __aenter__(self) -> PubSubPublisher:
         await self._open()
         return self
 

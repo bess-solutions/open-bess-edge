@@ -17,9 +17,7 @@ Tests cover:
 from __future__ import annotations
 
 import pytest
-
 from src.interfaces.ai_ids import ModbusAnomalyDetector, ModbusFrame
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

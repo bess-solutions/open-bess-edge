@@ -23,8 +23,6 @@ Usage::
 
 from __future__ import annotations
 
-from typing import Any
-
 import numpy as np
 import structlog
 
@@ -60,7 +58,7 @@ class FLConfig:
     FRACTION_FIT: float = 0.8
 
 
-class BESSAIFlowerClient(_NumPyClientBase):
+class BESSAIFlowerClient(_NumPyClientBase):  # type: ignore[misc,valid-type]
     """Flower federated learning client for BESSAI edge nodes.
 
     Parameters:

@@ -48,7 +48,7 @@ _VALID_ENV: dict[str, str] = {
 }
 
 
-def _make_settings(**overrides: str) -> "config_module.Settings":
+def _make_settings(**overrides: str) -> config_module.Settings:
     env = {**_VALID_ENV, **overrides}
     with patch.dict(os.environ, env, clear=True):
         # _env_file=None makes pydantic-settings ignore the real config/.env

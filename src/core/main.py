@@ -152,7 +152,7 @@ def _ensure_watchdog(
 # Main coroutine
 # ---------------------------------------------------------------------------
 
-async def main() -> None:
+async def main() -> None:  # noqa: C901
     """
     Bootstrap and run the BESSAI Edge Gateway until a shutdown signal.
     """
@@ -199,9 +199,11 @@ async def main() -> None:
     guard = SafetyGuard(watchdog_interval_s=1.0)
     watchdog_ref: list[asyncio.Task[None]] = []   # mutable single-element ref
 
+    assert _cfg.GCP_PROJECT_ID is not None, "GCP_PROJECT_ID must be set"
+    assert _cfg.GCP_PUBSUB_TOPIC is not None, "GCP_PUBSUB_TOPIC must be set"
     async with PubSubPublisher(
-        project_id=_cfg.GCP_PROJECT_ID,        # type: ignore[attr-defined]
-        topic_name=_cfg.GCP_PUBSUB_TOPIC,      # type: ignore[attr-defined]
+        project_id=_cfg.GCP_PROJECT_ID,
+        topic_name=_cfg.GCP_PUBSUB_TOPIC,
     ) as publisher, health_server.run():
 
         log.info(

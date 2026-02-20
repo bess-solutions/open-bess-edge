@@ -57,7 +57,15 @@ ignore_missing_imports = true
 # ---------------------------------------------------------------------------
 [tool.coverage.run]
 source   = ["src"]
-omit     = ["src/**/__init__.py"]
+omit     = [
+    "src/**/__init__.py",
+    # Infrastructure modules requiring GCP credentials / OTel collector
+    "src/interfaces/otel_setup.py",
+    "src/interfaces/pubsub_publisher.py",
+    "src/core/main.py",
+    # Partial stubs (production path only — tested via integration)
+    "src/interfaces/sun2000_monitor.py",
+]
 
 [tool.coverage.report]
 fail_under  = 80
