@@ -32,7 +32,7 @@ import statistics
 import time as _time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
+from typing import Any
 
 import structlog
 
@@ -154,8 +154,8 @@ class CMgPredictor:
         self,
         node: str = "Maitencillo",
         model_path: str | Path = "models/price_predictor.onnx",
-        model_p10_path: Optional[str | Path] = None,
-        model_p90_path: Optional[str | Path] = None,
+        model_p10_path: str | Path | None = None,
+        model_p90_path: str | Path | None = None,
         history_window: int = 192,   # 8 days → supports lag_168h
         alpha: float = 0.3,
         cache_ttl_s: float = _CACHE_TTL_S,
@@ -173,7 +173,7 @@ class CMgPredictor:
             log.info("cmg_predictor.using_int8", node=node, path=str(int8_path))
 
         # Quantile model paths (auto-discover from base path)
-        def _q_path(suffix: str, override: Optional[str | Path]) -> Path:
+        def _q_path(suffix: str, override: str | Path | None) -> Path:
             if override:
                 return Path(override)
             base = Path(model_path)
@@ -198,7 +198,7 @@ class CMgPredictor:
         self._smooth: dict[int, float] = {h: _HOURLY_MEAN_CMG[h] for h in range(24)}
 
         # Forecast cache: (timestamp_s, [PriceForecast])
-        self._cache: Optional[tuple[float, list[PriceForecast]]] = None
+        self._cache: tuple[float, list[PriceForecast]] | None = None
 
     # ── Model Loading ─────────────────────────────────────────────────────────
 
@@ -302,7 +302,7 @@ class CMgPredictor:
     def predict_next_24h(
         self,
         current_hour: int,
-        current_cmg: Optional[float] = None,
+        current_cmg: float | None = None,
     ) -> list[PriceForecast]:
         """Generate 24h price forecasts with uncertainty bands.
 
@@ -380,7 +380,7 @@ class CMgPredictor:
         lag_168h: float,
         day_of_week: float = 0.0,
         soc_pct: float = 50.0,
-    ) -> "np.ndarray":
+    ) -> np.ndarray:
         """Build the input feature vector for ONNX inference."""
         is_weekend = float(int(day_of_week) >= 5)
         if self._n_features == 11:
@@ -401,7 +401,7 @@ class CMgPredictor:
             ]
         return np.array([vec], dtype=np.float32)
 
-    def _run_session(self, session: object, features: "np.ndarray") -> float:
+    def _run_session(self, session: Any, features: np.ndarray) -> float:
         """Run a single ONNX session and return scalar output."""
         out = session.run(None, {self._input_name: features})  # type: ignore[union-attr]
         return float(out[0].flatten()[0])

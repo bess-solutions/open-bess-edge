@@ -12,12 +12,10 @@ Covers: _check_auth, handle_status, handle_fleet, handle_carbon,
 from __future__ import annotations
 
 import json
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
 
 import pytest
-
 from src.interfaces.dashboard_api import DashboardAPI, DashboardState
-
 
 # ---------------------------------------------------------------------------
 # Helpers
