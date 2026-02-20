@@ -10,6 +10,7 @@ import asyncio
 import json
 import tempfile
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import pytest
 from src.interfaces.datalake_publisher import DataLakePublisher, TelemetryRow
@@ -34,6 +35,25 @@ class TestTelemetryRow:
     def test_event_type_default_nominal(self):
         row = _row()
         assert row.event_type == "nominal"
+
+    def test_custom_event_type(self):
+        row = TelemetryRow(site_id="X", event_type="alarm")
+        assert row.event_type == "alarm"
+
+    def test_to_bq_row_contains_all_fields(self):
+        row = _row()
+        bq = row.to_bq_row()
+        for field in [
+            "site_id",
+            "soc_pct",
+            "power_kw",
+            "temp_c",
+            "anomaly_score",
+            "co2_avoided_kg",
+            "dispatch_kw",
+            "event_type",
+        ]:
+            assert field in bq
 
 
 class TestDataLakePublisher:
@@ -116,3 +136,156 @@ class TestDataLakePublisher:
             content = Path(path).read_text().strip()
             lines = content.splitlines()
             assert len(lines) == 2
+
+    def test_published_total_zero_initially(self):
+        pub = DataLakePublisher()
+        assert pub.published_total == 0
+
+    def test_buffer_size_zero_initially(self):
+        pub = DataLakePublisher()
+        assert pub.buffer_size == 0
+
+
+# ── BQ mode tests (mocked bigquery) ────────────────────────────────────────
+
+
+class TestBigQueryMode:
+    """Tests that exercise the BigQuery code path (lines 51, 127-131, 193-214)."""
+
+    def test_aenter_bq_connected(self):
+        """Lines 127-130: if _BQ_AVAILABLE + project_id → client created."""
+        mock_bq_client = MagicMock()
+        mock_bq = MagicMock()
+        mock_bq.Client.return_value = mock_bq_client
+
+        with tempfile.TemporaryDirectory() as d:
+            pub = DataLakePublisher(
+                project_id="my-project",
+                local_buffer_path=d + "/buf.jsonl",
+            )
+
+            async def go():
+                with (
+                    patch("src.interfaces.datalake_publisher._BQ_AVAILABLE", True),
+                    patch("src.interfaces.datalake_publisher.bigquery", mock_bq, create=True),
+                ):
+                    async with pub as p:
+                        return p._client
+
+            client = asyncio.run(go())
+            assert client is mock_bq_client
+
+    def test_aenter_bq_init_exception_falls_back_to_local(self):
+        """Line 131: if Client() raises → client stays None."""
+        mock_bq = MagicMock()
+        mock_bq.Client.side_effect = Exception("auth error")
+
+        with tempfile.TemporaryDirectory() as d:
+            pub = DataLakePublisher(
+                project_id="bad-project",
+                local_buffer_path=d + "/buf.jsonl",
+            )
+
+            async def go():
+                with (
+                    patch("src.interfaces.datalake_publisher._BQ_AVAILABLE", True),
+                    patch("src.interfaces.datalake_publisher.bigquery", mock_bq, create=True),
+                ):
+                    async with pub as p:
+                        return p._client
+
+            client = asyncio.run(go())
+            assert client is None
+
+    def test_bq_flush_success_increments_total(self):
+        """Lines 205-211: no errors → published_total increments, no local file."""
+        mock_client = MagicMock()
+        mock_client.insert_rows_json.return_value = []  # no errors
+
+        with tempfile.TemporaryDirectory() as d:
+            buf_path = Path(d) / "fallback.jsonl"
+            pub = DataLakePublisher(
+                project_id="proj",
+                batch_size=2,
+                local_buffer_path=str(buf_path),
+            )
+            pub._client = mock_client
+
+            async def go():
+                pub._buffer.append(_row(site_id="s1"))
+                pub._buffer.append(_row(site_id="s2"))
+                await pub._flush()
+                return pub.published_total
+
+            total = asyncio.run(go())
+            assert total == 2
+            assert not buf_path.exists()  # no local fallback needed
+
+    def test_bq_flush_errors_triggers_local_fallback(self):
+        """Lines 201-204: BQ returns errors → row written to local file."""
+        mock_client = MagicMock()
+        mock_client.insert_rows_json.return_value = [{"index": 0, "errors": ["bad"]}]
+
+        with tempfile.TemporaryDirectory() as d:
+            buf_path = Path(d) / "fallback.jsonl"
+            pub = DataLakePublisher(
+                project_id="proj",
+                batch_size=2,
+                local_buffer_path=str(buf_path),
+            )
+            pub._client = mock_client
+
+            async def go():
+                pub._buffer.append(_row(site_id="s1"))
+                pub._buffer.append(_row(site_id="s2"))
+                await pub._flush()
+
+            asyncio.run(go())
+            assert buf_path.exists()
+
+    def test_bq_flush_exception_triggers_local_fallback(self):
+        """Lines 212-214: executor raises → calls _flush_to_local."""
+        mock_client = MagicMock()
+        mock_client.insert_rows_json.side_effect = Exception("network error")
+
+        with tempfile.TemporaryDirectory() as d:
+            buf_path = Path(d) / "fallback.jsonl"
+            pub = DataLakePublisher(
+                project_id="proj",
+                batch_size=1,
+                local_buffer_path=str(buf_path),
+            )
+            pub._client = mock_client
+            pub._buffer.append(_row())
+
+            asyncio.run(pub._flush())
+            assert buf_path.exists()
+
+    def test_aexit_closes_bq_client(self):
+        """Line 145: client.close() called on aexit."""
+        mock_client = MagicMock()
+        mock_client.close = MagicMock()
+
+        with tempfile.TemporaryDirectory() as d:
+            pub = DataLakePublisher(
+                project_id="",
+                local_buffer_path=d + "/buf.jsonl",
+            )
+            pub._client = mock_client
+
+            asyncio.run(pub.__aexit__(None, None, None))
+            mock_client.close.assert_called_once()
+
+    def test_local_flush_exception_does_not_raise(self):
+        """Line 229: write to unwritable path logs but does not raise."""
+        pub = DataLakePublisher(
+            project_id="",
+            batch_size=1,
+            local_buffer_path="/root/no_write_permission/buf.jsonl",
+        )
+
+        async def go():
+            pub._buffer.append(_row())
+            await pub._flush()  # should not raise
+
+        asyncio.run(go())  # test passes if no exception
