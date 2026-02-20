@@ -7,10 +7,9 @@ set_charge_target_soc, __aenter__ / __aexit__ lifecycle.
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
-
 from src.drivers.luna2000_driver import BatteryMode, LUNADriver, LUNATelemetry
 
 # ---------------------------------------------------------------------------
