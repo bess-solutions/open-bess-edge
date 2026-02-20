@@ -41,16 +41,16 @@ log = structlog.get_logger(__name__)
 
 # Alarm bitmask decoder (Alarm Register 32008 bits)
 _ALARM1_BITS: dict[int, str] = {
-    0:  "High String Input Reverse",
-    1:  "Module Protection",
-    2:  "Grounding Error",
-    3:  "Low Insulation Resistance",
-    4:  "DC Overvoltage",
-    5:  "AC Grid Overvoltage",
-    6:  "AC Grid Undervoltage",
-    7:  "Grid Overfrequency",
-    8:  "Grid Underfrequency",
-    9:  "Unstable Grid",
+    0: "High String Input Reverse",
+    1: "Module Protection",
+    2: "Grounding Error",
+    3: "Low Insulation Resistance",
+    4: "DC Overvoltage",
+    5: "AC Grid Overvoltage",
+    6: "AC Grid Undervoltage",
+    7: "Grid Overfrequency",
+    8: "Grid Underfrequency",
+    9: "Unstable Grid",
     10: "Output Overcurrent",
     11: "Output DC Component Too High",
     12: "Anti-Islanding",
@@ -59,47 +59,48 @@ _ALARM1_BITS: dict[int, str] = {
 }
 
 _ALARM2_BITS: dict[int, str] = {
-    0:  "AFCI Self-Check Fault",
-    1:  "DC Arc Fault",
-    2:  "PV String Reverse Connection",
-    5:  "Battery Overtemperature",
-    6:  "Battery Undertemperature",
-    7:  "Battery Overcharge",
-    8:  "Battery Overdischarge",
-    9:  "Battery Abnormal",
+    0: "AFCI Self-Check Fault",
+    1: "DC Arc Fault",
+    2: "PV String Reverse Connection",
+    5: "Battery Overtemperature",
+    6: "Battery Undertemperature",
+    7: "Battery Overcharge",
+    8: "Battery Overdischarge",
+    9: "Battery Abnormal",
     15: "RCMU Alarm",
 }
 
 # Register addresses — SUN2000 Interface Definition v3.0
-REG_STATE     = 32089
-REG_PV1_V     = 32016
-REG_PV1_I     = 32017
-REG_PV2_V     = 32018
-REG_PV2_I     = 32019
-REG_PV_POWER  = 32064  # INT32 (2 regs)
-REG_AC_V      = 32069
-REG_AC_I      = 32072  # INT32 (2 regs)
-REG_AC_POWER  = 32080  # INT32 (2 regs)
-REG_FREQ      = 32085
-REG_TEMP      = 32087
-REG_TOTAL_E   = 32106  # UINT32 (2 regs) /0.01 kWh
-REG_DAILY_E   = 32114  # UINT32 (2 regs) /0.01 kWh
-REG_ALARM1    = 32008
-REG_ALARM2    = 32009
+REG_STATE = 32089
+REG_PV1_V = 32016
+REG_PV1_I = 32017
+REG_PV2_V = 32018
+REG_PV2_I = 32019
+REG_PV_POWER = 32064  # INT32 (2 regs)
+REG_AC_V = 32069
+REG_AC_I = 32072  # INT32 (2 regs)
+REG_AC_POWER = 32080  # INT32 (2 regs)
+REG_FREQ = 32085
+REG_TEMP = 32087
+REG_TOTAL_E = 32106  # UINT32 (2 regs) /0.01 kWh
+REG_DAILY_E = 32114  # UINT32 (2 regs) /0.01 kWh
+REG_ALARM1 = 32008
+REG_ALARM2 = 32009
 
 # LUNA2000
-REG_LUNA_SOC  = 37760
-REG_LUNA_PWR  = 37765  # INT32 (2 regs)
+REG_LUNA_SOC = 37760
+REG_LUNA_PWR = 37765  # INT32 (2 regs)
 REG_LUNA_TEMP = 37752
 
 
 class InverterState(IntEnum):
     """SUN2000 working state codes (register 32089)."""
-    STANDBY         = 0
-    GRID_CONNECTED  = 256
-    FAULT           = 512
-    SLEEP           = 1024
-    UNKNOWN         = 9999
+
+    STANDBY = 0
+    GRID_CONNECTED = 256
+    FAULT = 512
+    SLEEP = 1024
+    UNKNOWN = 9999
 
     @classmethod
     def from_raw(cls, raw: int) -> InverterState:
@@ -112,6 +113,7 @@ class InverterState(IntEnum):
 @dataclass
 class PVStringData:
     """One PV MPPT string measurement."""
+
     string_id: int
     voltage_v: float
     current_a: float
@@ -154,8 +156,13 @@ class SUN2000Telemetry:
     @property
     def is_safe(self) -> bool:
         """True if inverter is running without critical alarms."""
-        critical = {"Grounding Error", "DC Arc Fault", "Battery Overtemperature",
-                    "Battery Overdischarge", "Output Overcurrent"}
+        critical = {
+            "Grounding Error",
+            "DC Arc Fault",
+            "Battery Overtemperature",
+            "Battery Overdischarge",
+            "Output Overcurrent",
+        }
         return self.state != InverterState.FAULT and not any(
             a in critical for a in self.active_alarms
         )
@@ -169,8 +176,12 @@ class SUN2000Telemetry:
             "active_alarms": self.active_alarms,
             "pv": {
                 "strings": [
-                    {"id": s.string_id, "v": round(s.voltage_v, 1),
-                     "a": round(s.current_a, 2), "w": round(s.power_w, 1)}
+                    {
+                        "id": s.string_id,
+                        "v": round(s.voltage_v, 1),
+                        "a": round(s.current_a, 2),
+                        "w": round(s.power_w, 1),
+                    }
                     for s in self.pv_strings
                 ],
                 "total_kw": round(self.pv_total_power_kw, 3),
@@ -187,8 +198,12 @@ class SUN2000Telemetry:
             },
             "battery": {
                 "soc_pct": round(self.batt_soc_pct, 1) if self.batt_soc_pct is not None else None,
-                "power_kw": round(self.batt_power_kw, 3) if self.batt_power_kw is not None else None,
-                "temperature_c": round(self.batt_temperature_c, 1) if self.batt_temperature_c is not None else None,
+                "power_kw": round(self.batt_power_kw, 3)
+                if self.batt_power_kw is not None
+                else None,
+                "temperature_c": round(self.batt_temperature_c, 1)
+                if self.batt_temperature_c is not None
+                else None,
             },
         }
 
@@ -256,9 +271,11 @@ class SUN2000Monitor:
 
     async def __aenter__(self) -> SUN2000Monitor:
         from pymodbus.client import ModbusTcpClient  # type: ignore
+
         self._client = ModbusTcpClient(self.host, port=self.port, timeout=3)
         ok = await asyncio.get_event_loop().run_in_executor(
-            None, self._client.connect  # type: ignore
+            None,
+            self._client.connect,  # type: ignore
         )
         if not ok:
             raise ConnectionError(f"Cannot connect to {self.host}:{self.port}")
@@ -267,7 +284,8 @@ class SUN2000Monitor:
     async def __aexit__(self, *_: object) -> None:
         if self._client:
             await asyncio.get_event_loop().run_in_executor(
-                None, self._client.close  # type: ignore
+                None,
+                self._client.close,  # type: ignore
             )
 
     # ------------------------------------------------------------------
@@ -318,9 +336,8 @@ class SUN2000Monitor:
             # Alarms
             a1 = self._read(REG_ALARM1, 1)[0]
             a2 = self._read(REG_ALARM2, 1)[0]
-            tel.active_alarms = (
-                decode_alarm_register(a1, _ALARM1_BITS) +
-                decode_alarm_register(a2, _ALARM2_BITS)
+            tel.active_alarms = decode_alarm_register(a1, _ALARM1_BITS) + decode_alarm_register(
+                a2, _ALARM2_BITS
             )
 
             # LUNA2000 (best-effort)
@@ -345,8 +362,11 @@ class SUN2000Monitor:
 
         # Route alarms
         for alarm_name in tel.active_alarms:
-            level = AlertLevel.CRITICAL if "Arc" in alarm_name or "Overtemperature" in alarm_name \
+            level = (
+                AlertLevel.CRITICAL
+                if "Arc" in alarm_name or "Overtemperature" in alarm_name
                 else AlertLevel.WARNING
+            )
             self.alert_mgr.fire(level, f"HW_{alarm_name.replace(' ', '_').upper()}", alarm_name)
 
         log.debug(

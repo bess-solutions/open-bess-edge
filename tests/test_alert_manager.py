@@ -12,7 +12,6 @@ from src.interfaces.alert_manager import Alert, AlertLevel, AlertManager
 
 
 class TestAlert:
-
     def test_alert_level_enum_values(self):
         assert AlertLevel.CRITICAL.value == "CRITICAL"
         assert AlertLevel.WARNING.value == "WARNING"
@@ -42,7 +41,6 @@ class TestAlert:
 
 
 class TestAlertManager:
-
     def _mgr(self) -> AlertManager:
         return AlertManager(site_id="test", dedup_window_s=1.0)
 

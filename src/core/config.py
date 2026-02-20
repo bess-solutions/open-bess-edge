@@ -34,10 +34,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 # A hostname label: starts/ends with alnum, may contain hyphens.
 _HOST_RE = re.compile(
     r"^("
-    r"(?:\d{1,3}\.){3}\d{1,3}"                        # IPv4
-    r"|(?:[0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}"   # IPv6 (simplified)
+    r"(?:\d{1,3}\.){3}\d{1,3}"  # IPv4
+    r"|(?:[0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}"  # IPv6 (simplified)
     r"|(?:[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)*"  # optional domain labels
-    r"[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?"   # final label (allows hyphens)
+    r"[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?"  # final label (allows hyphens)
     r")$"
 )
 
@@ -82,9 +82,7 @@ class Settings(BaseSettings):
         """Accept IPv4, IPv6, or a DNS hostname (e.g. Docker service names)."""
         s = str(v).strip()
         if not _HOST_RE.match(s):
-            raise ValueError(
-                f"INVERTER_IP must be a valid IP address or hostname, got: {s!r}"
-            )
+            raise ValueError(f"INVERTER_IP must be a valid IP address or hostname, got: {s!r}")
         return s
 
     INVERTER_PORT: int = Field(

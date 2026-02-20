@@ -74,6 +74,7 @@ _VALID_PROFILE: dict[str, Any] = {
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 async def _make_driver(tmp_path: Path) -> UniversalDriver:
     """Write the valid profile to a temp file and return a driver instance."""
     profile_file = tmp_path / "test_profile.json"
@@ -100,6 +101,7 @@ def _mock_error_result() -> MagicMock:
 # Profile loading
 # ---------------------------------------------------------------------------
 
+
 class TestProfileLoading:
     def test_missing_file_raises(self, tmp_path: Path) -> None:
         with pytest.raises(DriverConfigError, match="not found"):
@@ -124,16 +126,19 @@ class TestProfileLoading:
     def test_valid_profile_loads(self, tmp_path: Path) -> None:
         profile_file = tmp_path / "test_profile.json"
         profile_file.write_text(json.dumps(_VALID_PROFILE))
+
         # AsyncModbusTcpClient requires a running loop in pymodbus 3.12+
         async def _inner() -> None:
             driver = await _make_driver(tmp_path)
             assert "soc" in driver._registers
+
         asyncio.run(_inner())
 
 
 # ---------------------------------------------------------------------------
 # read_tag
 # ---------------------------------------------------------------------------
+
 
 class TestReadTag:
     @pytest.mark.asyncio
@@ -164,9 +169,7 @@ class TestReadTag:
             await driver.read_tag("undefined_tag")
 
     @pytest.mark.asyncio
-    async def test_connection_error_raises_modbus_read_error(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_connection_error_raises_modbus_read_error(self, tmp_path: Path) -> None:
         from pymodbus.exceptions import ConnectionException
 
         driver = await _make_driver(tmp_path)
@@ -177,13 +180,9 @@ class TestReadTag:
             await driver.read_tag("soc")
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_modbus_read_error(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_error_response_raises_modbus_read_error(self, tmp_path: Path) -> None:
         driver = await _make_driver(tmp_path)
-        driver._client.read_holding_registers = AsyncMock(
-            return_value=_mock_error_result()
-        )
+        driver._client.read_holding_registers = AsyncMock(return_value=_mock_error_result())
         with pytest.raises(ModbusReadError):
             await driver.read_tag("soc")
 
@@ -191,6 +190,7 @@ class TestReadTag:
 # ---------------------------------------------------------------------------
 # write_tag
 # ---------------------------------------------------------------------------
+
 
 class TestWriteTag:
     @pytest.mark.asyncio
@@ -204,23 +204,17 @@ class TestWriteTag:
         driver._client.write_registers.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def test_write_ro_tag_raises_permission_error(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_write_ro_tag_raises_permission_error(self, tmp_path: Path) -> None:
         driver = await _make_driver(tmp_path)
         with pytest.raises(PermissionError, match="read-only"):
             await driver.write_tag("soc", 50.0)
 
     @pytest.mark.asyncio
-    async def test_write_connection_error_raises_modbus_write_error(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_write_connection_error_raises_modbus_write_error(self, tmp_path: Path) -> None:
         from pymodbus.exceptions import ConnectionException
 
         driver = await _make_driver(tmp_path)
-        driver._client.write_registers = AsyncMock(
-            side_effect=ConnectionException("broken pipe")
-        )
+        driver._client.write_registers = AsyncMock(side_effect=ConnectionException("broken pipe"))
         with pytest.raises(ModbusWriteError):
             await driver.write_tag("watchdog_heartbeat", 1.0)
 
@@ -228,6 +222,7 @@ class TestWriteTag:
 # ---------------------------------------------------------------------------
 # connect
 # ---------------------------------------------------------------------------
+
 
 class TestConnect:
     @pytest.mark.asyncio

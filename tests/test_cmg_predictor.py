@@ -20,6 +20,7 @@ from src.interfaces.cmg_predictor import (
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
+
 @pytest.fixture
 def predictor() -> CMgPredictor:
     p = CMgPredictor(node="TestNode", model_path="nonexistent.onnx")
@@ -50,6 +51,7 @@ def sample_csv(tmp_path: Path) -> Path:
 
 # ── Unit Tests: PriceForecast ─────────────────────────────────────────────────
 
+
 class TestPriceForecast:
     def test_peak_hours_flagged(self):
         for h in _PEAK_HOURS:
@@ -75,6 +77,7 @@ class TestPriceForecast:
 
 
 # ── Unit Tests: CMgPredictor ──────────────────────────────────────────────────
+
 
 class TestCMgPredictor:
     def test_init_defaults(self, predictor: CMgPredictor):

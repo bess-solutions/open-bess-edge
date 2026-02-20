@@ -17,7 +17,6 @@ def _site(site_id: str = "CL-001", available_kw: float = 30.0, soc: float = 75.0
 
 
 class TestVPPPublisher:
-
     def test_register_site_increments_n_sites(self):
         vpp = VPPPublisher()
         vpp.register_site(_site("CL-001"))
@@ -75,7 +74,6 @@ class TestVPPPublisher:
 
 
 class TestOpenADREvent:
-
     def test_event_has_unique_ids(self):
         e1 = OpenADREvent()
         e2 = OpenADREvent()

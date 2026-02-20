@@ -77,9 +77,7 @@ def _resolve_endian(value: str, field: str) -> str:
     try:
         return _ENDIAN_MAP[value.upper()]
     except KeyError:
-        raise DriverConfigError(
-            f"Invalid {field} '{value}'. Must be 'BIG' or 'LITTLE'."
-        ) from None
+        raise DriverConfigError(f"Invalid {field} '{value}'. Must be 'BIG' or 'LITTLE'.") from None
 
 
 # ---------------------------------------------------------------------------
@@ -126,12 +124,8 @@ class UniversalDriver:
 
         # Connection byte / word order from profile (struct format prefix: '>' or '<')
         conn = self._profile.get("connection", {})
-        self._byte_order: str = _resolve_endian(
-            conn.get("byte_order", "BIG"), "byte_order"
-        )
-        self._word_order: str = _resolve_endian(
-            conn.get("word_order", "BIG"), "word_order"
-        )
+        self._byte_order: str = _resolve_endian(conn.get("byte_order", "BIG"), "byte_order")
+        self._word_order: str = _resolve_endian(conn.get("word_order", "BIG"), "word_order")
 
         self._client = AsyncModbusTcpClient(host=self._host, port=self._port)
         log.info(
@@ -155,9 +149,7 @@ class UniversalDriver:
             with path.open("r", encoding="utf-8") as fh:
                 profile: DeviceProfile = json.load(fh)
         except json.JSONDecodeError as exc:
-            raise DriverConfigError(
-                f"Device profile JSON is invalid: {path}"
-            ) from exc
+            raise DriverConfigError(f"Device profile JSON is invalid: {path}") from exc
 
         for required in ("connection", "registers"):
             if required not in profile:
@@ -205,8 +197,7 @@ class UniversalDriver:
                     await asyncio.sleep(wait)
 
         raise ConnectionException(
-            f"Could not connect to {self._host}:{self._port} "
-            f"after {_MAX_CONNECT_RETRIES} attempts"
+            f"Could not connect to {self._host}:{self._port} after {_MAX_CONNECT_RETRIES} attempts"
         ) from last_exc
 
     async def disconnect(self) -> None:
@@ -228,9 +219,7 @@ class UniversalDriver:
                 f"Available tags: {list(self._registers.keys())}"
             ) from None
 
-    def _decode_value(
-        self, registers: list[int], reg_type: str, scale: float
-    ) -> float:
+    def _decode_value(self, registers: list[int], reg_type: str, scale: float) -> float:
         """
         Decode raw Modbus register words into a scaled Python float.
 
@@ -253,14 +242,10 @@ class UniversalDriver:
             case "INT16":
                 (raw,) = struct.unpack(f"{bo}h", raw_bytes)
             case _:
-                raise DriverConfigError(
-                    f"Unsupported register type: '{reg_type}'"
-                )
+                raise DriverConfigError(f"Unsupported register type: '{reg_type}'")
         return float(raw) * scale
 
-    def _encode_value(
-        self, value: float, reg_type: str, scale: float
-    ) -> list[int]:
+    def _encode_value(self, value: float, reg_type: str, scale: float) -> list[int]:
         """
         Encode a scaled Python value back into Modbus register words.
 
@@ -282,13 +267,10 @@ class UniversalDriver:
             case "INT16":
                 packed = struct.pack(f"{bo}h", int(raw))
             case _:
-                raise DriverConfigError(
-                    f"Unsupported register type: '{reg_type}'"
-                )
+                raise DriverConfigError(f"Unsupported register type: '{reg_type}'")
         # Convert packed bytes back to list of 16-bit register values
         return [
-            int.from_bytes(packed[i : i + 2], byteorder="big")
-            for i in range(0, len(packed), 2)
+            int.from_bytes(packed[i : i + 2], byteorder="big") for i in range(0, len(packed), 2)
         ]
 
     # ------------------------------------------------------------------
@@ -324,19 +306,15 @@ class UniversalDriver:
 
         log.debug("driver.read_tag.start", tag=tag_name, address=address, count=count)
         try:
-            result = await self._client.read_holding_registers(
-                address=address, count=count
-            )
+            result = await self._client.read_holding_registers(address=address, count=count)
         except (ConnectionException, ModbusIOException) as exc:
             raise ModbusReadError(
-                f"Modbus read failed for tag '{tag_name}' "
-                f"at address {address}: {exc}"
+                f"Modbus read failed for tag '{tag_name}' at address {address}: {exc}"
             ) from exc
 
         if result.isError():
             raise ModbusReadError(
-                f"Modbus exception response for tag '{tag_name}' "
-                f"at address {address}: {result}"
+                f"Modbus exception response for tag '{tag_name}' at address {address}: {result}"
             )
 
         value = self._decode_value(result.registers, reg_type, scale)
@@ -368,9 +346,7 @@ class UniversalDriver:
         reg = self._get_register(tag_name)
 
         if reg.get("access", "RO").upper() == "RO":
-            raise PermissionError(
-                f"Tag '{tag_name}' is read-only (access=RO). Cannot write."
-            )
+            raise PermissionError(f"Tag '{tag_name}' is read-only (access=RO). Cannot write.")
 
         address: int = reg["address"]
         reg_type: str = reg["type"]
@@ -385,13 +361,10 @@ class UniversalDriver:
             encoded=payload,
         )
         try:
-            result = await self._client.write_registers(
-                address=address, values=payload
-            )
+            result = await self._client.write_registers(address=address, values=payload)
         except (ConnectionException, ModbusIOException) as exc:
             raise ModbusWriteError(
-                f"Modbus write failed for tag '{tag_name}' "
-                f"at address {address}: {exc}"
+                f"Modbus write failed for tag '{tag_name}' at address {address}: {exc}"
             ) from exc
 
         if result.isError():

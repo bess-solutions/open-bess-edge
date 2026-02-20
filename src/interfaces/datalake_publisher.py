@@ -47,6 +47,7 @@ log = structlog.get_logger(__name__)
 
 try:
     from google.cloud import bigquery  # type: ignore[import-untyped]
+
     _BQ_AVAILABLE = True
 except ImportError:
     _BQ_AVAILABLE = False
@@ -58,6 +59,7 @@ class TelemetryRow:
 
     All float fields default to 0.0 (not None) to avoid type errors.
     """
+
     site_id: str
     timestamp: float = field(default_factory=time.time)
     soc_pct: float = 0.0
@@ -71,11 +73,14 @@ class TelemetryRow:
     def to_bq_row(self) -> dict:
         """Convert to BigQuery-compatible row dict."""
         import datetime
+
         d = asdict(self)
         # Convert Unix timestamp → ISO 8601 string for BQ TIMESTAMP
-        d["timestamp"] = datetime.datetime.fromtimestamp(
-            self.timestamp, tz=datetime.timezone.utc
-        ).isoformat().replace("+00:00", "Z")
+        d["timestamp"] = (
+            datetime.datetime.fromtimestamp(self.timestamp, tz=datetime.timezone.utc)
+            .isoformat()
+            .replace("+00:00", "Z")
+        )
         return d
 
     def to_jsonl(self) -> str:
@@ -110,7 +115,7 @@ class DataLakePublisher:
         self.batch_size = batch_size
         self._buffer: deque[TelemetryRow] = deque(maxlen=buffer_size)
         self._local_path = Path(local_buffer_path)
-        self._client: object | None = None   # bigquery.Client when available
+        self._client: object | None = None  # bigquery.Client when available
         self._published_total: int = 0
 
     # ------------------------------------------------------------------

@@ -26,6 +26,7 @@ from src.core.safety import SafetyGuard
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def guard() -> SafetyGuard:
     """Return a SafetyGuard with 0.01 s watchdog interval for fast tests."""
@@ -35,6 +36,7 @@ def guard() -> SafetyGuard:
 # ---------------------------------------------------------------------------
 # check_safety — happy path
 # ---------------------------------------------------------------------------
+
 
 class TestCheckSafetyPass:
     def test_nominal_values(self, guard: SafetyGuard) -> None:
@@ -61,6 +63,7 @@ class TestCheckSafetyPass:
 # check_safety — blocked conditions
 # ---------------------------------------------------------------------------
 
+
 class TestCheckSafetyBlock:
     def test_soc_below_min(self, guard: SafetyGuard) -> None:
         assert guard.check_safety({"soc": 4.99}) is False
@@ -81,6 +84,7 @@ class TestCheckSafetyBlock:
 # ---------------------------------------------------------------------------
 # watchdog_loop
 # ---------------------------------------------------------------------------
+
 
 class TestWatchdogLoop:
     @pytest.mark.asyncio
@@ -103,9 +107,7 @@ class TestWatchdogLoop:
             assert c.args[0] == "watchdog_heartbeat"
 
     @pytest.mark.asyncio
-    async def test_raises_after_two_consecutive_failures(
-        self, guard: SafetyGuard
-    ) -> None:
+    async def test_raises_after_two_consecutive_failures(self, guard: SafetyGuard) -> None:
         """RuntimeError must be raised after 2 consecutive write failures."""
         driver = MagicMock()
         driver.write_tag = AsyncMock(side_effect=OSError("Modbus error"))
@@ -114,9 +116,7 @@ class TestWatchdogLoop:
             await guard.watchdog_loop(driver)
 
     @pytest.mark.asyncio
-    async def test_cancelled_error_propagates(
-        self, guard: SafetyGuard
-    ) -> None:
+    async def test_cancelled_error_propagates(self, guard: SafetyGuard) -> None:
         """CancelledError from task cancellation must not be swallowed."""
         driver = MagicMock()
         driver.write_tag = AsyncMock()
@@ -128,9 +128,7 @@ class TestWatchdogLoop:
             await task
 
     @pytest.mark.asyncio
-    async def test_counter_wraps_at_uint16_max(
-        self, guard: SafetyGuard
-    ) -> None:
+    async def test_counter_wraps_at_uint16_max(self, guard: SafetyGuard) -> None:
         """Counter must wrap to 0 after reaching 65535."""
         guard._heartbeat_counter = 65534
         driver = MagicMock()

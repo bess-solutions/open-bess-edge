@@ -140,6 +140,7 @@ def get_meter(name: str = _INSTRUMENTATION_SCOPE) -> metrics.Meter:
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _resolve_endpoint() -> str:
     """Read the OTLP endpoint from settings (env var or .env file)."""
     return settings.OTEL_EXPORTER_OTLP_ENDPOINT

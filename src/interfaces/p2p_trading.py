@@ -57,6 +57,7 @@ class EnergyCredit:
         hash:               SHA-256 of credit payload (integrity check).
         published:          Whether credit has been published to ledger.
     """
+
     credit_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     site_id: str = "unknown"
     kwh: float = 0.0
@@ -71,13 +72,16 @@ class EnergyCredit:
 
     def _compute_hash(self) -> str:
         """Compute SHA-256 of stable credit fields (excluding hash itself)."""
-        payload = json.dumps({
-            "credit_id": self.credit_id,
-            "site_id": self.site_id,
-            "kwh": round(self.kwh, 6),
-            "co2_avoided_kg": round(self.co2_avoided_kg, 6),
-            "timestamp": self.timestamp,
-        }, sort_keys=True)
+        payload = json.dumps(
+            {
+                "credit_id": self.credit_id,
+                "site_id": self.site_id,
+                "kwh": round(self.kwh, 6),
+                "co2_avoided_kg": round(self.co2_avoided_kg, 6),
+                "timestamp": self.timestamp,
+            },
+            sort_keys=True,
+        )
         return hashlib.sha256(payload.encode()).hexdigest()
 
     def to_dict(self) -> dict:
@@ -90,9 +94,10 @@ class EnergyCredit:
 @dataclass
 class LedgerResult:
     """Result of a ledger publication attempt."""
+
     success: bool
     credit_id: str
-    tx_id: str | None = None         # Fabric transaction ID
+    tx_id: str | None = None  # Fabric transaction ID
     block_number: int | None = None  # Block height on the channel
     error: str | None = None
     latency_ms: float = 0.0
@@ -238,7 +243,7 @@ class P2PEnergyTrader:
         log.warning(
             "p2p.remote_stub",
             msg="Remote ledger publish not yet implemented. "
-                "Replace _publish_remote with Fabric Gateway call.",
+            "Replace _publish_remote with Fabric Gateway call.",
             endpoint=self.ledger_endpoint,
         )
         return LedgerResult(

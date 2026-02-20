@@ -20,7 +20,6 @@ def _row(soc: float = 70.0, site_id: str = "test-001") -> TelemetryRow:
 
 
 class TestTelemetryRow:
-
     def test_to_bq_row_has_iso_timestamp(self):
         row = _row()
         bq = row.to_bq_row()
@@ -38,11 +37,11 @@ class TestTelemetryRow:
 
 
 class TestDataLakePublisher:
-
     def test_publish_buffers_row(self):
         with tempfile.TemporaryDirectory() as d:
             pub = DataLakePublisher(
-                project_id="", batch_size=3,
+                project_id="",
+                batch_size=3,
                 local_buffer_path=d + "/test_buffer.jsonl",
             )
 
@@ -57,7 +56,8 @@ class TestDataLakePublisher:
     def test_batch_flush_writes_to_local_file(self):
         with tempfile.TemporaryDirectory() as d:
             pub = DataLakePublisher(
-                project_id="", batch_size=3,
+                project_id="",
+                batch_size=3,
                 local_buffer_path=d + "/test_buffer.jsonl",
             )
 
@@ -88,8 +88,9 @@ class TestDataLakePublisher:
 
     def test_publish_many_returns_count(self):
         with tempfile.TemporaryDirectory() as d:
-            pub = DataLakePublisher(project_id="", batch_size=10,
-                                    local_buffer_path=d + "/buf2.jsonl")
+            pub = DataLakePublisher(
+                project_id="", batch_size=10, local_buffer_path=d + "/buf2.jsonl"
+            )
 
             async def go():
                 async with pub:
@@ -102,8 +103,7 @@ class TestDataLakePublisher:
     def test_aexit_flushes_remaining(self):
         with tempfile.TemporaryDirectory() as d:
             path = d + "/flush_test.jsonl"
-            pub = DataLakePublisher(project_id="", batch_size=10,
-                                    local_buffer_path=path)
+            pub = DataLakePublisher(project_id="", batch_size=10, local_buffer_path=path)
 
             async def go():
                 async with pub:

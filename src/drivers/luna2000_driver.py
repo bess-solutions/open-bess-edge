@@ -32,39 +32,40 @@ log = structlog.get_logger(__name__)
 # ---------------------------------------------------------------------------
 # Register addresses (Huawei SUN2000 Interface Definition v3.0)
 # ---------------------------------------------------------------------------
-REG_LUNA_TEMP        = 37752   # INT16  /10 °C
-REG_LUNA_SOC         = 37760   # UINT16 /10 %
-REG_LUNA_SOH         = 37761   # UINT16 /10 %
-REG_LUNA_CYCLE_COUNT = 37762   # UINT16 cycles
-REG_LUNA_CAPACITY_HI = 37758   # UINT32 (2 regs) /0.001 kWh
-REG_LUNA_POWER_HI    = 37765   # INT32  (2 regs) /0.001 kW, + = charging
-REG_LUNA_VOLTAGE     = 37800   # UINT16 /10 V
-REG_LUNA_CURRENT     = 37801   # INT16  /10 A
+REG_LUNA_TEMP = 37752  # INT16  /10 °C
+REG_LUNA_SOC = 37760  # UINT16 /10 %
+REG_LUNA_SOH = 37761  # UINT16 /10 %
+REG_LUNA_CYCLE_COUNT = 37762  # UINT16 cycles
+REG_LUNA_CAPACITY_HI = 37758  # UINT32 (2 regs) /0.001 kWh
+REG_LUNA_POWER_HI = 37765  # INT32  (2 regs) /0.001 kW, + = charging
+REG_LUNA_VOLTAGE = 37800  # UINT16 /10 V
+REG_LUNA_CURRENT = 37801  # INT16  /10 A
 
-REG_LUNA_MODE        = 47086   # UINT16 RW working mode
-REG_LUNA_TARGET_SOC  = 47087   # UINT16 RW /10 % charge target
+REG_LUNA_MODE = 47086  # UINT16 RW working mode
+REG_LUNA_TARGET_SOC = 47087  # UINT16 RW /10 % charge target
 
 
 class BatteryMode(IntEnum):
     """LUNA2000 working mode codes (register 47086)."""
+
     MAX_SELF_CONSUMPTION = 0
-    FULLY_CHARGED        = 1
-    TIME_OF_USE          = 2
-    REMOTE_DISPATCH      = 3
+    FULLY_CHARGED = 1
+    TIME_OF_USE = 2
+    REMOTE_DISPATCH = 3
 
 
 @dataclass
 class LUNATelemetry:
     """Single telemetry snapshot from the LUNA2000 ESS."""
 
-    soc_pct: float           # State of charge 0.0–100.0 %
-    soh_pct: float           # State of health 0.0–100.0 %
-    power_kw: float          # Positive = charging, negative = discharging
-    voltage_v: float         # Pack voltage in V (350–560 V)
-    current_a: float         # Pack current in A
-    temperature_c: float     # Pack temperature in °C
-    cycle_count: int         # Cumulative cycle count
-    capacity_kwh: float      # Usable capacity in kWh
+    soc_pct: float  # State of charge 0.0–100.0 %
+    soh_pct: float  # State of health 0.0–100.0 %
+    power_kw: float  # Positive = charging, negative = discharging
+    voltage_v: float  # Pack voltage in V (350–560 V)
+    current_a: float  # Pack current in A
+    temperature_c: float  # Pack temperature in °C
+    cycle_count: int  # Cumulative cycle count
+    capacity_kwh: float  # Usable capacity in kWh
     working_mode: BatteryMode = BatteryMode.MAX_SELF_CONSUMPTION
     timestamp: float = field(default_factory=time.time)
 
@@ -127,6 +128,7 @@ class LUNADriver:
     def _make_client(self) -> object:
         try:
             from pymodbus.client import ModbusTcpClient  # type: ignore
+
             return ModbusTcpClient(
                 host=self.host,
                 port=self.port,
@@ -175,7 +177,8 @@ class LUNADriver:
     async def __aenter__(self) -> LUNADriver:
         self._client = self._make_client()
         connected = await asyncio.get_event_loop().run_in_executor(
-            None, self._client.connect  # type: ignore
+            None,
+            self._client.connect,  # type: ignore
         )
         if not connected:
             raise ConnectionError(f"Cannot connect to SUN2000 at {self.host}:{self.port}")
@@ -185,7 +188,8 @@ class LUNADriver:
     async def __aexit__(self, *_: object) -> None:
         if self._client:
             await asyncio.get_event_loop().run_in_executor(
-                None, self._client.close  # type: ignore
+                None,
+                self._client.close,  # type: ignore
             )
         log.info("luna.disconnected")
 
@@ -202,26 +206,26 @@ class LUNADriver:
         loop = asyncio.get_event_loop()
 
         def _read() -> LUNATelemetry:
-            temp_raw  = self._read_regs(REG_LUNA_TEMP, 1)[0]
-            soc_raw   = self._read_regs(REG_LUNA_SOC, 1)[0]
-            soh_raw   = self._read_regs(REG_LUNA_SOH, 1)[0]
-            cycles    = self._read_regs(REG_LUNA_CYCLE_COUNT, 1)[0]
-            cap_regs  = self._read_regs(REG_LUNA_CAPACITY_HI, 2)
-            pwr_regs  = self._read_regs(REG_LUNA_POWER_HI, 2)
-            volt_raw  = self._read_regs(REG_LUNA_VOLTAGE, 1)[0]
-            curr_raw  = self._read_regs(REG_LUNA_CURRENT, 1)[0]
-            mode_raw  = self._read_regs(REG_LUNA_MODE, 1)[0]
+            temp_raw = self._read_regs(REG_LUNA_TEMP, 1)[0]
+            soc_raw = self._read_regs(REG_LUNA_SOC, 1)[0]
+            soh_raw = self._read_regs(REG_LUNA_SOH, 1)[0]
+            cycles = self._read_regs(REG_LUNA_CYCLE_COUNT, 1)[0]
+            cap_regs = self._read_regs(REG_LUNA_CAPACITY_HI, 2)
+            pwr_regs = self._read_regs(REG_LUNA_POWER_HI, 2)
+            volt_raw = self._read_regs(REG_LUNA_VOLTAGE, 1)[0]
+            curr_raw = self._read_regs(REG_LUNA_CURRENT, 1)[0]
+            mode_raw = self._read_regs(REG_LUNA_MODE, 1)[0]
 
             return LUNATelemetry(
-                soc_pct       = soc_raw * 0.1,
-                soh_pct       = soh_raw * 0.1,
-                power_kw      = self._to_int32(*pwr_regs) * 0.001,
-                voltage_v     = volt_raw * 0.1,
-                current_a     = self._to_int16(curr_raw) * 0.1,
-                temperature_c = self._to_int16(temp_raw) * 0.1,
-                cycle_count   = cycles,
-                capacity_kwh  = self._to_uint32(*cap_regs) * 0.001,
-                working_mode  = BatteryMode(min(mode_raw, 3)),
+                soc_pct=soc_raw * 0.1,
+                soh_pct=soh_raw * 0.1,
+                power_kw=self._to_int32(*pwr_regs) * 0.001,
+                voltage_v=volt_raw * 0.1,
+                current_a=self._to_int16(curr_raw) * 0.1,
+                temperature_c=self._to_int16(temp_raw) * 0.1,
+                cycle_count=cycles,
+                capacity_kwh=self._to_uint32(*cap_regs) * 0.001,
+                working_mode=BatteryMode(min(mode_raw, 3)),
             )
 
         return await loop.run_in_executor(None, _read)
@@ -233,9 +237,7 @@ class LUNADriver:
             mode: BatteryMode enum value.
         """
         loop = asyncio.get_event_loop()
-        await loop.run_in_executor(
-            None, lambda: self._write_reg(REG_LUNA_MODE, int(mode))
-        )
+        await loop.run_in_executor(None, lambda: self._write_reg(REG_LUNA_MODE, int(mode)))
         log.info("luna.mode_set", mode=mode.name)
 
     async def set_charge_target_soc(self, target_pct: float) -> None:
@@ -248,7 +250,5 @@ class LUNADriver:
             raise ValueError(f"target_pct must be 0–100, got {target_pct}")
         raw = int(round(target_pct * 10))
         loop = asyncio.get_event_loop()
-        await loop.run_in_executor(
-            None, lambda: self._write_reg(REG_LUNA_TARGET_SOC, raw)
-        )
+        await loop.run_in_executor(None, lambda: self._write_reg(REG_LUNA_TARGET_SOC, raw))
         log.info("luna.charge_target_set", target_pct=target_pct)

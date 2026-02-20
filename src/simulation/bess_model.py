@@ -40,7 +40,7 @@ class BESSPhysicsModel:
     max_power_kw: float = 50.0
     initial_soc: float = 0.5
     round_trip_eff: float = 0.92
-    degradation_rate: float = 0.0003       # fraction per FEC
+    degradation_rate: float = 0.0003  # fraction per FEC
     thermal_tau_min: float = 30.0
     ambient_temp_c: float = 25.0
     max_temp_c: float = 50.0
@@ -100,7 +100,9 @@ class BESSPhysicsModel:
         heat_kw = abs(clipped_power) * 0.02  # 2% resistive heating
         dt_s = dt_minutes * 60.0
         tau_s = self.thermal_tau_min * 60.0
-        self.temp_c += (heat_kw * tau_s / self.capacity_kwh - (self.temp_c - self.ambient_temp_c)) * (dt_s / tau_s)
+        self.temp_c += (
+            heat_kw * tau_s / self.capacity_kwh - (self.temp_c - self.ambient_temp_c)
+        ) * (dt_s / tau_s)
         self.temp_c = max(self.ambient_temp_c, self.temp_c)
 
         return {

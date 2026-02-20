@@ -4,6 +4,7 @@ tests/test_sun2000_monitor.py
 Tests for the SUN2000Monitor and SUN2000Telemetry classes.
 All tests use mock Modbus clients — no real hardware needed.
 """
+
 from __future__ import annotations
 
 from src.interfaces.alert_manager import AlertManager
@@ -20,6 +21,7 @@ from src.interfaces.sun2000_monitor import (
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_monitor() -> SUN2000Monitor:
     mgr = AlertManager(site_id="TEST-001", dedup_window_s=0.0)
@@ -69,7 +71,7 @@ class TestDecodeAlarmRegister:
         assert "Low Insulation Resistance" in alarms
 
     def test_alarm2_arc_fault(self):
-        raw = 0b10   # bit 1 = DC Arc Fault
+        raw = 0b10  # bit 1 = DC Arc Fault
         alarms = decode_alarm_register(raw, _ALARM2_BITS)
         assert "DC Arc Fault" in alarms
 

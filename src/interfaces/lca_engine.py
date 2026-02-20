@@ -53,6 +53,7 @@ class LCAConfig:
         embodied_co2_per_kwh_kg: Battery manufacturing CO₂ per kWh capacity (kgCO₂eq/kWh).
         grid_emission_factor: Manual override for grid EF in gCO₂eq/kWh. If None, uses DB.
     """
+
     region: str = "CL"
     capacity_kwh: float = 100.0
     design_cycles: int = 4_000
@@ -73,6 +74,7 @@ class LCAResult:
         cumulative_avoided_kg: Lifetime CO₂ avoided (kg).
         timestamp:          Unix time of calculation.
     """
+
     co2_avoided_kg: float
     co2_grid_kg: float
     co2_battery_amort: float
@@ -106,9 +108,7 @@ class LCAEngine:
             self._grid_ef = self.config.grid_emission_factor
         else:
             default_ef = 345.0  # global average gCO₂eq/kWh
-            self._grid_ef = GRID_EMISSION_FACTORS_G_KWH.get(
-                self.config.region.upper(), default_ef
-            )
+            self._grid_ef = GRID_EMISSION_FACTORS_G_KWH.get(self.config.region.upper(), default_ef)
 
         # Battery embodied carbon amortisation
         if self.config.embodied_co2_per_kwh_kg > 0:
@@ -117,13 +117,9 @@ class LCAEngine:
             self._battery_embodied_co2 = BATTERY_EMBODIED_CO2_KG_KWH
 
         # Total battery manufacturing CO₂ (kg)
-        self._total_battery_co2_kg = (
-            self._battery_embodied_co2 * self.config.capacity_kwh
-        )
+        self._total_battery_co2_kg = self._battery_embodied_co2 * self.config.capacity_kwh
         # Co₂ per full equivalent cycle
-        self._co2_per_fec_kg = (
-            self._total_battery_co2_kg / self.config.design_cycles
-        )
+        self._co2_per_fec_kg = self._total_battery_co2_kg / self.config.design_cycles
 
         log.info(
             "lca_engine.init",
@@ -172,12 +168,8 @@ class LCAEngine:
         self._cycle_count += fec
 
         # Update Prometheus
-        CARBON_AVOIDED_KG.labels(site_id=self.site_id).set(
-            self._cumulative_co2_avoided_kg
-        )
-        CARBON_INTENSITY_G_KWH.labels(site_id=self.site_id).set(
-            self._grid_ef
-        )
+        CARBON_AVOIDED_KG.labels(site_id=self.site_id).set(self._cumulative_co2_avoided_kg)
+        CARBON_INTENSITY_G_KWH.labels(site_id=self.site_id).set(self._grid_ef)
 
         result = LCAResult(
             co2_avoided_kg=co2_avoided_kg,

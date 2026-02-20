@@ -39,7 +39,10 @@ from src.interfaces.metrics import (
 )
 
 __all__ = [
-    "FleetOrchestrator", "SiteProxy", "SiteTelemetry", "FleetSummary",
+    "FleetOrchestrator",
+    "SiteProxy",
+    "SiteTelemetry",
+    "FleetSummary",
 ]
 
 log = structlog.get_logger(__name__)
@@ -48,9 +51,10 @@ log = structlog.get_logger(__name__)
 @dataclass
 class SiteTelemetry:
     """Telemetry snapshot from a single BESSAI edge site."""
+
     site_id: str
-    soc_pct: float              # 0-100
-    power_kw: float             # + = charging, - = discharging
+    soc_pct: float  # 0-100
+    power_kw: float  # + = charging, - = discharging
     temp_c: float
     capacity_kwh: float
     available_kw: float
@@ -61,12 +65,13 @@ class SiteTelemetry:
 @dataclass
 class FleetSummary:
     """Aggregated fleet KPIs for one orchestration cycle."""
+
     n_sites: int
     total_capacity_kwh: float
-    fleet_soc_pct: float        # weighted average SOC
-    total_power_kw: float       # sum of all site power (kW)
-    total_available_kw: float   # sum of flex capacity
-    sites_in_alarm: int         # sites with anomaly_score > 0.7
+    fleet_soc_pct: float  # weighted average SOC
+    total_power_kw: float  # sum of all site power (kW)
+    total_available_kw: float  # sum of flex capacity
+    sites_in_alarm: int  # sites with anomaly_score > 0.7
     cycle_duration_s: float
     timestamp: float = field(default_factory=time.time)
 
@@ -205,15 +210,20 @@ class FleetOrchestrator:
         """
         if not telemetries:
             return FleetSummary(
-                n_sites=0, total_capacity_kwh=0.0, fleet_soc_pct=0.0,
-                total_power_kw=0.0, total_available_kw=0.0,
-                sites_in_alarm=0, cycle_duration_s=0.0,
+                n_sites=0,
+                total_capacity_kwh=0.0,
+                fleet_soc_pct=0.0,
+                total_power_kw=0.0,
+                total_available_kw=0.0,
+                sites_in_alarm=0,
+                cycle_duration_s=0.0,
             )
 
         total_cap = sum(t.capacity_kwh for t in telemetries)
         weighted_soc = (
             sum(t.soc_pct * t.capacity_kwh for t in telemetries) / total_cap
-            if total_cap > 0 else 0.0
+            if total_cap > 0
+            else 0.0
         )
         total_power = sum(t.power_kw for t in telemetries)
         total_avail = sum(t.available_kw for t in telemetries)

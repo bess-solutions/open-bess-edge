@@ -132,9 +132,7 @@ class PubSubPublisher:
             (i.e. outside of the async context manager).
         """
         if self._client is None:
-            raise RuntimeError(
-                "PubSubPublisher must be used as an async context manager."
-            )
+            raise RuntimeError("PubSubPublisher must be used as an async context manager.")
 
         # Inject envelope fields
         payload: Telemetry = {
@@ -163,9 +161,7 @@ class PubSubPublisher:
         )
 
         try:
-            response = await self._client.publish(
-                self._topic_path, messages=[message]
-            )
+            response = await self._client.publish(self._topic_path, messages=[message])
             # gcloud-aio returns a PublishResponse; message IDs are in .messageIds
             msg_id: str = response.get("messageIds", ["?"])[0]
             log.info(
@@ -180,9 +176,7 @@ class PubSubPublisher:
                 topic=self._topic_name,
                 error=str(exc),
             )
-            raise PublisherError(
-                f"Failed to publish to {self._topic_path}: {exc}"
-            ) from exc
+            raise PublisherError(f"Failed to publish to {self._topic_path}: {exc}") from exc
 
 
 # ---------------------------------------------------------------------------
