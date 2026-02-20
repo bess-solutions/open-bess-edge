@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-19 v1.0.1 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-20 v1.3.0 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,11 +14,12 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 
 ---
 
-## ✅ Estado Actual — v1.0.1
+## ✅ Estado Actual — v1.2.0
 
 ### Tests
 ```
-228 / 228 passed ✅   (10.02s · Python 3.14 · pytest-asyncio)
+57 / 57 passed ✅   (2.22s · Python 3.14 · cmg_predictor + arbitrage_engine + dashboard_api)
+228 / 228 passed ✅  (10.02s · suite completa open-bess-edge)
 ```
 
 ### Stack Docker — Métricas en vivo (confirmado 2026-02-19)
@@ -34,12 +35,14 @@ Prometheus v2.51.2                          OK      ← localhost:9090
 
 | Módulo | Archivo | Versión | Estado |
 |---|---|---|---|
+| CMg Predictor v2 | `src/interfaces/cmg_predictor.py` | **v2.0** | ✅ **NUEVO** |
+| Arbitrage Engine v2 | `src/interfaces/arbitrage_engine.py` | **v2.0** | ✅ **NUEVO** |
 | Configuración | `src/core/config.py` | v0.5 | ✅ Producción |
 | Seguridad (SOC / Temp) | `src/core/safety.py` | v0.5 | ✅ Producción |
 | Orquestador principal | `src/core/main.py` | v0.5 | ✅ Producción |
 | Fleet Orchestrator | `src/core/fleet_orchestrator.py` | v0.8 | ✅ Producción |
 | Driver Modbus TCP | `src/drivers/modbus_driver.py` | v0.5 | ✅ Producción |
-| LUNA2000 Driver | `src/drivers/luna2000_driver.py` | **v1.0** | ✅ **NUEVO** |
+| LUNA2000 Driver | `src/drivers/luna2000_driver.py` | **v1.0** | ✅ Producción |
 | Servidor /health + /metrics | `src/interfaces/health.py` | v0.5 | ✅ Producción |
 | Prometheus metrics (22 total) | `src/interfaces/metrics.py` | v0.9 | ✅ Producción |
 | AI-IDS | `src/interfaces/ai_ids.py` | v0.6 | ✅ Producción |
@@ -53,17 +56,16 @@ Prometheus v2.51.2                          OK      ← localhost:9090
 | DataLake Publisher (BigQuery) | `src/interfaces/datalake_publisher.py` | v0.8 | ✅ Producción |
 | Dashboard REST API | `src/interfaces/dashboard_api.py` | v0.9 | ✅ Producción |
 | Alert Manager | `src/interfaces/alert_manager.py` | v0.9 | ✅ Producción |
-| SUN2000 Monitor | `src/interfaces/sun2000_monitor.py` | **v1.0** | ✅ **NUEVO** |
+| SUN2000 Monitor | `src/interfaces/sun2000_monitor.py` | **v1.0** | ✅ Producción |
 | BESS Gymnasium Env | `src/simulation/bess_env.py` | v0.7 | ✅ Producción |
 | BESS Physics Model | `src/simulation/bess_model.py` | v0.7 | ✅ Producción |
 | ONNX modelo dummy | `models/dispatch_policy.onnx` | v0.6 | ✅ Producción |
 | DRL training script | `scripts/train_drl_policy.py` | v0.7 | ✅ Producción |
 | Helm chart | `infrastructure/helm/bessai-edge/` | v0.7 | ✅ Completo |
-| Grafana Dashboard | `infrastructure/grafana/dashboards/bessai_main.json` | **v1.0** | ✅ **NUEVO** 13 paneles |
+| Grafana Dashboard | `infrastructure/grafana/dashboards/bessai_main.json` | **v1.0** | ✅ 13 paneles |
 | Terraform GCP | `infrastructure/terraform/` | v0.5 | ✅ 18 recursos |
 | Registro Modbus | `registry/huawei_sun2000.json` | **v2.0** | ✅ 28 registros reales |
 | Modbus Simulator | `infrastructure/docker/modbus_sim/` | **v1.0.1** | ✅ pymodbus server, 22 registros |
-| Sim Config (oitc) | `infrastructure/docker/modbus-simulator-config.json` | **v1.0.1** | ✅ puerto 502, SUN2000+LUNA2000 |
 | GitHub Actions CI/CD | `.github/workflows/ci.yml` | v0.9 | ✅ 7 jobs |
 
 ### 🐳 Stack Docker — ✅ COMPLETAMENTE OPERATIVO (v1.0.1)
@@ -130,7 +132,8 @@ v0.8.0  ████████████████████████
 v0.9.0  ████████████████████████  ✅ Dashboard API + Alert Manager + CI/CD Helm
 v1.0.0  ████████████████████████  ✅ Grafana Dashboards + LUNA2000 driver + 228 tests
 v1.0.1  ████████████████████████  ✅ Docker stack corregido y 100% operativo
-v1.1.0  ░░░░░░░░░░░░░░░░░░░░░░░░  📋 Huawei SUN2000 live integration
+v1.2.0  ████████████████████████  ✅ CMgPredictor v2 + ArbitrageEngine v2 + Dashboard
+v1.3.0  ████████████████████████  ✅ bessai-cen-data v0.3.0: 11 features ONNX · pipeline fix · CLI bessai-fetch-renewables/bessai-build-dataset · bessai-web API polling
 v2.0.0  ░░░░░░░░░░░░░░░░░░░░░░░░  📋 Multi-site planetary scale
 ```
 
@@ -269,3 +272,5 @@ pytest tests/ -v --tb=short
 | 2026-02-19 | v0.9.0 | 183/183 | Dashboard API, Alert Manager, CI Helm job |
 | 2026-02-19 | v1.0.0 | 228/228 | LUNA2000 driver, SUN2000 monitor, Grafana 13 paneles, registry v2.0 |
 | 2026-02-19 | v1.0.1 | 228/228 | Fix Docker: simulador Modbus oitc corregido, stack 100% operativo |
+| 2026-02-20 | **v1.2.0** | **57+228** | **CMgPredictor v2** (TTL cache, int8, p10/p90) · **ArbitrageEngine v2** (umbral confianza, spread mín) · `train_price_model.py v2` (11 features, ensemble, batch) · Dashboard web arbitraje |
+| 2026-02-20 | **v1.3.0** | **228/228** | **bessai-cen-data v0.3.0**: `pipeline.py` corregido 9→11 features (`lag_168h`, `is_weekend`), shape (24,11) match v2 ONNX · `pyproject.toml` v0.3.0 + CLI `bessai-fetch-renewables`/`bessai-build-dataset` · `bessai-web` polling real `/api/v1/schedule` + `/api/v1/status` · `drawChartFromSchedule()` con zonas carga/descarga · renewable-energy-chile dashboard: 5 bugs arreglados |

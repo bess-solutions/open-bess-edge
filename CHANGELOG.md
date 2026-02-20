@@ -7,7 +7,15 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-19T19:13 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-20T13:43 -03:00)
+
+> [!IMPORTANT]
+> **v1.2.0 — Módulo CMg Price Prediction completamente integrado** (2026-02-20)
+> - `CMgPredictor v2` + `ArbitrageEngine v2` operativos con bandas de incertidumbre p10/p90
+> - 57 tests pasan · `train_price_model.py v2` entrenamiento multi-nodo batch disponible
+> - Dashboard web standalone: `bessai-cen-data/dashboard/arbitrage_dashboard.html`
+
+
 
 ### Contexto del sistema
 **BESSAI Edge Gateway** (`open-bess-edge`) es el componente de borde de un sistema de gestión de baterías industriales (BESS). Adquiere telemetría via **Modbus TCP** desde inversores Huawei SUN2000 + batería LUNA2000, valida seguridad, y publica a **GCP Pub/Sub** con observabilidad via **OpenTelemetry** y **Prometheus**.
@@ -128,6 +136,57 @@ docker ps  # Verificar 4 contenedores: healthy/running
 
 All notable changes to this project are documented here.  
 Format: [Semantic Versioning](https://semver.org/) · [Conventional Commits](https://www.conventionalcommits.org/)
+
+---
+
+---
+
+## [v1.2.0] — 2026-02-20
+
+### Added
+- `src/interfaces/cmg_predictor.py` **v2** — CMgPredictor con:
+  - TTL cache 30 min en `predict_next_24h()` (evita re-cómputo redundante)
+  - Soporte 11 features (`lag_168h` + `is_weekend` vs. 9 anteriores)
+  - Auto-descubrimiento del modelo `_int8.onnx` para inferencia ~3× más rápida
+  - Bandas de incertidumbre `cmg_p10` / `cmg_p90` via modelos cuantílicos ONNX
+  - Invalidación de cache si Δprecio > umbral `_CACHE_INVALIDATE_DELTA`
+  - Propiedad `is_high_confidence` y `spread_clp` en `PriceForecast`
+  - Ventana de historial ampliada a 192h (8 días) para soportar `lag_168h`
+  - Método `projected_arbitrage_revenue_conservative()` usando bandas p10/p90
+- `src/interfaces/arbitrage_engine.py` **v2** — ArbitrageEngine con:
+  - Parámetros `min_confidence=0.4` y `min_spread_clp=30.0`
+  - Filtrado de horas con baja confianza → `hold` forzado, logging enriquecido
+  - Guard `_all_hold_schedule()` cuando spread p10/p90 es insuficiente para operar
+  - `DispatchSlot.to_dict()` expone `cmg_p10`, `cmg_p90` y `confidence`
+  - `avg_confidence` y `effective_spread` en log `arbitrage_engine.schedule_computed`
+- `bessai-cen-data/scripts/train_price_model.py` **v2**:
+  - 11 features: agrega `lag_168h` (weekly seasonality) + `is_weekend`
+  - Cuantización post-entrenamiento int8 (`onnxruntime-quantization`): ~3× más rápido en CPU
+  - Quantile Regression p10/p90 exportada a ONNX separado
+  - Tipos de modelo: `ridge`, `gbm` (LightGBM), `ensemble` (Ridge+LightGBM avg)
+  - Flag `--all-nodos`: entrena todos los nodos SEN en batch
+  - Flag `--no-quantize`: desactiva cuantización
+- `bessai-cen-data/dashboard/arbitrage_dashboard.html` — Dashboard web standalone:
+  - Forecast CMg 24h con bandas p10/p90 (Chart.js)
+  - Evolución SOC de la batería
+  - Tabla de schedule hora a hora filtrable (Carga / Descarga / Espera)
+  - KPIs: Revenue neto, spread CLP/kWh, horas activas, confianza media
+  - Selector de nodo (6 nodos SEN) y capacidad (500 kWh–5 MWh)
+  - Auto-refresh cada 60 s · Port fiel del motor Python en JavaScript
+
+### Changed
+- `DispatchSlot.to_dict()` incluye `cmg_p10`, `cmg_p90`, `confidence` (adición no-breaking)
+- `ArbitrageEngine.__init__()` con nuevos parámetros opcionales `min_confidence`, `min_spread_clp`
+
+### Dependencies (bessai-cen-data)
+- `lightgbm>=4.3.0` — modelo GBM para ensemble
+- `onnxruntime>=1.18.0` — cuantización int8
+
+### Tests
+```
+57 / 57 passed in 2.22s (test_cmg_predictor + test_arbitrage_engine + test_dashboard_api)
+228 / 228 passed in 10.02s (suite completa open-bess-edge)
+```
 
 ---
 
