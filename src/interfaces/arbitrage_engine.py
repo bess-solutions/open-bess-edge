@@ -1,22 +1,20 @@
 """
 src/interfaces/arbitrage_engine.py
 ====================================
-BESSAI Edge Gateway — Arbitrage Schedule Engine.
+BESSAI Edge Gateway — Arbitrage Schedule Engine v2.
 
-Computes the optimal 24-hour charge/discharge schedule for a BESS given:
-- CMg price forecast (from CMgPredictor)
-- Current battery state (SOC, max power, capacity)
-- Safety constraints (min/max SOC, max cycles/day)
+Mejoras v2:
+  - Umbral mínimo de confianza: sólo opera cuando forecast.confidence >= min_confidence
+  - Usa bandas p10/p90 del CMgPredictor para revenue conservador
+  - DispatchSlot expone cmg_p10, cmg_p90, confidence en to_dict()
+  - Logging enriquecido con avg_confidence y n_low_confidence slots
 
 Algorithm:
-    1. Sort forecast hours by price.
-    2. Assign cheapest hours to charging (up to capacity or max charge hours).
-    3. Assign most expensive hours to discharging (energy available after charge).
-    4. Remaining hours → idle.
-    5. Apply safety constraints (SOC limits, min rest between charge/discharge).
-
-Output:
-    ArbitrageSchedule with 24 DispatchSlot objects and projected financials.
+    1. Filtrar horas con confidence < min_confidence → hold forzado.
+    2. Ordenar restantes por precio.
+    3. Cheapest N → charge (si precio < media − 0.5σ AND spread p10-p90 bajo).
+    4. Most expensive N → discharge (si precio > media + 0.5σ AND spread bajo).
+    5. Simular SOC con safety constraints.
 
 Usage::
 
@@ -27,7 +25,7 @@ Usage::
     predictor.load()
     forecast = predictor.predict_next_24h(current_hour=10, current_cmg=45.2)
 
-    engine = ArbitrageEngine(capacity_kwh=1000.0, max_power_kw=500.0)
+    engine = ArbitrageEngine(capacity_kwh=1000.0, max_power_kw=500.0, min_confidence=0.4)
     schedule = engine.compute(forecast, current_soc_pct=30.0)
     print(schedule.summary())
 """
@@ -81,6 +79,9 @@ class DispatchSlot:
             "action": self.action,
             "power_kw": round(self.power_kw, 1),
             "cmg_clp_kwh": self.forecast.cmg_clp_kwh,
+            "cmg_p10": self.forecast.cmg_p10,
+            "cmg_p90": self.forecast.cmg_p90,
+            "confidence": round(self.forecast.confidence, 3),
             "soc_before_pct": round(self.soc_before_pct, 1),
             "soc_after_pct": round(self.soc_after_pct, 1),
             "revenue_clp": round(self.revenue_clp),
@@ -165,6 +166,8 @@ class ArbitrageEngine:
         max_charge_hours: int = 6,
         max_discharge_hours: int = 4,
         node: str = "unknown",
+        min_confidence: float = 0.4,
+        min_spread_clp: float = 30.0,
     ) -> None:
         self.capacity_kwh = capacity_kwh
         self.max_power_kw = max_power_kw
@@ -174,6 +177,9 @@ class ArbitrageEngine:
         self.max_charge_hours = max_charge_hours
         self.max_discharge_hours = max_discharge_hours
         self.node = node
+        # v2 uncertainty controls
+        self.min_confidence = min_confidence   # skip hours below this confidence
+        self.min_spread_clp = min_spread_clp   # min price spread to trade (p90_max - p10_min)
 
     # ── Core computation ──────────────────────────────────────────────────────
 
@@ -195,21 +201,50 @@ class ArbitrageEngine:
             log.warning("arbitrage_engine.empty_forecast", node=self.node)
             return ArbitrageSchedule(node=self.node)
 
+        # ── v2: filter low-confidence hours → hold forced ──
+        viable = [f for f in forecasts if f.confidence >= self.min_confidence]
+        low_conf_hours = {f.hour for f in forecasts if f.confidence < self.min_confidence}
+        if low_conf_hours:
+            log.info(
+                "arbitrage_engine.low_confidence_skipped",
+                node=self.node,
+                n_skipped=len(low_conf_hours),
+                hours=sorted(low_conf_hours),
+            )
+
+        # ── v2: check minimum spread using p10/p90 bands ──
+        if viable:
+            max_p90 = max(f.cmg_p90 for f in viable)
+            min_p10 = min(f.cmg_p10 for f in viable)
+            effective_spread = max_p90 - min_p10
+        else:
+            effective_spread = 0.0
+
+        if effective_spread < self.min_spread_clp:
+            log.info(
+                "arbitrage_engine.spread_too_low",
+                node=self.node,
+                effective_spread=round(effective_spread, 1),
+                min_spread_clp=self.min_spread_clp,
+            )
+            # Build all-hold schedule (no trading)
+            return self._all_hold_schedule(forecasts, current_soc_pct)
+
         # Sort by price to identify charge/discharge candidates
-        sorted_by_price = sorted(forecasts, key=lambda f: f.cmg_clp_kwh)
+        sorted_by_price = sorted(viable, key=lambda f: f.cmg_clp_kwh)
 
         # Cheapest N hours → charge candidates
         charge_hours = {
             f.hour
             for f in sorted_by_price[: self.max_charge_hours]
-            if f.cmg_clp_kwh < self._price_threshold(forecasts, "low")
+            if f.cmg_clp_kwh < self._price_threshold(viable, "low")
         }
 
         # Most expensive N hours → discharge candidates
         discharge_hours = {
             f.hour
             for f in sorted_by_price[-self.max_discharge_hours :]
-            if f.cmg_clp_kwh > self._price_threshold(forecasts, "high")
+            if f.cmg_clp_kwh > self._price_threshold(viable, "high")
         }
 
         # Prevent overlap (discharge takes priority)
@@ -265,12 +300,17 @@ class ArbitrageEngine:
             )
 
         net = total_revenue - total_cost
+        avg_confidence = (
+            sum(f.confidence for f in forecasts) / len(forecasts) if forecasts else 0.0
+        )
         log.info(
             "arbitrage_engine.schedule_computed",
             node=self.node,
             charge_hours=len(charge_hours),
             discharge_hours=len(discharge_hours),
             projected_net_clp=round(net * 1000),
+            avg_confidence=round(avg_confidence, 3),
+            effective_spread=round(effective_spread, 1),
         )
 
         return ArbitrageSchedule(
@@ -281,6 +321,32 @@ class ArbitrageEngine:
             projected_net_clp=round(net * 1000),
             n_charge_hours=len(charge_hours),
             n_discharge_hours=len(discharge_hours),
+            capacity_kwh=self.capacity_kwh,
+            efficiency=self.efficiency,
+        )
+
+    def _all_hold_schedule(
+        self,
+        forecasts: list[PriceForecast],
+        current_soc_pct: float,
+    ) -> ArbitrageSchedule:
+        """Return an all-hold schedule when spread is too low to trade."""
+        slots = [
+            DispatchSlot(
+                hour=fc.hour,
+                action="hold",
+                power_kw=0.0,
+                forecast=fc,
+                soc_before_pct=current_soc_pct,
+                soc_after_pct=current_soc_pct,
+                revenue_clp=0.0,
+            )
+            for fc in sorted(forecasts, key=lambda f: f.hour)
+        ]
+        return ArbitrageSchedule(
+            node=self.node,
+            slots=slots,
+            projected_net_clp=0.0,
             capacity_kwh=self.capacity_kwh,
             efficiency=self.efficiency,
         )
