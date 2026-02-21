@@ -44,18 +44,39 @@ log = structlog.get_logger(__name__)
 try:
     import numpy as np
     import onnxruntime as ort  # type: ignore[import-untyped]
+
     _ONNX_AVAILABLE = True
 except ImportError:
     _ONNX_AVAILABLE = False
-    np = None   # type: ignore[assignment]
+    np = None  # type: ignore[assignment]
     ort = None  # type: ignore[assignment]
 
 # ── Chilean SEN hourly CMg profile (CLP/kWh) — empirical 2023-2024 aggregate ─
 _HOURLY_MEAN_CMG: list[float] = [
-    38.2, 36.1, 34.8, 34.1, 33.9, 35.2,  # 00-05  Off-peak
-    42.1, 58.3, 71.2, 61.4, 48.3, 38.9,  # 06-11  Morning ramp
-    29.4, 24.1, 22.8, 21.3, 22.1, 28.7,  # 12-17  Solar trough
-    44.2, 62.3, 78.4, 71.2, 58.3, 46.1,  # 18-23  Evening peak
+    38.2,
+    36.1,
+    34.8,
+    34.1,
+    33.9,
+    35.2,  # 00-05  Off-peak
+    42.1,
+    58.3,
+    71.2,
+    61.4,
+    48.3,
+    38.9,  # 06-11  Morning ramp
+    29.4,
+    24.1,
+    22.8,
+    21.3,
+    22.1,
+    28.7,  # 12-17  Solar trough
+    44.2,
+    62.3,
+    78.4,
+    71.2,
+    58.3,
+    46.1,  # 18-23  Evening peak
 ]
 
 _PEAK_HOURS: frozenset[int] = frozenset({18, 19, 20, 21, 22})
@@ -63,16 +84,28 @@ _SOLAR_TROUGH_HOURS: frozenset[int] = frozenset({11, 12, 13, 14, 15, 16})
 
 # Feature list (must stay in sync with train_price_model.py v2)
 _FEATURE_NAMES_V2 = [
-    "soc_pct", "hour_of_day", "day_of_week",
-    "recent_mean_cmg", "recent_std_cmg",
-    "peak_flag", "solar_hour_flag",
-    "lag_1h", "lag_24h", "lag_168h", "is_weekend",
+    "soc_pct",
+    "hour_of_day",
+    "day_of_week",
+    "recent_mean_cmg",
+    "recent_std_cmg",
+    "peak_flag",
+    "solar_hour_flag",
+    "lag_1h",
+    "lag_24h",
+    "lag_168h",
+    "is_weekend",
 ]
 _FEATURE_NAMES_V1 = [
-    "soc_pct", "hour_of_day", "day_of_week",
-    "recent_mean_cmg", "recent_std_cmg",
-    "peak_flag", "solar_hour_flag",
-    "lag_1h", "lag_24h",
+    "soc_pct",
+    "hour_of_day",
+    "day_of_week",
+    "recent_mean_cmg",
+    "recent_std_cmg",
+    "peak_flag",
+    "solar_hour_flag",
+    "lag_1h",
+    "lag_24h",
 ]
 
 # Cache TTL — 30 minutes.  Override for testing.
@@ -156,7 +189,7 @@ class CMgPredictor:
         model_path: str | Path = "models/price_predictor.onnx",
         model_p10_path: str | Path | None = None,
         model_p90_path: str | Path | None = None,
-        history_window: int = 192,   # 8 days → supports lag_168h
+        history_window: int = 192,  # 8 days → supports lag_168h
         alpha: float = 0.3,
         cache_ttl_s: float = _CACHE_TTL_S,
     ) -> None:
@@ -206,26 +239,30 @@ class CMgPredictor:
         """Load ONNX models (main + quantile). Fails silently → smoothing fallback."""
         if not (_ONNX_AVAILABLE and self.model_path.exists()):
             log.info(
-                "cmg_predictor.fallback_mode", node=self.node,
+                "cmg_predictor.fallback_mode",
+                node=self.node,
                 reason="no_onnx_model" if not self.model_path.exists() else "onnxruntime_missing",
             )
             return
 
         opts = ort.SessionOptions()
         opts.log_severity_level = 3
-        opts.intra_op_num_threads = 1   # prevents thread-pool churn on edge device
+        opts.intra_op_num_threads = 1  # prevents thread-pool churn on edge device
 
         try:
             self._session = ort.InferenceSession(
-                str(self.model_path), sess_options=opts,
+                str(self.model_path),
+                sess_options=opts,
                 providers=["CPUExecutionProvider"],
             )
             self._input_name = self._session.get_inputs()[0].name  # type: ignore[union-attr]
             self._n_features = self._session.get_inputs()[0].shape[1]  # type: ignore[union-attr]
             self._onnx_loaded = True
             log.info(
-                "cmg_predictor.onnx_loaded", node=self.node,
-                path=str(self.model_path), n_features=self._n_features,
+                "cmg_predictor.onnx_loaded",
+                node=self.node,
+                path=str(self.model_path),
+                n_features=self._n_features,
             )
         except Exception as exc:
             log.warning("cmg_predictor.onnx_load_failed", error=str(exc), node=self.node)
@@ -238,10 +275,15 @@ class CMgPredictor:
         ]:
             if path.exists():
                 try:
-                    setattr(self, attr, ort.InferenceSession(
-                        str(path), sess_options=opts,
-                        providers=["CPUExecutionProvider"],
-                    ))
+                    setattr(
+                        self,
+                        attr,
+                        ort.InferenceSession(
+                            str(path),
+                            sess_options=opts,
+                            providers=["CPUExecutionProvider"],
+                        ),
+                    )
                     log.info("cmg_predictor.quantile_loaded", label=label, path=str(path))
                     self._quantile_loaded = True
                 except Exception as exc:
@@ -283,9 +325,9 @@ class CMgPredictor:
             with open(csv_path, newline="", encoding="utf-8") as f:
                 reader = csv.DictReader(f)
                 rows = sorted(reader, key=lambda r: (r.get("fecha", ""), r.get("hora", "0")))
-                for row in rows[-self.history_window:]:
+                for row in rows[-self.history_window :]:
                     try:
-                        h   = int(float(row.get("hora", row.get("hour", 0))))
+                        h = int(float(row.get("hora", row.get("hour", 0))))
                         cmg = float(row.get("cmg_clp_kwh", row.get("costo_marginal", 0)))
                         self.update(h, cmg)
                         count += 1
@@ -322,10 +364,7 @@ class CMgPredictor:
 
         # ── TTL cache check ──
         now = _time.monotonic()
-        if (
-            self._cache is not None
-            and (now - self._cache[0]) < self._cache_ttl_s
-        ):
+        if self._cache is not None and (now - self._cache[0]) < self._cache_ttl_s:
             return self._cache[1]
 
         # ── Compute fresh forecast ──
@@ -341,33 +380,35 @@ class CMgPredictor:
         """Exponential smoothing prediction — no ML dependencies."""
         recent_vals = [v for _, v in self._history[-24:]] if self._history else []
         if len(recent_vals) >= 2:
-            std  = statistics.stdev(recent_vals)
+            std = statistics.stdev(recent_vals)
             mean = statistics.mean(recent_vals)
-            cv   = std / mean if mean > 0 else 0.5
+            cv = std / mean if mean > 0 else 0.5
         else:
             cv = 0.5
 
         forecasts: list[PriceForecast] = []
         for offset in range(1, 25):
-            h         = (current_hour + offset) % 24
+            h = (current_hour + offset) % 24
             predicted = self._smooth[h]
             horizon_decay = math.exp(-offset / 12)
-            confidence    = max(0.1, (1 - cv) * horizon_decay)
+            confidence = max(0.1, (1 - cv) * horizon_decay)
 
             if offset > 12:
-                w         = (offset - 12) / 12
+                w = (offset - 12) / 12
                 predicted = (1 - w) * predicted + w * _HOURLY_MEAN_CMG[h]
 
             # Simple ±15% bands scaled by confidence
             band = predicted * (0.3 - 0.2 * confidence)
-            forecasts.append(PriceForecast(
-                hour=h,
-                cmg_clp_kwh=round(predicted, 2),
-                confidence=round(confidence, 3),
-                method="exponential_smoothing",
-                cmg_p10=round(max(0.0, predicted - band), 2),
-                cmg_p90=round(predicted + band, 2),
-            ))
+            forecasts.append(
+                PriceForecast(
+                    hour=h,
+                    cmg_clp_kwh=round(predicted, 2),
+                    confidence=round(confidence, 3),
+                    method="exponential_smoothing",
+                    cmg_p10=round(max(0.0, predicted - band), 2),
+                    cmg_p90=round(predicted + band, 2),
+                )
+            )
         return forecasts
 
     def _make_feature_vector(
@@ -386,18 +427,30 @@ class CMgPredictor:
         if self._n_features == 11:
             # v2 model
             vec = [
-                soc_pct, h, day_of_week,
-                recent_mean, recent_std,
-                float(h in _PEAK_HOURS), float(h in _SOLAR_TROUGH_HOURS),
-                lag_1h, lag_24h, lag_168h, is_weekend,
+                soc_pct,
+                h,
+                day_of_week,
+                recent_mean,
+                recent_std,
+                float(h in _PEAK_HOURS),
+                float(h in _SOLAR_TROUGH_HOURS),
+                lag_1h,
+                lag_24h,
+                lag_168h,
+                is_weekend,
             ]
         else:
             # v1 model (9 features, backwards compat)
             vec = [
-                soc_pct, h, day_of_week,
-                recent_mean, recent_std,
-                float(h in _PEAK_HOURS), float(h in _SOLAR_TROUGH_HOURS),
-                lag_1h, lag_24h,
+                soc_pct,
+                h,
+                day_of_week,
+                recent_mean,
+                recent_std,
+                float(h in _PEAK_HOURS),
+                float(h in _SOLAR_TROUGH_HOURS),
+                lag_1h,
+                lag_24h,
             ]
         return np.array([vec], dtype=np.float32)
 
@@ -408,17 +461,21 @@ class CMgPredictor:
 
     def _predict_onnx(self, current_hour: int, current_cmg: float) -> list[PriceForecast]:
         """ONNX inference for all 24h slots, with optional quantile bands."""
-        recent_vals  = [v for _, v in self._history[-24:]] or [current_cmg]
-        recent_mean  = statistics.mean(recent_vals) if recent_vals else _HOURLY_MEAN_CMG[current_hour]
-        recent_std   = statistics.stdev(recent_vals) if len(recent_vals) > 1 else 5.0
-        lag_1h       = self._history[-1][1]   if self._history          else current_cmg
-        lag_24h      = self._history[-24][1]  if len(self._history) >= 24  else recent_mean
-        lag_168h     = self._history[-168][1] if len(self._history) >= 168 else recent_mean
+        recent_vals = [v for _, v in self._history[-24:]] or [current_cmg]
+        recent_mean = (
+            statistics.mean(recent_vals) if recent_vals else _HOURLY_MEAN_CMG[current_hour]
+        )
+        recent_std = statistics.stdev(recent_vals) if len(recent_vals) > 1 else 5.0
+        lag_1h = self._history[-1][1] if self._history else current_cmg
+        lag_24h = self._history[-24][1] if len(self._history) >= 24 else recent_mean
+        lag_168h = self._history[-168][1] if len(self._history) >= 168 else recent_mean
 
         forecasts: list[PriceForecast] = []
         for offset in range(1, 25):
-            h        = (current_hour + offset) % 24
-            features = self._make_feature_vector(h, recent_mean, recent_std, lag_1h, lag_24h, lag_168h)
+            h = (current_hour + offset) % 24
+            features = self._make_feature_vector(
+                h, recent_mean, recent_std, lag_1h, lag_24h, lag_168h
+            )
 
             try:
                 predicted = max(0.0, self._run_session(self._session, features))
@@ -440,18 +497,20 @@ class CMgPredictor:
 
             except Exception as exc:
                 log.warning("cmg_predictor.onnx_inference_error", error=str(exc), hour=h)
-                predicted  = self._smooth[h]
+                predicted = self._smooth[h]
                 confidence = 0.3
-                p10 = p90  = 0.0
+                p10 = p90 = 0.0
 
-            forecasts.append(PriceForecast(
-                hour=h,
-                cmg_clp_kwh=round(predicted, 2),
-                confidence=round(confidence, 3),
-                method="onnx",
-                cmg_p10=round(p10, 2) if p10 else 0.0,
-                cmg_p90=round(p90, 2) if p90 else 0.0,
-            ))
+            forecasts.append(
+                PriceForecast(
+                    hour=h,
+                    cmg_clp_kwh=round(predicted, 2),
+                    confidence=round(confidence, 3),
+                    method="onnx",
+                    cmg_p10=round(p10, 2) if p10 else 0.0,
+                    cmg_p90=round(p90, 2) if p90 else 0.0,
+                )
+            )
         return forecasts
 
     # ── Utilities ─────────────────────────────────────────────────────────────
@@ -496,10 +555,10 @@ class CMgPredictor:
         """Estimate daily arbitrage revenue (CLP) using point-estimate prices."""
         if not forecasts:
             return 0.0
-        prices             = [f.cmg_clp_kwh for f in forecasts]
-        energy_dispatched  = capacity_kwh * efficiency
-        cost_to_charge     = capacity_kwh * min(prices)
-        revenue_discharge  = energy_dispatched * max(prices)
+        prices = [f.cmg_clp_kwh for f in forecasts]
+        energy_dispatched = capacity_kwh * efficiency
+        cost_to_charge = capacity_kwh * min(prices)
+        revenue_discharge = energy_dispatched * max(prices)
         return round(revenue_discharge - cost_to_charge, 2)
 
     def projected_arbitrage_revenue_conservative(
@@ -511,7 +570,7 @@ class CMgPredictor:
         """Conservative estimate: charge at p90 (worst charge price), discharge at p10 (worst discharge)."""
         if not forecasts:
             return 0.0
-        charge_price    = max((f.cmg_p90 for f in forecasts), default=0.0)
+        charge_price = max((f.cmg_p90 for f in forecasts), default=0.0)
         discharge_price = min((f.cmg_p10 for f in forecasts if f.is_peak), default=0.0)
-        energy          = capacity_kwh * efficiency
+        energy = capacity_kwh * efficiency
         return round(energy * discharge_price - capacity_kwh * charge_price, 2)

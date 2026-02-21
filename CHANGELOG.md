@@ -7,15 +7,16 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-20T19:52 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-21T11:16 -03:00)
 
 > [!IMPORTANT]
-> **v1.3.1 — CI verde + Mega Scraper + Diagnóstico API CEN** (2026-02-20)
-> - CI/CD 100% verde: ruff ✅ · mypy ✅ · pytest 321/321 ✅ · Helm ✅ · Terraform ✅ — commit `002a923`
-> - `sources/mega_scraper_energia_abierta.py` v1.0 — 8 módulos (CMg, ERNC, generación, combustibles, CO₂, embalsada)
+> **v1.3.2 — CI verde restaurado + 372 tests** (2026-02-21)
+> - `ruff format` aplicado en 4 archivos: `arbitrage_engine.py`, `cmg_predictor.py`, `dashboard_api.py`, `test_luna2000_driver_async.py`
+> - CI/CD 100% verde: ruff ✅ · mypy ✅ · pytest 372/372 ✅ · Helm ✅ · Terraform ✅
+> - Suite real: **372 tests** (vs 228 documentados en v1.3.1 — la suite creció con nuevas iteraciones)
 > - **Auth API CEN confirmada**: `?user_key=TOKEN` (NO Bearer) · endpoint correcto: `/costo-marginal-real/v4/findByDate`
 > - **Estado fuentes datos**: CNE públicos (5 módulos) listos sin bloqueo · CEN plan "Mercados" por verificar · DMC no implementado
-> - **Próximas acciones**: ejecutar CNE público → verificar plan Mercados CEN → implementar módulo DMC → entrenar ONNX
+> - **Próximas acciones**: verificar plan Mercados CEN → ejecutar CNE público → implementar módulo DMC → entrenar ONNX con datos reales
 
 
 
@@ -140,6 +141,27 @@ All notable changes to this project are documented here.
 Format: [Semantic Versioning](https://semver.org/) · [Conventional Commits](https://www.conventionalcommits.org/)
 
 ---
+
+---
+
+## [v1.3.2] — 2026-02-21
+
+### Fixed
+- **CI / Formato (ruff format)** — 4 archivos reformateados que bloqueaban el pipeline:
+  - `src/interfaces/arbitrage_engine.py`
+  - `src/interfaces/cmg_predictor.py`
+  - `src/interfaces/dashboard_api.py`
+  - `tests/test_luna2000_driver_async.py`
+
+### Changed
+- Documentación actualizada: suite real en **372 tests** (vs 228 documentados en v1.3.1)
+- `PROJECT_STATUS.md` — versión bump a v1.3.2, historial actualizado
+
+### Tests
+```
+372 / 372 passed (suite completa open-bess-edge)
+CI verde: ruff ✅ · mypy ✅ · pytest ✅ · helm ✅ · terraform ✅
+```
 
 ---
 

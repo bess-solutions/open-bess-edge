@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/Tests-73%2F73%20%E2%9C%85-success)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-372%2F372%20%E2%9C%85-success)](tests/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![CI](https://github.com/bess-solutions/open-bess-edge/actions/workflows/ci.yml/badge.svg)](https://github.com/bess-solutions/open-bess-edge/actions)
 
@@ -10,7 +10,7 @@
 
 ---
 
-## 🚀 Estado del Proyecto — v0.5.0
+## 🚀 Estado del Proyecto — v1.3.2
 
 | Componente | Estado |
 |---|---|
@@ -175,8 +175,8 @@ pytest tests/ --cov=src --cov-report=html
 
 **Resultado actual:**
 ```
-73 passed in 11.89s  ✅
-Python 3.14 · pytest-asyncio 1.3.0 · numpy 2.4.2 · scikit-learn 1.8.0 · onnxruntime 1.24.2
+372 passed in ~30s  ✅
+Python 3.14 · pytest-asyncio · numpy 2.4.x · scikit-learn 1.8.x · onnxruntime 1.24.x
 ```
 
 > **Nota:** No se requiere archivo `.env` para los tests. El `conftest.py` inyecta las variables mínimas automáticamente.
