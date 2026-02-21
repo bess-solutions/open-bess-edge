@@ -7,20 +7,21 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-21T13:59 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-21T14:10 -03:00)
 
 > [!IMPORTANT]
-> **v1.4.0 — Estándares internacionales implementados** (2026-02-21)
-> - Commit `474fb27` → main: 22 archivos, 1.871 lneas nuevas
-> - CI ahora tiene **9 jobs**: lint + typecheck + test + **security** (bandit+pip-audit) + terraform + helm + docker-build + **trivy** (CVE scan SARIF) + docker-push
-> - Dependabot activado: pip + github-actions + docker (semanal, ya creando PRs automáticos)
-> - Release pipeline: SBOM (CycloneDX JSON+XML) + firma imagen cosign (sigstore keyless)
-> - **Gobernanza OSS**: SECURITY.md, CODE_OF_CONDUCT.md, GOVERNANCE.md, CONTRIBUTING.md
-> - **ADRs**: 5 decisiones documentadas en `docs/adr/` (pydantic-settings, struct Modbus, IsolationForest, ONNX, Pub/Sub)
-> - **Compliance**: NTSyCS CEN Chile + IEC 62443 SL-1 mapeados en `docs/compliance/`
-> - **Prometheus**: 12 alert rules en `infrastructure/prometheus/alert_rules.yml`
-> - Tests: 372/372 ✅ · ruff ✅ · Docker stack: gateway healthy en localhost:8000
-> - **Próximas acciones**: registrar en OpenSSF Best Practices badge · verificar plan Mercados CEN · entrenar ONNX con datos reales
+> **v1.5.0 — Sitio de documentación + PyPI package + API Reference** (2026-02-21)
+> - Commit `8d495e3` → main: 7 archivos, 736 líneas
+> - `mkdocs.yml`: sitio MkDocs con tema Material, dark/light mode, navegación completa
+> - `.github/workflows/docs.yml`: deploy automático a GitHub Pages en push a main
+> - `.github/workflows/pypi.yml`: pipeline PyPI con Trusted Publisher OIDC
+> - `pyproject.toml`: metadata PEP 621 completa para `bessai-edge` package
+> - `docs/index.md`: landing page del sitio con arquitectura Mermaid, features, status
+> - `docs/api_reference.md`: documentación REST completa (/health, /metrics, /api/v1/status, /dispatch)
+> - `docs/runbook.md`: actualizado con procedimientos operacionales y matriz de escalación
+> - **Pendiente manual:** Activar GitHub Pages en Settings → Pages → gh-pages branch
+> - **Pendiente manual:** Registrar en [OpenSSF Best Practices](https://www.bestpractices.dev/) para badge real
+> - **Próximas acciones:** verificar API CEN plan Mercados → entrenar ONNX real → publicar en PyPI
 
 
 

@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-21T14:00 v1.4.0 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-21T14:10 v1.5.0 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,7 +14,7 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 
 ---
 
-## ✅ Estado Actual — v1.4.0
+## ✅ Estado Actual — v1.5.0
 
 ### Tests
 ```
@@ -141,6 +141,7 @@ v1.3.0  ████████████████████████
 v1.3.1  ████████████████████████  ✅ CI 100% verde (ruff+mypy fix) · Mega Scraper 8 módulos
 v1.3.2  ████████████████████████  ✅ ruff format fix (4 archivos) · suite actualizada 372 tests
 v1.4.0  ████████████████████████  ✅ Estándares internacionales: OSS governance, supply chain security, ADRs, compliance
+v1.5.0  ████████████████████████  ✅ MkDocs site · PyPI package · API Reference · Runbook operacional
 v2.0.0  ░░░░░░░░░░░░░░░░░░░░░░░░  📋 Multi-site planetary scale
 ```
 
