@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import signal
 import time
 from importlib.metadata import version as _pkg_version
@@ -46,7 +47,9 @@ import structlog
 
 from src.core.config import get_settings
 from src.core.safety import SafetyGuard
+from src.drivers.base import DataProvider
 from src.drivers.modbus_driver import UniversalDriver
+from src.drivers.simulator_driver import SimulatorDriver, SimMode
 from src.interfaces.health import HealthServer
 from src.interfaces.metrics import (
     CYCLES_TOTAL,
@@ -103,7 +106,7 @@ def _handle_signal(sig: signal.Signals) -> None:
 # ---------------------------------------------------------------------------
 
 
-async def _acquire(driver: UniversalDriver) -> dict[str, Any]:
+async def _acquire(driver: DataProvider) -> dict[str, Any]:
     """
     Read ``_ACQUISITION_TAGS`` from the device.  Tags that fail are logged
     and skipped so a single bad register does not block valid readings.
@@ -124,7 +127,7 @@ async def _acquire(driver: UniversalDriver) -> dict[str, Any]:
 
 def _ensure_watchdog(
     guard: SafetyGuard,
-    driver: UniversalDriver,
+    driver: DataProvider,
     watchdog_ref: list[asyncio.Task[None]],
 ) -> None:
     """
@@ -177,12 +180,44 @@ async def main() -> None:  # noqa: C901
     configure_otel()
     tracer = get_tracer()
 
-    # ── Step 3 — Driver instantiation ────────────────────────────────────
-    driver = UniversalDriver(
-        host=_cfg.inverter_ip_str,
-        port=_cfg.INVERTER_PORT,
-        profile_path=_cfg.driver_profile_abs,
+    # ── Step 3 — Driver instantiation (factory: sim ↔ real) ─────────────
+    # Decision logic:
+    #   BESSAI_MODE=demo        → always SimulatorDriver
+    #   BESSAI_MODE=production  → always UniversalDriver (fails if IP missing)
+    #   BESSAI_MODE=auto (def.) → SimulatorDriver if INVERTER_IP not set, else UniversalDriver
+    _bessai_mode = os.getenv("BESSAI_MODE", "auto").lower()
+    _inverter_ip = getattr(_cfg, "inverter_ip_str", None) or os.getenv("INVERTER_IP", "")
+
+    _use_sim = (
+        _bessai_mode == "demo"
+        or (_bessai_mode == "auto" and not _inverter_ip)
     )
+
+    driver: DataProvider
+    if _use_sim:
+        _sim_mode = os.getenv("BESSAI_SIM_MODE", SimMode.NORMAL)
+        _profile   = getattr(_cfg, "DEVICE_PROFILE", "huawei_sun2000")
+        driver = SimulatorDriver(
+            profile=_profile,
+            mode=_sim_mode,
+        )
+        log.info(
+            "startup.driver.sim",
+            profile=_profile,
+            sim_mode=_sim_mode,
+            tip="Set INVERTER_IP in .env to switch to real hardware",
+        )
+    else:
+        driver = UniversalDriver(
+            host=_cfg.inverter_ip_str,
+            port=_cfg.INVERTER_PORT,
+            profile_path=_cfg.driver_profile_abs,
+        )
+        log.info(
+            "startup.driver.real",
+            host=_cfg.inverter_ip_str,
+            port=_cfg.INVERTER_PORT,
+        )
 
     # ── Step 4 — Connect (fail fast if unreachable) ───────────────────────
     try:
