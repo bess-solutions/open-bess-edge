@@ -64,7 +64,6 @@ except ImportError:
     middleware = None  # type: ignore[assignment]
 
 
-
 class DashboardState:
     """Shared state object updated by the main orchestrator loop.
 
@@ -274,9 +273,7 @@ class DashboardAPI:
         import datetime
 
         current_hour = datetime.datetime.now().hour
-        node = (
-            dict(request.rel_url.query).get("node", self.state.schedule_node)
-        )
+        node = dict(request.rel_url.query).get("node", self.state.schedule_node)
 
         # ── Fast path: return cached result (within 15 min) ────────────────
         if (
@@ -286,10 +283,7 @@ class DashboardAPI:
             return self._json_response(self.state._schedule_dict)
 
         # ── Primary: data-flywheel ArbitragePipeline ───────────────────────
-        if (
-            _FLYWHEEL_AVAILABLE
-            and self.state.arbitrage_pipeline is not None
-        ):
+        if _FLYWHEEL_AVAILABLE and self.state.arbitrage_pipeline is not None:
             try:
                 opps = self.state.arbitrage_pipeline.run(force_refresh=False)
                 result = {
@@ -360,23 +354,27 @@ class DashboardAPI:
         """ONNX dispatch status."""
         if not await self._check_auth(request):
             return self._unauthorized()
-        return self._json_response({
-            "available": self.state.onnx_available,
-            "dispatch_kw": self.state.onnx_dispatch_kw,
-            "inference_ms": round(self.state.onnx_inference_ms, 2),
-            "dispatch_count": self.state.onnx_dispatch_count,
-        })
+        return self._json_response(
+            {
+                "available": self.state.onnx_available,
+                "dispatch_kw": self.state.onnx_dispatch_kw,
+                "inference_ms": round(self.state.onnx_inference_ms, 2),
+                "dispatch_count": self.state.onnx_dispatch_count,
+            }
+        )
 
     async def handle_ids(self, request: Any) -> Any:
         """AI-IDS status."""
         if not await self._check_auth(request):
             return self._unauthorized()
-        return self._json_response({
-            "score": round(self.state.ids_score, 4),
-            "alert_count": self.state.ids_alert_count,
-            "trained": self.state.ids_trained,
-            "status": "alarm" if self.state.ids_score > 0.7 else "nominal",
-        })
+        return self._json_response(
+            {
+                "score": round(self.state.ids_score, 4),
+                "alert_count": self.state.ids_alert_count,
+                "trained": self.state.ids_trained,
+                "status": "alarm" if self.state.ids_score > 0.7 else "nominal",
+            }
+        )
 
     # ------------------------------------------------------------------
     # Lifecycle

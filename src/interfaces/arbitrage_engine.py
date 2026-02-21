@@ -178,8 +178,8 @@ class ArbitrageEngine:
         self.max_discharge_hours = max_discharge_hours
         self.node = node
         # v2 uncertainty controls
-        self.min_confidence = min_confidence   # skip hours below this confidence
-        self.min_spread_clp = min_spread_clp   # min price spread to trade (p90_max - p10_min)
+        self.min_confidence = min_confidence  # skip hours below this confidence
+        self.min_spread_clp = min_spread_clp  # min price spread to trade (p90_max - p10_min)
 
     # ── Core computation ──────────────────────────────────────────────────────
 

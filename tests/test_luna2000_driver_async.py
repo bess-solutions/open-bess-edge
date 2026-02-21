@@ -34,15 +34,15 @@ def _make_register_mock(values: dict[int, list[int]]) -> MagicMock:
 
 # Register map for a LUNA2000 at 60% SOC, discharging 10 kW
 _LUNA_REGS: dict[int, list[int]] = {
-    37752: [0x0106],       # temp = 262 → 26.2°C
-    37760: [600],          # SOC = 600 → 60.0%
-    37761: [980],          # SOH = 980 → 98.0%
-    37762: [123],          # cycles
-    37758: [0, 10000],     # capacity = 10.0 kWh
+    37752: [0x0106],  # temp = 262 → 26.2°C
+    37760: [600],  # SOC = 600 → 60.0%
+    37761: [980],  # SOH = 980 → 98.0%
+    37762: [123],  # cycles
+    37758: [0, 10000],  # capacity = 10.0 kWh
     37765: [0xFFFF, 0xD8F0],  # power = -10000 → -10.0 kW
-    37800: [4800],         # voltage = 480 V
-    37801: [0xFFD2],       # current = -46 → -4.6 A
-    47086: [0],            # mode = MAX_SELF_CONSUMPTION
+    37800: [4800],  # voltage = 480 V
+    37801: [0xFFD2],  # current = -46 → -4.6 A
+    47086: [0],  # mode = MAX_SELF_CONSUMPTION
 }
 
 
@@ -125,17 +125,13 @@ class TestSetMode:
     async def test_set_mode_fully_charged(self):
         drv, mock_client = _driver_with_mock()
         await drv.set_mode(BatteryMode.FULLY_CHARGED)
-        mock_client.write_register.assert_called_once_with(
-            address=47086, value=1, slave=3
-        )
+        mock_client.write_register.assert_called_once_with(address=47086, value=1, slave=3)
 
     @pytest.mark.asyncio
     async def test_set_mode_remote_dispatch(self):
         drv, mock_client = _driver_with_mock()
         await drv.set_mode(BatteryMode.REMOTE_DISPATCH)
-        mock_client.write_register.assert_called_once_with(
-            address=47086, value=3, slave=3
-        )
+        mock_client.write_register.assert_called_once_with(address=47086, value=3, slave=3)
 
 
 # ---------------------------------------------------------------------------
@@ -149,25 +145,19 @@ class TestSetChargeTargetSOC:
         drv, mock_client = _driver_with_mock()
         await drv.set_charge_target_soc(80.0)
         # REG_LUNA_TARGET_SOC = 47087 (registro contiguo al modo 47086)
-        mock_client.write_register.assert_called_once_with(
-            address=47087, value=800, slave=3
-        )
+        mock_client.write_register.assert_called_once_with(address=47087, value=800, slave=3)
 
     @pytest.mark.asyncio
     async def test_valid_target_100_pct(self):
         drv, mock_client = _driver_with_mock()
         await drv.set_charge_target_soc(100.0)
-        mock_client.write_register.assert_called_once_with(
-            address=47087, value=1000, slave=3
-        )
+        mock_client.write_register.assert_called_once_with(address=47087, value=1000, slave=3)
 
     @pytest.mark.asyncio
     async def test_valid_target_0_pct(self):
         drv, mock_client = _driver_with_mock()
         await drv.set_charge_target_soc(0.0)
-        mock_client.write_register.assert_called_once_with(
-            address=47087, value=0, slave=3
-        )
+        mock_client.write_register.assert_called_once_with(address=47087, value=0, slave=3)
 
     @pytest.mark.asyncio
     async def test_raises_on_negative_target(self):

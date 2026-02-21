@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-20T16:10 v1.3.1 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-21T11:16 v1.3.2 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,11 +14,11 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 
 ---
 
-## ✅ Estado Actual — v1.3.1
+## ✅ Estado Actual — v1.3.2
 
 ### Tests
 ```
-228 / 228 passed ✅  (suite completa open-bess-edge)
+372 / 372 passed ✅  (suite completa open-bess-edge)
 CI: ruff ✅ · mypy ✅ · pytest ✅ · helm ✅ · terraform ✅ · docker (skipped — no infra change)
 ```
 
@@ -119,7 +119,7 @@ GET /api/v1/health   → ok / degraded
 
 ### Bloqueadores activos
 
-> 🎉 **Sin bloqueadores activos** — pipeline CI/CD (7 jobs) operativo.
+> 🎉 **Sin bloqueadores activos** — pipeline CI/CD (7 jobs) operativo. Fix formato ruff aplicado (v1.3.2).
 
 ---
 
@@ -136,6 +136,7 @@ v1.0.1  ████████████████████████
 v1.2.0  ████████████████████████  ✅ CMgPredictor v2 + ArbitrageEngine v2 + Dashboard
 v1.3.0  ████████████████████████  ✅ bessai-cen-data v0.3.0: 11 features ONNX · pipeline fix · CLI bessai-fetch-renewables/bessai-build-dataset · bessai-web API polling
 v1.3.1  ████████████████████████  ✅ CI 100% verde (ruff+mypy fix) · Mega Scraper 8 módulos · sources/data/ pipeline
+v1.3.2  ████████████████████████  ✅ ruff format fix (4 archivos) · suite actualizada 372 tests
 v2.0.0  ░░░░░░░░░░░░░░░░░░░░░░░░  📋 Multi-site planetary scale
 ```
 
@@ -277,3 +278,4 @@ pytest tests/ -v --tb=short
 | 2026-02-20 | **v1.2.0** | **57+228** | **CMgPredictor v2** (TTL cache, int8, p10/p90) · **ArbitrageEngine v2** (umbral confianza, spread mín) · `train_price_model.py v2` (11 features, ensemble, batch) · Dashboard web arbitraje |
 | 2026-02-20 | **v1.3.0** | **228/228** | **bessai-cen-data v0.3.0**: `pipeline.py` corregido 9→11 features (`lag_168h`, `is_weekend`), shape (24,11) match v2 ONNX · `pyproject.toml` v0.3.0 + CLI `bessai-fetch-renewables`/`bessai-build-dataset` · `bessai-web` polling real `/api/v1/schedule` + `/api/v1/status` · `drawChartFromSchedule()` con zonas carga/descarga · renewable-energy-chile dashboard: 5 bugs arreglados |
 | 2026-02-20 | **v1.3.1** | **228/228** | **CI 100% verde**: fix ruff UP045/UP037/I001/F401 + mypy attr-defined en `_run_session` · **Mega Scraper** `sources/mega_scraper_energia_abierta.py` v1.0: 8 módulos CNE+CEN, pipeline `historical/market/training/`, dry-run verificado |
+| 2026-02-21 | **v1.3.2** | **372/372** | **ruff format fix**: 4 archivos reformateados (`arbitrage_engine.py`, `cmg_predictor.py`, `dashboard_api.py`, `test_luna2000_driver_async.py`) · Suite real actualizada de 228 → 372 tests |
