@@ -26,6 +26,7 @@ Usage::
 
 from __future__ import annotations
 
+import mimetypes
 import os
 import time
 from pathlib import Path
@@ -261,6 +262,24 @@ class DashboardAPI:
             }
         )
 
+    async def handle_dashboard(self, request: Any) -> Any:
+        """Serve the static dashboard SPA (index.html)."""
+        dashboard_dir = Path(__file__).resolve().parents[2] / "dashboard"
+        file = dashboard_dir / "index.html"
+        if not file.exists():
+            return web.Response(text="Dashboard UI not found. Run from project root.", status=404)
+        return web.FileResponse(file)
+
+    async def handle_static(self, request: Any) -> Any:
+        """Serve CSS/JS assets under /dashboard/static/."""
+        filename = request.match_info.get("filename", "")
+        dashboard_dir = Path(__file__).resolve().parents[2] / "dashboard"
+        file = dashboard_dir / filename
+        if not file.exists() or not file.is_file():
+            return web.Response(text="Not found", status=404)
+        mime, _ = mimetypes.guess_type(str(file))
+        return web.FileResponse(file, headers={"Content-Type": mime or "application/octet-stream"})
+
     async def handle_schedule(self, request: Any) -> Any:
         """Compute and return optimal 24h arbitrage dispatch schedule.
 
@@ -422,6 +441,9 @@ class DashboardAPI:
                 log.warning("dashboard_api.flywheel_init_failed", error=str(exc))
 
         self._app = web.Application(middlewares=[cors_middleware])
+        self._app.router.add_get("/", self.handle_dashboard)
+        self._app.router.add_get("/dashboard", self.handle_dashboard)
+        self._app.router.add_get("/{filename:.*\.(?:css|js|ico|png|svg)}", self.handle_static)
         self._app.router.add_get("/api/v1/status", self.handle_status)
         self._app.router.add_get("/api/v1/fleet", self.handle_fleet)
         self._app.router.add_get("/api/v1/carbon", self.handle_carbon)

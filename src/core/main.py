@@ -34,7 +34,13 @@ import asyncio
 import logging
 import signal
 import time
+from importlib.metadata import version as _pkg_version
 from typing import Any
+
+try:
+    _GATEWAY_VERSION: str = _pkg_version("bessai-edge")
+except Exception:
+    _GATEWAY_VERSION = "dev"
 
 import structlog
 
@@ -192,18 +198,24 @@ async def main() -> None:  # noqa: C901
     # ── Step 5b — Health & Metrics server ────────────────────────────────
     health_server = HealthServer(
         site_id=_cfg.SITE_ID,
-        version="0.4.1",
+        version=_GATEWAY_VERSION,
         port=_cfg.HEALTH_PORT,
     )
     # Register static info gauge
-    GATEWAY_INFO.labels(site_id=_cfg.SITE_ID, version="0.4.1").set(1)
+    GATEWAY_INFO.labels(site_id=_cfg.SITE_ID, version=_GATEWAY_VERSION).set(1)
 
     # ── Step 5 — Safety guard, publisher, watchdog reference ─────────────
     guard = SafetyGuard(watchdog_interval_s=1.0)
     watchdog_ref: list[asyncio.Task[None]] = []  # mutable single-element ref
 
-    assert _cfg.GCP_PROJECT_ID is not None, "GCP_PROJECT_ID must be set"
-    assert _cfg.GCP_PUBSUB_TOPIC is not None, "GCP_PUBSUB_TOPIC must be set"
+    if not _cfg.GCP_PROJECT_ID:
+        raise ValueError(
+            "GCP_PROJECT_ID is required. Set it in config/.env or as an environment variable."
+        )
+    if not _cfg.GCP_PUBSUB_TOPIC:
+        raise ValueError(
+            "GCP_PUBSUB_TOPIC is required. Set it in config/.env or as an environment variable."
+        )
     async with (
         PubSubPublisher(
             project_id=_cfg.GCP_PROJECT_ID,

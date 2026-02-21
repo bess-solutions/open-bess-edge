@@ -85,6 +85,9 @@ services:
       PYTHONPATH: "/app"
     ports:
       - "8000:8000" # /health and /metrics HTTP endpoints
+      - "8080:8080" # Dashboard UI → http://localhost:8080
+    volumes:
+      - ../../dashboard:/app/dashboard:ro  # serve static assets
     networks:
       - bess-net
     depends_on:
@@ -116,6 +119,8 @@ services:
       # GCP not needed in simulator mode — use fake values
       GCP_PROJECT_ID: "local-dev"
       GCP_PUBSUB_TOPIC: "bess-telemetry-sim"
+    volumes:
+      - ../../dashboard:/app/dashboard:ro
     depends_on:
       otel-collector:
         condition: service_started
