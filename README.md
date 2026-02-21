@@ -7,7 +7,7 @@
 [![CI](https://github.com/bess-solutions/open-bess-edge/actions/workflows/ci.yml/badge.svg)](https://github.com/bess-solutions/open-bess-edge/actions)
 [![Multi-Arch](https://github.com/bess-solutions/open-bess-edge/actions/workflows/docker-multiarch.yml/badge.svg)](https://github.com/bess-solutions/open-bess-edge/actions)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-red?logo=github)](SECURITY.md)
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/10716/badge)](https://www.bestpractices.dev/projects/10716)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12001/badge)](https://www.bestpractices.dev/projects/12001)
 [![IEC 62443](https://img.shields.io/badge/IEC_62443-SL--1_Mapped-orange)](docs/compliance/iec62443_mapping.md)
 [![NTSyCS](https://img.shields.io/badge/NTSyCS-CEN_Chile-green)](docs/compliance/ntscys_compliance.md)
 
