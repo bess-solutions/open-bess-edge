@@ -1,0 +1,256 @@
+{
+    "$schema": "https://bessai.io/schemas/device-profile/v2.json",
+    "profile_version": "2.0.0",
+    "device": {
+        "manufacturer": "Fronius",
+        "model": "Symo GEN24 Plus 10.0 / BYD Battery-Box Premium HVS",
+        "description": "Fronius Symo GEN24 Plus hybrid inverter with BYD HVS battery stack via Fronius Smart Meter integrated Modbus TCP. Three-phase 3–12kW.",
+        "firmware_reference": "Fronius Modbus Sunspec (float) register map v3.4 (2025) + Fronius Hybrid Register Map",
+        "protocol": "ModbusTCP",
+        "slave_id_default": 1,
+        "rs485_baud": 9600,
+        "rs485_parity": "N",
+        "rs485_stopbits": 1,
+        "markets": [
+            "EU",
+            "AU"
+        ],
+        "certifications": [
+            "IEC 62109-1",
+            "IEC 62109-2",
+            "VDE-AR-N 4105",
+            "AS/NZS 4777.2"
+        ],
+        "notes": "Follows SunSpec Alliance float register format. Unit ID: 1 (inverter), 200 (Smart Meter grid point). TCP port 502."
+    },
+    "connection": {
+        "byte_order": "BIG",
+        "word_order": "BIG",
+        "timeout_seconds": 3,
+        "retries": 3
+    },
+    "registers": {
+        "inverter_status": {
+            "address": 40107,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RO",
+            "scale": 1,
+            "unit": "enum",
+            "description": "SunSpec inverter status: 1=Off, 2=Sleeping, 3=Starting, 4=MPPT, 5=Throttled, 6=Shutting down, 7=Fault, 8=Standby"
+        },
+        "ac_power_total": {
+            "address": 40083,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RO",
+            "scale": 1,
+            "unit": "W",
+            "description": "AC power output (SunSpec FLOAT32). Positive = exporting."
+        },
+        "ac_voltage_l1": {
+            "address": 40072,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RO",
+            "scale": 1,
+            "unit": "V",
+            "description": "Phase L1 voltage"
+        },
+        "ac_voltage_l2": {
+            "address": 40074,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RO",
+            "scale": 1,
+            "unit": "V",
+            "description": "Phase L2 voltage"
+        },
+        "ac_voltage_l3": {
+            "address": 40076,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RO",
+            "scale": 1,
+            "unit": "V",
+            "description": "Phase L3 voltage"
+        },
+        "ac_current_total": {
+            "address": 40071,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RO",
+            "scale": 1,
+            "unit": "A",
+            "description": "Total AC current"
+        },
+        "ac_frequency": {
+            "address": 40085,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RO",
+            "scale": 1,
+            "unit": "Hz",
+            "description": "AC output frequency"
+        },
+        "dc_power": {
+            "address": 40101,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RO",
+            "scale": 1,
+            "unit": "W",
+            "description": "Total DC input power from PV strings"
+        },
+        "dc_voltage": {
+            "address": 40099,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RO",
+            "scale": 1,
+            "unit": "V",
+            "description": "DC bus voltage"
+        },
+        "internal_temperature": {
+            "address": 40103,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RO",
+            "scale": 1,
+            "unit": "°C",
+            "description": "Inverter heat-sink temperature"
+        },
+        "daily_energy": {
+            "address": 40093,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RO",
+            "scale": 1,
+            "unit": "Wh",
+            "description": "Energy produced today"
+        },
+        "total_energy": {
+            "address": 40095,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RO",
+            "scale": 1,
+            "unit": "Wh",
+            "description": "Lifetime energy produced"
+        },
+        "battery_soc": {
+            "address": 40361,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RO",
+            "scale": 1,
+            "unit": "%",
+            "description": "Battery State of Charge (Fronius Battery / BYD HVS, 0.0–100.0%)"
+        },
+        "battery_power": {
+            "address": 40425,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RO",
+            "scale": 1,
+            "unit": "W",
+            "description": "Battery power. Positive = charging, Negative = discharging."
+        },
+        "battery_voltage": {
+            "address": 40427,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RO",
+            "scale": 1,
+            "unit": "V",
+            "description": "Battery pack voltage"
+        },
+        "battery_current": {
+            "address": 40429,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RO",
+            "scale": 1,
+            "unit": "A",
+            "description": "Battery current. Positive = charging."
+        },
+        "battery_temperature": {
+            "address": 40431,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RO",
+            "scale": 1,
+            "unit": "°C",
+            "description": "BYD HVS battery pack temperature"
+        },
+        "battery_status": {
+            "address": 40357,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RO",
+            "scale": 1,
+            "unit": "enum",
+            "description": "Battery status: 0=Off, 1=Empty, 2=Discharging, 3=Charging, 4=Full, 5=Holding, 6=Testing"
+        },
+        "grid_power": {
+            "address": 40097,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RO",
+            "scale": 1,
+            "unit": "W",
+            "description": "Power drawn from grid (unit_id=200, Smart Meter). Positive = import."
+        },
+        "storage_control_mode": {
+            "address": 40349,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RW",
+            "scale": 1,
+            "unit": "enum",
+            "description": "Battery control: 0=Disabled, 1=Auto (E-Manager), 2=External (TOU/API)"
+        },
+        "storage_setpoint_power": {
+            "address": 40351,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RW",
+            "scale": 1,
+            "unit": "W",
+            "description": "Charge/discharge setpoint when control mode=External. Positive = charge."
+        },
+        "storage_minimum_soc": {
+            "address": 40353,
+            "count": 2,
+            "type": "FLOAT32",
+            "access": "RW",
+            "scale": 1,
+            "unit": "%",
+            "description": "Minimum SOC threshold for forced discharge protection"
+        },
+        "watchdog_heartbeat": {
+            "address": 40355,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RW",
+            "scale": 1,
+            "unit": "count",
+            "description": "Watchdog heartbeat. Increment and write periodically to keep External control mode active."
+        }
+    },
+    "alarm_bits": {
+        "battery_status": {
+            "0": "Off — battery disconnected",
+            "1": "Empty — at minimum SOC",
+            "2": "Discharging",
+            "3": "Charging",
+            "4": "Full — at maximum SOC",
+            "5": "Holding — idle at target SOC",
+            "6": "Testing — internal BMS self-check"
+        }
+    },
+    "soc": {
+        "address": 40361,
+        "register_alias": "battery_soc"
+    }
+}

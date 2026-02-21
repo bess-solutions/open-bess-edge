@@ -1,0 +1,251 @@
+{
+    "$schema": "https://bessai.io/schemas/device-profile/v2.json",
+    "profile_version": "2.0.0",
+    "device": {
+        "manufacturer": "Victron Energy",
+        "model": "MultiPlus-II 48/5000 + SmartShunt 500A",
+        "description": "Victron MultiPlus-II inverter/charger with VE.Bus Modbus-TCP interface via Venus OS (Raspberry Pi / Cerbo GX). Popular for off-grid and microgrid installations worldwide.",
+        "firmware_reference": "Victron Modbus-TCP FAQ + VE.Bus register list v2.93 (2025)",
+        "protocol": "ModbusTCP",
+        "slave_id_default": 227,
+        "rs485_baud": 9600,
+        "rs485_parity": "N",
+        "rs485_stopbits": 1,
+        "markets": [
+            "EU",
+            "AU",
+            "LATAM",
+            "AFRICA",
+            "OFFGRID"
+        ],
+        "certifications": [
+            "IEC 62109-1",
+            "IEC 62109-2",
+            "VDE 0126-1-1"
+        ],
+        "notes": "Requires Venus OS on Cerbo GX or RPi. Unit IDs: 100=Quattro/MultiPlus, 223=BMS, 227=VE.Bus System, 228=Grid"
+    },
+    "connection": {
+        "byte_order": "BIG",
+        "word_order": "BIG",
+        "timeout_seconds": 5,
+        "retries": 3
+    },
+    "registers": {
+        "ac_input_voltage": {
+            "address": 3,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RO",
+            "scale": 0.1,
+            "unit": "V",
+            "description": "AC input (grid) voltage (unit_id=228 for ESS grid meter)"
+        },
+        "ac_input_current": {
+            "address": 6,
+            "count": 1,
+            "type": "INT16",
+            "access": "RO",
+            "scale": 0.1,
+            "unit": "A",
+            "description": "AC input current. Positive = import from grid."
+        },
+        "ac_input_power": {
+            "address": 12,
+            "count": 1,
+            "type": "INT16",
+            "access": "RO",
+            "scale": 1,
+            "unit": "W",
+            "description": "AC input total power. Positive = import."
+        },
+        "ac_output_voltage": {
+            "address": 15,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RO",
+            "scale": 0.1,
+            "unit": "V",
+            "description": "AC output voltage to loads"
+        },
+        "ac_output_current": {
+            "address": 18,
+            "count": 1,
+            "type": "INT16",
+            "access": "RO",
+            "scale": 0.1,
+            "unit": "A",
+            "description": "AC output current to loads"
+        },
+        "ac_output_power": {
+            "address": 23,
+            "count": 1,
+            "type": "INT16",
+            "access": "RO",
+            "scale": 1,
+            "unit": "W",
+            "description": "Output power to loads"
+        },
+        "ac_frequency": {
+            "address": 21,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RO",
+            "scale": 0.01,
+            "unit": "Hz",
+            "description": "Output frequency"
+        },
+        "inverter_state": {
+            "address": 31,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RO",
+            "scale": 1,
+            "unit": "enum",
+            "description": "System state: 0=Off, 1=LowPower, 2=Fault, 3=Bulk, 4=Absorption, 5=Float, 6=Storage, 7=Equalize, 8=Passthru, 9=Inverting, 10=PowerAssist, 11=PowerSupply, 252=HubMode1, 253=HubMode2, 254=HubMode3, 255=HubMode4"
+        },
+        "vebus_error": {
+            "address": 32,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RO",
+            "scale": 1,
+            "unit": "enum",
+            "description": "VE.Bus error code (0 = no error)"
+        },
+        "battery_voltage": {
+            "address": 259,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RO",
+            "scale": 0.01,
+            "unit": "V",
+            "description": "Battery voltage (DC bus)"
+        },
+        "battery_current": {
+            "address": 261,
+            "count": 1,
+            "type": "INT16",
+            "access": "RO",
+            "scale": 0.1,
+            "unit": "A",
+            "description": "Battery current. Positive = charging."
+        },
+        "battery_power": {
+            "address": 842,
+            "count": 1,
+            "type": "INT16",
+            "access": "RO",
+            "scale": 1,
+            "unit": "W",
+            "description": "Battery power. Positive = charging, Negative = discharging. (unit_id=225)"
+        },
+        "battery_soc": {
+            "address": 843,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RO",
+            "scale": 0.01,
+            "unit": "%",
+            "description": "Battery State of Charge 0.00-100.00%"
+        },
+        "battery_temperature": {
+            "address": 315,
+            "count": 1,
+            "type": "INT16",
+            "access": "RO",
+            "scale": 0.1,
+            "unit": "°C",
+            "description": "Battery temperature from SmartShunt/BMS"
+        },
+        "battery_consumed_ah": {
+            "address": 265,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RO",
+            "scale": 0.1,
+            "unit": "Ah",
+            "description": "Ah consumed since last full charge (SmartShunt)"
+        },
+        "time_to_go": {
+            "address": 267,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RO",
+            "scale": 0.01,
+            "unit": "h",
+            "description": "Estimated time to battery depletion at current load"
+        },
+        "pv_power": {
+            "address": 850,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RO",
+            "scale": 1,
+            "unit": "W",
+            "description": "Total PV charger power (sum of MPPT controllers, unit_id=225)"
+        },
+        "grid_power": {
+            "address": 820,
+            "count": 1,
+            "type": "INT16",
+            "access": "RO",
+            "scale": 1,
+            "unit": "W",
+            "description": "Grid power measured at meter. Positive = import. (unit_id=225)"
+        },
+        "internal_temperature": {
+            "address": 34,
+            "count": 1,
+            "type": "INT16",
+            "access": "RO",
+            "scale": 0.1,
+            "unit": "°C",
+            "description": "MultiPlus-II internal chassis temperature"
+        },
+        "ess_setpoint": {
+            "address": 37,
+            "count": 1,
+            "type": "INT16",
+            "access": "RW",
+            "scale": 1,
+            "unit": "W",
+            "description": "ESS active power setpoint (+ = charge from grid, - = discharge to grid). Hub4/ESS mode."
+        },
+        "minimum_soc": {
+            "address": 2901,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RW",
+            "scale": 0.01,
+            "unit": "%",
+            "description": "Minimum SOC for ESS. Battery stops discharging below this level."
+        },
+        "watchdog_heartbeat": {
+            "address": 2900,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RW",
+            "scale": 1,
+            "unit": "count",
+            "description": "ESS watchdog. Write any value every <WD_TIMEOUT>s or system reverts to internal control."
+        }
+    },
+    "alarm_bits": {
+        "inverter_state": {
+            "0": "Off",
+            "1": "Low Power standby",
+            "2": "Fault — see vebus_error register",
+            "3": "Bulk charging",
+            "4": "Absorption charging",
+            "5": "Float charging",
+            "6": "Storage mode",
+            "9": "Inverting (off-grid loads)",
+            "10": "Power Assist (grid + battery)"
+        }
+    },
+    "soc": {
+        "address": 843,
+        "register_alias": "battery_soc"
+    }
+}
