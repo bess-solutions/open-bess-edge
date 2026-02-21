@@ -92,7 +92,60 @@ jobs:
           fail_ci_if_error: false
 
   # ─────────────────────────────────────────────────────────────────
-  # Job 4: Terraform validate (no GCP credentials needed)
+  # Job 4: Security — SAST + Dependency audit
+  # ─────────────────────────────────────────────────────────────────
+  security:
+    name: Security (bandit + pip-audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install security tools
+        run: pip install bandit pip-audit
+
+      - name: Run bandit SAST
+        run: |
+          bandit -r src/ \
+            --severity-level medium \
+            --confidence-level medium \
+            --format json \
+            --output bandit-report.json || true
+          bandit -r src/ \
+            --severity-level medium \
+            --confidence-level medium \
+            --exit-zero
+
+      - name: Upload bandit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: bandit-report.json
+
+      - name: Run pip-audit (dependency vulnerability scan)
+        run: |
+          pip-audit \
+            --requirement requirements.txt \
+            --format json \
+            --output pip-audit-report.json || true
+          pip-audit \
+            --requirement requirements.txt \
+            --ignore-vuln PYSEC-2022-42969
+
+      - name: Upload pip-audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-report
+          path: pip-audit-report.json
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 5: Terraform validate (no GCP credentials needed)
   # ─────────────────────────────────────────────────────────────────
   terraform-validate:
     name: Terraform validate
@@ -115,7 +168,7 @@ jobs:
         run: terraform -chdir=infrastructure/terraform fmt -check -recursive
 
   # ─────────────────────────────────────────────────────────────────
-  # Job 5: Helm lint & template validation
+  # Job 6: Helm lint & template validation
   # ─────────────────────────────────────────────────────────────────
   helm-lint:
     name: Helm lint & template
@@ -139,12 +192,14 @@ jobs:
             | head -60
 
   # ─────────────────────────────────────────────────────────────────
-  # Job 6: Docker build (valida que la imagen construye)
+  # Job 7: Docker build (validates the image builds correctly)
   # ─────────────────────────────────────────────────────────────────
   docker-build:
     name: Docker build
     runs-on: ubuntu-latest
     needs: [lint, test]
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
     steps:
       - uses: actions/checkout@v4
 
@@ -152,6 +207,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build image (no push)
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -163,12 +219,54 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ─────────────────────────────────────────────────────────────────
-  # Job 5: Push to GCP Artifact Registry (solo en main)
+  # Job 8: Trivy container security scan
+  # ─────────────────────────────────────────────────────────────────
+  trivy:
+    name: Container scan (Trivy)
+    runs-on: ubuntu-latest
+    needs: [docker-build]
+    permissions:
+      security-events: write  # Required to upload SARIF to GitHub Security tab
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image for scanning
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: infrastructure/docker/Dockerfile
+          platforms: linux/amd64
+          push: false
+          load: true
+          tags: ${{ env.IMAGE_NAME }}:scan
+          cache-from: type=gha
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "${{ env.IMAGE_NAME }}:scan"
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL,HIGH"
+          exit-code: "0"  # Don't fail CI — upload results for visibility
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "trivy-results.sarif"
+          category: "trivy-container"
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 9: Push to GCP Artifact Registry (only on main)
   # ─────────────────────────────────────────────────────────────────
   docker-push:
     name: Push to Artifact Registry
     runs-on: ubuntu-latest
-    needs: [docker-build]
+    needs: [docker-build, security, trivy]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
       contents: read

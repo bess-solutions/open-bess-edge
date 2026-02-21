@@ -70,3 +70,15 @@ omit     = [
 [tool.coverage.report]
 fail_under  = 80
 show_missing = true
+
+# ---------------------------------------------------------------------------
+# Bandit — Python SAST (Security Static Analysis)
+# ---------------------------------------------------------------------------
+[tool.bandit]
+skips = [
+    "B101",   # assert_used — acceptable in tests (excluded via exclude)
+    "B311",   # random — we use random only for simulation, not crypto
+    "B603",   # subprocess_without_shell_equals_true — not applicable
+    "B404",   # import_subprocess — used only in scripts/
+]
+exclude_dirs = ["tests", ".venv", ".git"]

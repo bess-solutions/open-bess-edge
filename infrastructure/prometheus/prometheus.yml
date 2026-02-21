@@ -18,7 +18,11 @@ global:
     project: "bessai"
     component: "edge-gateway"
 
-# ── Alerting (optional — add Alertmanager here when needed) ───────────────────
+# ── Rule Files (alerting rules) ──────────────────────────────────────────────
+rule_files:
+  - "alert_rules.yml"
+
+# ── Alerting (configure Alertmanager when deploying to production) ────────────
 # alerting:
 #   alertmanagers:
 #     - static_configs:

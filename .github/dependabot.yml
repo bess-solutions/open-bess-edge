@@ -1,0 +1,70 @@
+version: 2
+updates:
+  # ──────────────────────────────────────────────────────
+  # Python dependencies (pip)
+  # ──────────────────────────────────────────────────────
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: "America/Santiago"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "python"
+    groups:
+      # Group all AWS/GCP SDK updates together
+      gcp-deps:
+        patterns:
+          - "google-*"
+          - "grpcio*"
+      # Group all observability deps
+      observability-deps:
+        patterns:
+          - "opentelemetry-*"
+          - "prometheus-client"
+      # Group all ML/AI deps
+      ai-deps:
+        patterns:
+          - "numpy"
+          - "scikit-learn"
+          - "onnxruntime*"
+    ignore:
+      # Pin pymodbus minor — API can have breaking changes
+      - dependency-name: "pymodbus"
+        update-types: ["version-update:semver-major"]
+      # Pin pydantic major — v3 will be breaking
+      - dependency-name: "pydantic*"
+        update-types: ["version-update:semver-major"]
+
+  # ──────────────────────────────────────────────────────
+  # GitHub Actions
+  # ──────────────────────────────────────────────────────
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: "America/Santiago"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+
+  # ──────────────────────────────────────────────────────
+  # Docker base images
+  # ──────────────────────────────────────────────────────
+  - package-ecosystem: docker
+    directory: "/infrastructure/docker"
+    schedule:
+      interval: weekly
+      day: tuesday
+      time: "06:00"
+      timezone: "America/Santiago"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "docker"

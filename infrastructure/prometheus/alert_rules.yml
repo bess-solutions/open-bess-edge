@@ -1,0 +1,180 @@
+# Prometheus Alert Rules — BESSAI Edge Gateway
+# =============================================================================
+# These rules define operational and safety alerts for the BESSAI system.
+# Load via rule_files in prometheus.yml.
+#
+# Alert Severity Levels:
+#   critical  — requires immediate intervention (possible physical risk)
+#   warning   — degraded state, intervention needed within hours
+#   info      — informational, no immediate action required
+# =============================================================================
+
+groups:
+  # ---------------------------------------------------------------------------
+  # Gateway Availability
+  # ---------------------------------------------------------------------------
+  - name: bessai.availability
+    interval: 30s
+    rules:
+
+      - alert: BESSGatewayDown
+        expr: up{job="bessai-gateway"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: gateway
+        annotations:
+          summary: "BESSAI Gateway is down ({{ $labels.instance }})"
+          description: >
+            The BESSAI Edge Gateway at {{ $labels.instance }} has been unreachable
+            for more than 1 minute. Battery management is NOT operational.
+            Check container logs: docker logs bessai-gateway
+
+      - alert: BESSGatewayHighLatency
+        expr: rate(bess_cycle_duration_seconds_sum[5m]) / rate(bess_cycle_duration_seconds_count[5m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          component: gateway
+        annotations:
+          summary: "BESSAI telemetry cycle latency > 5s ({{ $labels.site_id }})"
+          description: >
+            Average telemetry cycle duration is {{ $value | humanizeDuration }}.
+            Expected < 5s. Possible Modbus connectivity issue.
+
+  # ---------------------------------------------------------------------------
+  # Safety & Operational Limits
+  # ---------------------------------------------------------------------------
+  - name: bessai.safety
+    interval: 15s
+    rules:
+
+      - alert: BESSHighSafetyBlocks
+        expr: increase(bess_safety_blocks_total[5m]) > 3
+        for: 0m
+        labels:
+          severity: critical
+          component: safety
+        annotations:
+          summary: "High safety block rate on {{ $labels.site_id }}"
+          description: >
+            {{ $value }} safety blocks triggered in the last 5 minutes on site
+            {{ $labels.site_id }}. This may indicate SOC or temperature anomaly.
+            Immediate inspection required.
+
+      - alert: BESSLowSOC
+        expr: bess_soc_percent < 10
+        for: 10m
+        labels:
+          severity: critical
+          component: battery
+        annotations:
+          summary: "BESS SOC critically low: {{ $value | humanize }}% ({{ $labels.site_id }})"
+          description: >
+            Battery State of Charge has been below 10% for 10 minutes on site
+            {{ $labels.site_id }}. Risk of deep discharge. Consider emergency charge.
+
+      - alert: BESSSOCWarning
+        expr: bess_soc_percent < 15
+        for: 5m
+        labels:
+          severity: warning
+          component: battery
+        annotations:
+          summary: "BESS SOC low: {{ $value | humanize }}% ({{ $labels.site_id }})"
+          description: >
+            Battery SOC is below 15% on site {{ $labels.site_id }}. Monitor closely.
+
+      - alert: BESSHighTemperature
+        expr: bess_last_power_kw > 0 and bess_soc_percent > 0  # proxy — replace with actual temp metric
+        for: 0m
+        labels:
+          severity: info
+          component: battery
+        annotations:
+          summary: "Temperature monitoring placeholder ({{ $labels.site_id }})"
+          description: >
+            Replace this rule with actual temperature metric when available.
+            Target: alert when battery temp > 42°C for 5 minutes.
+
+  # ---------------------------------------------------------------------------
+  # AI / Anomaly Detection
+  # ---------------------------------------------------------------------------
+  - name: bessai.ai
+    interval: 30s
+    rules:
+
+      - alert: BESSAnomalyDetected
+        expr: bess_ids_anomaly_score > 0.80
+        for: 2m
+        labels:
+          severity: warning
+          component: ai-ids
+        annotations:
+          summary: "AI-IDS anomaly detected on {{ $labels.site_id }} (score: {{ $value | humanize }})"
+          description: >
+            The AI Intrusion Detection System has scored {{ $value }} (threshold: 0.80)
+            on site {{ $labels.site_id }} for 2 minutes. Possible Modbus injection or
+            sensor fault. Review recent telemetry data.
+
+      - alert: BESSIDSHighAlertRate
+        expr: increase(bess_ids_alerts_total[15m]) > 5
+        for: 0m
+        labels:
+          severity: warning
+          component: ai-ids
+        annotations:
+          summary: "High AI-IDS alert rate on {{ $labels.site_id }}"
+          description: >
+            {{ $value }} IDS alerts in the last 15 minutes on {{ $labels.site_id }}.
+            Evaluate if this is a persistent intrusion attempt or a sensor fault.
+
+  # ---------------------------------------------------------------------------
+  # Cloud Connectivity / Data Pipeline
+  # ---------------------------------------------------------------------------
+  - name: bessai.connectivity
+    interval: 60s
+    rules:
+
+      - alert: BESSPublishErrorsHigh
+        expr: increase(bess_publish_errors_total[5m]) > 10
+        for: 0m
+        labels:
+          severity: warning
+          component: pubsub
+        annotations:
+          summary: "GCP Pub/Sub publish errors on {{ $labels.site_id }}"
+          description: >
+            {{ $value }} publish errors to GCP Pub/Sub in the last 5 minutes.
+            Telemetry data is being lost. Check GCP connectivity and service account permissions.
+
+      - alert: BESSDataLakePublishErrors
+        expr: increase(bess_datalake_rows_published_total[10m]) == 0
+        for: 30m
+        labels:
+          severity: warning
+          component: datalake
+        annotations:
+          summary: "No BigQuery rows published in 30 minutes ({{ $labels.site_id }})"
+          description: >
+            DataLake publisher has not sent rows to BigQuery in 30 minutes.
+            Either the system is idle or there's a connectivity issue.
+
+  # ---------------------------------------------------------------------------
+  # Fleet / Multi-site
+  # ---------------------------------------------------------------------------
+  - name: bessai.fleet
+    interval: 60s
+    rules:
+
+      - alert: BESSFleetSitesDown
+        expr: bess_fleet_sites_active < 1
+        for: 5m
+        labels:
+          severity: critical
+          component: fleet
+        annotations:
+          summary: "No active BESS sites in fleet"
+          description: >
+            Fleet orchestrator reports 0 active sites for 5 minutes.
+            All managed BESS sites may be unreachable. Check network connectivity.

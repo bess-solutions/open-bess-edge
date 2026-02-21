@@ -1,0 +1,93 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement for BESSAI Edge Gateway
+title: "[FEAT] "
+labels: ["enhancement", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! BESSAI Edge Gateway aims to be the reference 
+        implementation for industrial BESS management. Great ideas from the community 
+        shape the roadmap.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Feature Area
+      options:
+        - New Device Driver (inverter/battery)
+        - New Communication Protocol (Modbus RTU, IEC 61850, OCPP, etc.)
+        - AI / Machine Learning  
+        - Energy Market Integration (CMg, OpenADR, P2P)
+        - Observability / Metrics / Alerting
+        - Security / Compliance
+        - API / Integration
+        - Infrastructure / Deployment
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Motivation
+      description: What problem does this feature solve? What use case does it enable?
+      placeholder: "As a BESS operator, I need to... because..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like. Be as specific as possible.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative approaches or workarounds?
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority (from your perspective)
+      options:
+        - 🔴 Critical — blocking production use
+        - 🟡 High — significant impact on my use case
+        - 🟢 Medium — would be nice to have
+        - ⚪ Low — minor improvement
+    validations:
+      required: true
+
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: Would you be willing to contribute this feature?
+      options:
+        - "Yes — I can implement this and submit a PR"
+        - "Partial — I can help with design/testing but not full implementation"
+        - "No — I'm requesting the maintainers implement this"
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References / Prior Art
+      description: Links to standards, papers, similar implementations, or related issues.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues and this is not a duplicate
+          required: true
+        - label: This feature aligns with the project's industrial/energy focus
+          required: false
