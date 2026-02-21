@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BESSAI Edge — Control Center</title>
+  <meta name="description" content="BESSAI Edge Gateway — Panel de control industrial para sistemas BESS con IA embebida, monitoreo en tiempo real y arbitraje de energía." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ── TOP NAV ──────────────────────────────────────────────── -->
+  <nav class="topnav">
+    <div class="nav-brand">
+      <svg class="brand-icon" viewBox="0 0 32 32" fill="none">
+        <rect x="2" y="8" width="28" height="16" rx="3" stroke="#6366f1" stroke-width="2"/>
+        <rect x="30" y="12" width="2" height="8" rx="1" fill="#6366f1"/>
+        <rect x="6" y="11" width="4" height="10" rx="1" fill="#6366f1" opacity="0.9"/>
+        <rect x="12" y="13" width="4" height="8" rx="1" fill="#6366f1" opacity="0.7"/>
+        <rect x="18" y="12" width="4" height="9" rx="1" fill="#22d3ee" opacity="0.9"/>
+        <rect x="24" y="14" width="3" height="7" rx="1" fill="#22d3ee" opacity="0.6"/>
+      </svg>
+      <span class="brand-name">BESSAI<span class="brand-tag">Edge</span></span>
+    </div>
+    <div class="nav-center">
+      <span class="site-badge" id="site-id-badge">⚙ Conectando…</span>
+    </div>
+    <div class="nav-right">
+      <div class="connection-indicator" id="conn-indicator">
+        <span class="conn-dot" id="conn-dot"></span>
+        <span id="conn-label">Offline</span>
+      </div>
+      <span class="nav-time" id="nav-time">--:--:--</span>
+    </div>
+  </nav>
+
+  <!-- ── MAIN GRID ─────────────────────────────────────────────── -->
+  <main class="dashboard-grid">
+
+    <!-- ROW 1: KPI cards -->
+    <section class="kpi-row">
+      <!-- SOC Gauge -->
+      <div class="card card-soc" id="card-soc">
+        <div class="card-header">
+          <span class="card-label">Estado de Carga</span>
+          <span class="card-unit">SOC</span>
+        </div>
+        <div class="gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 200 120">
+            <defs>
+              <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#ef4444"/>
+                <stop offset="30%" style="stop-color:#f59e0b"/>
+                <stop offset="70%" style="stop-color:#22c55e"/>
+                <stop offset="100%" style="stop-color:#06b6d4"/>
+              </linearGradient>
+            </defs>
+            <!-- Track -->
+            <path d="M 20 105 A 80 80 0 0 1 180 105" stroke="#1e2a3a" stroke-width="16" fill="none" stroke-linecap="round"/>
+            <!-- Fill -->
+            <path id="gauge-fill" d="M 20 105 A 80 80 0 0 1 180 105" stroke="url(#gaugeGrad)" stroke-width="16" fill="none" stroke-linecap="round" stroke-dasharray="0 251"/>
+            <!-- Needle -->
+            <circle id="gauge-needle-dot" cx="100" cy="105" r="4" fill="#6366f1" transform="rotate(-90 100 105)"/>
+          </svg>
+          <div class="gauge-value-wrap">
+            <span class="gauge-value" id="soc-value">--</span>
+            <span class="gauge-unit">%</span>
+          </div>
+        </div>
+        <div class="gauge-labels">
+          <span>0%</span><span>50%</span><span>100%</span>
+        </div>
+        <div class="gauge-status" id="soc-status">—</div>
+      </div>
+
+      <!-- Power Flow -->
+      <div class="card card-power">
+        <div class="card-header">
+          <span class="card-label">Flujo de Potencia</span>
+          <span class="card-unit">kW</span>
+        </div>
+        <div class="power-display">
+          <div class="power-value-big" id="power-value">--</div>
+          <div class="power-direction" id="power-dir">
+            <span class="power-dir-arrow" id="power-arrow">→</span>
+            <span id="power-dir-label">—</span>
+          </div>
+        </div>
+        <div class="power-flow-diagram">
+          <div class="flow-node" id="flow-grid">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            <span>Red</span>
+          </div>
+          <div class="flow-arrow-wrap">
+            <div class="flow-line" id="flow-line-1"></div>
+            <div class="flow-particles" id="particles-1"></div>
+          </div>
+          <div class="flow-node flow-node-bess" id="flow-bess">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="8" width="28" height="16" rx="3"/><rect x="30" y="12" width="2" height="8" rx="1" fill="currentColor" stroke="none"/></svg>
+            <span>BESS</span>
+          </div>
+          <div class="flow-arrow-wrap">
+            <div class="flow-line" id="flow-line-2"></div>
+            <div class="flow-particles" id="particles-2"></div>
+          </div>
+          <div class="flow-node" id="flow-load">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+            <span>Carga</span>
+          </div>
+        </div>
+        <div class="mini-stats">
+          <span>Temp: <b id="temp-val">--°C</b></span>
+          <span>Ciclos: <b id="cycles-val">--</b></span>
+        </div>
+      </div>
+
+      <!-- AI-IDS -->
+      <div class="card card-ids" id="card-ids">
+        <div class="card-header">
+          <span class="card-label">AI — Detector de Anomalías</span>
+          <span class="ids-status-badge" id="ids-badge">IDS</span>
+        </div>
+        <div class="ids-score-wrap">
+          <div class="ids-score-ring">
+            <svg viewBox="0 0 80 80">
+              <circle cx="40" cy="40" r="32" stroke="#1e2a3a" stroke-width="8" fill="none"/>
+              <circle id="ids-ring" cx="40" cy="40" r="32" stroke="#22d3ee" stroke-width="8" fill="none"
+                stroke-dasharray="201" stroke-dashoffset="201" stroke-linecap="round"
+                transform="rotate(-90 40 40)"/>
+            </svg>
+            <span class="ids-score-text" id="ids-score">0.00</span>
+          </div>
+          <div class="ids-info">
+            <div class="ids-stat"><span>Alertas hoy</span><b id="ids-alerts">0</b></div>
+            <div class="ids-stat"><span>Modelo</span><b id="ids-trained">—</b></div>
+            <div class="ids-stat"><span>ONNX</span><b id="onnx-status">—</b></div>
+            <div class="ids-stat"><span>Latencia</span><b id="onnx-ms">-- ms</b></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Arbitraje / Ahorro -->
+      <div class="card card-arbitrage">
+        <div class="card-header">
+          <span class="card-label">Arbitraje de Energía</span>
+          <span class="card-unit">CLP</span>
+        </div>
+        <div class="arb-value-big" id="arb-net">$0</div>
+        <div class="arb-label">Proyección neta 24h</div>
+        <div class="arb-stats">
+          <div class="arb-stat">
+            <svg viewBox="0 0 16 16" fill="none" stroke="#22c55e" stroke-width="2"><path d="M8 14V2M3 7l5-5 5 5"/></svg>
+            <span>Carga</span>
+            <b id="arb-charge">-- h</b>
+          </div>
+          <div class="arb-divider"></div>
+          <div class="arb-stat">
+            <svg viewBox="0 0 16 16" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M8 2v12M3 9l5 5 5-5"/></svg>
+            <span>Descarga</span>
+            <b id="arb-discharge">-- h</b>
+          </div>
+          <div class="arb-divider"></div>
+          <div class="arb-stat">
+            <svg viewBox="0 0 16 16" fill="none" stroke="#6366f1" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+            <span>Fuente</span>
+            <b id="arb-source">--</b>
+          </div>
+        </div>
+        <button class="btn-refresh" id="btn-schedule" onclick="window.bessai.loadSchedule()">↻ Actualizar</button>
+      </div>
+    </section>
+
+    <!-- ROW 2: Charts + Alerts -->
+    <section class="charts-row">
+      <!-- SOC + Power History Chart -->
+      <div class="card card-chart">
+        <div class="card-header">
+          <span class="card-label">Historial 24h — SOC y Potencia</span>
+          <div class="chart-legend">
+            <span class="legend-dot" style="background:#6366f1"></span>SOC (%)
+            <span class="legend-dot" style="background:#22d3ee;margin-left:12px"></span>Potencia (kW)
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-main"></canvas>
+        </div>
+      </div>
+
+      <!-- Alerts Feed -->
+      <div class="card card-alerts">
+        <div class="card-header">
+          <span class="card-label">Eventos del Sistema</span>
+          <span class="alerts-count" id="alerts-count">0</span>
+        </div>
+        <div class="alerts-feed" id="alerts-feed">
+          <div class="alert-empty">Sin eventos recientes</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROW 3: Carbon + Fleet + Safety -->
+    <section class="metrics-row">
+      <div class="card card-carbon">
+        <div class="card-header"><span class="card-label">🌿 Impacto Ambiental</span></div>
+        <div class="metric-big"><span id="co2-val">0.0</span><span class="metric-unit">kg CO₂ evitado</span></div>
+        <div class="metric-sub"><span id="trees-val">0.0</span> árboles equivalentes</div>
+        <div class="metric-methodology">Metodología IEA WEO 2024 + IEEE 2030.6 LCA</div>
+      </div>
+      <div class="card card-fleet">
+        <div class="card-header"><span class="card-label">🌐 Fleet Status</span></div>
+        <div class="fleet-grid">
+          <div class="fleet-stat"><span>Sitios</span><b id="fleet-sites">--</b></div>
+          <div class="fleet-stat"><span>SOC Prom.</span><b id="fleet-soc">--%</b></div>
+          <div class="fleet-stat"><span>Flex. Disp.</span><b id="fleet-kw">-- kW</b></div>
+          <div class="fleet-stat"><span>Alarmas</span><b id="fleet-alarms" class="alarm-count">0</b></div>
+        </div>
+      </div>
+      <div class="card card-safety">
+        <div class="card-header"><span class="card-label">🛡️ Safety Guard</span></div>
+        <div class="safety-status" id="safety-status-display">
+          <div class="safety-icon" id="safety-icon">✓</div>
+          <div class="safety-text" id="safety-text">NOMINAL</div>
+        </div>
+        <div class="safety-limits">
+          <div class="limit-row"><span>SOC mín</span><b>5%</b></div>
+          <div class="limit-row"><span>SOC máx</span><b>98%</b></div>
+          <div class="limit-row"><span>Temp máx</span><b>45°C</b></div>
+        </div>
+      </div>
+      <div class="card card-p2p">
+        <div class="card-header"><span class="card-label">⚡ P2P Energy Trading</span></div>
+        <div class="metric-big"><span id="p2p-kwh">0.0</span><span class="metric-unit">kWh en créditos</span></div>
+        <div class="metric-sub"><span id="p2p-minted">0</span> créditos emitidos · <span id="p2p-pending">0</span> pendientes</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── FOOTER ────────────────────────────────────────────────── -->
+  <footer class="dash-footer">
+    <span>BESSAI Edge Gateway</span>
+    <span id="footer-version">v--</span>
+    <span>Apache 2.0 · <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank">GitHub</a></span>
+    <span id="footer-uptime">Uptime: --</span>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
