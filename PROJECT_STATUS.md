@@ -1,27 +1,28 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-21T14:10 v1.5.0 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-21T16:47 v1.7.0 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
 
 ## 🎯 ¿Qué es BESSAI?
 
-Sistema industrial de gestión de baterías (BESS) con inteligencia artificial. Conecta inversores reales (Huawei SUN2000) vía Modbus TCP, valida la operación de forma segura, y publica telemetría a la nube (GCP) con observabilidad completa.
+Sistema industrial de gestión de baterías (BESS) con inteligencia artificial. Conecta inversores reales (Huawei SUN2000, SMA Sunny Tripower, Victron MultiPlus-II, Fronius GEN24) vía Modbus TCP, valida la operación de forma segura, y publica telemetría a la nube (GCP Pub/Sub o MQTT) con observabilidad completa.
 
 **Visión a largo plazo:** Evolucionar a una plataforma de energía distribuida de escala planetaria (VPP, Edge AI, P2P Trading, LCA).  
 Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 
 ---
 
-## ✅ Estado Actual — v1.5.0
+## ✅ Estado Actual — v1.7.0
 
 ### Tests
 ```
-372 / 372 passed ✅  (suite completa open-bess-edge)
-CI: ruff ✅ · mypy ✅ · pytest ✅ · helm ✅ · terraform ✅ · security ✅ · trivy ✅ · docker ✅
-9 jobs activos — +security (bandit+pip-audit) +trivy (CVE scan SARIF)
+378 / 378 passed ✅  (suite completa open-bess-edge, incluye 6 chaos tests auto-reconnect)
+CI: ruff ✅ · mypy ✅ · pytest ✅ · bandit ✅ · trivy ✅ · docker ✅ · multiarch ✅
+10 jobs activos — +docker-multiarch (linux/amd64 + linux/arm64 → ghcr.io)
 ```
+
 
 ### Stack Docker — Métricas en vivo (confirmado 2026-02-19)
 ```
