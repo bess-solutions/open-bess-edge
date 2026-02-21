@@ -12,7 +12,7 @@
 # =============================================================================
 
 # ── Stage 1: Builder ─────────────────────────────────────────────────────────
-FROM python:3.11-slim AS builder
+FROM python:3.14-slim AS builder
 
 # Install build tools needed for native extensions (pymodbus, cryptography …)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -33,7 +33,7 @@ RUN python -m venv /opt/venv && \
 
 
 # ── Stage 2: Runtime ─────────────────────────────────────────────────────────
-FROM python:3.11-slim AS runtime
+FROM python:3.14-slim AS runtime
 
 LABEL maintainer="ingenieria@bess-solutions.cl" \
       org.opencontainers.image.title="BESSAI Edge Gateway" \
