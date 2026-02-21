@@ -34,6 +34,7 @@ from pymodbus.exceptions import ConnectionException, ModbusIOException
 # ---------------------------------------------------------------------------
 _MAX_CONNECT_RETRIES: Final[int] = 3
 _RETRY_BACKOFF_BASE_S: Final[float] = 2.0  # seconds; doubles each retry
+_AUTO_RECONNECT_DELAY_S: Final[float] = 0.5  # short pause before mid-session reconnect
 
 # ---------------------------------------------------------------------------
 # Logger
@@ -205,6 +206,28 @@ class UniversalDriver:
         self._client.close()
         log.info("driver.disconnected", host=self._host, port=self._port)
 
+    async def _reconnect(self) -> None:
+        """
+        Attempt to re-establish a dropped Modbus TCP session.
+
+        Called automatically by ``read_tag`` / ``write_tag`` when a
+        ``ModbusReadError`` or ``ModbusWriteError`` is caught mid-session.
+        Uses the existing ``connect()`` retry logic (up to
+        ``_MAX_CONNECT_RETRIES`` attempts with exponential back-off).
+        """
+        log.warning(
+            "driver.reconnecting",
+            host=self._host,
+            port=self._port,
+            action="closing_then_reconnecting",
+        )
+        try:
+            self._client.close()
+        except Exception:  # noqa: BLE001
+            pass  # best-effort close; ignore errors
+        await asyncio.sleep(_AUTO_RECONNECT_DELAY_S)
+        await self.connect()  # raises ConnectionException if all retries fail
+
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
@@ -308,9 +331,21 @@ class UniversalDriver:
         try:
             result = await self._client.read_holding_registers(address=address, count=count)
         except (ConnectionException, ModbusIOException) as exc:
-            raise ModbusReadError(
-                f"Modbus read failed for tag '{tag_name}' at address {address}: {exc}"
-            ) from exc
+            # Mid-session disconnect — attempt one automatic reconnect
+            log.warning(
+                "driver.read_tag.connection_lost",
+                tag=tag_name,
+                error=str(exc),
+                action="auto_reconnecting",
+            )
+            await self._reconnect()
+            try:
+                result = await self._client.read_holding_registers(address=address, count=count)
+            except (ConnectionException, ModbusIOException) as exc2:
+                raise ModbusReadError(
+                    f"Modbus read failed for tag '{tag_name}' at address {address} "
+                    f"after reconnect: {exc2}"
+                ) from exc2
 
         if result.isError():
             raise ModbusReadError(
@@ -363,9 +398,21 @@ class UniversalDriver:
         try:
             result = await self._client.write_registers(address=address, values=payload)
         except (ConnectionException, ModbusIOException) as exc:
-            raise ModbusWriteError(
-                f"Modbus write failed for tag '{tag_name}' at address {address}: {exc}"
-            ) from exc
+            # Mid-session disconnect — attempt one automatic reconnect
+            log.warning(
+                "driver.write_tag.connection_lost",
+                tag=tag_name,
+                error=str(exc),
+                action="auto_reconnecting",
+            )
+            await self._reconnect()
+            try:
+                result = await self._client.write_registers(address=address, values=payload)
+            except (ConnectionException, ModbusIOException) as exc2:
+                raise ModbusWriteError(
+                    f"Modbus write failed for tag '{tag_name}' at address {address} "
+                    f"after reconnect: {exc2}"
+                ) from exc2
 
         if result.isError():
             raise ModbusWriteError(
