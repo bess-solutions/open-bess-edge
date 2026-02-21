@@ -1,0 +1,102 @@
+site_name: BESSAI Edge Gateway
+site_description: Open-source industrial BESS gateway with AI-powered anomaly detection, NTSyCS compliance, and IEC 62443 SL-1 security architecture.
+site_url: https://bess-solutions.github.io/open-bess-edge/
+repo_url: https://github.com/bess-solutions/open-bess-edge
+repo_name: bess-solutions/open-bess-edge
+copyright: Copyright &copy; 2024-2026 BESS Solutions — Apache 2.0 License
+
+theme:
+  name: material
+  logo: assets/logo.png
+  favicon: assets/favicon.png
+  language: en
+  palette:
+    - scheme: slate
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - toc.follow
+  font:
+    text: Inter
+    code: Roboto Mono
+
+plugins:
+  - search:
+      lang: en
+  - minify:
+      minify_html: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Quick Start: quickstart.md
+    - Local Development: local_development.md
+    - Docker Setup: docker_setup.md
+  - Architecture:
+    - Overview: architecture.md
+    - Decision Records (ADRs): adr/README.md
+  - API Reference: api_reference.md
+  - Operations:
+    - Runbook: runbook.md
+    - Prometheus Alerts: alerting.md
+  - Security & Compliance:
+    - Security Model: security_model.md
+    - NTSyCS Compliance: compliance/ntscys_compliance.md
+    - IEC 62443 Mapping: compliance/iec62443_mapping.md
+  - Contributing:
+    - Guide: ../CONTRIBUTING.md
+    - Code of Conduct: ../CODE_OF_CONDUCT.md
+    - Governance: ../GOVERNANCE.md
+  - Changelog: changelog.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/bess-solutions/open-bess-edge
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/bess-solutions
+  version:
+    provider: mike
+
+extra_css:
+  - stylesheets/extra.css

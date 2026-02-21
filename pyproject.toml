@@ -1,6 +1,78 @@
 # pyproject.toml — BESSAI Edge Gateway
-# Centraliza configuración de herramientas: pytest, ruff, mypy
-# Compatible con PEP 517/518 (no es un paquete instalable —  entry point es src/core/main.py)
+# PEP 517/518 compliant: package metadata + tool configuration
+
+# ---------------------------------------------------------------------------
+# Build system
+# ---------------------------------------------------------------------------
+[build-system]
+requires      = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+# ---------------------------------------------------------------------------
+# Package metadata (PEP 621)
+# ---------------------------------------------------------------------------
+[project]
+name            = "bessai-edge"
+version         = "1.4.0"
+description     = "Open-source industrial BESS gateway with AI anomaly detection, NTSyCS and IEC 62443 compliance"
+readme          = "README.md"
+license         = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors         = [{ name = "BESS Solutions", email = "contacto@bess-solutions.com" }]
+keywords        = [
+    "BESS", "battery-energy-storage", "Modbus", "IIoT",
+    "anomaly-detection", "edge-AI", "ONNX", "industrial-control",
+    "NTSyCS", "IEC62443", "GCP",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: System :: Hardware",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "pydantic-settings>=2.2",
+    "pymodbus>=3.6",
+    "scikit-learn>=1.4",
+    "onnxruntime>=1.17",
+    "google-cloud-pubsub>=2.20",
+    "opentelemetry-sdk>=1.23",
+    "opentelemetry-exporter-otlp>=1.23",
+    "prometheus-client>=0.20",
+    "structlog>=24.1",
+    "aiohttp>=3.9",
+    "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0", "pytest-asyncio>=0.23", "pytest-cov>=4.1",
+    "ruff>=0.3", "mypy>=1.9", "bandit>=1.7", "pip-audit>=2.7",
+]
+docs = [
+    "mkdocs-material>=9.5", "mkdocs-minify-plugin>=0.8",
+]
+
+[project.scripts]
+bessai-edge = "bessai_edge.cli:main"
+
+[project.urls]
+Homepage      = "https://bess-solutions.github.io/open-bess-edge/"
+Repository    = "https://github.com/bess-solutions/open-bess-edge"
+Documentation = "https://bess-solutions.github.io/open-bess-edge/"
+"Bug Tracker" = "https://github.com/bess-solutions/open-bess-edge/issues"
+Changelog     = "https://github.com/bess-solutions/open-bess-edge/blob/main/CHANGELOG.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
 
 [tool.pytest.ini_options]
 testpaths       = ["tests"]
