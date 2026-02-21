@@ -1,0 +1,91 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write     # Required to push to gh-pages
+  pages: write
+  id-token: write
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────
+  # Build documentation (runs on every PR to validate)
+  # ─────────────────────────────────────────────────────────────────
+  build:
+    name: Build Docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for git-revision-date-localized
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install MkDocs + plugins
+        run: |
+          pip install \
+            mkdocs-material==9.5.* \
+            mkdocs-minify-plugin==0.8.* \
+            mkdocs-git-revision-date-localized-plugin==1.2.* \
+            mike==2.1.*
+
+      - name: Build documentation
+        run: mkdocs build --strict --site-dir site/
+
+      - name: Upload built site (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-site
+          path: site/
+          retention-days: 7
+
+  # ─────────────────────────────────────────────────────────────────
+  # Deploy to GitHub Pages (only on push to main)
+  # ─────────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install MkDocs + plugins
+        run: |
+          pip install \
+            mkdocs-material==9.5.* \
+            mkdocs-minify-plugin==0.8.* \
+            mkdocs-git-revision-date-localized-plugin==1.2.* \
+            mike==2.1.*
+
+      - name: Configure Git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Deploy to GitHub Pages (gh-pages branch)
+        run: mkdocs gh-deploy --force --clean --verbose
