@@ -2,11 +2,12 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/Tests-372%2F372%20%E2%9C%85-success)](tests/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![Tests](https://img.shields.io/badge/Tests-378%2F378%20%E2%9C%85-success)](tests/)
+[![Docker](https://img.shields.io/badge/Docker-amd64%20%7C%20arm64-2496ED?logo=docker&logoColor=white)](https://ghcr.io/bess-solutions/open-bess-edge)
 [![CI](https://github.com/bess-solutions/open-bess-edge/actions/workflows/ci.yml/badge.svg)](https://github.com/bess-solutions/open-bess-edge/actions)
+[![Multi-Arch](https://github.com/bess-solutions/open-bess-edge/actions/workflows/docker-multiarch.yml/badge.svg)](https://github.com/bess-solutions/open-bess-edge/actions)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-red?logo=github)](SECURITY.md)
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/0000/badge)](https://www.bestpractices.dev/projects/0000)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/10716/badge)](https://www.bestpractices.dev/projects/10716)
 [![IEC 62443](https://img.shields.io/badge/IEC_62443-SL--1_Mapped-orange)](docs/compliance/iec62443_mapping.md)
 [![NTSyCS](https://img.shields.io/badge/NTSyCS-CEN_Chile-green)](docs/compliance/ntscys_compliance.md)
 
@@ -14,28 +15,33 @@
 
 ---
 
-## 🚀 Estado del Proyecto — v1.3.2
+## 🚀 Estado del Proyecto — v1.7.0
 
 | Componente | Estado |
 |---|---|
-| Modbus TCP Driver (`UniversalDriver`) | ✅ Funcional — pymodbus 3.12 |
+| Modbus TCP Driver + **Auto-Reconexión** | ✅ `_reconnect()` + backoff, 6 chaos tests |
 | Safety Guard (`SafetyGuard`) | ✅ Funcional |
 | Config (`pydantic-settings`) | ✅ Funcional — acepta IPs y hostnames |
 | Health Check HTTP (`GET /health`) | ✅ JSON status + uptime |
 | Prometheus Metrics (`GET /metrics`) | ✅ 22 métricas + alert_rules.yml |
 | **AI-IDS** (`ModbusAnomalyDetector`) | ✅ IsolationForest + z-score, score 0-1 |
 | **ONNX Dispatcher** (`ONNXDispatcher`) | ✅ Inferencia offline, fallback seguro |
+| **Dashboard Cliente** (`http://:8080`) | ✅ SOC gauge, power flow, IDS ring, arbitraje |
 | GCP Pub/Sub Publisher | ✅ Implementado y conectado |
+| **MQTT Publisher** (`paho-mqtt`) | ✅ Mosquitto / HA / AWS IoT Core / Azure |
 | OpenTelemetry + Cloud Trace | ✅ Implementado |
-| Suite de tests | ✅ **372/372 tests pasan** |
+| Suite de tests | ✅ **378/378 tests pasan** (6 nuevos chaos) |
 | Docker Compose (+ Simulador) | ✅ Operativo — perfil `monitoring` |
+| **Multi-Arch Docker** (amd64 + arm64) | ✅ Buildx CI → ghcr.io — Raspberry Pi 4/5 |
 | Prometheus + Grafana + Alerting | ✅ `--profile monitoring` + alert rules |
 | Terraform GCP | ✅ 18 recursos en GCP |
-| GitHub Actions CI/CD | ✅ 9 jobs: lint+test+security+trivy+docker |
+| GitHub Actions CI/CD | ✅ 10 jobs: lint+test+security+trivy+docker+multiarch |
+| **Hardware Registry** | ✅ 4 perfiles: Huawei, SMA, Victron, Fronius |
 | **Gobernanza OSS** | ✅ SECURITY+COC+GOVERNANCE+CONTRIBUTING |
-| **ADRs (5 decisiones)** | ✅ `docs/adr/` — pydantic, Modbus, IDS, ONNX, Pub/Sub|
+| **ADRs (5 decisiones)** | ✅ `docs/adr/` — pydantic, Modbus, IDS, ONNX, Pub/Sub |
 | **IEC 62443 Compliance** | ✅ SL-1 mapeado en `docs/compliance/` |
 | **NTSyCS CEN Chile** | ✅ Mapeado en `docs/compliance/` |
+| **OpenSSF Best Practices** | ✅ Passing badge — bestpractices.dev |
 
 ---
 

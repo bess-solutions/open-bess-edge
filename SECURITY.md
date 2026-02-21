@@ -4,9 +4,10 @@
 
 | Version | Supported |
 |---|---|
-| 1.3.x (latest) | ✅ Active support |
-| 1.2.x | ✅ Security patches only |
-| < 1.2 | ❌ End of life |
+| 1.7.x (latest) | ✅ Active support |
+| 1.6.x | ✅ Security patches only |
+| 1.5.x | ⚠️ Critical patches only |
+| < 1.5 | ❌ End of life |
 
 ## Reporting a Vulnerability
 
