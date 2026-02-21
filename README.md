@@ -5,8 +5,12 @@
 [![Tests](https://img.shields.io/badge/Tests-372%2F372%20%E2%9C%85-success)](tests/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![CI](https://github.com/bess-solutions/open-bess-edge/actions/workflows/ci.yml/badge.svg)](https://github.com/bess-solutions/open-bess-edge/actions)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-red?logo=github)](SECURITY.md)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/0000/badge)](https://www.bestpractices.dev/projects/0000)
+[![IEC 62443](https://img.shields.io/badge/IEC_62443-SL--1_Mapped-orange)](docs/compliance/iec62443_mapping.md)
+[![NTSyCS](https://img.shields.io/badge/NTSyCS-CEN_Chile-green)](docs/compliance/ntscys_compliance.md)
 
-> **Gateway industrial agnóstico para la gestión segura y optimizada de activos BESS, cumpliendo normativa NTSyCS del CEN (Chile).**
+> **Gateway industrial de código abierto para gestión segura y optimizada de activos BESS — cumpliendo normativa NTSyCS del CEN Chile, IEC 62443 SL-1 y estándares internacionales de software industrial.**
 
 ---
 
@@ -18,16 +22,20 @@
 | Safety Guard (`SafetyGuard`) | ✅ Funcional |
 | Config (`pydantic-settings`) | ✅ Funcional — acepta IPs y hostnames |
 | Health Check HTTP (`GET /health`) | ✅ JSON status + uptime |
-| Prometheus Metrics (`GET /metrics`) | ✅ 11 métricas en tiempo real |
-| **AI-IDS** (`ModbusAnomalyDetector`) | ✅ **NUEVO** — IsolationForest + z-score, score 0-1 |
-| **ONNX Dispatcher** (`ONNXDispatcher`) | ✅ **NUEVO** — inferencia offline, fallback seguro |
+| Prometheus Metrics (`GET /metrics`) | ✅ 22 métricas + alert_rules.yml |
+| **AI-IDS** (`ModbusAnomalyDetector`) | ✅ IsolationForest + z-score, score 0-1 |
+| **ONNX Dispatcher** (`ONNXDispatcher`) | ✅ Inferencia offline, fallback seguro |
 | GCP Pub/Sub Publisher | ✅ Implementado y conectado |
-| OpenTelemetry | ✅ Implementado |
-| Suite de tests | ✅ **73/73 tests pasan** |
-| Docker Compose (+ Simulador) | ✅ Operativo — con perfil `monitoring` |
-| Prometheus + Grafana | ✅ `--profile monitoring` |
-| Terraform GCP | ✅ `apply` ejecutado — 18 recursos en GCP |
-| GitHub Actions CI/CD | ✅ lint + test + tf-validate + docker-push |
+| OpenTelemetry + Cloud Trace | ✅ Implementado |
+| Suite de tests | ✅ **372/372 tests pasan** |
+| Docker Compose (+ Simulador) | ✅ Operativo — perfil `monitoring` |
+| Prometheus + Grafana + Alerting | ✅ `--profile monitoring` + alert rules |
+| Terraform GCP | ✅ 18 recursos en GCP |
+| GitHub Actions CI/CD | ✅ 9 jobs: lint+test+security+trivy+docker |
+| **Gobernanza OSS** | ✅ SECURITY+COC+GOVERNANCE+CONTRIBUTING |
+| **ADRs (5 decisiones)** | ✅ `docs/adr/` — pydantic, Modbus, IDS, ONNX, Pub/Sub|
+| **IEC 62443 Compliance** | ✅ SL-1 mapeado en `docs/compliance/` |
+| **NTSyCS CEN Chile** | ✅ Mapeado en `docs/compliance/` |
 
 ---
 

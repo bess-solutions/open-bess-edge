@@ -1,0 +1,129 @@
+name: 🐛 Bug Report
+description: Report a bug in BESSAI Edge Gateway
+title: "[BUG] "
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out this form as completely as possible.
+        
+        > ⚠️ **Security vulnerabilities** should NOT be reported here. See [SECURITY.md](../SECURITY.md).
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      description: Which part of the system is affected?
+      options:
+        - Core / Orchestrator (main.py)
+        - Safety Guard (safety.py)
+        - Configuration (config.py)
+        - Modbus Driver (modbus_driver.py)
+        - LUNA2000 Driver (luna2000_driver.py)
+        - AI-IDS (ai_ids.py)
+        - ONNX Dispatcher (onnx_dispatcher.py)
+        - Dashboard API (dashboard_api.py)
+        - CMg Predictor (cmg_predictor.py)
+        - Arbitrage Engine (arbitrage_engine.py)
+        - Docker / Infrastructure
+        - CI/CD Pipeline
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: What version of BESSAI Edge Gateway are you running?
+      placeholder: "e.g., v1.3.2"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - Docker (simulator mode)
+        - Docker (real hardware)
+        - Local Python (no Docker)
+        - Kubernetes (Helm)
+        - GCP Cloud Run
+    validations:
+      required: true
+
+  - type: input
+    id: python_version
+    attributes:
+      label: Python Version
+      placeholder: "e.g., 3.11.7"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened? Include error messages and tracebacks.
+      render: python
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Provide minimal steps to reproduce the bug.
+      placeholder: |
+        1. Configure .env with ...
+        2. Run `docker compose up ...`
+        3. Call `GET /api/v1/status`
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Relevant Configuration
+      description: Paste relevant parts of your .env (redact secrets!) or docker-compose override.
+      render: bash
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs
+      description: Paste relevant log output. Run with `LOG_LEVEL=DEBUG` for more detail.
+      render: text
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues and this is not a duplicate
+          required: true
+        - label: I have read the [troubleshooting guide](../docs/runbook.md)
+          required: false
+        - label: I can reproduce this consistently
+          required: false
