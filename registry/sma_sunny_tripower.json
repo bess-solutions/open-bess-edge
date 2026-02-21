@@ -1,0 +1,263 @@
+{
+  "$schema": "https://bessai.io/schemas/device-profile/v2.json",
+  "profile_version": "2.0.0",
+  "device": {
+    "manufacturer": "SMA",
+    "model": "Sunny Tripower X 25 / SBSW-10 / SI 6.0H",
+    "description": "SMA Sunny Tripower residential/commercial hybrid inverter with SMA Home Storage. 3-phase up to 25kW. Supports SMA Speedwire and Modbus TCP.",
+    "firmware_reference": "SMA Modbus Parameter List v3.6 (2024) — UNIT_ID 3",
+    "protocol": "ModbusTCP",
+    "slave_id_default": 3,
+    "rs485_baud": 9600,
+    "rs485_parity": "N",
+    "rs485_stopbits": 1,
+    "markets": ["EU", "AU", "US", "LATAM"],
+    "certifications": ["IEC 62109", "VDE-AR-N 4105", "AS/NZS 4777"]
+  },
+  "connection": {
+    "byte_order": "BIG",
+    "word_order": "BIG",
+    "timeout_seconds": 3,
+    "retries": 3
+  },
+  "registers": {
+    "device_status": {
+      "address": 30201,
+      "count": 2,
+      "type": "UINT32",
+      "access": "RO",
+      "scale": 1,
+      "unit": "enum",
+      "description": "Device status: 307=Error, 455=Warning, 1392=OK, 1793=Off, 2119=Standby"
+    },
+    "grid_relay_status": {
+      "address": 30211,
+      "count": 2,
+      "type": "UINT32",
+      "access": "RO",
+      "scale": 1,
+      "unit": "enum",
+      "description": "Grid relay/contactor status: 51=Closed, 311=Open"
+    },
+    "ac_power_total": {
+      "address": 30775,
+      "count": 2,
+      "type": "INT32",
+      "access": "RO",
+      "scale": 1,
+      "unit": "W",
+      "description": "Total AC active power. Positive = feed-in, negative = consumption."
+    },
+    "ac_voltage_l1": {
+      "address": 30783,
+      "count": 2,
+      "type": "UINT32",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Phase L1 voltage"
+    },
+    "ac_voltage_l2": {
+      "address": 30785,
+      "count": 2,
+      "type": "UINT32",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Phase L2 voltage"
+    },
+    "ac_voltage_l3": {
+      "address": 30787,
+      "count": 2,
+      "type": "UINT32",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Phase L3 voltage"
+    },
+    "ac_current_total": {
+      "address": 30795,
+      "count": 2,
+      "type": "INT32",
+      "access": "RO",
+      "scale": 0.001,
+      "unit": "A",
+      "description": "Total AC current (sum of all phases)"
+    },
+    "grid_frequency": {
+      "address": 30803,
+      "count": 2,
+      "type": "UINT32",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "Hz",
+      "description": "Grid frequency"
+    },
+    "reactive_power": {
+      "address": 30805,
+      "count": 2,
+      "type": "INT32",
+      "access": "RO",
+      "scale": 1,
+      "unit": "var",
+      "description": "Reactive power"
+    },
+    "power_factor": {
+      "address": 30807,
+      "count": 2,
+      "type": "INT32",
+      "access": "RO",
+      "scale": 0.001,
+      "unit": "",
+      "description": "Displacement power factor (-1.000 to 1.000)"
+    },
+    "internal_temperature": {
+      "address": 30953,
+      "count": 2,
+      "type": "INT32",
+      "access": "RO",
+      "scale": 0.1,
+      "unit": "°C",
+      "description": "Inverter operating temperature"
+    },
+    "daily_energy": {
+      "address": 30535,
+      "count": 4,
+      "type": "UINT64",
+      "access": "RO",
+      "scale": 1,
+      "unit": "Wh",
+      "description": "Energy fed into grid today"
+    },
+    "total_energy": {
+      "address": 30529,
+      "count": 4,
+      "type": "UINT64",
+      "access": "RO",
+      "scale": 1,
+      "unit": "Wh",
+      "description": "Total lifetime energy fed into grid"
+    },
+    "battery_soc": {
+      "address": 30845,
+      "count": 2,
+      "type": "UINT32",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "%",
+      "description": "Current state of charge of the SMA Home Storage battery"
+    },
+    "battery_soh": {
+      "address": 30865,
+      "count": 2,
+      "type": "UINT32",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "%",
+      "description": "State of health of battery"
+    },
+    "battery_power": {
+      "address": 30847,
+      "count": 2,
+      "type": "INT32",
+      "access": "RO",
+      "scale": 1,
+      "unit": "W",
+      "description": "Battery power. Positive = charging, Negative = discharging."
+    },
+    "battery_temperature": {
+      "address": 30849,
+      "count": 2,
+      "type": "INT32",
+      "access": "RO",
+      "scale": 0.1,
+      "unit": "°C",
+      "description": "Battery pack temperature"
+    },
+    "battery_voltage": {
+      "address": 30851,
+      "count": 2,
+      "type": "UINT32",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Battery voltage"
+    },
+    "battery_current": {
+      "address": 30853,
+      "count": 2,
+      "type": "INT32",
+      "access": "RO",
+      "scale": 0.001,
+      "unit": "A",
+      "description": "Battery current. Positive = charging."
+    },
+    "battery_charge_total": {
+      "address": 31393,
+      "count": 4,
+      "type": "UINT64",
+      "access": "RO",
+      "scale": 1,
+      "unit": "Wh",
+      "description": "Total energy charged into battery since installation"
+    },
+    "battery_discharge_total": {
+      "address": 31397,
+      "count": 4,
+      "type": "UINT64",
+      "access": "RO",
+      "scale": 1,
+      "unit": "Wh",
+      "description": "Total energy discharged from battery since installation"
+    },
+    "operating_mode": {
+      "address": 40009,
+      "count": 2,
+      "type": "UINT32",
+      "access": "RW",
+      "scale": 1,
+      "unit": "enum",
+      "description": "Operating mode: 1=Off, 1467=On, 1749=Forced charge, 1751=Forced discharge"
+    },
+    "battery_min_soc": {
+      "address": 40011,
+      "count": 2,
+      "type": "UINT32",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "%",
+      "description": "Minimum allowed SOC for discharge (5.0–100.0%)"
+    },
+    "active_power_limit": {
+      "address": 40016,
+      "count": 2,
+      "type": "UINT32",
+      "access": "RW",
+      "scale": 1,
+      "unit": "W",
+      "description": "Active power limit for grid feed-in"
+    },
+    "watchdog_heartbeat": {
+      "address": 40042,
+      "count": 2,
+      "type": "UINT32",
+      "access": "RW",
+      "scale": 1,
+      "unit": "count",
+      "description": "Watchdog heartbeat: increment and write before WD_TIMEOUT expires."
+    }
+  },
+  "alarm_bits": {
+    "device_status": {
+      "307": "General error — check event log",
+      "455": "Warning active",
+      "1392": "OK — normal operation",
+      "1793": "Off",
+      "2119": "Standby"
+    }
+  },
+  "soc": {
+    "address": 30845,
+    "register_alias": "battery_soc"
+  }
+}
