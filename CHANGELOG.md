@@ -7,16 +7,20 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-21T11:16 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-21T13:59 -03:00)
 
 > [!IMPORTANT]
-> **v1.3.2 — CI verde restaurado + 372 tests** (2026-02-21)
-> - `ruff format` aplicado en 4 archivos: `arbitrage_engine.py`, `cmg_predictor.py`, `dashboard_api.py`, `test_luna2000_driver_async.py`
-> - CI/CD 100% verde: ruff ✅ · mypy ✅ · pytest 372/372 ✅ · Helm ✅ · Terraform ✅
-> - Suite real: **372 tests** (vs 228 documentados en v1.3.1 — la suite creció con nuevas iteraciones)
-> - **Auth API CEN confirmada**: `?user_key=TOKEN` (NO Bearer) · endpoint correcto: `/costo-marginal-real/v4/findByDate`
-> - **Estado fuentes datos**: CNE públicos (5 módulos) listos sin bloqueo · CEN plan "Mercados" por verificar · DMC no implementado
-> - **Próximas acciones**: verificar plan Mercados CEN → ejecutar CNE público → implementar módulo DMC → entrenar ONNX con datos reales
+> **v1.4.0 — Estándares internacionales implementados** (2026-02-21)
+> - Commit `474fb27` → main: 22 archivos, 1.871 lneas nuevas
+> - CI ahora tiene **9 jobs**: lint + typecheck + test + **security** (bandit+pip-audit) + terraform + helm + docker-build + **trivy** (CVE scan SARIF) + docker-push
+> - Dependabot activado: pip + github-actions + docker (semanal, ya creando PRs automáticos)
+> - Release pipeline: SBOM (CycloneDX JSON+XML) + firma imagen cosign (sigstore keyless)
+> - **Gobernanza OSS**: SECURITY.md, CODE_OF_CONDUCT.md, GOVERNANCE.md, CONTRIBUTING.md
+> - **ADRs**: 5 decisiones documentadas en `docs/adr/` (pydantic-settings, struct Modbus, IsolationForest, ONNX, Pub/Sub)
+> - **Compliance**: NTSyCS CEN Chile + IEC 62443 SL-1 mapeados en `docs/compliance/`
+> - **Prometheus**: 12 alert rules en `infrastructure/prometheus/alert_rules.yml`
+> - Tests: 372/372 ✅ · ruff ✅ · Docker stack: gateway healthy en localhost:8000
+> - **Próximas acciones**: registrar en OpenSSF Best Practices badge · verificar plan Mercados CEN · entrenar ONNX con datos reales
 
 
 
@@ -141,6 +145,50 @@ All notable changes to this project are documented here.
 Format: [Semantic Versioning](https://semver.org/) · [Conventional Commits](https://www.conventionalcommits.org/)
 
 ---
+
+---
+
+## [v1.4.0] — 2026-02-21
+
+> **Hito:** Nivelación a estándares internacionales de software industrial open source
+
+### Added
+- **Gobernanza OSS** (requerida por CNCF/Linux Foundation):
+  - `SECURITY.md` — responsible disclosure, SLAs, protocolo emergencia ICS, safe harbor
+  - `CODE_OF_CONDUCT.md` — Contributor Covenant v2.1
+  - `GOVERNANCE.md` — roles (Maintainer/Contributor/Community), proceso de decisiones, release policy
+  - `CONTRIBUTING.md` — setup entorno, convención commits, reglas safety-critical, cómo añadir drivers
+- **GitHub Templates**:
+  - `.github/ISSUE_TEMPLATE/bug_report.yml` — 10 campos con componente, OS, logs
+  - `.github/ISSUE_TEMPLATE/feature_request.yml` — área, motivación, voluntad de contribuir
+  - `.github/pull_request_template.md` — checklist con Safety Impact Assessment
+  - `.github/dependabot.yml` — actualizaciones semanal: pip + github-actions + docker
+- **Supply Chain Security en CI** (`ci.yml` a 9 jobs):
+  - Job `security`: `bandit -r src/ --severity medium` (SAST) + `pip-audit --requirement requirements.txt` (CVE deps)
+  - Job `trivy`: escaneo imagen Docker, resultados subidos al GitHub Security tab (SARIF)
+- **SBOM + Firma de release** (`release.yml`):
+  - Job `generate-sbom`: CycloneDX JSON + XML adjuntos como asset del GitHub Release
+  - Job `sign-image`: cosign keyless signing (Sigstore) de la imagen Docker en Artifact Registry
+- **Architecture Decision Records** (`docs/adr/`):
+  - ADR-0001: pydantic-settings para configuración (vs dynaconf/configparser)
+  - ADR-0002: `struct` stdlib para Modbus encoding (vs BinaryPayloadDecoder removido en pymodbus 3.12)
+  - ADR-0003: IsolationForest + z-score ensemble para AI-IDS (vs autoencoder/SVM)
+  - ADR-0004: ONNX Runtime para inferencia offline en edge (vs PyTorch/TFLite)
+  - ADR-0005: GCP Pub/Sub para telemetría (vs MQTT/Kafka/AWS IoT)
+- **Documentación de compliance** (`docs/compliance/`):
+  - `ntscys_compliance.md` — mapeo formal NTSyCS CEN Chile (Cap. 4, 6, 8)
+  - `iec62443_mapping.md` — IEC 62443-3-3 SL-1: 7 Foundation Requirements mapeados a implementación
+- **Prometheus Alerting** (`infrastructure/prometheus/`):
+  - `alert_rules.yml` — 12 reglas en 4 grupos: availability, safety, AI-IDS, connectivity
+  - `prometheus.yml` — `rule_files` activado apuntando a `alert_rules.yml`
+- **pyproject.toml**: sección `[tool.bandit]` con skips ajustados al codebase
+- **README.md**: 4 nuevos badges (Security Policy, OpenSSF Best Practices, IEC 62443, NTSyCS)
+
+### Tests
+```
+372 / 372 passed (sin regresión)
+CI: ruff ✅ · format ✅ · 9 jobs activos
+```
 
 ---
 

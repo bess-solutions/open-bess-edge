@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-21T11:16 v1.3.2 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-21T14:00 v1.4.0 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,12 +14,13 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 
 ---
 
-## ✅ Estado Actual — v1.3.2
+## ✅ Estado Actual — v1.4.0
 
 ### Tests
 ```
 372 / 372 passed ✅  (suite completa open-bess-edge)
-CI: ruff ✅ · mypy ✅ · pytest ✅ · helm ✅ · terraform ✅ · docker (skipped — no infra change)
+CI: ruff ✅ · mypy ✅ · pytest ✅ · helm ✅ · terraform ✅ · security ✅ · trivy ✅ · docker ✅
+9 jobs activos — +security (bandit+pip-audit) +trivy (CVE scan SARIF)
 ```
 
 ### Stack Docker — Métricas en vivo (confirmado 2026-02-19)
@@ -119,7 +120,9 @@ GET /api/v1/health   → ok / degraded
 
 ### Bloqueadores activos
 
-> 🎉 **Sin bloqueadores activos** — pipeline CI/CD (7 jobs) operativo. Fix formato ruff aplicado (v1.3.2).
+> 🎉 **Sin bloqueadores activos** — CI/CD 9 jobs operativo. Estándares internacionales implementados (v1.4.0).
+> 
+> **Pendiente estratégico:** Registrar en [OpenSSF Best Practices Badge](https://www.bestpractices.dev/) (~30 min online).
 
 ---
 
@@ -134,9 +137,10 @@ v0.9.0  ████████████████████████
 v1.0.0  ████████████████████████  ✅ Grafana Dashboards + LUNA2000 driver + 228 tests
 v1.0.1  ████████████████████████  ✅ Docker stack corregido y 100% operativo
 v1.2.0  ████████████████████████  ✅ CMgPredictor v2 + ArbitrageEngine v2 + Dashboard
-v1.3.0  ████████████████████████  ✅ bessai-cen-data v0.3.0: 11 features ONNX · pipeline fix · CLI bessai-fetch-renewables/bessai-build-dataset · bessai-web API polling
-v1.3.1  ████████████████████████  ✅ CI 100% verde (ruff+mypy fix) · Mega Scraper 8 módulos · sources/data/ pipeline
+v1.3.0  ████████████████████████  ✅ bessai-cen-data v0.3.0: 11 features ONNX · pipeline fix · CLI · API
+v1.3.1  ████████████████████████  ✅ CI 100% verde (ruff+mypy fix) · Mega Scraper 8 módulos
 v1.3.2  ████████████████████████  ✅ ruff format fix (4 archivos) · suite actualizada 372 tests
+v1.4.0  ████████████████████████  ✅ Estándares internacionales: OSS governance, supply chain security, ADRs, compliance
 v2.0.0  ░░░░░░░░░░░░░░░░░░░░░░░░  📋 Multi-site planetary scale
 ```
 
