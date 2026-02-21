@@ -7,21 +7,41 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-21T14:10 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-21T16:47 -03:00)
 
 > [!IMPORTANT]
-> **v1.5.0 — Sitio de documentación + PyPI package + API Reference** (2026-02-21)
-> - Commit `8d495e3` → main: 7 archivos, 736 líneas
-> - `mkdocs.yml`: sitio MkDocs con tema Material, dark/light mode, navegación completa
-> - `.github/workflows/docs.yml`: deploy automático a GitHub Pages en push a main
-> - `.github/workflows/pypi.yml`: pipeline PyPI con Trusted Publisher OIDC
-> - `pyproject.toml`: metadata PEP 621 completa para `bessai-edge` package
-> - `docs/index.md`: landing page del sitio con arquitectura Mermaid, features, status
-> - `docs/api_reference.md`: documentación REST completa (/health, /metrics, /api/v1/status, /dispatch)
-> - `docs/runbook.md`: actualizado con procedimientos operacionales y matriz de escalación
-> - **Pendiente manual:** Activar GitHub Pages en Settings → Pages → gh-pages branch
-> - **Pendiente manual:** Registrar en [OpenSSF Best Practices](https://www.bestpractices.dev/) para badge real
-> - **Próximas acciones:** verificar API CEN plan Mercados → entrenar ONNX real → publicar en PyPI
+> **v1.7.0 — Global Standard Release** (2026-02-21)
+> - Commit `7ffc9a4` → main: LICENSE Apache 2.0 (OpenSSF bloqueador resuelto)
+> - Commit `926d5cd` → main: README v1.7.0 · OpenSSF badge ID 10716 · Multi-Arch CI badge
+> - Commit `5adfe93` → main: +1708 líneas — véanse detalles abajo
+>
+> ### Cambios v1.7.0 (5adfe93)
+> - **`registry/sma_sunny_tripower.json`** — 25 registros, mercados EU/AU/US/LATAM
+> - **`registry/victron_multiplus2.json`** — 22 registros, Venus OS, off-grid/microgrid
+> - **`registry/fronius_gen24_byd.json`** — 23 registros SunSpec float32, BYD HVS
+> - **`src/interfaces/mqtt_publisher.py`** — publisher universal paho-mqtt: Mosquitto / HA / AWS IoT Core / Azure IoT Hub / HiveMQ; TLS mutuo; topics estandarizados por site_id
+> - **`tests/test_reconnect_chaos.py`** — 6 escenarios de chaos testing para auto-reconnect Modbus
+> - **`.github/workflows/docker-multiarch.yml`** — Buildx CI: linux/amd64 + linux/arm64 → ghcr.io
+> - **`docs/quickstart_rpi.md`** — Raspberry Pi 4/5 deployment en 15 min
+> - **`docs/mqtt_integration.md`** — Guía completa MQTT con ejemplos Home Assistant
+> - **`requirements.txt`** — paho-mqtt>=2.0.0 añadido
+>
+> ### Cambios v1.6.0 (0bda77f)
+> - **`src/drivers/modbus_driver.py`** — `_reconnect()` con backoff exponencial; read_tag/write_tag con auto-reconnect transparente
+> - **`src/core/main.py`** — `ValueError` en lugar de `assert` para GCP config; versión dinámica via `importlib.metadata`
+> - **`dashboard/index.html`** + **`dashboard/styles.css`** + **`dashboard/main.js`** — Dashboard SOC/power/IDS/arbitraje
+> - **`src/interfaces/dashboard_api.py`** — sirve frontend estático + rutas `/dashboard`
+> - **`infrastructure/docker/docker-compose.yml`** — puerto 8080 expuesto, volumen dashboard/
+>
+> ### Pendiente manual
+> - Registrar en [OpenSSF Best Practices](https://www.bestpractices.dev/projects/new) con URL del repo → obtener ID real → actualizar badge en README si difiere de 10716
+> - Activar GitHub Pages en Settings → Pages → rama gh-pages (site MkDocs)
+> - Publicar en PyPI: `pyproject.toml` ya configurado; ejecutar `pypi.yml` CI
+>
+> ### Próximas acciones técnicas sugeridas
+> - Entrenar ONNX con datos reales del CEN (CMg predictor v2 → dispatch model)
+> - Integrar MQTT publisher en `main.py` (actualmente standalone, no conectado al loop principal)
+> - Chaos test de reconexión en CI (actualmente solo local)
 
 
 

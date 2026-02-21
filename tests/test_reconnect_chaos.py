@@ -154,11 +154,10 @@ async def test_multiple_sequential_reads_each_recover(driver: ModbusDriver) -> N
     """
     good_result = _make_mock_result(value=500)
 
-    reconnect_calls = 0
+    reconnect_calls = [0]
 
     async def _fake_connect() -> None:
-        nonlocal reconnect_calls
-        reconnect_calls += 1
+        reconnect_calls[0] += 1
 
     with patch.object(driver, "connect", side_effect=_fake_connect), \
          patch.object(driver, "_client") as mock_client:
@@ -180,7 +179,7 @@ async def test_multiple_sequential_reads_each_recover(driver: ModbusDriver) -> N
             results.append(v)
 
     assert len(results) == 3
-    assert reconnect_calls == 3  # one reconnect per dropped read
+    assert reconnect_calls[0] == 3  # one reconnect per dropped read
 
 
 # ---------------------------------------------------------------------------
