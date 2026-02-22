@@ -92,7 +92,43 @@ jobs:
           fail_ci_if_error: false
 
   # ─────────────────────────────────────────────────────────────────
-  # Job 4: Security — SAST + Dependency audit
+  # Job 4: Interoperability Contract Tests (BESSAI-SPEC-001 Category A)
+  # No hardware needed — uses SimulatorDriver
+  # ─────────────────────────────────────────────────────────────────
+  interop:
+    name: Interop Contract Tests (BESSAI-SPEC-001)
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run BESSAI-SPEC-001 Category A contract tests
+        env:
+          SITE_ID: CI-INTEROP-TEST
+          INVERTER_IP: "127.0.0.1"
+        run: |
+          pytest tests/interop/test_driver_contract.py \
+            -v --tb=short \
+            -m "not slow" \
+            --junit-xml=interop-results.xml
+
+      - name: Upload interop test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: interop-test-results
+          path: interop-results.xml
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 5: Security — SAST + Dependency audit
   # ─────────────────────────────────────────────────────────────────
   security:
     name: Security (bandit + pip-audit)
