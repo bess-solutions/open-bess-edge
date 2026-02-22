@@ -1,0 +1,176 @@
+---
+# BESSAI Edge Gateway — Kubernetes Deployment Manifest
+# Compatible con: K3s (Raspberry Pi), K8s 1.28+, EKS, GKE, AKS
+# Uso: kubectl apply -f infrastructure/k8s/
+#
+# Variables a personalizar:
+#   - SITE_ID: identificador único del sitio
+#   - INVERTER_IP: IP del inversor Modbus TCP
+#   - namespace: bessai (creado por namespace.yml)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bessai-edge-gateway
+  namespace: bessai
+  labels:
+    app: bessai-edge-gateway
+    version: "1.7.1"
+    component: gateway
+    part-of: bessai
+  annotations:
+    app.kubernetes.io/managed-by: kubectl
+    deployment.kubernetes.io/revision: "1"
+spec:
+  replicas: 1          # 1 réplica por sitio — Modbus TCP es stateful
+  selector:
+    matchLabels:
+      app: bessai-edge-gateway
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0   # Zero-downtime rollout
+  template:
+    metadata:
+      labels:
+        app: bessai-edge-gateway
+        version: "1.7.1"
+    spec:
+      # ── Seguridad ──────────────────────────────────────────────────
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      automountServiceAccountToken: false
+
+      # ── Init container: esperar a que el inversor esté disponible ──
+      initContainers:
+        - name: wait-for-inverter
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for inverter at $INVERTER_IP:$INVERTER_PORT..."
+              until nc -zw3 $INVERTER_IP ${INVERTER_PORT:-502}; do
+                echo "Inverter not yet reachable, retrying in 5s..."
+                sleep 5
+              done
+              echo "Inverter is reachable. Starting gateway."
+          env:
+            - name: INVERTER_IP
+              valueFrom:
+                configMapKeyRef:
+                  name: bessai-config
+                  key: INVERTER_IP
+            - name: INVERTER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: bessai-config
+                  key: INVERTER_PORT
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+
+      # ── Contenedor principal ───────────────────────────────────────
+      containers:
+        - name: bessai-edge-gateway
+          image: ghcr.io/bess-solutions/open-bess-edge:latest
+          imagePullPolicy: Always
+          ports:
+            - name: health
+              containerPort: 8000
+              protocol: TCP
+
+          # ── Variables de entorno desde ConfigMap ──────────────────
+          envFrom:
+            - configMapRef:
+                name: bessai-config
+
+          # ── Variables sensibles desde Secret ──────────────────────
+          env:
+            - name: GCP_PROJECT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: bessai-secrets
+                  key: GCP_PROJECT_ID
+                  optional: true
+            - name: GCP_PUBSUB_TOPIC
+              valueFrom:
+                secretKeyRef:
+                  name: bessai-secrets
+                  key: GCP_PUBSUB_TOPIC
+                  optional: true
+            - name: MQTT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: bessai-secrets
+                  key: MQTT_USERNAME
+                  optional: true
+            - name: MQTT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bessai-secrets
+                  key: MQTT_PASSWORD
+                  optional: true
+
+          # ── Health probes ──────────────────────────────────────────
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: health
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: health
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+
+          # ── Recursos (ajustar según hardware) ─────────────────────
+          resources:
+            requests:
+              cpu: "100m"       # 0.1 vCPU — ideal para Raspberry Pi
+              memory: "128Mi"
+            limits:
+              cpu: "500m"       # 0.5 vCPU
+              memory: "512Mi"
+
+          # ── Seguridad del contenedor ──────────────────────────────
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false   # Python necesita tmpdir
+            capabilities:
+              drop:
+                - ALL
+
+          # ── Registro de logs estructurado ─────────────────────────
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+
+      # ── Volúmenes ─────────────────────────────────────────────────
+      volumes:
+        - name: tmp
+          emptyDir: {}
+
+      # ── Afinidad de nodo (opcional) ───────────────────────────────
+      # Descomenta para fijar a un nodo específico (edge cluster)
+      # nodeSelector:
+      #   site-id: SITE-CL-001
+
+      # ── Tolerancias para nodos edge ───────────────────────────────
+      tolerations:
+        - key: "edge"
+          operator: "Exists"
+          effect: "NoSchedule"
+
+      restartPolicy: Always
