@@ -97,3 +97,10 @@ flwr>=1.8.0
 # If not installed, the gateway falls back gracefully to GCP Pub/Sub only.
 paho-mqtt>=2.0.0
 
+# ---------------------------------------------------------------------------
+# Security — pin explícito para forzar version segura de dep. transitiva
+# cryptography>=46.0.0 resuelve CVE detectado en v44.0.0 (pip-audit)
+# Referencias: dependencia transitiva de paho-mqtt / gcloud-aio-pubsub
+# ---------------------------------------------------------------------------
+cryptography>=46.0.0
+
