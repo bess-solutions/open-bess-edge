@@ -26,6 +26,7 @@ Usage::
 
 from __future__ import annotations
 
+import collections
 import mimetypes
 import os
 import time
@@ -52,8 +53,8 @@ __all__ = ["DashboardAPI", "DashboardState"]
 
 log = structlog.get_logger(__name__)
 
-VERSION = "1.0.0"  # bumped: data-flywheel integration
-BUILD_DATE = "2026-02-20"
+VERSION = "2.3.0"  # v2.3.0: rate limiting SR 7.1, mkdocs nav, hash pinning
+BUILD_DATE = "2026-02-22"
 
 try:
     from aiohttp import web
@@ -64,6 +65,56 @@ except ImportError:
     _AIOHTTP_AVAILABLE = False
     web = None  # type: ignore[assignment]
     middleware = None  # type: ignore[assignment]
+
+
+# ---------------------------------------------------------------------------
+# IEC 62443 SR 7.1 — Rate Limiter (Denial-of-Service protection)
+# ---------------------------------------------------------------------------
+
+_RATE_LIMIT_WINDOW_S: int = 60  # sliding window
+
+
+class _RateLimiter:
+    """In-memory sliding-window rate limiter keyed by client IP.
+
+    Configurable via env vars:
+      RATE_LIMIT_READ_RPM   — max requests/min for read endpoints (default 300)
+
+    Returns True if the request should be allowed.
+    """
+
+    def __init__(self) -> None:
+        self._read_limit: int = int(os.getenv("RATE_LIMIT_READ_RPM", "300"))
+        # deque of timestamps per IP
+        self._counters: dict[str, collections.deque[float]] = {}
+
+    def is_allowed(self, ip: str) -> bool:
+        now = time.monotonic()
+        window_start = now - _RATE_LIMIT_WINDOW_S
+        dq = self._counters.setdefault(ip, collections.deque())
+        # Evict timestamps outside the window
+        while dq and dq[0] < window_start:
+            dq.popleft()
+        if len(dq) >= self._read_limit:
+            log.warning(
+                "dashboard_api.rate_limit_exceeded",
+                ip=ip,
+                count=len(dq),
+                limit=self._read_limit,
+            )
+            return False
+        dq.append(now)
+        return True
+
+    def retry_after(self, ip: str) -> int:
+        """Seconds until the oldest request falls outside the window."""
+        dq = self._counters.get(ip)
+        if not dq:
+            return 1
+        return max(1, int(_RATE_LIMIT_WINDOW_S - (time.monotonic() - dq[0])) + 1)
+
+
+_rate_limiter = _RateLimiter()
 
 
 class DashboardState:
@@ -448,6 +499,23 @@ class DashboardAPI:
             resp.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type"
             return resp
 
+        @middleware
+        async def rate_limit_middleware(request: Any, handler: Any) -> Any:
+            """IEC 62443 SR 7.1 — Deny-of-Service protection via per-IP rate limiting."""
+            # Exempt OPTIONS preflight and health endpoint from rate limiting
+            if request.method == "OPTIONS" or request.path in ("/api/v1/health", "/"):
+                return await handler(request)
+            ip: str = request.headers.get("X-Forwarded-For", request.remote or "unknown").split(",")[0].strip()
+            if not _rate_limiter.is_allowed(ip):
+                retry = _rate_limiter.retry_after(ip)
+                return web.Response(
+                    text='{"error": "Too Many Requests", "retry_after_s": ' + str(retry) + '}',
+                    status=429,
+                    content_type="application/json",
+                    headers={"Retry-After": str(retry)},
+                )
+            return await handler(request)
+
         # Initialise the data-flywheel pipeline (if bessai_arbitrage is installed)
         if _FLYWHEEL_AVAILABLE and BessConfig is not None and ArbitragePipeline is not None:
             try:
@@ -472,7 +540,7 @@ class DashboardAPI:
             except Exception as exc:
                 log.warning("dashboard_api.flywheel_init_failed", error=str(exc))
 
-        self._app = web.Application(middlewares=[cors_middleware])
+        self._app = web.Application(middlewares=[rate_limit_middleware, cors_middleware])
         self._app.router.add_get("/", self.handle_dashboard)
         self._app.router.add_get("/dashboard", self.handle_dashboard)
         self._app.router.add_get(r"/{filename:.*\.(?:css|js|ico|png|svg)}", self.handle_static)
