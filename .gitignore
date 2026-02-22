@@ -104,3 +104,15 @@ out/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# ---------------------------------------------------------------------------
+# IEC 62443 GAP-003: OT PKI — private keys MUST NOT be committed
+# Run: bash infrastructure/certs/gen_certs.sh to regenerate locally
+# ---------------------------------------------------------------------------
+infrastructure/certs/*.key
+infrastructure/certs/*.pem
+infrastructure/certs/*.srl
+# CA key is especially sensitive
+infrastructure/certs/ca.key
+# Public certs are safe to commit (no secret material)
+# infrastructure/certs/*.crt  ← intentionally NOT ignored
