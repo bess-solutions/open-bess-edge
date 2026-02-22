@@ -297,6 +297,20 @@ class UniversalDriver:
         ]
 
     # ------------------------------------------------------------------
+    # DataProvider protocol properties
+    # ------------------------------------------------------------------
+
+    @property
+    def is_connected(self) -> bool:
+        """True if the Modbus TCP client currently has an active connection."""
+        return bool(self._client.connected)
+
+    @property
+    def source_description(self) -> str:
+        """Human-readable identifier of the Modbus data source."""
+        return f"ModbusTCP@{self._host}:{self._port}"
+
+    # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
 

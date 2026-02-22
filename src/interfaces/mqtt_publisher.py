@@ -36,7 +36,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import logging
 import os
 import ssl
 import time
@@ -53,6 +52,7 @@ log = structlog.get_logger(__name__)
 # Exceptions
 # ---------------------------------------------------------------------------
 
+
 class MQTTConnectionError(RuntimeError):
     """Raised when the MQTT broker is unreachable or TLS fails."""
 
@@ -62,6 +62,7 @@ class MQTTConnectionError(RuntimeError):
 # ---------------------------------------------------------------------------
 try:
     import paho.mqtt.client as mqtt  # type: ignore[import]
+
     _PAHO_AVAILABLE = True
 except ImportError:
     _PAHO_AVAILABLE = False
@@ -71,11 +72,11 @@ except ImportError:
 # Topic templates
 # ---------------------------------------------------------------------------
 _TOPICS = {
-    "telemetry":  "{site_id}/telemetry",
-    "safety":     "{site_id}/safety",
-    "ids":        "{site_id}/ai/ids",
-    "dispatch":   "{site_id}/ai/dispatch",
-    "heartbeat":  "{site_id}/system/heartbeat",
+    "telemetry": "{site_id}/telemetry",
+    "safety": "{site_id}/safety",
+    "ids": "{site_id}/ai/ids",
+    "dispatch": "{site_id}/ai/dispatch",
+    "heartbeat": "{site_id}/system/heartbeat",
 }
 
 
@@ -154,32 +155,23 @@ class MQTTPublisher:
     # Lifecycle
     # -----------------------------------------------------------------------
 
-    async def start(self) -> None:
-        """Connect to the MQTT broker (non-blocking)."""
-        if not _PAHO_AVAILABLE:
-            raise RuntimeError(
-                "paho-mqtt not installed. Run: pip install paho-mqtt>=2.0"
-            )
+    def _build_tls_context(self) -> ssl.SSLContext:
+        """Build and return an SSLContext for TLS-secured connections."""
+        tls_ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        if self._tls_ca_cert:
+            tls_ctx.load_verify_locations(self._tls_ca_cert)
+        else:
+            tls_ctx.load_default_certs()
+        if self._tls_certfile and self._tls_keyfile:
+            tls_ctx.load_cert_chain(self._tls_certfile, self._tls_keyfile)
+        return tls_ctx
 
-        self._client = mqtt.Client(client_id=self._client_id, protocol=mqtt.MQTTv5)
+    def _setup_callbacks(self) -> None:
+        """Register on_connect / on_disconnect callbacks on the MQTT client."""
 
-        # Auth
-        if self._username:
-            self._client.username_pw_set(self._username, self._password)
-
-        # TLS
-        if self._use_tls:
-            tls_ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-            if self._tls_ca_cert:
-                tls_ctx.load_verify_locations(self._tls_ca_cert)
-            else:
-                tls_ctx.load_default_certs()
-            if self._tls_certfile and self._tls_keyfile:
-                tls_ctx.load_cert_chain(self._tls_certfile, self._tls_keyfile)
-            self._client.tls_set_context(tls_ctx)
-
-        # Callbacks
-        def _on_connect(client: Any, userdata: Any, flags: Any, rc: Any, props: Any = None) -> None:
+        def _on_connect(
+            client: Any, userdata: Any, flags: Any, rc: Any, props: Any = None
+        ) -> None:
             if rc == 0:
                 self._connected = True
                 log.info("mqtt_publisher.connected", host=self._host, port=self._port)
@@ -193,6 +185,21 @@ class MQTTPublisher:
         self._client.on_connect = _on_connect
         self._client.on_disconnect = _on_disconnect
 
+    async def start(self) -> None:
+        """Connect to the MQTT broker (non-blocking)."""
+        if not _PAHO_AVAILABLE:
+            raise RuntimeError("paho-mqtt not installed. Run: pip install paho-mqtt>=2.0")
+
+        self._client = mqtt.Client(client_id=self._client_id, protocol=mqtt.MQTTv5)
+
+        if self._username:
+            self._client.username_pw_set(self._username, self._password)
+
+        if self._use_tls:
+            self._client.tls_set_context(self._build_tls_context())
+
+        self._setup_callbacks()
+
         self._client.connect_async(self._host, self._port, keepalive=60)
         self._client.loop_start()
 
@@ -204,7 +211,7 @@ class MQTTPublisher:
         else:
             self._client.loop_stop()
             raise MQTTConnectionError(
-                f"Could not connect to MQTT broker at {self._host}:{self._port} within 10 s"
+                f"Could not connect to MQTT broker at {str(self._host)}:{self._port} within 10 s"
             )
 
         log.info(
@@ -231,7 +238,9 @@ class MQTTPublisher:
         if not self._connected or self._client is None:
             log.warning("mqtt_publisher.publish_skipped", topic=topic, reason="disconnected")
             return
-        result = self._client.publish(topic, self._dump(payload), qos=self._qos, retain=self._retain)
+        result = self._client.publish(
+            topic, self._dump(payload), qos=self._qos, retain=self._retain
+        )
         if result.rc != mqtt.MQTT_ERR_SUCCESS:
             log.warning("mqtt_publisher.publish_error", topic=topic, rc=result.rc)
         else:

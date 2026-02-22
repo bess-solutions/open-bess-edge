@@ -42,7 +42,7 @@ from typing import Any
 
 import structlog
 
-from src.drivers.base import DataProvider, DataProviderError
+from src.drivers.base import DataProviderError
 
 __all__ = ["SimulatorDriver", "SimMode"]
 
@@ -55,29 +55,49 @@ log = structlog.get_logger(__name__)
 
 class SimMode:
     """Simulation scenario presets."""
-    NORMAL = "normal"    # typical BESS day — charge at night, discharge at peak
-    STRESS = "stress"    # high thermal, rapid cycling (tests AI-IDS)
-    FAULT  = "fault"     # anomalous values — triggers AI-IDS alarm
-    IDLE   = "idle"      # steady state: SOC=80%, power=0, temp=25°C
+
+    NORMAL = "normal"  # typical BESS day — charge at night, discharge at peak
+    STRESS = "stress"  # high thermal, rapid cycling (tests AI-IDS)
+    FAULT = "fault"  # anomalous values — triggers AI-IDS alarm
+    IDLE = "idle"  # steady state: SOC=80%, power=0, temp=25°C
 
 
 # ---------------------------------------------------------------------------
 # Physics constants
 # ---------------------------------------------------------------------------
 
-_TICK_S       = 5.0     # simulated seconds per real second
-_CAPACITY_KWH = 200.0   # nominal BESS capacity (kWh) — configurable
-_MAX_POWER_KW = 100.0   # peak charge/discharge power (kW)
-_ETA_CHG      = 0.96    # round-trip charge efficiency
-_ETA_DIS      = 0.96    # round-trip discharge efficiency
+_TICK_S = 5.0  # simulated seconds per real second
+_CAPACITY_KWH = 200.0  # nominal BESS capacity (kWh) — configurable
+_MAX_POWER_KW = 100.0  # peak charge/discharge power (kW)
+_ETA_CHG = 0.96  # round-trip charge efficiency
+_ETA_DIS = 0.96  # round-trip discharge efficiency
 
 # Typical daily dispatch schedule: hour → power fraction (-1=discharge, +1=charge)
 _NORMAL_SCHEDULE: dict[int, float] = {
-    0: 0.8, 1: 0.9, 2: 0.9, 3: 0.9, 4: 0.5, 5: 0.0,   # night: charge
-    6: 0.0, 7:-0.3, 8:-0.6, 9:-0.8,                      # morning peak: discharge
-    10:-0.5,11:-0.3,12: 0.3,13: 0.5,14: 0.3,15:-0.3,    # midday solar
-    16:-0.5,17:-0.8,18:-0.9,19:-0.7,20:-0.4,21:-0.2,    # evening peak
-    22: 0.4,23: 0.7,                                       # late night: charge
+    0: 0.8,
+    1: 0.9,
+    2: 0.9,
+    3: 0.9,
+    4: 0.5,
+    5: 0.0,  # night: charge
+    6: 0.0,
+    7: -0.3,
+    8: -0.6,
+    9: -0.8,  # morning peak: discharge
+    10: -0.5,
+    11: -0.3,
+    12: 0.3,
+    13: 0.5,
+    14: 0.3,
+    15: -0.3,  # midday solar
+    16: -0.5,
+    17: -0.8,
+    18: -0.9,
+    19: -0.7,
+    20: -0.4,
+    21: -0.2,  # evening peak
+    22: 0.4,
+    23: 0.7,  # late night: charge
 }
 
 
@@ -113,18 +133,18 @@ class SimulatorDriver:
         registry_dir: str | Path = "registry",
     ) -> None:
         self._profile_name = profile
-        self._mode = (mode or os.getenv("BESSAI_SIM_MODE", SimMode.NORMAL)).lower()
+        self._mode = (mode or os.getenv("BESSAI_SIM_MODE") or SimMode.NORMAL).lower()
         self._capacity_kwh = capacity_kwh
         self._registry_dir = Path(registry_dir)
 
         # Physics state
-        self._soc: float = initial_soc                # %
-        self._power_kw: float = 0.0                   # kW (+charge, -discharge)
+        self._soc: float = initial_soc  # %
+        self._power_kw: float = 0.0  # kW (+charge, -discharge)
         self._temp_c: float = 25.0 + random.uniform(-3, 3)  # °C
         self._voltage: float = 48.0 * (0.8 + initial_soc / 500)  # V
-        self._current: float = 0.0                    # A
+        self._current: float = 0.0  # A
         self._cycle_count: int = random.randint(50, 500)
-        self._last_power_sign: float = 0.0            # for cycle counting
+        self._last_power_sign: float = 0.0  # for cycle counting
         self._daily_energy_kwh: float = 0.0
         self._total_energy_kwh: float = random.uniform(5000, 50000)
         self._ac_power_w: float = 0.0
@@ -241,7 +261,7 @@ class SimulatorDriver:
             self._power_kw = _MAX_POWER_KW * math.sin(2 * math.pi * hour_phase)
         else:
             # Normal: follow daily schedule
-            hour = int((time.gmtime(time.time() - 10800).tm_hour))  # Chile UTC-3
+            hour = int(time.gmtime(time.time() - 10800).tm_hour)  # Chile UTC-3
             fraction = _NORMAL_SCHEDULE.get(hour, 0.0)
             self._power_kw = _MAX_POWER_KW * fraction * (1 + random.uniform(-0.05, 0.05))
 
@@ -274,7 +294,11 @@ class SimulatorDriver:
 
         # Cycle count: increment on power direction reversal
         current_sign = 1.0 if self._power_kw > 5 else (-1.0 if self._power_kw < -5 else 0.0)
-        if current_sign != 0 and self._last_power_sign != 0 and current_sign != self._last_power_sign:
+        if (
+            current_sign != 0
+            and self._last_power_sign != 0
+            and current_sign != self._last_power_sign
+        ):
             self._cycle_count += 1
         if current_sign != 0:
             self._last_power_sign = current_sign
@@ -286,104 +310,94 @@ class SimulatorDriver:
 
     def _read_value(self, tag_name: str) -> float:
         """Map tag names to current simulation state values."""
-        noise = lambda s=0.5: random.uniform(-s, s)
+
+        def noise(s=0.5):
+            return random.uniform(-s, s)
 
         mapping: dict[str, float] = {
             # State of charge / health
-            "luna_soc":          self._soc + noise(0.1),
-            "battery_soc":       self._soc + noise(0.1),
-            "luna_soh":          97.5 - self._cycle_count * 0.008 + noise(0.1),
-            "battery_soh":       97.5 - self._cycle_count * 0.008 + noise(0.1),
-
+            "luna_soc": self._soc + noise(0.1),
+            "battery_soc": self._soc + noise(0.1),
+            "luna_soh": 97.5 - self._cycle_count * 0.008 + noise(0.1),
+            "battery_soh": 97.5 - self._cycle_count * 0.008 + noise(0.1),
             # Power — battery side
-            "luna_power":        self._power_kw + noise(0.05),
-            "battery_power":     self._power_kw * 1000 + noise(50),    # W for some profiles
-            "pv_power":          max(0.0, random.gauss(15, 3)),         # kW solar
-
+            "luna_power": self._power_kw + noise(0.05),
+            "battery_power": self._power_kw * 1000 + noise(50),  # W for some profiles
+            "pv_power": max(0.0, random.gauss(15, 3)),  # kW solar
             # Voltage & current
-            "luna_voltage":      self._voltage + noise(2),
-            "battery_voltage":   self._voltage + noise(2),
-            "luna_current":      self._current + noise(0.5),
-            "battery_current":   self._current + noise(0.5),
-
+            "luna_voltage": self._voltage + noise(2),
+            "battery_voltage": self._voltage + noise(2),
+            "luna_current": self._current + noise(0.5),
+            "battery_current": self._current + noise(0.5),
             # Temperature
-            "luna_temperature":  self._temp_c + noise(0.2),
+            "luna_temperature": self._temp_c + noise(0.2),
             "battery_temperature": self._temp_c + noise(0.2),
             "internal_temperature": self._temp_c - 3 + noise(0.5),  # inverter cooler
-
             # AC grid side
-            "active_power":      self._ac_power_w / 1000 + noise(0.02),   # kW
-            "ac_power_total":    self._ac_power_w + noise(10),              # W
-            "ac_voltage":        self._ac_voltage_v + noise(0.5),
-            "ac_voltage_l1":     self._ac_voltage_v + noise(0.5),
-            "ac_voltage_l2":     self._ac_voltage_v + noise(0.5),
-            "ac_voltage_l3":     self._ac_voltage_v + noise(0.5),
-            "ac_current":        abs(self._current) * 0.7 + noise(0.1),
-            "ac_current_total":  abs(self._current) * 0.7 + noise(0.1),
-            "grid_frequency":    self._frequency_hz + noise(0.02),
-            "frequency":         self._frequency_hz + noise(0.02),
-            "grid_power":        self._ac_power_w + noise(20),              # W
-
+            "active_power": self._ac_power_w / 1000 + noise(0.02),  # kW
+            "ac_power_total": self._ac_power_w + noise(10),  # W
+            "ac_voltage": self._ac_voltage_v + noise(0.5),
+            "ac_voltage_l1": self._ac_voltage_v + noise(0.5),
+            "ac_voltage_l2": self._ac_voltage_v + noise(0.5),
+            "ac_voltage_l3": self._ac_voltage_v + noise(0.5),
+            "ac_current": abs(self._current) * 0.7 + noise(0.1),
+            "ac_current_total": abs(self._current) * 0.7 + noise(0.1),
+            "grid_frequency": self._frequency_hz + noise(0.02),
+            "frequency": self._frequency_hz + noise(0.02),
+            "grid_power": self._ac_power_w + noise(20),  # W
             # DC input
-            "dc_power":          abs(self._power_kw) * 1000 * 1.02,
-            "dc_voltage":        self._voltage * 2.5 + noise(5),
-            "pv_total_power":    max(0.0, random.gauss(12, 2)),             # kW
-            "pv1_voltage":       280 + noise(5),
-            "pv1_current":       max(0.0, random.gauss(8, 1)),
-            "pv2_voltage":       280 + noise(5),
-            "pv2_current":       max(0.0, random.gauss(8, 1)),
-
+            "dc_power": abs(self._power_kw) * 1000 * 1.02,
+            "dc_voltage": self._voltage * 2.5 + noise(5),
+            "pv_total_power": max(0.0, random.gauss(12, 2)),  # kW
+            "pv1_voltage": 280 + noise(5),
+            "pv1_current": max(0.0, random.gauss(8, 1)),
+            "pv2_voltage": 280 + noise(5),
+            "pv2_current": max(0.0, random.gauss(8, 1)),
             # Power factor
-            "power_factor":      0.98 + noise(0.01),
-            "reactive_power":    noise(5),
-
+            "power_factor": 0.98 + noise(0.01),
+            "reactive_power": noise(5),
             # Capacity & energy
-            "luna_capacity":     self._capacity_kwh * 0.95,
-            "battery_charge_total":   self._total_energy_kwh * 3600,   # Wh total charge
+            "luna_capacity": self._capacity_kwh * 0.95,
+            "battery_charge_total": self._total_energy_kwh * 3600,  # Wh total charge
             "battery_discharge_total": self._total_energy_kwh * 3600,
-            "daily_energy":      self._daily_energy_kwh,
-            "total_energy":      self._total_energy_kwh,
-
+            "daily_energy": self._daily_energy_kwh,
+            "total_energy": self._total_energy_kwh,
             # Cycles
-            "luna_cycle_count":  float(self._cycle_count),
-
+            "luna_cycle_count": float(self._cycle_count),
             # State / status (enums as floats)
-            "inverter_state":    1392.0 if self._mode != SimMode.FAULT else 307.0,  # SMA: 1392=OK
-            "device_status":     1392.0 if self._mode != SimMode.FAULT else 307.0,
-            "battery_status":    3.0 if self._power_kw > 0 else 2.0,   # 3=charging, 2=discharging
-            "grid_relay_status": 51.0,   # 51=closed
-
+            "inverter_state": 1392.0 if self._mode != SimMode.FAULT else 307.0,  # SMA: 1392=OK
+            "device_status": 1392.0 if self._mode != SimMode.FAULT else 307.0,
+            "battery_status": 3.0 if self._power_kw > 0 else 2.0,  # 3=charging, 2=discharging
+            "grid_relay_status": 51.0,  # 51=closed
             # AC output (Victron / off-grid)
             "ac_output_voltage": self._ac_voltage_v + noise(0.3),
             "ac_output_current": abs(self._current) * 0.6 + noise(0.1),
-            "ac_output_power":   abs(self._ac_power_w) * 0.8 + noise(20),
-            "ac_input_voltage":  self._ac_voltage_v + noise(1),
-            "ac_input_current":  abs(self._current) * 0.3 + noise(0.1),
-            "ac_input_power":    self._ac_power_w * 0.5 + noise(30),
-
+            "ac_output_power": abs(self._ac_power_w) * 0.8 + noise(20),
+            "ac_input_voltage": self._ac_voltage_v + noise(1),
+            "ac_input_current": abs(self._current) * 0.3 + noise(0.1),
+            "ac_input_power": self._ac_power_w * 0.5 + noise(30),
             # Victron specifics
             "battery_consumed_ah": max(0.0, (100 - self._soc) * self._capacity_kwh * 10 / 48),
-            "time_to_go":       max(0.0, self._soc / 100 * self._capacity_kwh / max(0.1, abs(self._power_kw))),
-            "ess_setpoint":     self._power_kw * 1000,
-            "minimum_soc":      10.0,
-
+            "time_to_go": max(
+                0.0, self._soc / 100 * self._capacity_kwh / max(0.1, abs(self._power_kw))
+            ),
+            "ess_setpoint": self._power_kw * 1000,
+            "minimum_soc": 10.0,
             # Alarms (0 = no alarm)
-            "alarm1":           0.0 if self._mode != SimMode.FAULT else 16.0,
-            "alarm2":           0.0 if self._mode != SimMode.FAULT else 512.0,
-            "alarm3":           0.0,
-            "vebus_error":      0.0,
-
+            "alarm1": 0.0 if self._mode != SimMode.FAULT else 16.0,
+            "alarm2": 0.0 if self._mode != SimMode.FAULT else 512.0,
+            "alarm3": 0.0,
+            "vebus_error": 0.0,
             # Watchdog / heartbeat (read back what was last written)
-            "watchdog_heartbeat":    1.0,
-
+            "watchdog_heartbeat": 1.0,
             # Control registers (readable current setpoints)
-            "luna_working_mode":     2.0,   # TOU
+            "luna_working_mode": 2.0,  # TOU
             "luna_charge_target_soc": 90.0,
-            "operating_mode":        1467.0,
-            "storage_control_mode":  1.0,   # Auto
+            "operating_mode": 1467.0,
+            "storage_control_mode": 1.0,  # Auto
             "storage_setpoint_power": self._power_kw * 1000,
-            "storage_minimum_soc":   10.0,
-            "active_power_limit":    _MAX_POWER_KW * 1000,
+            "storage_minimum_soc": 10.0,
+            "active_power_limit": _MAX_POWER_KW * 1000,
         }
 
         if tag_name not in mapping:
@@ -402,6 +416,6 @@ class SimulatorDriver:
     # -----------------------------------------------------------------------
 
     @classmethod
-    def for_profile(cls, profile: str, **kwargs: Any) -> "SimulatorDriver":
+    def for_profile(cls, profile: str, **kwargs: Any) -> SimulatorDriver:
         """Convenience factory. ``SimulatorDriver.for_profile("sma_sunny_tripower")``."""
         return cls(profile=profile, **kwargs)
