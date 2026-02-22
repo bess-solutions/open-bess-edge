@@ -85,10 +85,20 @@ nav:
   - Operations:
     - Runbook: runbook.md
     - Prometheus Alerts: alerting.md
+  - Tutorials:
+    - Deploy en 5 Minutos: tutorials/quickstart_5min.md
+    - Conectar Hardware Real: tutorials/connecting_real_hardware.md
+    - MQTT + Home Assistant: tutorials/integration_homeassistant.md
+    - MQTT Integration (full): mqtt_integration.md
   - Security & Compliance:
     - Security Model: security_model.md
     - NTSyCS Compliance: compliance/ntscys_compliance.md
     - IEC 62443 Mapping: compliance/iec62443_mapping.md
+    - IEC 62443 SL-2 Gap: compliance/iec62443_sl2_gap.md
+    - OpenSSF Gold Checklist: openssf_gold_checklist.md
+  - Comunidad y Estrategia:
+    - Bounty Program: bounty_program.md
+    - Pitch Deck: pitch_deck.md
   - Contributing:
     - Guide: ../CONTRIBUTING.md
     - Code of Conduct: ../CODE_OF_CONDUCT.md
