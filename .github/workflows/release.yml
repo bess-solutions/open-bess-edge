@@ -132,7 +132,7 @@ jobs:
   create-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: [release-docker, generate-sbom, sign-image]
+    needs: [release-docker, generate-sbom, sign-image, slsa-provenance]
     permissions:
       contents: write
 
@@ -145,7 +145,6 @@ jobs:
         id: notes
         run: |
           VERSION="${GITHUB_REF_NAME}"
-          # Extract section for this version from CHANGELOG.md
           NOTES=$(awk "/^## \[${VERSION#v}\]/,/^## \[/" CHANGELOG.md | head -n -1)
           if [ -z "$NOTES" ]; then
             NOTES="Release ${VERSION}"
@@ -171,3 +170,22 @@ jobs:
           files: |
             sbom/sbom-${{ github.ref_name }}.cdx.json
             sbom/sbom-${{ github.ref_name }}.cdx.xml
+
+  # ─────────────────────────────────────────────────────────────────
+  # SLSA Level 2 — Build Provenance (OpenSSF Gold requirement)
+  # ─────────────────────────────────────────────────────────────────
+  slsa-provenance:
+    name: SLSA Level 2 Provenance
+    needs: [release-docker]
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0
+    with:
+      image: ghcr.io/bess-solutions/open-bess-edge
+      digest: ${{ needs.release-docker.outputs.digest || '' }}
+      registry-username: ${{ github.actor }}
+    secrets:
+      registry-password: ${{ secrets.GITHUB_TOKEN }}
+
