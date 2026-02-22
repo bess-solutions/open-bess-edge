@@ -28,7 +28,7 @@ Based on the existing `iec62443_sl2_gap.md` analysis:
 | Communication integrity (SR 3.1) | TLS enforced (Ingress) | ✅ mTLS OT segment (GAP-003 CLOSED v2.1.0) |
 | Network segmentation (SR 5.2) | Docker network isolation | Formal network diagram needed |
 
-**Estimated SL-2 readiness:** ~85%  *(was 65% before v2.0.0–v2.1.0)*
+**Estimated SL-2 readiness:** ~95%  *(was 85% before v2.2.0 audit docs)*
 
 ---
 
@@ -54,7 +54,10 @@ Based on the existing `iec62443_sl2_gap.md` analysis:
 | MFA for management | TOTP for admin dashboard via `pyotp` | Engineering | ✅ CLOSED v2.0.0 |
 | SIEM log forwarding | Loki output via OTel Collector | Engineering | ✅ CLOSED v2.0.0 |
 | mTLS for OT segment | stunnel proxy + `ot_tls_config.py` + `gen_certs.sh` | Engineering | ✅ CLOSED v2.1.0 |
-| Formal network diagram | Create `docs/architecture/network_diagram.md` with OT zones | Engineering | 🔲 Pending |
+| Formal network diagram | `docs/architecture/network_diagram.md` (NAD-001) | Engineering | ✅ CLOSED v2.2.0 |
+| System Security Plan | `docs/compliance/ssp_iec62443_sl2.md` (SSP-001) | Engineering | ✅ CLOSED v2.2.0 |
+| PSIRT process | `SECURITY.md` — PSIRT section added | Engineering | ✅ CLOSED v2.2.0 |
+| Patch Management SLA | `docs/compliance/patch_management_sla.md` (PMS-001) | Engineering | ✅ CLOSED v2.2.0 |
 
 ### Phase 3 — Formal Audit (Q2–Q3 2026)
 
