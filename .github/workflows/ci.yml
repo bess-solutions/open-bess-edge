@@ -208,7 +208,7 @@ jobs:
 
       - name: Build image (no push)
         id: build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: infrastructure/docker/Dockerfile
@@ -234,7 +234,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build image for scanning
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: infrastructure/docker/Dockerfile
@@ -288,7 +288,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: infrastructure/docker/Dockerfile
