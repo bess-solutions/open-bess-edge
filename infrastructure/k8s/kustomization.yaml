@@ -1,0 +1,26 @@
+---
+# Kustomization — punto de entrada único para kubectl apply
+# Uso: kubectl apply -k infrastructure/k8s/
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: bessai
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - service.yaml
+  - deployment.yaml
+
+# Imágenes — sobrescribir tag en ambientes específicos:
+# images:
+#   - name: ghcr.io/bess-solutions/open-bess-edge
+#     newTag: "1.7.1"
+
+# Labels comunes aplicados a todos los recursos
+commonLabels:
+  managed-by: kustomize
+  project: bessai-edge-gateway
+
+# Anotaciones de trazabilidad
+commonAnnotations:
+  docs: "https://bess-solutions.github.io/open-bess-edge/"
+  contact: "ingenieria@bess-solutions.cl"

@@ -1,0 +1,38 @@
+---
+# ConfigMap con configuración no-sensible del gateway
+# ⚠️  Valores sensibles (credenciales) van en bessai-secrets.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bessai-config
+  namespace: bessai
+  labels:
+    app: bessai-edge-gateway
+data:
+  # ── Sitio ────────────────────────────────────────────────────────
+  SITE_ID: "SITE-CL-001"
+
+  # ── Inversor Modbus TCP ───────────────────────────────────────────
+  INVERTER_IP: "192.168.1.100"   # ← Cambiar a la IP real del inversor
+  INVERTER_PORT: "502"
+  DRIVER_PROFILE_PATH: "registry/huawei_sun2000.json"
+
+  # ── Gateway ───────────────────────────────────────────────────────
+  HEALTH_PORT: "8000"
+  WATCHDOG_TIMEOUT: "5"
+  LOG_LEVEL: "INFO"
+
+  # ── Modo de operación ─────────────────────────────────────────────
+  # BESSAI_MODE: "modbus"      # real hardware
+  # BESSAI_MODE: "simulator"   # sin hardware (para dev)
+  BESSAI_MODE: "modbus"
+
+  # ── MQTT (si se usa) ──────────────────────────────────────────────
+  MQTT_ENABLED: "false"          # Cambiar a "true" para activar MQTT
+  MQTT_BROKER_HOST: "mosquitto"  # Nombre del servicio K8s del broker
+  MQTT_BROKER_PORT: "1883"
+  MQTT_SITE_ID: "SITE-CL-001"
+
+  # ── OpenTelemetry ─────────────────────────────────────────────────
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
+  OTEL_SERVICE_NAME: "bessai-edge-gateway"

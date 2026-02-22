@@ -1,0 +1,9 @@
+---
+# Namespace dedicado para BESSAI
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bessai
+  labels:
+    name: bessai
+    managed-by: bessai-team

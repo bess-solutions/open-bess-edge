@@ -1,0 +1,23 @@
+---
+# Service para exponer /health y /metrics del gateway
+apiVersion: v1
+kind: Service
+metadata:
+  name: bessai-edge-gateway
+  namespace: bessai
+  labels:
+    app: bessai-edge-gateway
+  annotations:
+    # Prometheus auto-discovery
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
+    prometheus.io/path: "/metrics"
+spec:
+  selector:
+    app: bessai-edge-gateway
+  ports:
+    - name: health-metrics
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+  type: ClusterIP   # Interno al cluster — usa Ingress si necesitas acceso externo
