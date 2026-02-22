@@ -4,10 +4,10 @@
 
 | Version | Supported |
 |---|---|
-| 1.7.x (latest) | ✅ Active support |
-| 1.6.x | ✅ Security patches only |
-| 1.5.x | ⚠️ Critical patches only |
-| < 1.5 | ❌ End of life |
+| 2.1.x (latest) | ✅ Active support — all CVEs |
+| 2.0.x | ✅ Security patches — Critical + High |
+| 1.7.x | ⚠️ Critical patches only |
+| < 1.7 | ❌ End of life |
 
 ## Reporting a Vulnerability
 
@@ -131,3 +131,50 @@ This project targets compliance with:
 - **NTSyCS** — Norma Técnica de Seguridad y Calidad de Servicio (CEN Chile)
 
 See [`docs/compliance/`](docs/compliance/) for detailed compliance mappings.
+
+Key compliance documents:
+- [System Security Plan (SSP-001)](docs/compliance/ssp_iec62443_sl2.md) — IEC 62443-3-3 SL-2 coverage
+- [Patch Management SLA (PMS-001)](docs/compliance/patch_management_sla.md) — IEC 62443-2-3
+- [Network Architecture (NAD-001)](docs/architecture/network_diagram.md) — IEC 62443-3-2
+- [SL-2 Certification Path](docs/compliance/iec_62443_sl2_certification_path.md)
+
+---
+
+## PSIRT — Product Security Incident Response Team
+
+**IEC 62443-3-3 SR 2.12 — Non-repudiation | Vulnerability disclosure**
+
+### Contact
+
+| Channel | Address | SLA |
+|---------|---------|-----|
+| GitHub Security Advisories (preferred) | [Report privately](https://github.com/bess-solutions/open-bess-edge/security/advisories/new) | 48h acknowledgement |
+| Email | security@bess-solutions.cl | 48h acknowledgement |
+| Emergency (physical safety risk) | security@bess-solutions.cl Subject: `[EMERGENCY]` | 4h response |
+
+### PSIRT Process
+
+1. **Receipt** — Researcher submits via GitHub Security Advisory or email
+2. **Acknowledgement** — PSIRT acknowledges within 48h (4h for [EMERGENCY])
+3. **Triage** — Engineering Lead assigns CVSS score and severity within 5 business days
+4. **Remediation** — Fix timeline per [Patch Management SLA](docs/compliance/patch_management_sla.md)
+5. **Coordination** — PSIRT works with researcher on disclosure timeline (default: 90 days)
+6. **Disclosure** — CVE requested from MITRE; GitHub Advisory published; release notes updated
+7. **Credit** — Researcher credited in release notes unless anonymity requested
+
+### ICS-Specific Emergency Protocol
+
+If the vulnerability has potential for **physical harm** (battery fire, grid instability, safety system bypass):
+
+- Response SLA: **4 hours** (not 48)
+- Out-of-band patch issued **within 24 hours** of confirmation
+- Immediate notification to affected site operators via `SITE_ID`-tagged alert
+- Coordinated disclosure with CISA ICS-CERT if CVSS ≥ 9.0
+
+### PSIRT Team
+
+| Role | Responsibility |
+|------|---------------|
+| PSIRT Lead | Triage, coordination, disclosure | 
+| Engineering Lead | Fix implementation, patch review |
+| Site Operations | Deployment coordination with field teams |
