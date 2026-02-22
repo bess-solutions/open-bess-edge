@@ -1,0 +1,76 @@
+# BESSAI Edge Gateway — Grafana Loki Configuration
+# IEC 62443-3-3 SR 6.1 / SR 6.2: Audit log generation and review (GAP-002)
+# Receives structured logs from OTel Collector via HTTP push API (:3100)
+# Minimal single-binary configuration for edge deployment
+
+auth_enabled: false  # No auth within the bess-net Docker network (Bearer auth handled by OTel)
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+  log_level: info
+
+# Ingester: in-memory write-ahead log
+ingester:
+  wal:
+    enabled: true
+    dir: /loki/wal
+  lifecycler:
+    address: 127.0.0.1
+    ring:
+      kvstore:
+        store: inmemory
+      replication_factor: 1
+    final_sleep: 0s
+  chunk_idle_period: 5m
+  max_chunk_age: 1h
+  chunk_retain_period: 30s
+  max_transfer_retries: 0
+
+# Schema for chunks (TSDB — recommended since Loki 2.8)
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v12
+      index:
+        prefix: index_
+        period: 24h
+
+# Storage: local filesystem (suitable for edge deployment)
+storage_config:
+  tsdb_shipper:
+    active_index_directory: /loki/index
+    cache_location: /loki/index_cache
+    cache_ttl: 24h
+  filesystem:
+    directory: /loki/chunks
+
+# Limits — conservative for edge hardware
+limits_config:
+  enforce_metric_name: false
+  reject_old_samples: true
+  reject_old_samples_max_age: 168h  # 7 days
+  max_cache_freshness_per_query: 10m
+  max_entries_limit_per_query: 50000
+
+# Retention: 30 days for IEC 62443 audit compliance
+chunk_store_config:
+  max_look_back_period: 720h  # 30 days
+
+table_manager:
+  retention_deletes_enabled: true
+  retention_period: 720h  # 30 days
+
+# Query: minimize memory use on edge
+query_range:
+  max_retries: 5
+  parallelise_shardable_queries: false
+
+# Compactor (runs retention rules)
+compactor:
+  working_directory: /loki/compactor
+  compaction_interval: 10m
+  retention_enabled: true
+  delete_request_store: filesystem
