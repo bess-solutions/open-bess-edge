@@ -1,6 +1,8 @@
 # =============================================================================
 # OpenTelemetry Collector — BESSAI Edge Gateway Configuration
 # Used by docker-compose.yml
+# IEC 62443-3-3 SR 6.1 / SR 6.2: Audit log generation + review
+# GAP-002 CLOSED: log forwarding to Loki SIEM via otlp logs pipeline
 # =============================================================================
 
 receivers:
@@ -27,15 +29,38 @@ processors:
         value: "production"
         action: insert
 
+  # Add site_id resource attribute for SIEM correlation
+  transform/add_site_id:
+    log_statements:
+      - context: resource
+        statements:
+          - set(attributes["bessai.site_id"], "${SITE_ID:-edge-001}")
+          - set(attributes["bessai.component"], "edge-gateway")
+          - set(attributes["iec62443.zone"], "OT")
+
 exporters:
-  # Log spans/metrics to stdout — replace with your backend exporter
-  # (e.g. googlecloud, datadog, jaeger) in production.
+  # Stdout logging — always on for local debugging
   logging:
     loglevel: info
     sampling_initial: 5
     sampling_thereafter: 200
 
-  # Example: Google Cloud Monitoring / Trace (uncomment if using GCP)
+  # SIEM forwarding: Grafana Loki (IEC 62443 GAP-002)
+  # Set LOKI_ENDPOINT env var; defaults to monitoring profile's Loki service.
+  loki:
+    endpoint: "${LOKI_ENDPOINT:-http://bessai-loki:3100/loki/api/v1/push}"
+    default_labels_enabled:
+      exporter: false
+      job: true
+    labels:
+      resource_attributes:
+        service.name: "true"
+        host.name: "true"
+        bessai.site_id: "true"
+        bessai.component: "true"
+        iec62443.zone: "true"
+
+  # GCP Cloud Monitoring (uncomment for cloud deployment)
   # googlecloud:
   #   project: "${GCP_PROJECT_ID}"
 
@@ -58,3 +83,8 @@ service:
       receivers:  [otlp]
       processors: [memory_limiter, batch]
       exporters:  [logging]
+    # IEC 62443 GAP-002: structured audit log forwarding to SIEM (Loki)
+    logs:
+      receivers:  [otlp]
+      processors: [memory_limiter, transform/add_site_id, batch]
+      exporters:  [logging, loki]

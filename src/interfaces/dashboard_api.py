@@ -36,6 +36,7 @@ import structlog
 
 from src.interfaces.arbitrage_engine import ArbitrageEngine
 from src.interfaces.cmg_predictor import CMgPredictor
+from src.interfaces.totp_auth import TOTPAuth
 
 # Optional: bessai_arbitrage data-flywheel pipeline (Parquet-backed, cached)
 try:
@@ -194,23 +195,46 @@ class DashboardAPI:
         state: DashboardState | None = None,
         port: int = 8080,
         api_key: str = "",
+        site_id: str = "edge-001",
     ) -> None:
         self.state = state or DashboardState()
         self.port = port
         self.api_key = api_key or os.getenv("DASHBOARD_API_KEY", "")
         self._app: Any | None = None
         self._runner: Any | None = None
+        # IEC 62443 SR 1.3 — TOTP MFA (optional, configured via DASHBOARD_MFA_SECRET)
+        self._totp = TOTPAuth(site_id=site_id)
 
     # ------------------------------------------------------------------
     # Route handlers
     # ------------------------------------------------------------------
 
     async def _check_auth(self, request: Any) -> bool:
-        """Return True if auth is satisfied (no-op in dev mode)."""
-        if not self.api_key:
-            return True
-        auth = request.headers.get("Authorization", "")
-        return bool(auth == f"Bearer {self.api_key}")
+        """Return True if auth is satisfied.
+
+        Auth flow (IEC 62443 SR 1.3):
+        1. Bearer token check (existing) → if configured and wrong, deny.
+        2. TOTP check (new) → if MFA enabled and token wrong/missing, deny.
+        """
+        # Step 1 — Bearer token
+        if self.api_key:
+            auth = request.headers.get("Authorization", "")
+            if auth != f"Bearer {self.api_key}":
+                log.warning("dashboard_api.auth_bearer_failed", remote=str(request.remote))
+                return False
+
+        # Step 2 — TOTP MFA (IEC 62443 SR 1.3)
+        if self._totp.is_enabled:
+            totp_token = request.headers.get("X-TOTP-Token", "")
+            if not self._totp.verify(totp_token):
+                log.warning(
+                    "dashboard_api.auth_totp_failed",
+                    remote=str(request.remote),
+                    token_received=bool(totp_token),
+                )
+                return False
+
+        return True
 
     def _json_response(self, data: dict) -> Any:
         return web.Response(
@@ -253,6 +277,14 @@ class DashboardAPI:
                 "project": "BESSAI Edge Gateway",
             }
         )
+
+    async def handle_totp_info(self, request: Any) -> Any:
+        """Report TOTP MFA configuration status (IEC 62443-3-3 SR 1.3).
+
+        This endpoint is *unauthenticated* intentionally — it only reports
+        whether MFA is enabled, not the secret itself.
+        """
+        return self._json_response(self._totp.info().to_dict())
 
     async def handle_health(self, request: Any) -> Any:
         return self._json_response(
@@ -453,6 +485,7 @@ class DashboardAPI:
         self._app.router.add_get("/api/v1/ids", self.handle_ids)
         self._app.router.add_get("/api/v1/version", self.handle_version)
         self._app.router.add_get("/api/v1/health", self.handle_health)
+        self._app.router.add_get("/api/v1/auth/totp-info", self.handle_totp_info)
         self._app.router.add_options("/{path_info:.*}", self._cors_preflight)
 
         self._runner = web.AppRunner(self._app)
