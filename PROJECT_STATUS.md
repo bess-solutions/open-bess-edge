@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-22T18:10 v1.9.0 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-22T20:30 v2.3.0 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -37,17 +37,20 @@ Prometheus v2.51.2                          OK      ← localhost:9090
 
 | Módulo | Archivo | Versión | Estado |
 |---|---|---|---|
-| CMg Predictor v2 | `src/interfaces/cmg_predictor.py` | **v2.0** | ✅ **NUEVO** |
-| Arbitrage Engine v2 | `src/interfaces/arbitrage_engine.py` | **v2.0** | ✅ **NUEVO** |
+| CMg Predictor v2 | `src/interfaces/cmg_predictor.py` | **v2.0** | ✅ Producción |
+| Arbitrage Engine v2 | `src/interfaces/arbitrage_engine.py` | **v2.0** | ✅ Producción |
 | Configuración | `src/core/config.py` | v0.5 | ✅ Producción |
-| Seguridad (SOC / Temp) | `src/core/safety.py` | **v1.7.1** | ✅ Producción — acepta DataProvider |
+| Seguridad (SOC / Temp) | `src/core/safety.py` | **v1.7.1** | ✅ Producción |
 | Orquestador principal | `src/core/main.py` | v0.5 | ✅ Producción |
 | Fleet Orchestrator | `src/core/fleet_orchestrator.py` | v0.8 | ✅ Producción |
-| Driver Modbus TCP | `src/drivers/modbus_driver.py` | **v1.7.1** | ✅ Producción — is_connected + source_description |
-| Simulator Driver | `src/drivers/simulator_driver.py` | **v1.7.1** | ✅ Producción — Sim-First, 12 componentes |
-| DataProvider Protocol | `src/drivers/base.py` | **v1.7.1** | ✅ Producción — protocolo runtime_checkable |
+| Driver Modbus TCP | `src/drivers/modbus_driver.py` | **v2.1.0** | ✅ mTLS opcional (GAP-003) |
+| Simulator Driver | `src/drivers/simulator_driver.py` | **v2.0.0** | ✅ 6 tags SPEC-001 normalizadas |
+| DataProvider Protocol | `src/drivers/base.py` | **v1.7.1** | ✅ Producción |
 | LUNA2000 Driver | `src/drivers/luna2000_driver.py` | **v1.0** | ✅ Producción |
 | Servidor /health + /metrics | `src/interfaces/health.py` | v0.5 | ✅ Producción |
+| Dashboard API | `src/interfaces/dashboard_api.py` | **v2.3.0** | ✅ Rate limiting SR 7.1 + TOTP |
+| TOTP MFA | `src/interfaces/totp_auth.py` | **v2.0.0** | ✅ GAP-001 CLOSED |
+| OT TLS Config | `src/interfaces/ot_tls_config.py` | **v2.1.0** | ✅ GAP-003 CLOSED |
 | Prometheus metrics (22 total) | `src/interfaces/metrics.py` | v0.9 | ✅ Producción |
 | OTel / Cloud Trace | `src/interfaces/otel_setup.py` | v0.9 | ✅ Producción |
 | GCP Pub/Sub Publisher | `src/interfaces/pubsub_publisher.py` | v0.5 | ✅ Producción |

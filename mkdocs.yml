@@ -1,5 +1,5 @@
 site_name: BESSAI Edge Gateway
-site_description: Open-source industrial BESS gateway with AI-powered anomaly detection, NTSyCS compliance, and IEC 62443 SL-1 security architecture.
+site_description: Open-source industrial BESS gateway — IEC 62443 SL-2 certified path, mTLS OT segment, TOTP MFA, AI-powered arbitrage.
 site_url: https://bess-solutions.github.io/open-bess-edge/
 repo_url: https://github.com/bess-solutions/open-bess-edge
 repo_name: bess-solutions/open-bess-edge
@@ -104,8 +104,11 @@ nav:
     - NTSyCS Compliance: compliance/ntscys_compliance.md
     - IEC 62443 Mapping: compliance/iec62443_mapping.md
     - IEC 62443 SL-2 Gap: compliance/iec62443_sl2_gap.md
-    - OpenSSF Gold Checklist: openssf_gold_checklist.md
     - IEC 62443 SL-2 Path: compliance/iec_62443_sl2_certification_path.md
+    - System Security Plan (SSP-001): compliance/ssp_iec62443_sl2.md
+    - Network Architecture (NAD-001): architecture/network_diagram.md
+    - Patch Management SLA (PMS-001): compliance/patch_management_sla.md
+    - OpenSSF Gold Checklist: openssf_gold_checklist.md
     - IEEE 2030.5 Gap Analysis: compliance/ieee_2030_5_compliance.md
   - Interoperability:
     - Interop Test Suite: interoperability/interop_test_suite.md
