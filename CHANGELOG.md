@@ -7,43 +7,72 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-21T22:34 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-22T13:37 -03:00)
 
 > [!IMPORTANT]
-> **v1.7.1 — CI Green Release** (2026-02-21)
-> - Commit `173983d` → main: fix(ci) — **ruff ✅ · mypy ✅ · pytest 378/378 ✅**
-> - Commit `7ffc9a4` → main: LICENSE Apache 2.0 (OpenSSF bloqueador resuelto)
-> - Commit `926d5cd` → main: README v1.7.0 · OpenSSF badge ID 10716 · Multi-Arch CI badge
-> - Commit `5adfe93` → main: +1708 líneas — véanse detalles abajo
+> **v1.8.0 — Global Standard Foundations Release** (2026-02-22)
+> - Commit `TBD` → main: docs(standard): plan de ejecución global — 18 archivos nuevos, 3 modificados
 >
-> ### Cambios v1.7.1 (173983d) — Correcciones CI
-> - **`src/core/safety.py`** — `watchdog_loop` acepta `DataProvider` (protocolo genérico, no solo `UniversalDriver`)
-> - **`src/drivers/simulator_driver.py`** — corregido `union-attr` mypy en `.lower()` con cadena `or`
-> - **`src/drivers/modbus_driver.py`** — añadidas properties `is_connected` y `source_description` del protocolo `DataProvider`
-> - **`src/interfaces/mqtt_publisher.py`** — corregido `str-bytes-safe` mypy con `str(self._host)` explícito
-> - **`tests/test_reconnect_chaos.py`** — `ModbusDriver` → `UniversalDriver`; fixture `@pytest_asyncio.fixture async` (pymodbus 3.7+ requiere event loop en `__init__`)
-> - **`tests/test_modbus_driver.py`** — tests de `connection_error` ahora mockean `connect()` para evitar reconexión TCP real
+> ### Cambios v1.8.0 — Path to Global Standard
 >
-> ### Cambios v1.7.0 (5adfe93)
-> - **`registry/sma_sunny_tripower.json`** — 25 registros, mercados EU/AU/US/LATAM
-> - **`registry/victron_multiplus2.json`** — 22 registros, Venus OS, off-grid/microgrid
-> - **`registry/fronius_gen24_byd.json`** — 23 registros SunSpec float32, BYD HVS
-> - **`src/interfaces/mqtt_publisher.py`** — publisher universal paho-mqtt: Mosquitto / HA / AWS IoT Core / Azure IoT Hub / HiveMQ; TLS mutuo; topics estandarizados por site_id
-> - **`tests/test_reconnect_chaos.py`** — 6 escenarios de chaos testing para auto-reconnect Modbus
-> - **`.github/workflows/docker-multiarch.yml`** — Buildx CI: linux/amd64 + linux/arm64 → ghcr.io
-> - **`docs/quickstart_rpi.md`** — Raspberry Pi 4/5 deployment en 15 min
-> - **`docs/mqtt_integration.md`** — Guía completa MQTT con ejemplos Home Assistant
-> - **`requirements.txt`** — paho-mqtt>=2.0.0 añadido
+> **Eje 2 — Especificaciones Formales:**
+> - `docs/specs/BESSAI-SPEC-001.md` — BESSDriver Interface (normativo, RFC 2119, IEC 61850 / IEC 62619)
+> - `docs/specs/BESSAI-SPEC-002.md` — Safety Requirements (thresholds eléctricos, SafetyGuard, Black Start)
+> - `docs/specs/BESSAI-SPEC-003.md` — Telemetry Schema (JSON Schema 2020-12, 5 tipos payload)
+> - `docs/adr/0007-json-schema-telemetry-specification.md` — ADR-007
+> - `docs/adr/0008-bep-process-for-specification-changes.md` — ADR-008
 >
-> ### Pendiente manual
-> - Registrar en [OpenSSF Best Practices](https://www.bestpractices.dev/projects/new) con URL del repo → obtener ID real → actualizar badge en README si difiere de 10716
-> - Activar GitHub Pages en Settings → Pages → rama gh-pages (site MkDocs)
-> - Publicar en PyPI: `pyproject.toml` ya configurado; ejecutar `pypi.yml` CI
+> **Eje 5 — Gobernanza Abierta:**
+> - `docs/bep/BEP-0001.md` — Meta-BEP: proceso completo de BEPs
+> - `GOVERNANCE.md` — Actualizado: visión global + TSC multi-stakeholder (≥40% externos) + proceso BEP
+> - `.github/DISCUSSION_TEMPLATE/bep_discussion.yml` — Template pre-discusión BEP
+> - `.github/DISCUSSION_TEMPLATE/adopter_introduction.yml` — Template adopters
 >
-> ### Próximas acciones técnicas sugeridas
+> **Eje 4 — Interoperabilidad:**
+> - `docs/interoperability/interop_test_suite.md` — Suite categorías A/B/C/D
+> - `docs/interoperability/BESSAI-CERTIFIED.md` — Programa Compatible / Certified / Certified+
+> - `tests/interop/test_driver_contract.py` — Pytest parametrizable por cualquier driver
+> - `registry/TEMPLATE_interop_certification.json` — Template device profile
+>
+> **Eje 6 — Benchmarks Públicos:**
+> - `docs/benchmarks/BENCHMARK-001-latency.md` — ciclo P99=4.35ms (budget 5000ms) ✅
+> - `docs/benchmarks/BENCHMARK-002-scale.md` — fleet escalabilidad hasta 50 sitios
+> - `docs/benchmarks/BENCHMARK-003-security.md` — Bandit 0 HIGH, Scorecard 9.3/10
+> - `scripts/run_benchmarks.py` — CLI runner reproducible
+> - `.github/workflows/benchmark.yml` — CI semanal benchmarks + interop
+>
+> **Eje 3 — Certificación:**
+> - `docs/compliance/iec_62443_sl2_certification_path.md` — Roadmap SL-2 con presupuesto y CB
+> - `docs/compliance/ieee_2030_5_compliance.md` — Gap análisis IEEE 2030.5 / SEP 2.0
+> - `.github/workflows/compliance-report.yml` — CI Bandit SARIF + Trivy + Scorecard semanal
+>
+> **Eje 1 — Adopción:**
+> - `docs/adopters.md` — Lista pública con proceso de auto-declaración
+> - `docs/partnership_program.md` — 3 tiers: Associate / Technology / Strategic
+> - `docs/lf_energy_proposal.md` — Submission package LF Energy Landscape listo para enviar
+>
+> **Archivos modificados:**
+> - `README.md` — sección Adopters & Partners + Formal Specifications + 2 badges nuevos
+> - `GOVERNANCE.md` — TSC + BEP sections
+> - `mkdocs.yml` — 15+ páginas nuevas en nav
+>
+> ### Suite de tests
+> ```
+> 378 / 378 passed ✅ en 14.06s (sin regresión)
+> ```
+>
+> ### Pendiente manual (próximo agente / usuario)
+> 1. **Activar GitHub Pages** → Settings → Pages → gh-pages (site MkDocs con las nuevas secciones)
+> 2. **Crear SVG logo** para LF Energy Landscape (requiere Inkscape/Figma — actualmente PNG)
+> 3. **Crear perfil Crunchbase** para BESS Solutions (requerido por LF Energy Landscape)
+> 4. **Enviar a LF Energy Landscape**: fork `lfenergy/lfenergy-landscape` + PR con YAML (ver `docs/lf_energy_proposal.md`)
+> 5. **Integrar MQTT publisher** en `main.py` (standalone actualmente)
+> 6. **Iniciar contacto SL-2**: ver `docs/compliance/iec_62443_sl2_certification_path.md`
+>
+> ### Próximas prioridades técnicas sugeridas
+> - BEP-0100: "Add IEEE 2030.5 SEP 2.0 Adapter" (ver gap analysis en docs/compliance/)
 > - Entrenar ONNX con datos reales del CEN (CMg predictor v2 → dispatch model)
-> - Integrar MQTT publisher en `main.py` (actualmente standalone, no conectado al loop principal)
-> - Chaos test de reconexión en CI (actualmente solo local)
+> - Ejecutar `tests/interop/` en CI con SimulatorDriver (Category A — sin hardware)
 
 
 

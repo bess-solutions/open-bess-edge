@@ -1,0 +1,82 @@
+title: "Adopter Introduction"
+description: "Introduce your organization as a user or integrator of BESSAI Edge Gateway. Join the community of adopters!"
+labels: ["adopter", "community"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Welcome to the BESSAI community! 🎉
+        If your organization is using, deploying, or building on BESSAI Edge Gateway, we'd love to hear from you. Adopter introductions help us understand real-world use cases and prioritize the roadmap.
+
+        Your organization can also be listed in [`docs/adopters.md`](../docs/adopters.md) — just mention it below and open a PR!
+
+  - type: input
+    id: organization
+    attributes:
+      label: Organization name
+      placeholder: "e.g., Energía Renovable S.A."
+    validations:
+      required: true
+
+  - type: input
+    id: country
+    attributes:
+      label: Country / Region
+      placeholder: "e.g., Chile, Germany, Australia"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: adopter_tier
+    attributes:
+      label: How are you using BESSAI?
+      options:
+        - "🔌 Integrator — deploying BESSAI in customer projects"
+        - "🏭 Operator — running BESSAI at our own sites"
+        - "🔬 Research — using BESSAI for academic or R&D purposes"
+        - "🤝 Contributor — contributing code, drivers, or documentation"
+        - "👀 Evaluating — assessing BESSAI for future use"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: hardware
+    attributes:
+      label: Hardware you are connecting with
+      multiple: true
+      options:
+        - "Huawei SUN2000"
+        - "SMA Sunny Tripower"
+        - "Victron MultiPlus-II"
+        - "Fronius GEN24"
+        - "Other (describe below)"
+    validations:
+      required: false
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Your use case
+      description: Brief description of your deployment or project. No confidential details needed.
+      placeholder: "We are using BESSAI to manage a 500 kWh LFP installation at a solar farm in the Atacama region, integrating with our existing SCADA system via MQTT..."
+
+  - type: textarea
+    id: feedback
+    attributes:
+      label: Feedback or feature requests
+      description: What would make BESSAI work better for your use case?
+
+  - type: checkboxes
+    id: listing
+    attributes:
+      label: Adopter listing
+      options:
+        - label: "I consent to my organization being listed in `docs/adopters.md` (you can open a PR or we can add it)"
+        - label: I would be interested in joining the Technical Steering Committee (TSC) as an external member
+
+  - type: input
+    id: contact
+    attributes:
+      label: Contact (optional)
+      description: GitHub handle, email, or LinkedIn — only share what you are comfortable making public
+      placeholder: "@github-handle or contact@example.com"

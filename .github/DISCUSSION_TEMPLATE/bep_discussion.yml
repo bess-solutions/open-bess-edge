@@ -1,0 +1,67 @@
+title: "BEP Pre-Discussion"
+description: "Start a discussion before writing a formal BEP. Early feedback helps determine if a BEP is the right vehicle and shapes the proposal."
+labels: ["bep", "discussion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Before you open this discussion
+        A BEP (BESSAI Enhancement Proposal) is required only for changes that affect:
+        - BESSAI-SPEC-* specifications (driver interface, safety requirements, telemetry schema)
+        - GOVERNANCE.md or the BEP process itself
+        - Architectural changes that break compatibility for external adopters
+
+        **For bug fixes, new device drivers, or non-breaking features, open a PR directly.**
+
+  - type: input
+    id: title
+    attributes:
+      label: Proposal title
+      placeholder: "e.g., Add SoH% as a required tag in BESSAI-SPEC-001"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: bep_type
+    attributes:
+      label: Expected BEP type
+      options:
+        - "Standards Track (changes to BESSAI-SPEC-*)"
+        - "Governance (changes to GOVERNANCE.md or BEP process)"
+        - "Informational (significant observation, no normative changes)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem are you trying to solve? Why does it need a formal specification change?
+      placeholder: "Currently, conforming drivers are not required to report State of Health. This means the SafetyGuard cannot account for degraded batteries..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed solution (sketch)
+      description: A rough outline of your proposed change. This will evolve into the BEP specification section.
+      placeholder: "Add SoH_% as a RECOMMENDED tag in BESSAI-SPEC-001 §5.3, with a MUST requirement for all drivers that support the tag to return a value in [0, 100]..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What else did you consider? This helps the community understand your reasoning.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-discussion checklist
+      options:
+        - label: I have searched existing BEPs and GitHub Discussions for similar proposals
+          required: true
+        - label: I believe this change requires a formal BEP (not just a PR)
+          required: true

@@ -1,12 +1,19 @@
 # BESSAI Edge Gateway — Project Governance
 
-> **Status:** Active · **Last updated:** 2026-02-21 · **License:** Apache 2.0
+> **Status:** Active · **Last updated:** 2026-02-22 · **License:** Apache 2.0  
+> **Governance model:** Multi-stakeholder (Technical Steering Committee + BEP process)
 
 ---
 
 ## Vision
 
-BESSAI Edge Gateway is an open-source industrial gateway for Battery Energy Storage Systems (BESS), designed to be a reference implementation for safe, AI-augmented energy storage management compliant with Chilean NTSyCS regulation and IEC standards. Our goal is to make enterprise-grade BESS intelligence accessible to the global energy community.
+BESSAI Edge Gateway is an open-source industrial gateway for Battery Energy Storage Systems (BESS), designed to be a **reference implementation** for safe, AI-augmented energy storage management compliant with Chilean NTSyCS regulation and IEC 62443/62619 standards. Our long-term goal is to become a recognized global standard for BESS edge management — adopted by manufacturers, operators, and regulators worldwide.
+
+To achieve this, the project commits to:
+- **Open governance** with multi-stakeholder representation (Technical Steering Committee)
+- **Formal specifications** (BESSAI-SPEC-*) enabling independent implementations
+- **Transparent change management** via the BEP (BESSAI Enhancement Proposal) process
+- **Interoperability certification** open to any hardware manufacturer
 
 ---
 
@@ -27,6 +34,34 @@ Maintainers are responsible for the long-term health of the project. They have:
 | BESS Solutions Engineering Team | `@bess-solutions` | Core · Infrastructure · AI |
 
 To become a Maintainer, a Contributor must have at least 10 accepted PRs, demonstrate deep understanding of the codebase, and be nominated by an existing Maintainer.
+
+---
+
+### 🏛️ Technical Steering Committee (TSC)
+
+The TSC is responsible for the strategic direction of the project and ratifying BESSAI Enhancement Proposals (BEPs). It operates above the Maintainer layer.
+
+**TSC Responsibilities:**
+- Approve or reject BEPs (Standards Track and Governance types)
+- Constitute working groups for specific technical areas
+- Establish and maintain relationships with external standards bodies (IEEE, LF Energy, IEC)
+- Review and approve major releases (MAJOR version bumps)
+
+**TSC Composition:**
+- 5 to 7 members
+- **At least 40% of seats** MUST be held by individuals NOT employed by BESS Solutions at time of election
+- Staggered 1-year terms with a maximum of 2 consecutive terms
+
+**Current TSC Members:**
+
+| Name | Affiliation | Status | Term Expires |
+|---|---|---|---|
+| BESS Solutions Engineering Team | BESS Solutions | Founding (pre-election) | 2026-12-31 |
+| *(3 external seats — open to election)* | — | **Vacant** | — |
+
+> 📢 **Interested in joining the TSC?** The TSC will hold its first formal election once the project has at least 3 external Contributors (10+ accepted PRs). In the meantime, express interest by opening a GitHub Discussion with the "TSC Candidacy" tag.
+
+**TSC Decision Quorum:** Minimum 3 TSC members must vote. For BEP acceptance, at least 1 external member must be among the approving votes.
 
 ---
 
@@ -98,6 +133,20 @@ MAJOR.MINOR.PATCH
 - **Patch releases:** As needed for security/bug fixes
 - **Minor releases:** Approximately monthly
 - **Major releases:** When breaking changes accumulate, with 60-day deprecation notice
+
+---
+
+## Specification Change Process (BEPs)
+
+Changes to BESSAI interface specifications, telemetry schemas, or safety requirements MUST go through the **BESSAI Enhancement Proposal (BEP)** process.
+
+See [`docs/bep/BEP-0001.md`](docs/bep/BEP-0001.md) for the full process, including:
+- BEP types (Standards Track · Governance · Informational)
+- Template and required sections
+- Comment periods and TSC quorum rules
+- BEP number registry
+
+> A BEP is NOT required for bug fixes, documentation improvements, new device drivers, or non-breaking features. BEPs are for changes affecting external interfaces or governance.
 
 ---
 

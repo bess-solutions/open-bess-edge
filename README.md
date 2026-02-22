@@ -12,6 +12,8 @@
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12001/badge)](https://www.bestpractices.dev/projects/12001)
 [![IEC 62443](https://img.shields.io/badge/IEC_62443-SL--1_Mapped-orange)](docs/compliance/iec62443_mapping.md)
 [![NTSyCS](https://img.shields.io/badge/NTSyCS-CEN_Chile-green)](docs/compliance/ntscys_compliance.md)
+[![BESSAI-SPEC](https://img.shields.io/badge/BESSAI--SPEC-3_normative_docs-blueviolet)](docs/specs/)
+[![BEP Process](https://img.shields.io/badge/Governance-BEP_Process-lightblue)](docs/bep/BEP-0001.md)
 [![Discord](https://img.shields.io/badge/Discord-BESSAI_Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/ZqpE8AZs)
 
 > **Gateway industrial de código abierto para gestión segura y optimizada de activos BESS — cumpliendo normativa NTSyCS del CEN Chile, IEC 62443 SL-1 y estándares internacionales de software industrial.**
@@ -43,10 +45,14 @@
 | GitHub Actions CI/CD | ✅ 9 jobs: lint+typecheck+test+security+terraform+helm+docker+trivy+push |
 | **Hardware Registry** | ✅ 4 perfiles: Huawei, SMA, Victron, Fronius |
 | **Gobernanza OSS** | ✅ SECURITY+COC+GOVERNANCE+CONTRIBUTING |
-| **ADRs (5 decisiones)** | ✅ `docs/adr/` — pydantic, Modbus, IDS, ONNX, Pub/Sub |
-| **IEC 62443 Compliance** | ✅ SL-1 mapeado en `docs/compliance/` |
+| **ADRs (7 decisiones)** | ✅ `docs/adr/` — incluye ADR-007 (JSON Schema) y ADR-008 (BEP Process) |
+| **IEC 62443 Compliance** | ✅ SL-1 mapeado · SL-2 certification path en `docs/compliance/` |
+| **IEEE 2030.5** | 📋 Gap analysis disponible en `docs/compliance/ieee_2030_5_compliance.md` |
 | **NTSyCS CEN Chile** | ✅ Mapeado en `docs/compliance/` |
 | **OpenSSF Best Practices** | ✅ Passing badge — bestpractices.dev |
+| **Spec Formales (BESSAI-SPEC)** | ✅ 3 specs normativas en `docs/specs/` (driver, safety, telemetry) |
+| **Gobernanza TSC + BEP** | ✅ BEP-0001 · `GOVERNANCE.md` multi-stakeholder |
+| **Interoperabilidad** | ✅ Suite de tests en `tests/interop/` · BESSAI Certified Program |
 
 ---
 
@@ -235,6 +241,34 @@ Ver el documento completo: [BESSAI v2.0 Technical Roadmap](docs/bessai_v2_roadma
 | Q4 2026 | Federated Orchestration + VPP | 🟡 Media |
 | Q1 2027 | Data Lakehouse + P2P Trading | 🟡 Media |
 | Q2 2027 | LCA Engine + Carbon Dashboard | 🟢 Estratégica |
+
+---
+
+## 🏢 Adopters & Partners
+
+> BESSAI is used in production and R&D deployments. Want to be listed?
+> [Introduce your organization →](https://github.com/bess-solutions/open-bess-edge/discussions)
+
+| Organization | Type | Country | Hardware |
+|---|---|---|---|
+| BESS Solutions | Integrator (reference) | 🇨🇱 Chile | Huawei SUN2000 |
+
+**Partnership tiers** (Associate · Technology · Strategic · Academic): [`docs/partnership_program.md`](docs/partnership_program.md)  
+**Become a BESSAI Certified hardware vendor**: [`docs/interoperability/BESSAI-CERTIFIED.md`](docs/interoperability/BESSAI-CERTIFIED.md)
+
+---
+
+## 📐 Formal Specifications
+
+BESSAI publishes machine-readable normative specifications enabling third-party implementations:
+
+| Spec | Title | Key Requirement |
+|---|---|---|
+| [BESSAI-SPEC-001](docs/specs/BESSAI-SPEC-001.md) | BESSDriver Interface | All drivers MUST implement `DataProvider` protocol |
+| [BESSAI-SPEC-002](docs/specs/BESSAI-SPEC-002.md) | Safety Requirements | SafetyGuard MUST block when SOC < 5% or T > 60°C |
+| [BESSAI-SPEC-003](docs/specs/BESSAI-SPEC-003.md) | Telemetry Schema | JSON Schema 2020-12 for all telemetry messages |
+
+Propose a change: open a [BEP (BESSAI Enhancement Proposal)](docs/bep/BEP-0001.md)
 
 ---
 

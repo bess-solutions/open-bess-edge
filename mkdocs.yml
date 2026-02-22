@@ -88,6 +88,14 @@ nav:
       - ADR-003 IDS Anomaly: adr/0003-isolation-forest-anomaly-detection.md
       - ADR-004 ONNX Inference: adr/0004-onnx-offline-inference.md
       - ADR-005 GCP Pub/Sub: adr/0005-gcp-pubsub-telemetry.md
+      - ADR-007 JSON Schema Spec: adr/0007-json-schema-telemetry-specification.md
+      - ADR-008 BEP Process: adr/0008-bep-process-for-specification-changes.md
+  - Specifications (BESSAI-SPEC):
+    - SPEC-001 BESSDriver Interface: specs/BESSAI-SPEC-001.md
+    - SPEC-002 Safety Requirements: specs/BESSAI-SPEC-002.md
+    - SPEC-003 Telemetry Schema: specs/BESSAI-SPEC-003.md
+  - Enhancement Proposals (BEPs):
+    - BEP-0001 BEP Process: bep/BEP-0001.md
   - API Reference: api_reference.md
   - Operations:
     - Runbook: runbook.md
@@ -96,7 +104,19 @@ nav:
     - IEC 62443 Mapping: compliance/iec62443_mapping.md
     - IEC 62443 SL-2 Gap: compliance/iec62443_sl2_gap.md
     - OpenSSF Gold Checklist: openssf_gold_checklist.md
-  - Comunidad y Estrategia:
+    - IEC 62443 SL-2 Path: compliance/iec_62443_sl2_certification_path.md
+    - IEEE 2030.5 Gap Analysis: compliance/ieee_2030_5_compliance.md
+  - Interoperability:
+    - Interop Test Suite: interoperability/interop_test_suite.md
+    - BESSAI Certified Program: interoperability/BESSAI-CERTIFIED.md
+  - Benchmarks:
+    - Benchmark 001 — Latency: benchmarks/BENCHMARK-001-latency.md
+    - Benchmark 002 — Scale: benchmarks/BENCHMARK-002-scale.md
+    - Benchmark 003 — Security: benchmarks/BENCHMARK-003-security.md
+  - Community:
+    - Adopters: adopters.md
+    - Partnership Program: partnership_program.md
+    - LF Energy Proposal: lf_energy_proposal.md
     - Bounty Program: bounty_program.md
     - Pitch Deck: pitch_deck.md
     - Start-Up Chile SSAF: startup_chile_ssaf.md

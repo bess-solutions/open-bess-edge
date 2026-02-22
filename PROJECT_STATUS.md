@@ -1,26 +1,26 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-22T10:40 v1.7.1 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-22T13:37 v1.8.0 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
 
 ## 🎯 ¿Qué es BESSAI?
 
-Sistema industrial de gestión de baterías (BESS) con inteligencia artificial. Conecta inversores reales (Huawei SUN2000, SMA Sunny Tripower, Victron MultiPlus-II, Fronius GEN24) vía Modbus TCP, valida la operación de forma segura, y publica telemetría a la nube (GCP Pub/Sub o MQTT) con observabilidad completa.
+Sistema industrial de gestión de baterías (BESS) con inteligencia artificial — **candidato a estándar global**. Conecta inversores reales (Huawei SUN2000, SMA, Victron, Fronius) vía Modbus TCP, valida la operación de forma segura, y publica telemetría a GCP Pub/Sub o MQTT con observabilidad completa.
 
-**Visión a largo plazo:** Evolucionar a una plataforma de energía distribuida de escala planetaria (VPP, Edge AI, P2P Trading, LCA).  
+**Visión:** Convertirse en el estándar de referencia mundial para gestión de BESS en el edge — adoptado por fabricantes, operadores y reguladores.  
 Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 
 ---
 
-## ✅ Estado Actual — v1.7.1
+## ✅ Estado Actual — v1.8.0
 
 ### Tests
 ```
-378 / 378 passed ✅  (suite completa open-bess-edge, incluye 6 chaos tests auto-reconnect)
-CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · multiarch ✅ · push ✅ · scorecard ✅
-9 jobs CI / 1 job Scorecard (semanal) / 1 job Mutation Testing (semanal)
+378 / 378 passed ✅  (suite completa — 378 tests, 6 chaos tests, sin regresión)
+CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · multiarch ✅ · scorecard ✅
+Nuevos: benchmark.yml (semanal) · compliance-report.yml (semanal)
 ```
 
 
