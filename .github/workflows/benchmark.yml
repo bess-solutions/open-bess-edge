@@ -1,0 +1,158 @@
+name: "Weekly Benchmarks"
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # Every Monday at 06:00 UTC
+  workflow_dispatch:        # Allow manual trigger
+
+permissions:
+  contents: read
+  issues: write             # Needed to open issues on threshold breach
+
+jobs:
+  benchmark-latency:
+    name: "Benchmark 001 — Gateway Cycle Latency"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run latency benchmark (100 cycles, CI mode)
+        run: |
+          python scripts/run_benchmarks.py --benchmark 001 --cycles 100 --ci \
+            --output benchmark_001_results.json
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-001-latency-${{ github.run_id }}
+          path: benchmark_001_results.json
+
+      - name: Check thresholds and alert
+        run: |
+          python - <<'EOF'
+          import json, sys
+
+          with open("benchmark_001_results.json") as f:
+              results = json.load(f)
+
+          cycle_p99_ms = results.get("cycle_total_p99_ms", 0)
+          onnx_p99_ms = results.get("onnx_inference_p99_ms", 0)
+          safety_p99_ms = results.get("safety_eval_p99_ms", 0)
+
+          alerts = []
+          if cycle_p99_ms > 4800:
+              alerts.append(f"❌ cycle_total P99 = {cycle_p99_ms:.1f}ms > 4800ms threshold")
+          if onnx_p99_ms > 100:
+              alerts.append(f"❌ onnx_inference P99 = {onnx_p99_ms:.1f}ms > 100ms threshold")
+          if safety_p99_ms > 500:
+              alerts.append(f"❌ safety_eval P99 = {safety_p99_ms:.1f}ms > 500ms threshold")
+
+          if alerts:
+              print("BENCHMARK THRESHOLD EXCEEDED:")
+              for a in alerts:
+                  print(a)
+              print(f"\ncycle_total P99: {cycle_p99_ms:.1f}ms")
+              print(f"onnx P99: {onnx_p99_ms:.1f}ms")
+              print(f"safety P99: {safety_p99_ms:.1f}ms")
+              sys.exit(1)
+          else:
+              print("✅ All benchmark thresholds within limits")
+              print(f"  cycle_total P99:   {cycle_p99_ms:.1f}ms (< 4800ms)")
+              print(f"  onnx_inference P99:{onnx_p99_ms:.1f}ms (< 100ms)")
+              print(f"  safety_eval P99:   {safety_p99_ms:.1f}ms (< 500ms)")
+          EOF
+
+  benchmark-scale:
+    name: "Benchmark 002 — Fleet Scalability"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run scalability benchmark (up to 50 sites)
+        run: |
+          python scripts/run_benchmarks.py --benchmark 002 --max-sites 50 --ci \
+            --output benchmark_002_results.json
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-002-scale-${{ github.run_id }}
+          path: benchmark_002_results.json
+
+      - name: Check scalability thresholds
+        run: |
+          python - <<'EOF'
+          import json, sys
+
+          with open("benchmark_002_results.json") as f:
+              results = json.load(f)
+
+          # Check 10-site cycle P99
+          p99_at_10 = results.get("sites_10_cycle_p99_ms", 0)
+          p99_at_50 = results.get("sites_50_cycle_p99_ms", 0)
+
+          alerts = []
+          if p99_at_10 > 30:
+              alerts.append(f"❌ 10-site cycle P99 = {p99_at_10:.1f}ms > 30ms threshold")
+          if p99_at_50 > 5000:
+              alerts.append(f"❌ 50-site cycle P99 = {p99_at_50:.1f}ms > 5000ms threshold")
+
+          if alerts:
+              for a in alerts:
+                  print(a)
+              sys.exit(1)
+          else:
+              print("✅ Fleet scalability within limits")
+              print(f"  10-site P99: {p99_at_10:.1f}ms (< 30ms)")
+              print(f"  50-site P99: {p99_at_50:.1f}ms (< 5000ms)")
+          EOF
+
+  interop-contract-tests:
+    name: "Interop — Driver Contract Tests (SimulatorDriver)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run driver contract tests (Category A — no hardware)
+        run: |
+          pytest tests/interop/test_driver_contract.py::TestContract \
+            -v --tb=short --junit-xml=interop_contract_results.xml
+
+      - name: Upload contract test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: interop-contract-results-${{ github.run_id }}
+          path: interop_contract_results.xml
