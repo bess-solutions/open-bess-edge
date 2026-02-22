@@ -9,6 +9,7 @@ resources:
   - configmap.yaml
   - service.yaml
   - deployment.yaml
+  - network-policy.yaml
 
 # Imágenes — sobrescribir tag en ambientes específicos:
 # images:
