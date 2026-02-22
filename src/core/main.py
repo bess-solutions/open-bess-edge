@@ -49,7 +49,7 @@ from src.core.config import get_settings
 from src.core.safety import SafetyGuard
 from src.drivers.base import DataProvider
 from src.drivers.modbus_driver import UniversalDriver
-from src.drivers.simulator_driver import SimulatorDriver, SimMode
+from src.drivers.simulator_driver import SimMode, SimulatorDriver
 from src.interfaces.health import HealthServer
 from src.interfaces.metrics import (
     CYCLES_TOTAL,
@@ -188,15 +188,12 @@ async def main() -> None:  # noqa: C901
     _bessai_mode = os.getenv("BESSAI_MODE", "auto").lower()
     _inverter_ip = getattr(_cfg, "inverter_ip_str", None) or os.getenv("INVERTER_IP", "")
 
-    _use_sim = (
-        _bessai_mode == "demo"
-        or (_bessai_mode == "auto" and not _inverter_ip)
-    )
+    _use_sim = _bessai_mode == "demo" or (_bessai_mode == "auto" and not _inverter_ip)
 
     driver: DataProvider
     if _use_sim:
         _sim_mode = os.getenv("BESSAI_SIM_MODE", SimMode.NORMAL)
-        _profile   = getattr(_cfg, "DEVICE_PROFILE", "huawei_sun2000")
+        _profile = getattr(_cfg, "DEVICE_PROFILE", "huawei_sun2000")
         driver = SimulatorDriver(
             profile=_profile,
             mode=_sim_mode,
