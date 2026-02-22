@@ -103,6 +103,9 @@ nav:
 
 extra:
   social:
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/ZqpE8AZs
+      name: BESSAI Community Discord
     - icon: fontawesome/brands/github
       link: https://github.com/bess-solutions/open-bess-edge
     - icon: fontawesome/brands/linkedin
