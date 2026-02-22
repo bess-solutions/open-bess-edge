@@ -95,7 +95,8 @@ nav:
     - SPEC-002 Safety Requirements: specs/BESSAI-SPEC-002.md
     - SPEC-003 Telemetry Schema: specs/BESSAI-SPEC-003.md
   - Enhancement Proposals (BEPs):
-    - BEP-0001 BEP Process: bep/BEP-0001.md
+    - BEP-0001 — BEP Process: bep/BEP-0001.md
+    - BEP-0100 — IEEE 2030.5 Adapter: bep/BEP-0100.md
   - API Reference: api_reference.md
   - Operations:
     - Runbook: runbook.md
