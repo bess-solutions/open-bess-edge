@@ -71,27 +71,27 @@ nav:
   - Getting Started:
     - Quick Start (5 min): tutorials/quickstart_5min.md
     - Local Development: local_development.md
-    - Docker Setup: docker_setup.md
     - Raspberry Pi 4/5: quickstart_rpi.md
-  - Tutorials:
-    - Deploy en 5 Minutos: tutorials/quickstart_5min.md
-    - MQTT + Home Assistant: tutorials/integration_homeassistant.md
-    - MQTT Integration (full): mqtt_integration.md
-  - Architecture:
-    - Overview: architecture.md
-    - Sim-First Strategy: simulation_registry.md
-    - Decision Records (ADRs): adr/README.md
-  - API Reference: api_reference.md
-  - Operations:
-    - Runbook: runbook.md
-    - Prometheus Alerts: alerting.md
   - Tutorials:
     - Deploy en 5 Minutos: tutorials/quickstart_5min.md
     - Conectar Hardware Real: tutorials/connecting_real_hardware.md
     - MQTT + Home Assistant: tutorials/integration_homeassistant.md
     - MQTT Integration (full): mqtt_integration.md
+  - Architecture:
+    - Overview: architecture.md
+    - Sim-First Strategy: simulation_registry.md
+    - Roadmap v2.0: bessai_v2_roadmap.md
+    - Decision Records (ADRs):
+      - Overview: adr/README.md
+      - ADR-001 Pydantic Settings: adr/0001-pydantic-settings-config.md
+      - ADR-002 Modbus Encoding: adr/0002-struct-modbus-encoding.md
+      - ADR-003 IDS Anomaly: adr/0003-isolation-forest-anomaly-detection.md
+      - ADR-004 ONNX Inference: adr/0004-onnx-offline-inference.md
+      - ADR-005 GCP Pub/Sub: adr/0005-gcp-pubsub-telemetry.md
+  - API Reference: api_reference.md
+  - Operations:
+    - Runbook: runbook.md
   - Security & Compliance:
-    - Security Model: security_model.md
     - NTSyCS Compliance: compliance/ntscys_compliance.md
     - IEC 62443 Mapping: compliance/iec62443_mapping.md
     - IEC 62443 SL-2 Gap: compliance/iec62443_sl2_gap.md
@@ -99,11 +99,7 @@ nav:
   - Comunidad y Estrategia:
     - Bounty Program: bounty_program.md
     - Pitch Deck: pitch_deck.md
-  - Contributing:
-    - Guide: ../CONTRIBUTING.md
-    - Code of Conduct: ../CODE_OF_CONDUCT.md
-    - Governance: ../GOVERNANCE.md
-  - Changelog: changelog.md
+    - Start-Up Chile SSAF: startup_chile_ssaf.md
 
 extra:
   social:
