@@ -20,15 +20,15 @@ Based on the existing `iec62443_sl2_gap.md` analysis:
 
 | Domain | Current Status | Gap |
 |---|---|---|
-| Authentication (SR 1.1) | API key auth implemented | Needs MFA for management access |
-| Audit logging (SR 2.8) | Structured logs via structlog | Log forwarding to SIEM needed |
+| Authentication (SR 1.1) | API key auth implemented | ✅ MFA via TOTP (GAP-001 CLOSED v2.0.0) |
+| Audit logging (SR 2.8) | Structured logs via structlog | ✅ Loki SIEM forwarding (GAP-002 CLOSED v2.0.0) |
 | Software integrity (SR 3.2) | SLSA Level 2 + cosign | Not formally evaluated by auditor |
 | Vulnerability disclosure (SR 2.12) | `SECURITY.md` exists | No formal PSIRT process |
 | Patch management (SR 2.2) | Dependabot + CI | Formal patch SLA document needed |
-| Communication integrity (SR 3.1) | TLS enforced (Ingress) | mTLS for OT segment not implemented |
+| Communication integrity (SR 3.1) | TLS enforced (Ingress) | ✅ mTLS OT segment (GAP-003 CLOSED v2.1.0) |
 | Network segmentation (SR 5.2) | Docker network isolation | Formal network diagram needed |
 
-**Estimated SL-2 readiness:** ~65%
+**Estimated SL-2 readiness:** ~85%  *(was 65% before v2.0.0–v2.1.0)*
 
 ---
 
@@ -49,12 +49,12 @@ Based on the existing `iec62443_sl2_gap.md` analysis:
 
 **Duration:** 6–10 weeks (parallel to Phase 1 tail)
 
-| Gap | Remediation | Owner |
-|---|---|---|
-| MFA for management | Implement TOTP for admin dashboard via `pyotp` | Engineering |
-| SIEM log forwarding | Add Fluentd/Loki output target for audit logs | Engineering |
-| mTLS for OT segment | Add mutual TLS config to Modbus TCP wrapper | Engineering |
-| Formal network diagram | Create `docs/architecture/network_diagram.md` with OT zones | Engineering |
+| Gap | Remediation | Owner | Status |
+|---|---|---|---|
+| MFA for management | TOTP for admin dashboard via `pyotp` | Engineering | ✅ CLOSED v2.0.0 |
+| SIEM log forwarding | Loki output via OTel Collector | Engineering | ✅ CLOSED v2.0.0 |
+| mTLS for OT segment | stunnel proxy + `ot_tls_config.py` + `gen_certs.sh` | Engineering | ✅ CLOSED v2.1.0 |
+| Formal network diagram | Create `docs/architecture/network_diagram.md` with OT zones | Engineering | 🔲 Pending |
 
 ### Phase 3 — Formal Audit (Q2–Q3 2026)
 
