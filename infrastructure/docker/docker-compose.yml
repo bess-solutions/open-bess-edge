@@ -4,14 +4,16 @@
 # Services:
 #   modbus-simulator  — Simulated Modbus TCP device (dev/test only)
 #   gateway           — The BESSAI Edge Gateway application
-#   otel-collector    — OpenTelemetry Collector (OTLP receiver → console)
+#   otel-collector    — OpenTelemetry Collector (OTLP receiver → Loki + console)
 #   prometheus        — Metrics scraper (monitoring profile)
-#   grafana           — Metrics dashboard (monitoring profile)
+#   grafana           — Metrics + Logs dashboard (monitoring profile)
+#   bessai-loki       — Grafana Loki SIEM (monitoring profile, IEC 62443 GAP-002)
 #
 # Profiles:
 #   (default)   — gateway + otel-collector  (requires real INVERTER_IP in .env)
 #   simulator   — modbus-simulator + gateway-sim + otel-collector (dev mode)
-#   monitoring  — prometheus + grafana (add to any profile for dashboards)
+#   monitoring  — prometheus + grafana + loki (add to any profile for dashboards)
+#                 Set LOKI_ENDPOINT=http://bessai-loki:3100/loki/api/v1/push
 #
 # Usage:
 #   # Development mode (with Modbus simulator):
@@ -41,6 +43,7 @@ volumes:
   otel-data:
   prometheus-data:
   grafana-data:
+  loki-data:  # IEC 62443 GAP-002: SIEM audit log persistence
 
     # ── Services ──────────────────────────────────────────────────────────────────
 services:
@@ -192,6 +195,36 @@ services:
       - bess-net
     depends_on:
       - prometheus
+      - bessai-loki  # IEC 62443 GAP-002: Loki datasource
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # ── Grafana Loki — SIEM log store (monitoring profile) ────────────────────
+  # IEC 62443-3-3 SR 6.1 / SR 6.2: Audit log generation and review.
+  # GAP-002: Structured audit logs from OTel Collector → Loki → Grafana.
+  # Access: http://localhost:3100/ready
+  bessai-loki:
+    image: grafana/loki:2.9.8
+    container_name: bessai-loki
+    profiles: [ "monitoring" ]
+    restart: unless-stopped
+    command: -config.file=/etc/loki/loki-config.yaml
+    volumes:
+      - ../loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki-data:/loki
+    ports:
+      - "3100:3100"  # Loki push API + query API
+    networks:
+      - bess-net
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:3100/ready" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
     logging:
       driver: "json-file"
       options:

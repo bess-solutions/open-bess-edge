@@ -216,6 +216,13 @@ class SimulatorDriver:
     async def write_tag(self, tag_name: str, value: float) -> None:
         if not self._connected:
             raise DataProviderError("SimulatorDriver not connected")
+        # BESSAI-SPEC-001 §4.6: reject non-finite values (inf, nan)
+        import math as _math
+        if not _math.isfinite(value):
+            raise ValueError(
+                f"write_tag('{tag_name}', {value}): non-finite value rejected. "
+                "BESSAI-SPEC-001 §4.6 requires all values to be finite floats."
+            )
         if tag_name not in self._writable and self._tags:
             log.warning("simulator.write_readonly", tag=tag_name)
         log.debug("simulator.write_tag", tag=tag_name, value=value)
@@ -315,6 +322,23 @@ class SimulatorDriver:
             return random.uniform(-s, s)
 
         mapping: dict[str, float] = {
+            # ----------------------------------------------------------------
+            # BESSAI-SPEC-001 §5.1 — Required normalized tag names
+            # These tags MUST be present in every conformant DataProvider.
+            # ----------------------------------------------------------------
+            "SOC_%":        self._soc + noise(0.1),           # 0–100 %
+            "P_kW":         self._power_kw + noise(0.05),    # kW (+charge, -discharge)
+            "T_battery_C":  self._temp_c + noise(0.2),       # −40 to 100 °C
+            "V_dc_V":       max(0.0, self._voltage + noise(2)),  # 0–∞ V
+            "alarm_code":   0.0 if self._mode != SimMode.FAULT else 16.0,  # 0–∞
+            # SPEC-001 §5.1 mode enum: 0=FAULT 1=STRESS 2=NORMAL(TOU) 3=IDLE
+            "mode":         (
+                2.0 if self._mode == SimMode.NORMAL else
+                3.0 if self._mode == SimMode.IDLE else
+                1.0 if self._mode == SimMode.STRESS else
+                0.0  # FAULT
+            ),
+            # ----------------------------------------------------------------
             # State of charge / health
             "luna_soc": self._soc + noise(0.1),
             "battery_soc": self._soc + noise(0.1),
@@ -405,8 +429,11 @@ class SimulatorDriver:
                 # Unknown tag but exists in profile — return plausible default
                 log.debug("simulator.unknown_tag_default", tag=tag_name)
                 return 0.0
-            raise DataProviderError(
-                f"SimulatorDriver: tag '{tag_name}' is not in profile '{self._profile_name}'"
+            # BESSAI-SPEC-001 §4.5: raise KeyError for unknown tags
+            raise KeyError(
+                f"Tag '{tag_name}' not found in SimulatorDriver "
+                f"(profile: '{self._profile_name}'). "
+                "See BESSAI-SPEC-001 §5 for the required tag set."
             )
 
         return round(mapping[tag_name], 4)
