@@ -118,11 +118,25 @@ curl http://localhost:8000/metrics     # Prometheus metrics
 3. Link the related Issue(s): `Closes #123`
 4. Request review from at least one Maintainer
 5. **Squash commits** before merge if you have more than 3 WIP commits
-6. Do not merge your own PR — at least one other Maintainer must approve
+6. Do not merge your own PR — at least one other Maintainer must approve (**two-person integrity rule**)
 
 ### PR Review Turnaround
 
 We aim to provide initial feedback within **5 business days**. If you haven't heard back, feel free to ping `@bess-solutions` in the PR comments.
+
+---
+
+## Maintainer Security Policy (OpenSSF Silver/Gold)
+
+All maintainers with write access to this repository must:
+
+1. **Enable 2FA** on their GitHub account — mandatory, no exceptions
+2. **Sign commits** with a verified GPG key (`git config commit.gpgsign true`)
+3. **Never force-push to `main`** — branch protection enforces this
+4. **Review and merge only PRs you did NOT author** (two-person integrity)
+5. Report suspected supply chain attacks to ingenieria@bess-solutions.cl immediately
+
+> 📋 For the full OpenSSF Gold Badge progress, see [`docs/openssf_gold_checklist.md`](docs/openssf_gold_checklist.md)
 
 ---
 
