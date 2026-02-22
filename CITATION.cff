@@ -1,0 +1,47 @@
+cff-version: 1.2.0
+message: >-
+  If you use BESSAI Edge Gateway in your research or industrial deployment,
+  please cite it using the metadata from this file.
+type: software
+title: "BESSAI Edge Gateway"
+abstract: >-
+  Open-source industrial IoT gateway for Battery Energy Storage Systems (BESS).
+  Acquires real-time telemetry via Modbus TCP from industrial inverters
+  (Huawei SUN2000, SMA, Victron, Fronius), validates safety constraints,
+  publishes telemetry to GCP Pub/Sub and MQTT brokers, and applies
+  edge AI (Isolation Forest anomaly detection, ONNX policy dispatch)
+  for optimal battery operation. Compliant with NTSyCS CEN Chile and
+  IEC 62443 SL-1.
+authors:
+  - family-names: "Briones"
+    given-names: "Rodrigo"
+    affiliation: "BESS Solutions"
+    email: "ingenieria@bess-solutions.cl"
+    orcid: ""
+repository-code: "https://github.com/bess-solutions/open-bess-edge"
+url: "https://bess-solutions.cl"
+license: Apache-2.0
+version: "1.7.1"
+date-released: "2026-02-21"
+keywords:
+  - "BESS"
+  - "battery energy storage"
+  - "Modbus TCP"
+  - "edge computing"
+  - "IIoT"
+  - "renewable energy"
+  - "anomaly detection"
+  - "ONNX"
+  - "Chile"
+  - "NTSyCS"
+  - "IEC 62443"
+  - "open-source"
+references:
+  - type: standard
+    title: "IEC 62443 — Industrial Automation and Control Systems Security"
+    authors:
+      - name: "International Electrotechnical Commission"
+  - type: standard
+    title: "Norma Técnica de Seguridad y Calidad de Servicio (NTSyCS)"
+    authors:
+      - name: "Coordinador Eléctrico Nacional de Chile (CEN)"

@@ -1,0 +1,80 @@
+name: 🔌 Hardware Support Request
+description: Request support for a new inverter, battery or hardware device
+title: "[Hardware]: Add support for "
+labels: ["hardware-support", "enhancement"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        BESSAI supports **Huawei SUN2000, SMA Sunny Tripower, Victron MultiPlus-II** and **Fronius GEN24**.
+        If you need support for a new device, fill out the information below and we will create a Modbus registry profile.
+
+        **Before submitting:** Check if the [registry/](../registry/) folder already has a profile for your device.
+
+  - type: input
+    id: manufacturer
+    attributes:
+      label: Manufacturer
+      placeholder: "e.g., Tesla, ABB, Sungrow, SolarEdge"
+    validations:
+      required: true
+
+  - type: input
+    id: model
+    attributes:
+      label: Model / Series
+      placeholder: "e.g., Powerwall 3, Fimer React 2, Sungrow SH10RS"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: protocol
+    attributes:
+      label: Communication Protocol
+      options:
+        - Modbus TCP
+        - Modbus RTU
+        - SunSpec (Modbus)
+        - OPC UA
+        - REST API
+        - Other / Unknown
+    validations:
+      required: true
+
+  - type: input
+    id: datasheet
+    attributes:
+      label: Modbus Register Map / Datasheet URL
+      description: Link to official Modbus register map (PDF or URL)
+      placeholder: "https://..."
+
+  - type: textarea
+    id: registers
+    attributes:
+      label: Key Registers (if known)
+      description: |
+        List the critical Modbus registers you need (address, type, description).
+        If you don't know them, attach/link the register map above.
+      placeholder: |
+        Address 40001 — SOC (%) UINT16 scale 0.1
+        Address 40002 — Power (W) INT32 scale 1
+        ...
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgently do you need this?
+      options:
+        - "🔴 Critical — blocking production deployment"
+        - "🟡 Medium — needed in next 3 months"
+        - "🟢 Nice to have — no urgent deadline"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other relevant info (country, project size, willingness to test)
