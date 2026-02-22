@@ -7,10 +7,33 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-22T13:37 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-22T19:22 -03:00)
 
 > [!IMPORTANT]
-> **v1.8.0 — Global Standard Foundations Release** (2026-02-22)
+> **v2.0.0 — Interop Tests Fix + TOTP MFA + Loki SIEM** (2026-02-22)
+>
+> ### Cambios v2.0.0
+>
+> **Fix: 18 → 0 errores en interop test suite**
+> - `src/drivers/simulator_driver.py` — 6 tags SPEC-001 normalizadas: `SOC_%`, `P_kW`, `T_battery_C`, `V_dc_V`, `alarm_code`, `mode`
+> - `src/drivers/simulator_driver.py` — Excepción `KeyError` para tags desconocidos (SPEC-001 §4.5)
+> - `src/drivers/simulator_driver.py` — `write_tag()` lanza `ValueError` para valores `inf`/`nan` (SPEC-001 §4.6)
+> - `tests/conftest.py` — Root conftest registra `--driver-class` antes de colección
+> - `pytest.ini` — Cambiado a `[pytest]` para habilitar `asyncio_mode = auto`
+>
+> **IEC 62443 GAP-001 CLOSED: TOTP MFA (SR 1.3)**
+> - `src/interfaces/totp_auth.py` — Módulo TOTP con soft-dep pyotp; fallback dev-mode
+> - `src/interfaces/dashboard_api.py` — TOTP en `_check_auth()` + endpoint `/api/v1/auth/totp-info`
+> - `tests/test_totp_auth.py` — Suite TOTP: 17 passed, 4 skipped (pyotp no instalado)
+> - `requirements.txt` — `pyotp>=2.9.0`
+>
+> **IEC 62443 GAP-002 CLOSED: Loki SIEM log forwarding (SR 6.1, SR 6.2)**
+> - `infrastructure/docker/otel-collector-config.yaml` — Exporter Loki + pipeline `logs`
+> - `infrastructure/docker/docker-compose.yml` — Servicio `bessai-loki` (perfil `monitoring`)
+> - `infrastructure/loki/loki-config.yaml` — Config Loki: filesystem, retención 30 días
+>
+> **Resultado:** `410 passed, 4 skipped` — suite completa sin failures ni errors.
+
 > - Commit `TBD` → main: docs(standard): plan de ejecución global — 18 archivos nuevos, 3 modificados
 >
 > ### Cambios v1.8.0 — Path to Global Standard
