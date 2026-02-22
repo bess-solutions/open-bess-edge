@@ -21,13 +21,21 @@ from __future__ import annotations
 
 import asyncio
 import json
+import ssl
 import struct
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, Final, Optional
 
 import structlog
 from pymodbus.client import AsyncModbusTcpClient
 from pymodbus.exceptions import ConnectionException, ModbusIOException
+
+# Optional import for TLS config helper (avoids hard dep on structlog in tests)
+try:
+    from src.interfaces.ot_tls_config import OtTlsConfig, build_ssl_context as _build_ssl_ctx
+    _OT_TLS_AVAILABLE = True
+except ImportError:
+    _OT_TLS_AVAILABLE = False
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -117,6 +125,15 @@ class UniversalDriver:
         host: str,
         port: int = 502,
         profile_path: Path | str = Path("registry/huawei_sun2000.json"),
+        # ----------------------------------------------------------------
+        # IEC 62443 GAP-003 SR 3.1: Optional mutual TLS for OT segment
+        # Use ot_tls_config.OtTlsConfig.from_env() to build from env vars,
+        # or pass paths directly for explicit configuration.
+        # ----------------------------------------------------------------
+        tls_ca_cert: Optional[Path] = None,
+        tls_client_cert: Optional[Path] = None,
+        tls_client_key: Optional[Path] = None,
+        tls_context: Optional[ssl.SSLContext] = None,
     ) -> None:
         self._host = host
         self._port = port
@@ -128,13 +145,46 @@ class UniversalDriver:
         self._byte_order: str = _resolve_endian(conn.get("byte_order", "BIG"), "byte_order")
         self._word_order: str = _resolve_endian(conn.get("word_order", "BIG"), "word_order")
 
-        self._client = AsyncModbusTcpClient(host=self._host, port=self._port)
+        # ── TLS setup (IEC 62443 GAP-003) ────────────────────────────────────
+        # Priority: explicit tls_context > cert paths > plain TCP
+        _sslctx: Optional[ssl.SSLContext] = None
+
+        if tls_context is not None:
+            _sslctx = tls_context
+            log.info("driver.mtls_enabled", host=host, port=port, source="explicit_context")
+        elif tls_ca_cert is not None and tls_client_cert is not None and tls_client_key is not None:
+            if _OT_TLS_AVAILABLE:
+                from src.interfaces.ot_tls_config import OtTlsConfig, build_ssl_context as _build
+                _cfg = OtTlsConfig(
+                    enabled=True,
+                    ca_cert_path=tls_ca_cert,
+                    client_cert_path=tls_client_cert,
+                    client_key_path=tls_client_key,
+                )
+                _sslctx = _build(_cfg)
+                log.info("driver.mtls_enabled", host=host, port=port, source="cert_paths")
+            else:
+                log.warning(
+                    "driver.mtls_skipped",
+                    reason="ot_tls_config module not available",
+                    host=host,
+                    port=port,
+                )
+        else:
+            log.info("driver.mtls_disabled", host=host, port=port, reason="no_tls_config")
+
+        self._client = AsyncModbusTcpClient(
+            host=self._host,
+            port=self._port,
+            **(dict(sslctx=_sslctx) if _sslctx else {}),
+        )
         log.info(
             "driver.initialized",
             host=host,
             port=port,
             profile=str(profile_path),
             registers=list(self._registers.keys()),
+            mtls=_sslctx is not None,
         )
 
     # ------------------------------------------------------------------
