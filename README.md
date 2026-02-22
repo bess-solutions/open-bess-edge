@@ -12,8 +12,11 @@
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12001/badge)](https://www.bestpractices.dev/projects/12001)
 [![IEC 62443](https://img.shields.io/badge/IEC_62443-SL--1_Mapped-orange)](docs/compliance/iec62443_mapping.md)
 [![NTSyCS](https://img.shields.io/badge/NTSyCS-CEN_Chile-green)](docs/compliance/ntscys_compliance.md)
+[![Discord](https://img.shields.io/badge/Discord-BESSAI_Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/ZqpE8AZs)
 
 > **Gateway industrial de código abierto para gestión segura y optimizada de activos BESS — cumpliendo normativa NTSyCS del CEN Chile, IEC 62443 SL-1 y estándares internacionales de software industrial.**
+
+> 💬 **Comunidad:** [Únete a Discord](https://discord.gg/ZqpE8AZs) · [GitHub Discussions](https://github.com/bess-solutions/open-bess-edge/discussions) · [Bounty Program](docs/bounty_program.md)
 
 ---
 
