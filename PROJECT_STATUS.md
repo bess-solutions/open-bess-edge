@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-22T13:37 v1.8.0 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-22T18:10 v1.9.0 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,13 +14,13 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 
 ---
 
-## ✅ Estado Actual — v1.8.0
+## ✅ Estado Actual — v1.9.0
 
 ### Tests
 ```
 378 / 378 passed ✅  (suite completa — 378 tests, 6 chaos tests, sin regresión)
 CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · multiarch ✅ · scorecard ✅
-Nuevos: benchmark.yml (semanal) · compliance-report.yml (semanal)
+Workflows: benchmark.yml · compliance-report.yml · fuzzing.yml (NEW — Atheris Modbus/MQTT)
 ```
 
 
@@ -129,17 +129,20 @@ GET /api/v1/health   → ok / degraded
 
 ### Bloqueadores activos
 
-> 🎉 **Sin bloqueadores activos** — CI/CD + Scorecard + Mutation Testing operativos. K8s manifests, SLSA L2 y estrategia SSAF implementados (v1.7.1).
+> 🎉 **Sin bloqueadores activos** — CI/CD + Scorecard + Mutation Testing + Fuzzing operativos. OpenSSF Gold ~85% cubierto. IEC 62443 Phase 1 docs listos (v1.9.0).
 
-### ✅ Entregables recientes (semanas 1-3+, 22-feb-2026)
+### ✅ Entregables recientes (v1.8.0–v1.9.0, 22-feb-2026)
 
 | Commit | Entregable | Impacto |
 |---|---|---|
-| `e7d111a` | Scorecard CI, CITATION.cff, badges Codecov+Scorecard, hardware template | OpenSSF supply chain score automático |
-| `545c084` | Tutorial 5min sin hardware, MQTT+HA tutorial, FUNDING.yml, MkDocs Tutorials | Onboarding < 5 min |
+| `TBD` | `security_guide_maintainer.md`, `release_process.md` | OpenSSF Silver/Gold — docs completos |
+| `TBD` | `fuzzing.yml` — Atheris Modbus + MQTT parsers | OpenSSF Gold — fuzzing crítico |
+| `TBD` | `network_diagram.md` — Zonas OT/DMZ/IT + conduits | IEC 62443 SR 5.2 |
+| `TBD` | `system_security_plan.md` — SSP FR1–FR7 mapeado | IEC 62443 Phase 1 pre-audit |
+| `TBD` | `psirt_process.md` + `patch_management_sla.md` | IEC 62443 SR 2.2 + SR 2.12 |
+| `e7d111a` | Scorecard CI, CITATION.cff, badges Codecov+Scorecard | OpenSSF supply chain score |
+| `545c084` | Tutorial 5min sin hardware, MQTT+HA tutorial, MkDocs | Onboarding < 5 min |
 | `9bc4d78` | K8s manifests (6 archivos), kustomization.yaml | `kubectl apply -k` en K3s/RPi/GKE |
-| `0ce640b` | Pitch deck, SSAF S16, IEC 62443 SL-2 gap, Bounty Program, NetworkPolicy, Mutation Test | Estrategia + postulación |
-| `460bff6` | Tutorial hardware real, OpenSSF Gold checklist, SLSA L2, Maintainer Security Policy | OpenSSF Gold path |
 
 ### Pendientes (solo Rodrigo)
 
@@ -166,6 +169,8 @@ v1.3.1  ████████████████████████
 v1.3.2  ████████████████████████  ✅ ruff format fix (4 archivos) · suite actualizada 372 tests
 v1.4.0  ████████████████████████  ✅ Estándares internacionales: OSS governance, supply chain security, ADRs, compliance
 v1.5.0  ████████████████████████  ✅ MkDocs site · PyPI package · API Reference · Runbook operacional
+v1.8.0  ████████████████████████  ✅ BESSAI Global Standard: specs formales, BEPs, interop, benchmarks, LF Energy
+v1.9.0  ████████████████████████  ✅ OpenSSF Gold foundations + IEC 62443 SL-2 Phase 1 docs · fuzzing Atheris
 v2.0.0  ░░░░░░░░░░░░░░░░░░░░░░░░  📋 Multi-site planetary scale
 ```
 
@@ -311,3 +316,5 @@ pytest tests/ -v --tb=short
 | 2026-02-21 | **v1.7.0** | **378/378** | hardware registry (SMA/Victron/Fronius), MQTT publisher, 6 chaos tests, Multi-Arch CI, Raspberry Pi docs, OpenSSF badge |
 | 2026-02-21 | **v1.7.1** | **378/378** | **CI Green**: fix(ci) mypy+ruff+pytest · DataProvider protocol en safety.py · UniversalDriver properties · fixture async test_reconnect_chaos · connect() mock en test_modbus_driver |
 | 2026-02-22 | **v1.7.1+** | **378/378** | **Ruta 10/10**: Semana 1 (Scorecard, CITATION, badges) · Semana 2 (tutoriales, FUNDING) · Semana 3 (K8s manifests, NetworkPolicy) · Estrategia (pitch deck, SSAF, IEC62443 SL-2, bounties, SLSA L2, OpenSSF Gold) |
+| 2026-02-22 | **v1.8.0** | **378/378** | BESSAI Global Standard: `BESSAI-SPEC-001/002/003`, BEP-0001, ADR-007/008, `docs/interoperability/`, benchmarks públicos, `docs/compliance/iec_62443_sl2_certification_path.md`, `lf_energy_proposal.md`, `partnership_program.md` |
+| 2026-02-22 | **v1.9.0** | **378/378** | OpenSSF Silver/Gold: `security_guide_maintainer.md`, `release_process.md`, `fuzzing.yml` (Atheris Modbus/MQTT) · IEC 62443 Phase 1: `network_diagram.md`, `system_security_plan.md`, `psirt_process.md`, `patch_management_sla.md` |
