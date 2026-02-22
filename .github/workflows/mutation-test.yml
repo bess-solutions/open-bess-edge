@@ -1,0 +1,65 @@
+name: Mutation Testing (Weekly)
+
+on:
+  schedule:
+    # Todos los domingos a las 06:00 UTC
+    - cron: "0 6 * * 0"
+  workflow_dispatch:  # Permite trigger manual
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  mutation-test:
+    name: Mutation Testing (mutmut)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies + mutmut
+        run: |
+          pip install -r requirements.txt -r requirements-dev.txt
+          pip install mutmut
+
+      - name: Run mutation tests (core modules)
+        run: |
+          mutmut run \
+            --paths-to-mutate src/core/safety.py,src/core/config.py \
+            --runner "python -m pytest tests/test_safety.py tests/test_config.py -x -q" \
+            --no-progress \
+            || true  # No falla CI — es informativo
+
+      - name: Generate mutation report
+        if: always()
+        run: |
+          mutmut results > mutation_report.txt 2>&1 || true
+          mutmut html || true
+          cat mutation_report.txt
+
+      - name: Upload mutation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-report
+          path: |
+            mutation_report.txt
+            html/
+
+      - name: Comment mutation score on summary
+        if: always()
+        run: |
+          SCORE=$(mutmut results 2>/dev/null | grep -oP '\d+(?= survived)' || echo "?")
+          KILLED=$(mutmut results 2>/dev/null | grep -oP '\d+(?= killed)' || echo "?")
+          echo "## 🧬 Mutation Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Killed | Survived |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| $KILLED | $SCORE |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> Módulos analizados: \`src/core/safety.py\`, \`src/core/config.py\`" >> $GITHUB_STEP_SUMMARY
