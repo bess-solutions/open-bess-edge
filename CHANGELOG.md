@@ -7,34 +7,50 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-22T19:22 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-22T20:30 -03:00)
 
 > [!IMPORTANT]
-> **v2.0.0 — Interop Tests Fix + TOTP MFA + Loki SIEM** (2026-02-22)
+> **v2.3.0 — Misiones Paralelas: Rate Limiting + mkdocs + Audit Package** (2026-02-22)
+>
+> IEC 62443 SL-2 readiness: **~95%** | Tests: **426 passed** | GAPs: **7/7 CLOSED**
+>
+> ### Cambios v2.3.0
+>
+> **IEC 62443 SR 7.1 CLOSED: Rate Limiting en Dashboard API**
+> - `src/interfaces/dashboard_api.py` — clase `_RateLimiter` (sliding window, 300 req/min por IP)
+> - Middleware `rate_limit_middleware` en aiohttp — retorna `429 + Retry-After`
+> - `RATE_LIMIT_READ_RPM` env var para configurar el límite
+> - `tests/test_rate_limiting.py` — 7 tests (sliding window, múltiples IPs, env override)
+>
+> **mkdocs nav actualizado:**
+> - `mkdocs.yml` — SSP-001, NAD-001, PMS-001 en sección "Security & Compliance"
+> - `site_description` → IEC 62443 SL-2
+>
+> ### Cambios v2.2.0
+>
+> **Paquete formal de auditoría IEC 62443 SL-2:**
+> - `docs/architecture/network_diagram.md` (NAD-001) — zonas OT/IT/Edge, 5 conduits
+> - `docs/compliance/ssp_iec62443_sl2.md` (SSP-001) — FR 1–7 completos
+> - `docs/compliance/patch_management_sla.md` (PMS-001) — Critical ≤7d, High ≤30d
+> - `SECURITY.md` — sección PSIRT: 7-step process, 4h ICS emergency SLA
+>
+> ### Cambios v2.1.0
+>
+> **IEC 62443 GAP-003 CLOSED: mTLS OT segment (SR 3.1)**
+> - `infrastructure/certs/gen_certs.sh` — PKI: CA + gateway-client + stunnel proxy
+> - `infrastructure/docker/stunnel-ot.conf` — TLS 1.3, verify=2, ECDHE
+> - `docker-compose.yml` — `bessai-stunnel` (perfil `ot-security`)
+> - `src/interfaces/ot_tls_config.py` — `OtTlsConfig.from_env()` + `build_ssl_context()`
+> - `src/drivers/modbus_driver.py` — 4 params TLS opcionales, retrocompatible
+> - `tests/test_ot_tls_config.py` — 9 passed, 1 skipped (openssl no en PATH Windows CI)
 >
 > ### Cambios v2.0.0
 >
-> **Fix: 18 → 0 errores en interop test suite**
-> - `src/drivers/simulator_driver.py` — 6 tags SPEC-001 normalizadas: `SOC_%`, `P_kW`, `T_battery_C`, `V_dc_V`, `alarm_code`, `mode`
-> - `src/drivers/simulator_driver.py` — Excepción `KeyError` para tags desconocidos (SPEC-001 §4.5)
-> - `src/drivers/simulator_driver.py` — `write_tag()` lanza `ValueError` para valores `inf`/`nan` (SPEC-001 §4.6)
-> - `tests/conftest.py` — Root conftest registra `--driver-class` antes de colección
-> - `pytest.ini` — Cambiado a `[pytest]` para habilitar `asyncio_mode = auto`
->
-> **IEC 62443 GAP-001 CLOSED: TOTP MFA (SR 1.3)**
-> - `src/interfaces/totp_auth.py` — Módulo TOTP con soft-dep pyotp; fallback dev-mode
-> - `src/interfaces/dashboard_api.py` — TOTP en `_check_auth()` + endpoint `/api/v1/auth/totp-info`
-> - `tests/test_totp_auth.py` — Suite TOTP: 17 passed, 4 skipped (pyotp no instalado)
-> - `requirements.txt` — `pyotp>=2.9.0`
->
-> **IEC 62443 GAP-002 CLOSED: Loki SIEM log forwarding (SR 6.1, SR 6.2)**
-> - `infrastructure/docker/otel-collector-config.yaml` — Exporter Loki + pipeline `logs`
-> - `infrastructure/docker/docker-compose.yml` — Servicio `bessai-loki` (perfil `monitoring`)
-> - `infrastructure/loki/loki-config.yaml` — Config Loki: filesystem, retención 30 días
->
-> **Resultado:** `410 passed, 4 skipped` — suite completa sin failures ni errors.
-
-> - Commit `TBD` → main: docs(standard): plan de ejecución global — 18 archivos nuevos, 3 modificados
+> **Fix: 18 → 0 errores interop** + **GAP-001 TOTP MFA** + **GAP-002 Loki SIEM**
+> - `src/drivers/simulator_driver.py` — tags SPEC-001, KeyError, ValueError
+> - `tests/conftest.py` + `pytest.ini` — asyncio_mode=auto funcional
+> - `src/interfaces/totp_auth.py` — TOTP MFA, soft-dep pyotp
+> - `infrastructure/docker/docker-compose.yml` — `bessai-loki` (perfil `monitoring`)
 >
 > ### Cambios v1.8.0 — Path to Global Standard
 >
