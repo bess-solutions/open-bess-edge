@@ -35,7 +35,7 @@
 | **Multi-Arch Docker** (amd64 + arm64) | ✅ Buildx CI → ghcr.io — Raspberry Pi 4/5 |
 | Prometheus + Grafana + Alerting | ✅ `--profile monitoring` + alert rules |
 | Terraform GCP | ✅ 18 recursos en GCP |
-| GitHub Actions CI/CD | ✅ 10 jobs: lint+test+security+trivy+docker+multiarch |
+| GitHub Actions CI/CD | ✅ 9 jobs: lint+typecheck+test+security+terraform+helm+docker+trivy+push |
 | **Hardware Registry** | ✅ 4 perfiles: Huawei, SMA, Victron, Fronius |
 | **Gobernanza OSS** | ✅ SECURITY+COC+GOVERNANCE+CONTRIBUTING |
 | **ADRs (5 decisiones)** | ✅ `docs/adr/` — pydantic, Modbus, IDS, ONNX, Pub/Sub |
@@ -142,15 +142,17 @@ open-bess-edge/
       │  Modbus TCP (pymodbus 3.12 + struct)
       ▼
 [Drivers Layer]  ──►  [Core Engine]  ──►  [Interfaces Layer]
- (src/drivers/)         (src/core/)        health.py  /health /metrics
-                              │             pubsub_publisher.py → GCP Pub/Sub
-                       Safety Guard         otel_setup.py → Cloud Trace
-                       Pydantic v2
-                              │
-                              ▼
-                   [Prometheus / Grafana]
-                   [GCP Pub/Sub / Cloud]
+ modbus_driver          (src/core/)        health.py      → /health /metrics
+ luna2000_driver         │                 pubsub_publisher.py → GCP Pub/Sub
+ simulator_driver   Safety Guard          mqtt_publisher.py   → MQTT Brokers
+                    Pydantic v2           otel_setup.py       → Cloud Trace
+                         │                ai_ids.py           → Anomaly score
+                         │                onnx_dispatcher.py  → Dispatch cmds
+                         ▼
+               [Prometheus / Grafana]     dashboard_api.py    → http://:8080
+               [GCP Pub/Sub / MQTT / Cloud]
 ```
+
 
 ---
 
