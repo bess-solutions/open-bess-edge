@@ -40,13 +40,18 @@ Prometheus v2.51.2                          OK      ← localhost:9090
 | CMg Predictor v2 | `src/interfaces/cmg_predictor.py` | **v2.0** | ✅ **NUEVO** |
 | Arbitrage Engine v2 | `src/interfaces/arbitrage_engine.py` | **v2.0** | ✅ **NUEVO** |
 | Configuración | `src/core/config.py` | v0.5 | ✅ Producción |
-| Seguridad (SOC / Temp) | `src/core/safety.py` | v0.5 | ✅ Producción |
+| Seguridad (SOC / Temp) | `src/core/safety.py` | **v1.7.1** | ✅ Producción — acepta DataProvider |
 | Orquestador principal | `src/core/main.py` | v0.5 | ✅ Producción |
 | Fleet Orchestrator | `src/core/fleet_orchestrator.py` | v0.8 | ✅ Producción |
-| Driver Modbus TCP | `src/drivers/modbus_driver.py` | v0.5 | ✅ Producción |
+| Driver Modbus TCP | `src/drivers/modbus_driver.py` | **v1.7.1** | ✅ Producción — is_connected + source_description |
+| Simulator Driver | `src/drivers/simulator_driver.py` | **v1.7.1** | ✅ Producción — Sim-First, 12 componentes |
+| DataProvider Protocol | `src/drivers/base.py` | **v1.7.1** | ✅ Producción — protocolo runtime_checkable |
 | LUNA2000 Driver | `src/drivers/luna2000_driver.py` | **v1.0** | ✅ Producción |
 | Servidor /health + /metrics | `src/interfaces/health.py` | v0.5 | ✅ Producción |
 | Prometheus metrics (22 total) | `src/interfaces/metrics.py` | v0.9 | ✅ Producción |
+| OTel / Cloud Trace | `src/interfaces/otel_setup.py` | v0.9 | ✅ Producción |
+| GCP Pub/Sub Publisher | `src/interfaces/pubsub_publisher.py` | v0.5 | ✅ Producción |
+| MQTT Publisher | `src/interfaces/mqtt_publisher.py` | **v1.7.1** | ✅ Producción — paho-mqtt, TLS, multi-broker |
 | AI-IDS | `src/interfaces/ai_ids.py` | v0.6 | ✅ Producción |
 | ONNX Dispatcher | `src/interfaces/onnx_dispatcher.py` | v0.6 | ✅ Producción |
 | VPP Publisher (OpenADR 3.0) | `src/interfaces/vpp_publisher.py` | v0.7 | ✅ Producción |
@@ -62,14 +67,13 @@ Prometheus v2.51.2                          OK      ← localhost:9090
 | BESS Gymnasium Env | `src/simulation/bess_env.py` | v0.7 | ✅ Producción |
 | BESS Physics Model | `src/simulation/bess_model.py` | v0.7 | ✅ Producción |
 | ONNX modelo dummy | `models/dispatch_policy.onnx` | v0.6 | ✅ Producción |
-| **Mega Scraper datos** | `sources/mega_scraper_energia_abierta.py` | **v1.0** | ✅ **NUEVO** |
 | DRL training script | `scripts/train_drl_policy.py` | v0.7 | ✅ Producción |
 | Helm chart | `infrastructure/helm/bessai-edge/` | v0.7 | ✅ Completo |
 | Grafana Dashboard | `infrastructure/grafana/dashboards/bessai_main.json` | **v1.0** | ✅ 13 paneles |
 | Terraform GCP | `infrastructure/terraform/` | v0.5 | ✅ 18 recursos |
 | Registro Modbus | `registry/huawei_sun2000.json` | **v2.0** | ✅ 28 registros reales |
 | Modbus Simulator | `infrastructure/docker/modbus_sim/` | **v1.0.1** | ✅ pymodbus server, 22 registros |
-| GitHub Actions CI/CD | `.github/workflows/ci.yml` | v0.9 | ✅ 7 jobs |
+| GitHub Actions CI/CD | `.github/workflows/ci.yml` | v1.0 | ✅ **9 jobs**: lint+typecheck+test+security+terraform+helm+docker+trivy+push |
 
 ### 🐳 Stack Docker — ✅ COMPLETAMENTE OPERATIVO (v1.0.1)
 
