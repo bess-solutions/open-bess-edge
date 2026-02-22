@@ -69,11 +69,17 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting Started:
-    - Quick Start: quickstart.md
+    - Quick Start (5 min): tutorials/quickstart_5min.md
     - Local Development: local_development.md
     - Docker Setup: docker_setup.md
+    - Raspberry Pi 4/5: quickstart_rpi.md
+  - Tutorials:
+    - Deploy en 5 Minutos: tutorials/quickstart_5min.md
+    - MQTT + Home Assistant: tutorials/integration_homeassistant.md
+    - MQTT Integration (full): mqtt_integration.md
   - Architecture:
     - Overview: architecture.md
+    - Sim-First Strategy: simulation_registry.md
     - Decision Records (ADRs): adr/README.md
   - API Reference: api_reference.md
   - Operations:
