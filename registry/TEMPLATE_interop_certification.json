@@ -1,0 +1,39 @@
+{
+  "$schema": "https://bessai.io/schemas/v1/device-profile.json",
+  "schema_version": "1.0",
+  "manufacturer": "REPLACE_MANUFACTURER_NAME",
+  "model": "REPLACE_MODEL_NAME",
+  "firmware_versions_tested": ["REPLACE_FIRMWARE_VERSION"],
+  "protocol": "Modbus TCP",
+  "default_port": 502,
+  "driver_class": "REPLACE_PYTHON_DOTTED_PATH",
+  "supported_tags": {
+    "read": [
+      "SOC_%",
+      "P_kW",
+      "T_battery_C",
+      "V_dc_V",
+      "I_dc_A",
+      "mode",
+      "alarm_code"
+    ],
+    "write": [
+      "P_setpoint_kW",
+      "mode_cmd"
+    ]
+  },
+  "unsupported_required_tags": [],
+  "optional_tags_supported": [],
+  "p_max_kw": 0.0,
+  "p_min_kw": 0.0,
+  "nominal_voltage_v": 0.0,
+  "chemistry": "LFP",
+  "interop_certified": false,
+  "interop_certification_level": null,
+  "interop_test_date": null,
+  "interop_test_report_url": null,
+  "certified_by": null,
+  "known_quirks": "REPLACE_WITH_KNOWN_LIMITATIONS_OR_QUIRKS",
+  "notes": "REPLACE_WITH_ADDITIONAL_NOTES",
+  "_instructions": "Remove this _instructions key before submitting PR. Fill all REPLACE_ placeholders. Set interop_certified to true only after passing tests/interop/test_driver_contract.py. See docs/interoperability/BESSAI-CERTIFIED.md."
+}
