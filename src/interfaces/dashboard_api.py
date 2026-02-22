@@ -443,7 +443,7 @@ class DashboardAPI:
         self._app = web.Application(middlewares=[cors_middleware])
         self._app.router.add_get("/", self.handle_dashboard)
         self._app.router.add_get("/dashboard", self.handle_dashboard)
-        self._app.router.add_get("/{filename:.*\.(?:css|js|ico|png|svg)}", self.handle_static)
+        self._app.router.add_get(r"/{filename:.*\.(?:css|js|ico|png|svg)}", self.handle_static)
         self._app.router.add_get("/api/v1/status", self.handle_status)
         self._app.router.add_get("/api/v1/fleet", self.handle_fleet)
         self._app.router.add_get("/api/v1/carbon", self.handle_carbon)

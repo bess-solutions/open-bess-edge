@@ -35,7 +35,7 @@ import structlog
 
 if TYPE_CHECKING:
     # Avoid circular import at runtime — only used for type hints.
-    from src.drivers.modbus_driver import UniversalDriver
+    from src.drivers.base import DataProvider
 
 # ---------------------------------------------------------------------------
 # Logger
@@ -149,7 +149,7 @@ class SafetyGuard:
     # Public API — watchdog coroutine
     # ------------------------------------------------------------------
 
-    async def watchdog_loop(self, driver: UniversalDriver) -> None:
+    async def watchdog_loop(self, driver: DataProvider) -> None:
         """
         Continuously refresh the device watchdog heartbeat register.
 
@@ -160,8 +160,9 @@ class SafetyGuard:
         Parameters
         ----------
         driver:
-            A connected ``UniversalDriver`` instance used to write the
-            ``watchdog_heartbeat`` tag.
+            A connected driver implementing the ``DataProvider`` protocol
+            (e.g. ``UniversalDriver`` or ``SimulatorDriver``) used to write
+            the ``watchdog_heartbeat`` tag.
 
         Raises
         ------

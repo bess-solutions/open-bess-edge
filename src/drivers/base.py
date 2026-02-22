@@ -26,7 +26,7 @@ Usage::
 
 from __future__ import annotations
 
-from typing import Any, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 __all__ = ["DataProvider", "DataProviderError", "DriverMode"]
 
@@ -47,9 +47,10 @@ class DataProviderError(RuntimeError):
 
 class DriverMode:
     """String constants for BESSAI_MODE environment variable."""
+
     DEMO = "demo"
     PRODUCTION = "production"
-    AUTO = "auto"   # default: use SimulatorDriver if INVERTER_IP not set
+    AUTO = "auto"  # default: use SimulatorDriver if INVERTER_IP not set
 
 
 # ---------------------------------------------------------------------------

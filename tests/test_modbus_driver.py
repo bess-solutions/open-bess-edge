@@ -170,14 +170,18 @@ class TestReadTag:
 
     @pytest.mark.asyncio
     async def test_connection_error_raises_modbus_read_error(self, tmp_path: Path) -> None:
+        from unittest.mock import patch
+
         from pymodbus.exceptions import ConnectionException
 
         driver = await _make_driver(tmp_path)
         driver._client.read_holding_registers = AsyncMock(
             side_effect=ConnectionException("timeout")
         )
-        with pytest.raises(ModbusReadError):
-            await driver.read_tag("soc")
+        # Also mock connect() so _reconnect() doesn't attempt real TCP connections
+        with patch.object(driver, "connect", new_callable=AsyncMock):
+            with pytest.raises(ModbusReadError):
+                await driver.read_tag("soc")
 
     @pytest.mark.asyncio
     async def test_error_response_raises_modbus_read_error(self, tmp_path: Path) -> None:
@@ -211,12 +215,16 @@ class TestWriteTag:
 
     @pytest.mark.asyncio
     async def test_write_connection_error_raises_modbus_write_error(self, tmp_path: Path) -> None:
+        from unittest.mock import patch
+
         from pymodbus.exceptions import ConnectionException
 
         driver = await _make_driver(tmp_path)
         driver._client.write_registers = AsyncMock(side_effect=ConnectionException("broken pipe"))
-        with pytest.raises(ModbusWriteError):
-            await driver.write_tag("watchdog_heartbeat", 1.0)
+        # Also mock connect() so _reconnect() doesn't attempt real TCP connections
+        with patch.object(driver, "connect", new_callable=AsyncMock):
+            with pytest.raises(ModbusWriteError):
+                await driver.write_tag("watchdog_heartbeat", 1.0)
 
 
 # ---------------------------------------------------------------------------
