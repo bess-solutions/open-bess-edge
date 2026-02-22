@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-21T16:47 v1.7.0 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-21T22:34 v1.7.1 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,7 +14,7 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 
 ---
 
-## ✅ Estado Actual — v1.7.0
+## ✅ Estado Actual — v1.7.1
 
 ### Tests
 ```
@@ -284,4 +284,6 @@ pytest tests/ -v --tb=short
 | 2026-02-20 | **v1.2.0** | **57+228** | **CMgPredictor v2** (TTL cache, int8, p10/p90) · **ArbitrageEngine v2** (umbral confianza, spread mín) · `train_price_model.py v2` (11 features, ensemble, batch) · Dashboard web arbitraje |
 | 2026-02-20 | **v1.3.0** | **228/228** | **bessai-cen-data v0.3.0**: `pipeline.py` corregido 9→11 features (`lag_168h`, `is_weekend`), shape (24,11) match v2 ONNX · `pyproject.toml` v0.3.0 + CLI `bessai-fetch-renewables`/`bessai-build-dataset` · `bessai-web` polling real `/api/v1/schedule` + `/api/v1/status` · `drawChartFromSchedule()` con zonas carga/descarga · renewable-energy-chile dashboard: 5 bugs arreglados |
 | 2026-02-20 | **v1.3.1** | **228/228** | **CI 100% verde**: fix ruff UP045/UP037/I001/F401 + mypy attr-defined en `_run_session` · **Mega Scraper** `sources/mega_scraper_energia_abierta.py` v1.0: 8 módulos CNE+CEN, pipeline `historical/market/training/`, dry-run verificado |
-| 2026-02-21 | **v1.3.2** | **372/372** | **ruff format fix**: 4 archivos reformateados (`arbitrage_engine.py`, `cmg_predictor.py`, `dashboard_api.py`, `test_luna2000_driver_async.py`) · Suite real actualizada de 228 → 372 tests |
+| 2026-02-21 | **v1.3.2** | **372/372** | **ruff format fix**: 4 archivos reformateados · Suite actualizada 228 → 372 tests |
+| 2026-02-21 | **v1.7.0** | **378/378** | hardware registry (SMA/Victron/Fronius), MQTT publisher, 6 chaos tests, Multi-Arch CI, Raspberry Pi docs, OpenSSF badge |
+| 2026-02-21 | **v1.7.1** | **378/378** | **CI Green**: fix(ci) mypy+ruff+pytest · DataProvider protocol en safety.py · UniversalDriver properties · fixture async test_reconnect_chaos · connect() mock en test_modbus_driver |

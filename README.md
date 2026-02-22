@@ -122,17 +122,17 @@ Ver la guía completa: [`docs/local_development.md`](docs/local_development.md)
 open-bess-edge/
 ├── src/
 │   ├── core/          # Lógica de negocio (orquestador, config, safety)
-│   ├── drivers/       # Adaptadores de hardware (Modbus TCP via struct)
-│   └── interfaces/    # health.py · metrics.py · pubsub_publisher.py · otel_setup.py
-├── registry/          # Perfiles JSON de dispositivos
+│   ├── drivers/       # Adaptadores de hardware (Modbus TCP, SimulatorDriver, Luna2000)
+│   └── interfaces/    # health · metrics · pubsub · mqtt_publisher · otel_setup · ai_ids · onnx
+├── registry/          # Perfiles JSON: Huawei, SMA, Victron, Fronius
 ├── config/            # Variables de entorno (.env.example)
-├── tests/             # Suite de tests (pytest, 54/54 ✅)
+├── tests/             # Suite de tests (pytest, 378/378 ✅ · 6 chaos tests)
 ├── infrastructure/
 │   ├── terraform/     # IaC para GCP — Pub/Sub + IAM + WIF (aplicado ✅)
-│   ├── prometheus/    # prometheus.yml — scrape config
+│   ├── prometheus/    # prometheus.yml · alert_rules.yml
 │   ├── grafana/       # Datasource provisioning automático
 │   └── docker/        # Dockerfiles y docker-compose
-└── docs/              # local_development.md · runbook.md · architecture.md
+└── docs/              # local_development.md · runbook.md · quickstart_rpi.md · mqtt_integration.md
 ```
 
 ### Flujo de datos
@@ -180,7 +180,7 @@ Ver [`config/.env.example`](config/.env.example) para la plantilla completa.
 ## 🧪 Testing
 
 ```bash
-# Suite completa (54/54 tests)
+# Suite completa (378/378 tests)
 pytest tests/ -v --tb=short
 
 # Con reporte de cobertura HTML
@@ -189,7 +189,7 @@ pytest tests/ --cov=src --cov-report=html
 
 **Resultado actual:**
 ```
-372 passed in ~30s  ✅
+378 passed in ~15s  ✅
 Python 3.14 · pytest-asyncio · numpy 2.4.x · scikit-learn 1.8.x · onnxruntime 1.24.x
 ```
 
