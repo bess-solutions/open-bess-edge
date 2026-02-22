@@ -198,6 +198,34 @@ Format: [Semantic Versioning](https://semver.org/) · [Conventional Commits](htt
 
 ---
 
+## [v1.9.0] — 2026-02-22
+
+> **Hito:** OpenSSF Silver/Gold foundations + IEC 62443 SL-2 Phase 1 documentation
+
+### Added — OpenSSF Gold Badge
+
+- `docs/security_guide_maintainer.md` — Guía de seguridad completa para maintainers (GPG signing, 2FA, branch protection, secrets management, incident response). Satisface criterio Silver/Gold OpenSSF.
+- `docs/release_process.md` — Proceso de release documentado (step-by-step: pre-checks, versioning, tag, CI pipeline, post-verification, rollback). Satisface criterio Silver/Gold OpenSSF.
+- `.github/workflows/fuzzing.yml` — Fuzzing semanal (Atheris) sobre parsers críticos Modbus + MQTT. Satisface criterio Gold OpenSSF: "fuzzing of critical inputs".
+
+### Added — IEC 62443 SL-2 Phase 1 (Pre-Assessment Deliverables)
+
+- `docs/architecture/network_diagram.md` — Diagrama formal de arquitectura de red: Zonas OT/DMZ/IT, definición de conduits C1–C4, reglas firewall, mapeo a SR 5.2. Satisface IEC 62443-3-3 SR 5.2.
+- `docs/architecture/system_security_plan.md` — System Security Plan (SSP) base: mapeo completo de todos los Security Requirements (FR1–FR7), estado actual de implementación, gaps y plan de remediación. Documento central para auditor SL-2.
+- `docs/compliance/psirt_process.md` — Proceso formal PSIRT: lifecycle de vulnerabilidades, SLA por severity CVSS, coordinación con reporter, CVE numbering. Satisface IEC 62443-3-3 SR 2.12.
+- `docs/compliance/patch_management_sla.md` — SLA formal de gestión de parches: Critical 14d / High 30d / Medium 90d, detection sources, prioritization matrix, metrics. Satisface IEC 62443-3-3 SR 2.2.
+
+### Changed
+
+- `docs/openssf_gold_checklist.md` — Actualizado: 12 ítems marcados como completados en v1.9.0. Estado: ~85% Gold criteria cubiertos (pendiente Rodrigo: 2FA + marcar checkboxes en bestpractices.dev).
+
+### Tests
+```
+378 / 378 passed ✅ (sin regresión)
+CI: ruff ✅ · mypy ✅ · pytest ✅ · bandit ✅ · trivy ✅
+New workflows: fuzzing.yml (semanal — Atheris Modbus/MQTT)
+```
+
 ---
 
 ## [v1.4.0] — 2026-02-21
