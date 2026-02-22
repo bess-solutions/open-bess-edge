@@ -1,156 +1,107 @@
-# BESSAI Edge Gateway — Network Architecture Diagram
+# Network Architecture — BESSAI Edge Gateway
 
+**Document:** NAD-001  
 **Version:** 1.0  
 **Date:** 2026-02-22  
-**Classification:** Non-confidential (topology names and IPs are representative)  
-**Status:** Active — IEC 62443 Phase 1 deliverable
+**IEC 62443 reference:** SR 5.2 — Zone and Conduit Model  
+**Status:** Active
 
 ---
 
-## Overview
+## 1. Overview
 
-This document provides the formal **network architecture diagram** for BESSAI Edge Gateway deployments, defining the OT/IT network segmentation required for IEC 62443-3-3 SL-2 certification (SR 5.2 — Zone and Conduit definitions).
-
----
-
-## Zone and Conduit Model (IEC 62443-3-3 SR 5.2)
+The BESSAI Edge Gateway mediates between the **OT zone** (BESS hardware) and the **IT zone** (cloud / SCADA). All inter-zone traffic passes through clearly defined conduits with enforced encryption and authentication.
 
 ```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│  ZONE 0 — OT / Field Level (Air-Gapped)                                      │
-│  Security Level: SL-2 target                                                 │
-│                                                                              │
-│  ┌──────────────────────┐    Modbus TCP     ┌──────────────────────────────┐ │
-│  │  BESS / Inverter     │ ──────────────►  │  BESSAI Edge Gateway         │ │
-│  │  (Huawei SUN2000     │   Port 502        │  (open-bess-edge)            │ │
-│  │   / SMA / Victron    │   Private VLAN    │  IP: 192.168.10.10           │ │
-│  │   / Fronius)         │                  │  Ports: 8000 (API), 502      │ │
-│  │  IP: 192.168.10.1    │                  │  OS: Ubuntu 22.04 LTS        │ │
-│  └──────────────────────┘                  │  Runtime: Docker 24.x         │ │
-│                                            └──────────────┬───────────────┘ │
-└────────────────────────────────────────────────────────── │ ────────────────┘
-                                                            │
-                                    ╔═══════════════════════╪═══════════╗
-                                    ║  CONDUIT C1 — OT→DMZ  │           ║
-                                    ║  Protocol: OTLP/gRPC  │           ║
-                                    ║  Direction: Outbound  │           ║
-                                    ║  Auth: mTLS (client   │           ║
-                                    ║        cert pinned)   │           ║
-                                    ╚═══════════════════════╪═══════════╝
-                                                            │
-┌──────────────────────────────────────────────────────────────────────────────┐
-│  ZONE 1 — DMZ / Security Boundary                                            │
-│                                                                              │
-│  ┌───────────────────────┐         ┌────────────────────────────────────┐   │
-│  │  AI-IDS               │         │  OpenTelemetry Collector           │   │
-│  │  (Isolation Forest    │         │  Port: 4317 (gRPC), 4318 (HTTP)    │   │
-│  │   + LSTM Autoencoder) │         │  Receives: traces, metrics, logs   │   │
-│  │  Modbus traffic       │         │  Exports: → Prometheus, → Loki     │   │
-│  │  anomaly detection    │         │                                    │   │
-│  └────────────┬──────────┘         └────────────────────┬───────────────┘   │
-│               │ SIEM alerts                              │                   │
-└────────────── │ ──────────────────────────────────────── │ ──────────────────┘
-                │                                          │
-    ╔═══════════╪═══════════════╗            ╔═════════════╪═════════════╗
-    ║  CONDUIT C2 — DMZ→IT SIEM║            ║  CONDUIT C3 — DMZ→Cloud   ║
-    ║  Protocol: Syslog/TLS     ║            ║  Protocol: HTTPS/TLS 1.3  ║
-    ║  Direction: Outbound only ║            ║  Direction: Outbound only ║
-    ╚═══════════╪═══════════════╝            ╚═════════════╪═════════════╝
-                │                                          │
-┌───────────────┼──────────────────────────────────────────┼───────────────────┐
-│  ZONE 2 — IT Network / Corporate                                             │
-│               │                                          │                   │
-│  ┌────────────┴────────────┐         ┌────────────────────┴────────────────┐ │
-│  │  SIEM                   │         │  Cloud (GCP)                        │ │
-│  │  (Chronicle / Splunk)   │         │  ├── GCP Pub/Sub (telemetry stream) │ │
-│  │  Receives security       │         │  ├── BigQuery (data lake)           │ │
-│  │  alerts from AI-IDS     │         │  ├── Prometheus (metrics)           │ │
-│  │  Port: 514 (Syslog/TLS) │         │  ├── Grafana (dashboards)           │ │
-│  └─────────────────────────┘         │  └── Loki (structured logs)         │ │
-│                                      └─────────────────────────────────────┘ │
-│  ┌──────────────────────────────────────────────────────────────────────────┐ │
-│  │  Operator Workstation — Management Access                               │ │
-│  │  VPN required (WireGuard) → Edge Gateway admin port :8000               │ │
-│  │  MFA required (TOTP — roadmap Q1 2026)                                  │ │
-│  └──────────────────────────────────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────────────────────────────────┘
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         IT ZONE (Trust Level: Low)                          ║
+║                                                                              ║
+║   ┌─────────────┐    HTTPS/TLS    ┌────────────────────────────────────┐   ║
+║   │  SCADA /    │◄──────/443─────►│          Cloud / SaaS              │   ║
+║   │  Operator   │                 │   (Azure IoT Hub / AWS IoT Core)   │   ║
+║   │  Dashboard  │◄── REST+Bearer  │                                    │   ║
+║   │  :8080      │    + TOTP MFA   └────────────────────────────────────┘   ║
+║   └─────────────┘                                                           ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                    EDGE ZONE (Trust Level: Medium)                          ║
+║                         [Docker bess-net bridge]                            ║
+║                                                                             ║
+║  ┌──────────────────────────────────────────────────────────────────────┐  ║
+║  │                   BESSAI Edge Gateway Container                       │  ║
+║  │  ┌───────────┐  ┌────────────┐  ┌──────────────┐  ┌─────────────┐  │  ║
+║  │  │ Dashboard │  │  Arbitrage │  │ CMg Predictor│  │ OTel SDK    │  │  ║
+║  │  │ API (REST)│  │  Engine    │  │  (ML model)  │  │ (OTLP gRPC) │  │  ║
+║  │  └───────────┘  └────────────┘  └──────────────┘  └──────┬──────┘  │  ║
+║  │               ┌─────────────────────┐                     │         │  ║
+║  │               │  UniversalDriver /   │                     │         │  ║
+║  │               │  ModbusDriver        │                     │         │  ║
+║  │               └──────────┬──────────┘                     │         │  ║
+║  └──────────────────────────┼────────────────────────────────┼─────────┘  ║
+║                TCP:502 (bess-net only)               OTLP:4317             ║
+║  ┌─────────────────────────▼──────────────────────────────────▼─────────┐ ║
+║  │  bessai-stunnel (mTLS proxy)     │  bessai-otel-collector              │ ║
+║  │  dweomer/stunnel:5.72            │  → bessai-loki (Loki push)          │ ║
+║  │  profile: ot-security            │  → Prometheus scrape                │ ║
+║  └──────────┬───────────────────────┴─────────────────────────────────────┘ ║
+╠═════════════╪════════════════════════════════════════════════════════════════╣
+║             │       OT ZONE (Trust Level: High)                             ║
+║          TLS 1.3, mutual auth (GAP-003), Port 8502                         ║
+║  ┌──────────▼───────────────────────────────────────────────────────────┐  ║
+║  │  BESS Inverter / Battery Management System                            │  ║
+║  │  (Huawei SUN2000, BYD, CATL — or simulator in dev mode)              │  ║
+║  │  Isolated physical network / VLAN                                    │  ║
+║  └──────────────────────────────────────────────────────────────────────┘  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 ```
 
 ---
 
-## Zone Definitions
+## 2. Security Zones (IEC 62443-3-2)
 
-| Zone | Name | Security Level | Description |
-|---|---|---|---|
-| **Zone 0** | OT / Field | SL-2 (target) | Battery inverter hardware + Edge Gateway. Physically isolated. No inbound connections. |
-| **Zone 1** | DMZ | SL-1 (current) | Security inspection layer. AI-IDS, OTel collector. Unidirectional data flow outbound only. |
-| **Zone 2** | IT / Cloud | SL-1 | Corporate network and cloud services. No direct access to Zone 0. |
-
----
-
-## Conduit Definitions
-
-| Conduit | From → To | Protocol | Direction | Auth | Encryption |
-|---|---|---|---|---|---|
-| **C1** | Zone 0 → Zone 1 | OTLP/gRPC | Outbound only | mTLS (roadmap) | TLS 1.3 |
-| **C2** | Zone 1 → Zone 2 (SIEM) | Syslog/TLS | Outbound only | TLS client cert | TLS 1.3 |
-| **C3** | Zone 1 → Cloud (GCP) | HTTPS | Outbound only | OIDC/WIF | TLS 1.3 |
-| **C4** | Zone 2 → Zone 0 (mgmt) | HTTPS + VPN | Inbound limited | API key + VPN + MFA | TLS 1.3 + WireGuard |
-
-> **No direct conduit exists from Zone 2 to Zone 0.** All management access goes through Zone 1 and is authenticated + encrypted.
+| Zone | ID | Components | Trust Level | Ingress Control |
+|------|----|-----------|-------------|-----------------|
+| IT Zone | Z1 | SCADA dashboard, operator browsers, cloud endpoints | Low | TLS 1.3 + Bearer + TOTP MFA |
+| Edge Zone | Z2 | BESSAI Gateway, OTel Collector, Loki, Prometheus, Grafana | Medium | Docker bess-net (isolated bridge) |
+| OT Zone | Z3 | BESS inverter, Battery Management System | High | mTLS 1.3 + mutual certificate auth |
 
 ---
 
-## Firewall Rules Summary
+## 3. Conduits (IEC 62443-3-2)
 
-### Zone 0 (Edge Gateway) — Inbound
-
-| Port | Protocol | Source | Purpose |
-|---|---|---|---|
-| 502 | TCP | 192.168.10.0/24 (OT VLAN) | Modbus TCP from inverter |
-| 8000 | TCP | 10.0.0.0/8 (VPN range) | Admin API (requires VPN) |
-
-### Zone 0 (Edge Gateway) — Outbound
-
-| Port | Protocol | Destination | Purpose |
-|---|---|---|---|
-| 4317 | TCP | OTel Collector (DMZ) | OTLP/gRPC telemetry |
-| 1883 / 8883 | TCP | MQTT broker (optional) | MQTT publishing |
-
-### Zone 1 (DMZ) — Outbound
-
-| Port | Protocol | Destination | Purpose |
-|---|---|---|---|
-| 443 | HTTPS | GCP APIs | Pub/Sub, BigQuery, Artifact Registry |
-| 514 | TLS | SIEM endpoint | Security alerts from AI-IDS |
+| ID | From | To | Protocol | Port | Security Controls |
+|----|------|----|----------|------|-------------------|
+| C1 | Z1 (Operators) | Z2 (Dashboard API) | HTTPS/REST | 8080 | TLS 1.3, Bearer + TOTP (GAP-001) |
+| C2 | Z2 (Gateway) | Z3 (Inverter) | Modbus TCP over TLS | 8502 | mTLS 1.3, cert auth (GAP-003) |
+| C3 | Z2 (OTel Collector) | Z1 (Cloud SIEM) | OTLP gRPC | 4317 | TLS 1.3, Loki push (GAP-002) |
+| C4 | Z2 (Gateway) | Z1 (Cloud) | HTTPS/MQTT | 443/8883 | TLS 1.3, device cert or SAS token |
+| C5 | Z2 (Prometheus) | Z2 (Grafana) | HTTP | 9090 | bess-net isolation (no external exposure) |
 
 ---
 
-## IEC 62443 Compliance Mapping
+## 4. Port Exposure Summary
 
-| Requirement | Standard | Implementation |
-|---|---|---|
-| SR 5.2 — Zone separation | IEC 62443-3-3 | Three zones (OT / DMZ / IT) with explicit conduits |
-| SR 3.1 — Communication integrity | IEC 62443-3-3 | TLS 1.3 enforced on all external conduits |
-| SR 1.3 — Account management | IEC 62443-3-3 | API key auth + VPN + MFA (roadmap) for admin |
-| SR 7.1 — DoS protection | IEC 62443-3-3 | NetworkPolicy (K8s) + Docker network isolation |
-
----
-
-## Gaps and Remediation Roadmap
-
-| Gap | Current State | Target | Timeline |
-|---|---|---|---|
-| mTLS on C1 (OT→DMZ) | TLS server-only | mTLS with pinned client cert | Q1 2026 |
-| MFA on management access | API key only | TOTP via pyotp | Q1 2026 |
-| SIEM integration (C2) | Logs in container stdout | Fluentd → Loki export | Q2 2026 |
-| Physical data diode (C1) | Software isolation | Fox DataDiode / Waterfall | Q3 2026 (hardware) |
+| Port | Service | Exposed | Justification |
+|------|---------|---------|---------------|
+| 8080 | Dashboard API | IT Zone | SCADA integration |
+| 3000 | Grafana | IT Zone | Monitoring dashboards |
+| 9090 | Prometheus | Internal | bess-net only |
+| 3100 | Loki | Internal | bess-net only |
+| 4317 | OTel OTLP gRPC | Internal | bess-net only |
+| 502 | Modbus TCP | Internal | Proxied via stunnel — NOT published to host |
+| 8502 | Modbus TLS | OT Zone | mTLS; inverter-side only |
 
 ---
 
-## References
+## 5. Segmentation Controls
 
-- [IEC 62443 SL-2 Certification Path](iec_62443_sl2_certification_path.md)
-- [System Security Plan](system_security_plan.md)
-- [Architecture Overview](../architecture.md)
-- [IEC 62443-3-3:2013 — System Security Requirements and Security Levels](https://www.iec.ch/iec62443)
+| Control | Implementation | IEC 62443 SR |
+|---------|---------------|--------------|
+| OT/IT zone separation | Docker bess-net bridge (no host network) | SR 5.2 |
+| No direct OT external exposure | stunnel proxy in bess-net; port 8502 not published | SR 5.1 |
+| Audit log forwarding | OTel → Loki, 30-day retention | SR 6.1, SR 6.2 |
+| Management interface auth | Bearer + TOTP MFA | SR 1.3 |
+| OT communication integrity | mTLS 1.3, verify=2 | SR 3.1 |
+
+---
+
+*Satisfies IEC 62443-3-2 §5.4 (Zone and Conduit documentation) required for SL-2 pre-assessment.*
