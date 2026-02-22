@@ -33,7 +33,7 @@ jobs:
             --output benchmark_001_results.json
 
       - name: Upload benchmark results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: benchmark-001-latency-${{ github.run_id }}
           path: benchmark_001_results.json
@@ -96,7 +96,7 @@ jobs:
             --output benchmark_002_results.json
 
       - name: Upload benchmark results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: benchmark-002-scale-${{ github.run_id }}
           path: benchmark_002_results.json
@@ -152,7 +152,7 @@ jobs:
             -v --tb=short --junit-xml=interop_contract_results.xml
 
       - name: Upload contract test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: interop-contract-results-${{ github.run_id }}
           path: interop_contract_results.xml
