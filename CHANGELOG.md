@@ -7,13 +7,22 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-21T16:47 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-21T22:34 -03:00)
 
 > [!IMPORTANT]
-> **v1.7.0 — Global Standard Release** (2026-02-21)
+> **v1.7.1 — CI Green Release** (2026-02-21)
+> - Commit `173983d` → main: fix(ci) — **ruff ✅ · mypy ✅ · pytest 378/378 ✅**
 > - Commit `7ffc9a4` → main: LICENSE Apache 2.0 (OpenSSF bloqueador resuelto)
 > - Commit `926d5cd` → main: README v1.7.0 · OpenSSF badge ID 10716 · Multi-Arch CI badge
 > - Commit `5adfe93` → main: +1708 líneas — véanse detalles abajo
+>
+> ### Cambios v1.7.1 (173983d) — Correcciones CI
+> - **`src/core/safety.py`** — `watchdog_loop` acepta `DataProvider` (protocolo genérico, no solo `UniversalDriver`)
+> - **`src/drivers/simulator_driver.py`** — corregido `union-attr` mypy en `.lower()` con cadena `or`
+> - **`src/drivers/modbus_driver.py`** — añadidas properties `is_connected` y `source_description` del protocolo `DataProvider`
+> - **`src/interfaces/mqtt_publisher.py`** — corregido `str-bytes-safe` mypy con `str(self._host)` explícito
+> - **`tests/test_reconnect_chaos.py`** — `ModbusDriver` → `UniversalDriver`; fixture `@pytest_asyncio.fixture async` (pymodbus 3.7+ requiere event loop en `__init__`)
+> - **`tests/test_modbus_driver.py`** — tests de `connection_error` ahora mockean `connect()` para evitar reconexión TCP real
 >
 > ### Cambios v1.7.0 (5adfe93)
 > - **`registry/sma_sunny_tripower.json`** — 25 registros, mercados EU/AU/US/LATAM
@@ -25,13 +34,6 @@
 > - **`docs/quickstart_rpi.md`** — Raspberry Pi 4/5 deployment en 15 min
 > - **`docs/mqtt_integration.md`** — Guía completa MQTT con ejemplos Home Assistant
 > - **`requirements.txt`** — paho-mqtt>=2.0.0 añadido
->
-> ### Cambios v1.6.0 (0bda77f)
-> - **`src/drivers/modbus_driver.py`** — `_reconnect()` con backoff exponencial; read_tag/write_tag con auto-reconnect transparente
-> - **`src/core/main.py`** — `ValueError` en lugar de `assert` para GCP config; versión dinámica via `importlib.metadata`
-> - **`dashboard/index.html`** + **`dashboard/styles.css`** + **`dashboard/main.js`** — Dashboard SOC/power/IDS/arbitraje
-> - **`src/interfaces/dashboard_api.py`** — sirve frontend estático + rutas `/dashboard`
-> - **`infrastructure/docker/docker-compose.yml`** — puerto 8080 expuesto, volumen dashboard/
 >
 > ### Pendiente manual
 > - Registrar en [OpenSSF Best Practices](https://www.bestpractices.dev/projects/new) con URL del repo → obtener ID real → actualizar badge en README si difiere de 10716
