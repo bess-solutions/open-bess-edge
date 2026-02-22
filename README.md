@@ -6,6 +6,8 @@
 [![Docker](https://img.shields.io/badge/Docker-amd64%20%7C%20arm64-2496ED?logo=docker&logoColor=white)](https://ghcr.io/bess-solutions/open-bess-edge)
 [![CI](https://github.com/bess-solutions/open-bess-edge/actions/workflows/ci.yml/badge.svg)](https://github.com/bess-solutions/open-bess-edge/actions)
 [![Multi-Arch](https://github.com/bess-solutions/open-bess-edge/actions/workflows/docker-multiarch.yml/badge.svg)](https://github.com/bess-solutions/open-bess-edge/actions)
+[![Codecov](https://codecov.io/gh/bess-solutions/open-bess-edge/branch/main/graph/badge.svg)](https://codecov.io/gh/bess-solutions/open-bess-edge)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/bess-solutions/open-bess-edge/badge)](https://scorecard.dev/viewer/?uri=github.com/bess-solutions/open-bess-edge)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-red?logo=github)](SECURITY.md)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12001/badge)](https://www.bestpractices.dev/projects/12001)
 [![IEC 62443](https://img.shields.io/badge/IEC_62443-SL--1_Mapped-orange)](docs/compliance/iec62443_mapping.md)
@@ -15,7 +17,7 @@
 
 ---
 
-## 🚀 Estado del Proyecto — v1.7.0
+## 🚀 Estado del Proyecto — v1.7.1
 
 | Componente | Estado |
 |---|---|
@@ -242,6 +244,8 @@ Las contribuciones son bienvenidas. Por favor sigue estos pasos:
    - Seguimos la convención [Conventional Commits](https://www.conventionalcommits.org/).
 3. **Push** a tu rama: `git push origin feature/my-feature`
 4. Abre un **Pull Request** describiendo tus cambios.
+
+> Para citar este proyecto en publicaciones académicas: **use el botón "Cite this repository"** que aparece en el panel lateral de GitHub (generado desde [`CITATION.cff`](CITATION.cff)).
 
 ### Guías de estilo
 
