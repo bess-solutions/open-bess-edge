@@ -1,0 +1,77 @@
+---
+# NetworkPolicy — aisla el namespace bessai
+# Solo permite tráfico de/hacia componentes conocidos
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: bessai-gateway-network-policy
+  namespace: bessai
+  labels:
+    app: bessai-edge-gateway
+    security: iec62443-sl2
+spec:
+  podSelector:
+    matchLabels:
+      app: bessai-edge-gateway
+
+  policyTypes:
+    - Ingress
+    - Egress
+
+  # ── Tráfico entrante permitido ────────────────────────────────
+  ingress:
+    # Prometheus puede scrapear /metrics
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+        - podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 8000
+
+  # ── Tráfico saliente permitido ────────────────────────────────
+  egress:
+    # DNS (requerido para resolución de nombres)
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+    # Modbus TCP al inversor (puerto 502)
+    - ports:
+        - protocol: TCP
+          port: 502
+
+    # MQTT broker (Mosquitto / cloud)
+    - ports:
+        - protocol: TCP
+          port: 1883   # MQTT sin TLS
+        - protocol: TCP
+          port: 8883   # MQTT con TLS
+
+    # GCP APIs (Pub/Sub, Cloud Trace)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443    # HTTPS / gRPC TLS
+
+    # OTel Collector interno
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 4317   # OTLP gRPC
+        - protocol: TCP
+          port: 4318   # OTLP HTTP
