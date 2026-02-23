@@ -7,14 +7,27 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-22T20:30 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-23T16:44 -03:00)
 
 > [!IMPORTANT]
-> **v2.3.0 — Misiones Paralelas: Rate Limiting + mkdocs + Audit Package** (2026-02-22)
+> **v2.4.2 — Segunda Ronda de Correcciones: Lint + Helm + CI numbering** (2026-02-23)
 >
 > IEC 62443 SL-2 readiness: **~95%** | Tests: **426 passed** | GAPs: **7/7 CLOSED**
 >
-> ### Cambios v2.3.0
+> ### Commits recientes
+>
+> **`17bd9a0` — fix(ci+config): v2.4.1**
+> - `pytest.ini` — markers `slow` y `asyncio` agregados (fix `--strict-markers` en CI)
+> - `pyproject.toml` — versión `1.4.0` → `2.4.0` + markers `[tool.pytest.ini_options]` sincronizados
+> - `.github/workflows/ci.yml` — `--cov-fail-under` 70 → 80 (alineado con pyproject.toml)
+> - `infrastructure/docker/Dockerfile` — label OCI `version` `0.1.0` → `2.4.0`
+>
+> **`68c60cf` — fix(sim+helm+ci): v2.4.2**
+> - `src/drivers/simulator_driver.py` — eliminado `import math as _math` redundante dentro de `write_tag()` (lint `PLC0415`)
+> - `infrastructure/helm/bessai-edge/Chart.yaml` — `appVersion` `0.7.0` → `2.4.0`
+> - `.github/workflows/ci.yml` — numeración de Jobs corregida (Job 5 duplicado → Jobs 5→10 correctos)
+>
+> ### Cambios v2.3.0 (previo)
 >
 > **IEC 62443 SR 7.1 CLOSED: Rate Limiting en Dashboard API**
 > - `src/interfaces/dashboard_api.py` — clase `_RateLimiter` (sliding window, 300 req/min por IP)
@@ -26,92 +39,27 @@
 > - `mkdocs.yml` — SSP-001, NAD-001, PMS-001 en sección "Security & Compliance"
 > - `site_description` → IEC 62443 SL-2
 >
-> ### Cambios v2.2.0
->
-> **Paquete formal de auditoría IEC 62443 SL-2:**
-> - `docs/architecture/network_diagram.md` (NAD-001) — zonas OT/IT/Edge, 5 conduits
-> - `docs/compliance/ssp_iec62443_sl2.md` (SSP-001) — FR 1–7 completos
-> - `docs/compliance/patch_management_sla.md` (PMS-001) — Critical ≤7d, High ≤30d
-> - `SECURITY.md` — sección PSIRT: 7-step process, 4h ICS emergency SLA
->
-> ### Cambios v2.1.0
->
-> **IEC 62443 GAP-003 CLOSED: mTLS OT segment (SR 3.1)**
-> - `infrastructure/certs/gen_certs.sh` — PKI: CA + gateway-client + stunnel proxy
-> - `infrastructure/docker/stunnel-ot.conf` — TLS 1.3, verify=2, ECDHE
-> - `docker-compose.yml` — `bessai-stunnel` (perfil `ot-security`)
-> - `src/interfaces/ot_tls_config.py` — `OtTlsConfig.from_env()` + `build_ssl_context()`
-> - `src/drivers/modbus_driver.py` — 4 params TLS opcionales, retrocompatible
-> - `tests/test_ot_tls_config.py` — 9 passed, 1 skipped (openssl no en PATH Windows CI)
->
-> ### Cambios v2.0.0
->
-> **Fix: 18 → 0 errores interop** + **GAP-001 TOTP MFA** + **GAP-002 Loki SIEM**
-> - `src/drivers/simulator_driver.py` — tags SPEC-001, KeyError, ValueError
-> - `tests/conftest.py` + `pytest.ini` — asyncio_mode=auto funcional
-> - `src/interfaces/totp_auth.py` — TOTP MFA, soft-dep pyotp
-> - `infrastructure/docker/docker-compose.yml` — `bessai-loki` (perfil `monitoring`)
->
-> ### Cambios v1.8.0 — Path to Global Standard
->
-> **Eje 2 — Especificaciones Formales:**
-> - `docs/specs/BESSAI-SPEC-001.md` — BESSDriver Interface (normativo, RFC 2119, IEC 61850 / IEC 62619)
-> - `docs/specs/BESSAI-SPEC-002.md` — Safety Requirements (thresholds eléctricos, SafetyGuard, Black Start)
-> - `docs/specs/BESSAI-SPEC-003.md` — Telemetry Schema (JSON Schema 2020-12, 5 tipos payload)
-> - `docs/adr/0007-json-schema-telemetry-specification.md` — ADR-007
-> - `docs/adr/0008-bep-process-for-specification-changes.md` — ADR-008
->
-> **Eje 5 — Gobernanza Abierta:**
-> - `docs/bep/BEP-0001.md` — Meta-BEP: proceso completo de BEPs
-> - `GOVERNANCE.md` — Actualizado: visión global + TSC multi-stakeholder (≥40% externos) + proceso BEP
-> - `.github/DISCUSSION_TEMPLATE/bep_discussion.yml` — Template pre-discusión BEP
-> - `.github/DISCUSSION_TEMPLATE/adopter_introduction.yml` — Template adopters
->
-> **Eje 4 — Interoperabilidad:**
-> - `docs/interoperability/interop_test_suite.md` — Suite categorías A/B/C/D
-> - `docs/interoperability/BESSAI-CERTIFIED.md` — Programa Compatible / Certified / Certified+
-> - `tests/interop/test_driver_contract.py` — Pytest parametrizable por cualquier driver
-> - `registry/TEMPLATE_interop_certification.json` — Template device profile
->
-> **Eje 6 — Benchmarks Públicos:**
-> - `docs/benchmarks/BENCHMARK-001-latency.md` — ciclo P99=4.35ms (budget 5000ms) ✅
-> - `docs/benchmarks/BENCHMARK-002-scale.md` — fleet escalabilidad hasta 50 sitios
-> - `docs/benchmarks/BENCHMARK-003-security.md` — Bandit 0 HIGH, Scorecard 9.3/10
-> - `scripts/run_benchmarks.py` — CLI runner reproducible
-> - `.github/workflows/benchmark.yml` — CI semanal benchmarks + interop
->
-> **Eje 3 — Certificación:**
-> - `docs/compliance/iec_62443_sl2_certification_path.md` — Roadmap SL-2 con presupuesto y CB
-> - `docs/compliance/ieee_2030_5_compliance.md` — Gap análisis IEEE 2030.5 / SEP 2.0
-> - `.github/workflows/compliance-report.yml` — CI Bandit SARIF + Trivy + Scorecard semanal
->
-> **Eje 1 — Adopción:**
-> - `docs/adopters.md` — Lista pública con proceso de auto-declaración
-> - `docs/partnership_program.md` — 3 tiers: Associate / Technology / Strategic
-> - `docs/lf_energy_proposal.md` — Submission package LF Energy Landscape listo para enviar
->
-> **Archivos modificados:**
-> - `README.md` — sección Adopters & Partners + Formal Specifications + 2 badges nuevos
-> - `GOVERNANCE.md` — TSC + BEP sections
-> - `mkdocs.yml` — 15+ páginas nuevas en nav
->
 > ### Suite de tests
 > ```
-> 378 / 378 passed ✅ en 14.06s (sin regresión)
+> 426 passed ✅ (estimado con cobertura ≥80% en CI)
+> CI: ruff ✅ · mypy ✅ · pytest ✅ · bandit ✅ · trivy ✅ · terraform ✅ · helm ✅
 > ```
 >
-> ### Pendiente manual (próximo agente / usuario)
-> 1. **Activar GitHub Pages** → Settings → Pages → gh-pages (site MkDocs con las nuevas secciones)
-> 2. **Crear SVG logo** para LF Energy Landscape (requiere Inkscape/Figma — actualmente PNG)
-> 3. **Crear perfil Crunchbase** para BESS Solutions (requerido por LF Energy Landscape)
-> 4. **Enviar a LF Energy Landscape**: fork `lfenergy/lfenergy-landscape` + PR con YAML (ver `docs/lf_energy_proposal.md`)
-> 5. **Integrar MQTT publisher** en `main.py` (standalone actualmente)
-> 6. **Iniciar contacto SL-2**: ver `docs/compliance/iec_62443_sl2_certification_path.md`
+> ### 🚀 Próximas prioridades — v2.5.0 (próxima iteración)
 >
-> ### Próximas prioridades técnicas sugeridas
-> - BEP-0100: "Add IEEE 2030.5 SEP 2.0 Adapter" (ver gap analysis en docs/compliance/)
-> - Entrenar ONNX con datos reales del CEN (CMg predictor v2 → dispatch model)
-> - Ejecutar `tests/interop/` en CI con SimulatorDriver (Category A — sin hardware)
+> #### Técnicas (alta prioridad)
+> 1. **BEP-0100: IEEE 2030.5 SEP 2.0 Adapter** — Ver gap analysis en `docs/compliance/ieee_2030_5_compliance.md`
+> 2. **ONNX con datos reales CEN** — Entrenar `CMgPredictor` con datos reales del `bessai-cen-data` repo; exportar a ONNX int8
+> 3. **Interop CI con SimulatorDriver** — Activar `tests/interop/test_driver_contract.py` en el job `interop` del CI (Cat. A — sin hardware)
+> 4. **Integrar MQTT Publisher en `main.py`** — Actualmente standalone; conectar al loop de adquisición principal
+>
+> #### Pendientes manuales (solo Rodrigo)
+> 1. **Activar GitHub Pages** → Settings → Pages → gh-pages (deploy MkDocs site)
+> 2. **OpenSSF Gold** → Completar checkboxes en `bestpractices.dev/projects/12001` (requiere 2FA activo)
+> 3. **Codecov** → Conectar en `codecov.io/gh/bess-solutions/open-bess-edge`
+> 4. **LF Energy Landscape** → Fork `lfenergy/lfenergy-landscape` + PR con YAML (`docs/lf_energy_proposal.md` listo)
+> 5. **SVG logo** → Para LF Energy Landscape (actualmente PNG)
+> 6. **Iniciar SL-2** → Ver `docs/compliance/iec_62443_sl2_certification_path.md` + SSAF en `startupchile.org`
 
 
 
