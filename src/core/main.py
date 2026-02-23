@@ -60,6 +60,7 @@ from src.interfaces.metrics import (
     PUBLISH_ERRORS_TOTAL,
     SAFETY_BLOCKS_TOTAL,
 )
+from src.interfaces.mqtt_publisher import MQTTConnectionError, MQTTPublisher
 from src.interfaces.otel_setup import configure_otel, get_tracer, shutdown_otel
 from src.interfaces.pubsub_publisher import PubSubPublisher
 
@@ -255,6 +256,34 @@ async def main() -> None:  # noqa: C901
         ) as publisher,
         health_server.run(),
     ):
+        # ── Step 5c — Optional MQTT publisher (fail-safe) —————————————
+        _mqtt_broker = os.getenv("MQTT_BROKER_URL")
+        mqtt_pub: MQTTPublisher | None = None
+        if _mqtt_broker:
+            mqtt_pub = MQTTPublisher(
+                broker_url=_mqtt_broker,
+                site_id=_cfg.SITE_ID,
+            )
+            try:
+                await mqtt_pub.start()
+                log.info(
+                    "mqtt_publisher.enabled",
+                    broker=_mqtt_broker,
+                    site_id=_cfg.SITE_ID,
+                )
+            except (MQTTConnectionError, Exception) as exc:
+                log.warning(
+                    "mqtt_publisher.start_failed",
+                    error=str(exc),
+                    action="continuing_without_mqtt",
+                )
+                mqtt_pub = None
+        else:
+            log.info(
+                "mqtt_publisher.disabled",
+                tip="Set MQTT_BROKER_URL in .env to enable dual-channel publishing",
+            )
+
         log.info(
             "gateway.started",
             site=_cfg.SITE_ID,
@@ -333,6 +362,27 @@ async def main() -> None:  # noqa: C901
                     PUBLISH_ERRORS_TOTAL.labels(site_id=_cfg.SITE_ID).inc()
                     span.record_exception(exc)
 
+                # ── STEP 4b: MQTT dual-channel (fail-safe) ────────────────
+                if mqtt_pub is not None and mqtt_pub.is_connected:
+                    try:
+                        await mqtt_pub.publish_telemetry(
+                            soc=float(telemetry.get("soc", 0.0)),
+                            power_kw=float(telemetry.get("active_power", 0.0)) / 1000.0,
+                            temp_c=float(telemetry.get("temp_c", 25.0)),
+                        )
+                        await mqtt_pub.publish_safety(
+                            is_safe=True,
+                            watchdog_status="ok",
+                        )
+                        await mqtt_pub.publish_heartbeat()
+                    except Exception as exc:
+                        log.warning(
+                            "cycle.mqtt_publish_failed",
+                            cycle=cycle,
+                            error=str(exc),
+                            action="continuing_without_mqtt_this_cycle",
+                        )
+
                 # Update cycle counters
                 CYCLES_TOTAL.labels(site_id=_cfg.SITE_ID).inc()
                 LAST_CYCLE_DURATION_S.labels(site_id=_cfg.SITE_ID).set(
@@ -355,6 +405,8 @@ async def main() -> None:  # noqa: C901
                 pass
 
     # PubSubPublisher.__aexit__ already closed the session here.
+    if mqtt_pub is not None:
+        await mqtt_pub.stop()
     await driver.disconnect()
     shutdown_otel()
     log.info("shutdown.complete")

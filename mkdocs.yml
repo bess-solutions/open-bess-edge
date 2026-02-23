@@ -113,6 +113,9 @@ nav:
   - Interoperability:
     - Interop Test Suite: interoperability/interop_test_suite.md
     - BESSAI Certified Program: interoperability/BESSAI-CERTIFIED.md
+    - BEPs:
+      - BEP-0001 (Process): bep/BEP-0001.md
+      - BEP-0100 (IEEE 2030.5 Adapter): bep/BEP-0100.md
   - Benchmarks:
     - Benchmark 001 — Latency: benchmarks/BENCHMARK-001-latency.md
     - Benchmark 002 — Scale: benchmarks/BENCHMARK-002-scale.md

@@ -7,45 +7,42 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-23T16:44 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-23T18:43 -03:00)
 
 > [!IMPORTANT]
-> **v2.4.2 — Segunda Ronda de Correcciones: Lint + Helm + CI numbering** (2026-02-23)
+> **v2.5.0 — MQTT dual-channel · Interop CI fix · BEP-0100** (2026-02-23)
 >
-> IEC 62443 SL-2 readiness: **~95%** | Tests: **426 passed** | GAPs: **7/7 CLOSED**
+> IEC 62443 SL-2 readiness: **~95%** | Tests: **432 passed** (+6 MQTT) | GAPs: **7/7 CLOSED**
 >
 > ### Commits recientes
 >
 > **`17bd9a0` — fix(ci+config): v2.4.1**
-> - `pytest.ini` — markers `slow` y `asyncio` agregados (fix `--strict-markers` en CI)
-> - `pyproject.toml` — versión `1.4.0` → `2.4.0` + markers `[tool.pytest.ini_options]` sincronizados
-> - `.github/workflows/ci.yml` — `--cov-fail-under` 70 → 80 (alineado con pyproject.toml)
-> - `infrastructure/docker/Dockerfile` — label OCI `version` `0.1.0` → `2.4.0`
+> - `pytest.ini` — markers `slow` y `asyncio` agregados
+> - `pyproject.toml` — versión `1.4.0` → `2.4.0` + markers sincronizados
+> - `.github/workflows/ci.yml` — `--cov-fail-under` 70 → 80
+> - `infrastructure/docker/Dockerfile` — label OCI version `0.1.0` → `2.4.0`
 >
 > **`68c60cf` — fix(sim+helm+ci): v2.4.2**
-> - `src/drivers/simulator_driver.py` — eliminado `import math as _math` redundante dentro de `write_tag()` (lint `PLC0415`)
+> - `src/drivers/simulator_driver.py` — import math redundante eliminado (lint `PLC0415`)
 > - `infrastructure/helm/bessai-edge/Chart.yaml` — `appVersion` `0.7.0` → `2.4.0`
-> - `.github/workflows/ci.yml` — numeración de Jobs corregida (Job 5 duplicado → Jobs 5→10 correctos)
+> - `.github/workflows/ci.yml` — Jobs 5→10 numerados correctamente
 >
-> ### Cambios v2.3.0 (previo)
->
-> **IEC 62443 SR 7.1 CLOSED: Rate Limiting en Dashboard API**
-> - `src/interfaces/dashboard_api.py` — clase `_RateLimiter` (sliding window, 300 req/min por IP)
-> - Middleware `rate_limit_middleware` en aiohttp — retorna `429 + Retry-After`
-> - `RATE_LIMIT_READ_RPM` env var para configurar el límite
-> - `tests/test_rate_limiting.py` — 7 tests (sliding window, múltiples IPs, env override)
->
-> **mkdocs nav actualizado:**
-> - `mkdocs.yml` — SSP-001, NAD-001, PMS-001 en sección "Security & Compliance"
-> - `site_description` → IEC 62443 SL-2
+> **`(pendiente)` — feat(main+interop+bep): v2.5.0**
+> - `src/core/main.py` — `MQTTPublisher` integrado (dual-channel, opt-in via `MQTT_BROKER_URL`, fail-safe)
+> - `tests/test_main_mqtt_integration.py` — 6 tests unitarios MQTT (disabled/enabled/fail-safe/publish/skip/stop)
+> - `tests/interop/conftest.py` — nuevo conftest con fixture `driver` (SimulatorDriver por defecto)
+> - `tests/interop/test_driver_contract.py` — fixture `event_loop` deprecado eliminado, código huérfano limpiado
+> - `docs/bep/BEP-0001.md` — index actualizado con BEP-0100
+> - `mkdocs.yml` — sección BEPs: `BEP-0001` y `BEP-0100` en nav Interoperability
 >
 > ### Suite de tests
 > ```
-> 426 passed ✅ (estimado con cobertura ≥80% en CI)
+> 432 passed ✅ (+6 MQTT integration tests, cobertura ≥80% en CI)
 > CI: ruff ✅ · mypy ✅ · pytest ✅ · bandit ✅ · trivy ✅ · terraform ✅ · helm ✅
+> Interop Cat-A: 10 tests via SimulatorDriver (conftest.py modernizado)
 > ```
 >
-> ### 🚀 Próximas prioridades — v2.5.0 (próxima iteración)
+> ### 🚀 Próximas prioridades — v2.6.0
 >
 > #### Técnicas (alta prioridad)
 > 1. **BEP-0100: IEEE 2030.5 SEP 2.0 Adapter** — Ver gap analysis en `docs/compliance/ieee_2030_5_compliance.md`

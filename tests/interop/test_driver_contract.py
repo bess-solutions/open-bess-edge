@@ -19,73 +19,13 @@ Usage:
 """
 from __future__ import annotations
 
-import asyncio
-import importlib
-import json
 import time
 from pathlib import Path
-from typing import Any
 
 import pytest
-import pytest_asyncio
-from pytest import FixtureRequest
 
 from src.drivers.base import DataProvider
 from src.drivers.simulator_driver import SimulatorDriver
-
-
-# ---------------------------------------------------------------------------
-# CLI options (allow passing a custom driver class + args)
-# ---------------------------------------------------------------------------
-
-
-def pytest_addoption(parser: pytest.Parser) -> None:  # type: ignore[return]
-    parser.addoption(
-        "--driver-class",
-        action="store",
-        default=None,
-        help="Dotted path to driver class, e.g. 'src.drivers.modbus_driver.ModbusBESSDriver'",
-    )
-    parser.addoption(
-        "--driver-args",
-        action="store",
-        default="{}",
-        help="JSON dict of constructor kwargs for the driver class",
-    )
-
-
-def _load_driver(request: FixtureRequest) -> DataProvider:
-    """Load the driver from CLI options or fall back to SimulatorDriver."""
-    driver_class_path: str | None = request.config.getoption("--driver-class")
-    driver_args_raw: str = request.config.getoption("--driver-args")
-
-    if driver_class_path is None:
-        return SimulatorDriver()
-
-    module_path, class_name = driver_class_path.rsplit(".", 1)
-    module = importlib.import_module(module_path)
-    cls = getattr(module, class_name)
-    kwargs: dict[str, Any] = json.loads(driver_args_raw)
-    return cls(**kwargs)
-
-
-# ---------------------------------------------------------------------------
-# Fixtures
-# ---------------------------------------------------------------------------
-
-
-@pytest.fixture(scope="module")
-def driver(request: FixtureRequest) -> DataProvider:
-    """Provide the driver under test."""
-    return _load_driver(request)
-
-
-@pytest.fixture(scope="module")
-def event_loop():
-    """Module-scoped event loop for all interop tests."""
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
 
 
 # ---------------------------------------------------------------------------
