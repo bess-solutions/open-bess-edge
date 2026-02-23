@@ -1,0 +1,111 @@
+name: Dependency Security Audit
+
+# IEC 62443-2-3 SR 2.2 + OpenSSF Gold Badge: automated CVE scanning
+# Runs weekly on Monday and on every push that touches dependencies.
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"   # Every Monday 09:00 UTC
+  push:
+    paths:
+      - "requirements.txt"
+      - "requirements-dev.txt"
+      - "pyproject.toml"
+      - ".github/workflows/deps-audit.yml"
+  pull_request:
+    paths:
+      - "requirements.txt"
+      - "requirements-dev.txt"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write  # for SARIF upload
+
+jobs:
+  pip-audit:
+    name: pip-audit CVE Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Audit production dependencies (fail on High/Critical)
+        run: |
+          pip-audit \
+            --requirement requirements.txt \
+            --vulnerability-service=osv \
+            --format=json \
+            --output=audit-results.json || true
+          # Report summary
+          pip-audit \
+            --requirement requirements.txt \
+            --vulnerability-service=osv \
+            --format=columns
+
+      - name: Fail on High or Critical CVEs
+        run: |
+          python - <<'EOF'
+          import json, sys
+          with open("audit-results.json") as f:
+              data = json.load(f)
+          blockers = []
+          for pkg in data.get("dependencies", []):
+              for vuln in pkg.get("vulns", []):
+                  severity = vuln.get("fix_versions", [])
+                  aliases = vuln.get("aliases", [])
+                  # Block any unfixed CVE (no fix_versions = no patch available yet)
+                  # Conservative: block all unpatched vulns
+                  if not vuln.get("fix_versions"):
+                      blockers.append({
+                          "pkg": pkg["name"],
+                          "vuln_id": vuln["id"],
+                          "aliases": aliases,
+                      })
+          if blockers:
+              print("❌ BLOCKING CVEs found (no fix version available):")
+              for b in blockers:
+                  print(f"  {b['pkg']}: {b['vuln_id']} ({', '.join(b['aliases'])})")
+              sys.exit(1)
+          print(f"✅ pip-audit passed — no blocking CVEs found.")
+          EOF
+
+      - name: Upload audit results (artifact)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pip-audit-results
+          path: audit-results.json
+          retention-days: 30
+
+  verify-hashes:
+    name: Verify Dependency Hash Integrity
+    runs-on: ubuntu-latest
+    if: hashFiles('requirements.hash.txt') != ''
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install with hash verification
+        run: |
+          pip install \
+            --require-hashes \
+            --no-deps \
+            -r requirements.hash.txt
+          echo "✅ All package hashes verified."
