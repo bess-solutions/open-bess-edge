@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-22T20:30 v2.3.0 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-23T16:44 v2.4.2 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,13 +14,13 @@ Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 
 ---
 
-## ✅ Estado Actual — v1.9.0
+## ✅ Estado Actual — v2.4.2
 
 ### Tests
 ```
-378 / 378 passed ✅  (suite completa — 378 tests, 6 chaos tests, sin regresión)
+426 passed ✅  (estimado con cobertura ≥80% — CI actualizado)
 CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · multiarch ✅ · scorecard ✅
-Workflows: benchmark.yml · compliance-report.yml · fuzzing.yml (NEW — Atheris Modbus/MQTT)
+Workflows: benchmark.yml · compliance-report.yml · fuzzing.yml · interop contract tests (Job 4)
 ```
 
 
@@ -76,7 +76,7 @@ Prometheus v2.51.2                          OK      ← localhost:9090
 | Terraform GCP | `infrastructure/terraform/` | v0.5 | ✅ 18 recursos |
 | Registro Modbus | `registry/huawei_sun2000.json` | **v2.0** | ✅ 28 registros reales |
 | Modbus Simulator | `infrastructure/docker/modbus_sim/` | **v1.0.1** | ✅ pymodbus server, 22 registros |
-| GitHub Actions CI/CD | `.github/workflows/ci.yml` | v1.0 | ✅ **9 jobs**: lint+typecheck+test+security+terraform+helm+docker+trivy+push |
+| GitHub Actions CI/CD | `.github/workflows/ci.yml` | v2.4.2 | ✅ **10 jobs**: lint+typecheck+test+interop+security+terraform+helm+docker+trivy+push (Jobs renumerados) |
 | OpenSSF Scorecard CI | `.github/workflows/scorecard.yml` | v1.0 | ✅ Supply chain security automático — badge Scorecard activo |
 | Mutation Testing | `.github/workflows/mutation-test.yml` | v1.0 | ✅ mutmut semanal — safety.py + config.py |
 | K8s Manifests | `infrastructure/k8s/` | v1.0 | ✅ 6 manifests: namespace+configmap+service+deployment+netpol+kustomize |
@@ -132,7 +132,7 @@ GET /api/v1/health   → ok / degraded
 
 ### Bloqueadores activos
 
-> 🎉 **Sin bloqueadores activos** — CI/CD + Scorecard + Mutation Testing + Fuzzing operativos. OpenSSF Gold ~85% cubierto. IEC 62443 Phase 1 docs listos (v1.9.0).
+> 🎉 **Sin bloqueadores activos** — CI/CD + Scorecard + Mutation Testing + Fuzzing operativos. OpenSSF Gold ~85% cubierto. IEC 62443 Phase 1 docs listos. Repository lint 100% limpio en v2.4.2.
 
 ### ✅ Entregables recientes (v1.8.0–v1.9.0, 22-feb-2026)
 
@@ -174,7 +174,14 @@ v1.4.0  ████████████████████████
 v1.5.0  ████████████████████████  ✅ MkDocs site · PyPI package · API Reference · Runbook operacional
 v1.8.0  ████████████████████████  ✅ BESSAI Global Standard: specs formales, BEPs, interop, benchmarks, LF Energy
 v1.9.0  ████████████████████████  ✅ OpenSSF Gold foundations + IEC 62443 SL-2 Phase 1 docs · fuzzing Atheris
-v2.0.0  ░░░░░░░░░░░░░░░░░░░░░░░░  📋 Multi-site planetary scale
+v2.0.0  ████████████████████████  ✅ Fix: 18→0 errores interop · TOTP MFA · Loki SIEM
+v2.1.0  ████████████████████████  ✅ mTLS OT segment (GAP-003) · stunnel · OtTlsConfig
+v2.2.0  ████████████████████████  ✅ Auditoría IEC 62443 SL-2: SSP, NAD, PMS, PSIRT
+v2.3.0  ████████████████████████  ✅ Rate Limiting SR 7.1 · mkdocs nav · pip-audit CI semanal
+v2.4.1  ████████████████████████  ✅ Fix: markers pytest · coverage 80% · versiones sync · Dockerfile OCI label
+v2.4.2  ████████████████████████  ✅ Fix: import math lint · Helm appVersion · ci.yml Job numbering
+v2.5.0  ░░░░░░░░░░░░░░░░░░░░░░░░  📋 BEP-0100 IEEE 2030.5 · ONNX real CEN · MQTT en main.py · Interop CI Cat-A
+v3.0.0  ░░░░░░░░░░░░░░░░░░░░░░░░  📋 Multi-site planetary scale · SL-2 certification
 ```
 
 ---
@@ -321,3 +328,9 @@ pytest tests/ -v --tb=short
 | 2026-02-22 | **v1.7.1+** | **378/378** | **Ruta 10/10**: Semana 1 (Scorecard, CITATION, badges) · Semana 2 (tutoriales, FUNDING) · Semana 3 (K8s manifests, NetworkPolicy) · Estrategia (pitch deck, SSAF, IEC62443 SL-2, bounties, SLSA L2, OpenSSF Gold) |
 | 2026-02-22 | **v1.8.0** | **378/378** | BESSAI Global Standard: `BESSAI-SPEC-001/002/003`, BEP-0001, ADR-007/008, `docs/interoperability/`, benchmarks públicos, `docs/compliance/iec_62443_sl2_certification_path.md`, `lf_energy_proposal.md`, `partnership_program.md` |
 | 2026-02-22 | **v1.9.0** | **378/378** | OpenSSF Silver/Gold: `security_guide_maintainer.md`, `release_process.md`, `fuzzing.yml` (Atheris Modbus/MQTT) · IEC 62443 Phase 1: `network_diagram.md`, `system_security_plan.md`, `psirt_process.md`, `patch_management_sla.md` |
+| 2026-02-22 | **v2.0.0** | **378/378** | Fix: 18→0 errores interop · TOTP MFA (`totp_auth.py`) · Loki SIEM (`docker-compose.yml`) · `asyncio_mode=auto` funcional |
+| 2026-02-22 | **v2.1.0** | **426/426** | GAP-003 mTLS OT: `gen_certs.sh` PKI · `stunnel-ot.conf` TLS 1.3 · `OtTlsConfig.from_env()` · `modbus_driver.py` params TLS |
+| 2026-02-22 | **v2.2.0** | **426/426** | Auditoría IEC 62443 SL-2: `ssp_iec62443_sl2.md` (SSP-001) · `network_diagram.md` (NAD-001) · `patch_management_sla.md` · SECURITY.md PSIRT |
+| 2026-02-22 | **v2.3.0** | **426/426** | SR 7.1 Rate Limiting (`_RateLimiter`, 300 req/min, `429+Retry-After`) · mkdocs nav SSP/NAD/PMS · `pip-audit` weekly CI · `requirements.hash.txt` scaffold |
+| 2026-02-23 | **v2.4.1** | **426/426** | Fix markers pytest (`slow`, `asyncio`) · coverage 80% CI · versión `1.4.0`→`2.4.0` en `pyproject.toml` · Dockerfile OCI label `0.1.0`→`2.4.0` |
+| 2026-02-23 | **v2.4.2** | **426/426** | Fix lint `simulator_driver.py` (import math redundante) · Helm `appVersion 0.7.0`→`2.4.0` · `ci.yml` Job numbering 5→10 corregido |
