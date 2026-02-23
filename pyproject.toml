@@ -13,7 +13,7 @@ build-backend = "hatchling.build"
 # ---------------------------------------------------------------------------
 [project]
 name            = "bessai-edge"
-version         = "1.4.0"
+version         = "2.4.0"
 description     = "Open-source industrial BESS gateway with AI anomaly detection, NTSyCS and IEC 62443 compliance"
 readme          = "README.md"
 license         = { file = "LICENSE" }
@@ -80,6 +80,12 @@ asyncio_mode    = "auto"
 log_cli         = true
 log_cli_level   = "WARNING"
 addopts         = "-v --tb=short"
+markers = [
+    "integration: marks tests as integration tests (require real device)",
+    "unit: marks tests as pure unit tests (mocked)",
+    "slow: marks tests as slow (excluded from CI fast path with -m 'not slow')",
+    "asyncio: marks tests as async (used by pytest-asyncio)",
+]
 
 # ---------------------------------------------------------------------------
 # Ruff — linter + formatter (reemplaza flake8 + black + isort)
