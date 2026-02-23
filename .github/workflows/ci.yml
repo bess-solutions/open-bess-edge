@@ -181,7 +181,7 @@ jobs:
           path: pip-audit-report.json
 
   # ─────────────────────────────────────────────────────────────────
-  # Job 5: Terraform validate (no GCP credentials needed)
+  # Job 6: Terraform validate (no GCP credentials needed)
   # ─────────────────────────────────────────────────────────────────
   terraform-validate:
     name: Terraform validate
@@ -204,7 +204,7 @@ jobs:
         run: terraform -chdir=infrastructure/terraform fmt -check -recursive
 
   # ─────────────────────────────────────────────────────────────────
-  # Job 6: Helm lint & template validation
+  # Job 7: Helm lint & template validation
   # ─────────────────────────────────────────────────────────────────
   helm-lint:
     name: Helm lint & template
@@ -228,7 +228,7 @@ jobs:
             | head -60
 
   # ─────────────────────────────────────────────────────────────────
-  # Job 7: Docker build (validates the image builds correctly)
+  # Job 8: Docker build (validates the image builds correctly)
   # ─────────────────────────────────────────────────────────────────
   docker-build:
     name: Docker build
@@ -255,7 +255,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ─────────────────────────────────────────────────────────────────
-  # Job 8: Trivy container security scan
+  # Job 9: Trivy container security scan
   # ─────────────────────────────────────────────────────────────────
   trivy:
     name: Container scan (Trivy)
@@ -297,7 +297,7 @@ jobs:
           category: "trivy-container"
 
   # ─────────────────────────────────────────────────────────────────
-  # Job 9: Push to GCP Artifact Registry (only on main)
+  # Job 10: Push to GCP Artifact Registry (only on main)
   # ─────────────────────────────────────────────────────────────────
   docker-push:
     name: Push to Artifact Registry
