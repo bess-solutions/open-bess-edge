@@ -16,9 +16,9 @@ FROM python:3.11-slim AS builder
 
 # Install build tools needed for native extensions (pymodbus, cryptography …)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        gcc \
-        libffi-dev \
-        libssl-dev \
+    gcc \
+    libffi-dev \
+    libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
@@ -36,14 +36,14 @@ RUN python -m venv /opt/venv && \
 FROM python:3.11-slim AS runtime
 
 LABEL maintainer="ingenieria@bess-solutions.cl" \
-      org.opencontainers.image.title="BESSAI Edge Gateway" \
-      org.opencontainers.image.description="Industrial BESS gateway — NTSyCS compliant" \
-      org.opencontainers.image.version="0.1.0" \
-      org.opencontainers.image.licenses="Apache-2.0"
+    org.opencontainers.image.title="BESSAI Edge Gateway" \
+    org.opencontainers.image.description="Industrial BESS gateway — NTSyCS compliant" \
+    org.opencontainers.image.version="2.4.0" \
+    org.opencontainers.image.licenses="Apache-2.0"
 
 # Runtime-only system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        libssl3 \
+    libssl3 \
     && rm -rf /var/lib/apt/lists/*
 
 # Security: run as non-root
