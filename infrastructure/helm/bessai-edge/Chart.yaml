@@ -9,7 +9,7 @@ type: application
 version: 0.7.0
 
 # Application version deployed by this chart
-appVersion: "0.7.0"
+appVersion: "2.4.0"
 
 home: https://github.com/bess-solutions/open-bess-edge
 sources:
