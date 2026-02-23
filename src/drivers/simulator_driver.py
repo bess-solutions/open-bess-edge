@@ -217,8 +217,7 @@ class SimulatorDriver:
         if not self._connected:
             raise DataProviderError("SimulatorDriver not connected")
         # BESSAI-SPEC-001 §4.6: reject non-finite values (inf, nan)
-        import math as _math
-        if not _math.isfinite(value):
+        if not math.isfinite(value):
             raise ValueError(
                 f"write_tag('{tag_name}', {value}): non-finite value rejected. "
                 "BESSAI-SPEC-001 §4.6 requires all values to be finite floats."
