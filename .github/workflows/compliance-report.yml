@@ -38,7 +38,7 @@ jobs:
           bandit -r src/ -ll --format txt  # Human-readable summary
 
       - name: Upload SARIF to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: bandit-results.sarif
           category: bandit
@@ -60,7 +60,7 @@ jobs:
           output: trivy-dep-results.sarif
 
       - name: Upload Trivy dep results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-dep-results.sarif
           category: trivy-deps
@@ -82,7 +82,7 @@ jobs:
           publish_results: true
 
       - name: Upload Scorecard results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: scorecard_results.sarif
           category: scorecard
