@@ -1,0 +1,416 @@
+/**
+ * BESSAI Edge — DRL Optimizer Module
+ * dashboard/optimizer.js
+ *
+ * Implements a client-side BESS simulation for the Optimizer tab.
+ * All physics are intentionally simplified for <1 ms browser execution.
+ * The actual training pipeline uses Ray RLlib: scripts/train_drl.py
+ *
+ * Physics model:
+ *   - SOC dynamics:  soc[t+1] = soc[t] + (power * η / capacity)
+ *   - Degradation:   Rainflow-simplified EFC accumulator + Arrhenius factor
+ *   - Reward:        revenue - λ_deg * deg_cost - safety_penalty
+ *
+ * Strategies simulated:
+ *   DRL Agent   → heuristic that mimics a trained PPO policy
+ *   MILP Opt.   → LP-relaxed optimal (full lookahead on CMg profile)
+ *   Rule-Based  → threshold trigger  (±ΔCMg threshold)
+ *   Random      → uniform random action in [-1, 1]
+ */
+
+'use strict';
+
+// ─── CMg profile generators ──────────────────────────────────────────────────
+
+/**
+ * Generates a 288-step (5-min intervals, 24 h) CMg price array in USD/MWh.
+ * Pattern: dual-peak Chilean SEN (mid-morning + evening peak).
+ *
+ * @param {'synthetic'|'peak'|'flat'} profile
+ * @returns {number[]}
+ */
+function generateCmgProfile(profile) {
+  const N = 288;
+  const prices = [];
+
+  if (profile === 'flat') {
+    for (let i = 0; i < N; i++) prices.push(55 + (Math.random() - 0.5) * 4);
+    return prices;
+  }
+
+  const volatility = profile === 'peak' ? 2.2 : 1.0;
+
+  for (let i = 0; i < N; i++) {
+    const h = (i * 5) / 60; // decimal hour 0-24
+    // Base load curve (off-peak 35, on-peak 95)
+    const base = 35
+      + 40 * Math.max(0, Math.sin(Math.PI * (h - 7) / 5))   // morning peak 07-12
+      + 45 * Math.max(0, Math.sin(Math.PI * (h - 18) / 4)); // evening peak 18-22
+    // Noise
+    const noise = (Math.random() - 0.5) * 12 * volatility;
+    prices.push(Math.max(10, base + noise));
+  }
+  return prices;
+}
+
+// ─── BESS physics ───────────────────────────────────────────────────────────
+
+/**
+ * Simulates one episode using the given dispatch strategy.
+ *
+ * @param {number[]}  cmg        Price profile [USD/MWh] — 288 steps
+ * @param {number}    capacity   Battery capacity [kWh]
+ * @param {number}    pMax       Max power [kW]
+ * @param {number}    soc0       Initial SOC  [0-1]
+ * @param {number}    costUsdKwh Battery replacement cost [USD/kWh]
+ * @param {'drl'|'milp'|'rule'|'random'} strategy
+ * @returns {{ socTraj: number[], revenue: number, degCost: number, ms: number }}
+ */
+function simulateEpisode(cmg, capacity, pMax, soc0, costUsdKwh, strategy) {
+  const t0 = performance.now();
+  const dt = 5 / 60;       // hours per step
+  const η_c = 0.96;        // charge efficiency
+  const η_d = 0.96;        // discharge efficiency
+  const socMin = 0.05;
+  const socMax = 0.98;
+  const N = cmg.length;
+
+  let soc = soc0;
+  let revenue = 0;           // USD
+  let efcAccum = 0;          // equivalent full cycles
+  const socTraj = [soc];
+
+  // MILP: precompute argmax/argmin indices for full-lookahead strategy
+  const cmgMean = cmg.reduce((a, b) => a + b, 0) / N;
+
+  for (let i = 0; i < N; i++) {
+    const price = cmg[i];
+    let action = 0; // normalised in [-1, 1]; >0 = discharge
+
+    if (strategy === 'drl') {
+      // Heuristic mimicking a trained PPO policy:
+      // discharge when price > mean + margin AND soc > low threshold
+      // charge   when price < mean - margin AND soc < high threshold
+      const margin = cmgMean * 0.15;
+      if (price > cmgMean + margin && soc > 0.25) {
+        action = Math.min(1, (price - cmgMean) / cmgMean);
+      } else if (price < cmgMean - margin && soc < 0.80) {
+        action = -Math.min(1, (cmgMean - price) / cmgMean);
+      }
+      // Life-aware clamp: reduce intensity near SOC limits
+      if (soc < 0.15) action = Math.max(action, -0.3);
+      if (soc > 0.92) action = Math.min(action,  0.3);
+
+    } else if (strategy === 'milp') {
+      // LP-relaxed greedy with full lookahead:
+      // Charge in cheapest N/3 hours, discharge in most expensive N/3 hours
+      const sorted = [...cmg].sort((a, b) => a - b);
+      const lowThresh  = sorted[Math.floor(N / 3)];
+      const highThresh = sorted[Math.floor(2 * N / 3)];
+      if (price >= highThresh && soc > 0.20)      action =  1;
+      else if (price <= lowThresh && soc < 0.85)  action = -1;
+
+    } else if (strategy === 'rule') {
+      // Simple threshold: ±20% from mean
+      if (price > cmgMean * 1.20 && soc > 0.20)  action =  0.8;
+      else if (price < cmgMean * 0.80 && soc < 0.85) action = -0.8;
+
+    } else { // random
+      action = (Math.random() - 0.5) * 2;
+    }
+
+    // Power and SOC update
+    const powerKw = action * pMax;
+    let deltaKwh;
+    if (powerKw > 0) {          // discharge
+      deltaKwh = powerKw * η_d * dt;
+      soc -= deltaKwh / capacity;
+    } else {                    // charge
+      deltaKwh = Math.abs(powerKw) * η_c * dt;
+      soc += deltaKwh / capacity;
+    }
+
+    // Safety clamp
+    soc = Math.max(socMin, Math.min(socMax, soc));
+    socTraj.push(soc);
+
+    // Revenue: discharge earns money at grid price, charge spends
+    revenue += powerKw > 0
+      ? (powerKw * dt / 1000) * price          // energy exported → +USD
+      : (powerKw * dt / 1000) * price;         // energy imported → -USD (price negative side)
+
+    // EFC accumulation (simplified half-cycle counting)
+    efcAccum += Math.abs(deltaKwh) / (2 * capacity);
+  }
+
+  // Degradation cost: EFC → % capacity fade → USD cost
+  // LFP: ~3500 EFC to 80 % SoH → linear approximation
+  const fadePerEfc = 0.20 / 3500;
+  const fadePct = efcAccum * fadePerEfc * 100;       // % per episode
+  const energyLost = (fadePct / 100) * capacity;     // kWh lost
+  const degCost = energyLost * costUsdKwh;            // USD
+
+  const ms = performance.now() - t0;
+  return { socTraj, revenue: Math.max(0, revenue), degCost, fadePct, efcAccum, ms };
+}
+
+// ─── Chart instances ─────────────────────────────────────────────────────────
+
+let socChart = null;
+let cmgChart = null;
+
+function initOptimizerCharts() {
+  const socCtx = document.getElementById('chart-soc-trajectory')?.getContext('2d');
+  const cmgCtx = document.getElementById('chart-cmg')?.getContext('2d');
+  if (!socCtx || !cmgCtx) return;
+
+  const chartDefaults = {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 600 },
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: 'rgba(13,22,37,.95)',
+        borderColor: '#1e2d42',
+        borderWidth: 1,
+        titleColor: '#e2e8f0',
+        bodyColor: '#7a95b0',
+      },
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(255,255,255,.04)' },
+        ticks: { color: '#4a6580', maxRotation: 0, autoSkip: true, maxTicksLimit: 13 },
+      },
+    },
+  };
+
+  socChart = new Chart(socCtx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [
+        { label: 'DRL Agent',   data: [], borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,.07)',  borderWidth: 2.5, tension: 0.35, fill: false, pointRadius: 0 },
+        { label: 'MILP Óptimo', data: [], borderColor: '#22d3ee', backgroundColor: 'rgba(34,211,238,.07)', borderWidth: 2,   tension: 0.35, fill: false, pointRadius: 0, borderDash: [6,3] },
+        { label: 'Rule-Based',  data: [], borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,.07)', borderWidth: 1.5, tension: 0.35, fill: false, pointRadius: 0, borderDash: [3,3] },
+      ],
+    },
+    options: {
+      ...chartDefaults,
+      scales: {
+        ...chartDefaults.scales,
+        y: {
+          grid: { color: 'rgba(255,255,255,.04)' },
+          ticks: { color: '#6366f1', callback: v => (v * 100).toFixed(0) + '%' },
+          min: 0, max: 1,
+        },
+      },
+    },
+  });
+
+  cmgChart = new Chart(cmgCtx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [
+        { label: 'CMg (USD/MWh)', data: [], borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,.10)', borderWidth: 2, tension: 0.35, fill: true, pointRadius: 0 },
+      ],
+    },
+    options: {
+      ...chartDefaults,
+      scales: {
+        ...chartDefaults.scales,
+        y: {
+          grid: { color: 'rgba(255,255,255,.04)' },
+          ticks: { color: '#22c55e', callback: v => '$' + v.toFixed(0) },
+        },
+      },
+    },
+  });
+}
+
+// ─── UI helpers ──────────────────────────────────────────────────────────────
+
+function setOptKpi(id, val, decimals = 2, suffix = '') {
+  const el = document.getElementById(id);
+  if (el) el.textContent = (typeof val === 'number' ? val.toFixed(decimals) : val) + suffix;
+}
+
+function setRunStatus(msg, busy = false) {
+  const btn = document.getElementById('btn-opt-run');
+  const sta = document.getElementById('opt-run-status');
+  if (btn) btn.disabled = busy;
+  if (sta) sta.textContent = msg;
+}
+
+function buildTimeLabels(n) {
+  const labels = [];
+  for (let i = 0; i <= n; i++) {
+    const h = Math.floor((i * 5) / 60).toString().padStart(2, '0');
+    const m = ((i * 5) % 60).toString().padStart(2, '0');
+    labels.push(i % 12 === 0 ? `${h}:${m}` : '');
+  }
+  return labels;
+}
+
+// ─── Benchmark table renderer ─────────────────────────────────────────────────
+
+function renderBenchmarkTable(results) {
+  const tbody = document.getElementById('benchmark-tbody');
+  if (!tbody) return;
+
+  const milpRev = results.find(r => r.label === 'MILP Óptimo')?.revenue ?? 1;
+  const rows = results.map(r => {
+    const gap = milpRev > 0 ? ((milpRev - r.revenue) / milpRev * 100) : 0;
+    const isTop = r.label === 'DRL Agent';
+    return `
+      <tr class="${isTop ? 'bench-row-highlight' : ''}">
+        <td><span class="bench-strategy-dot" style="background:${r.color}"></span>${r.label}</td>
+        <td class="bench-num">${r.revenue.toFixed(2)}</td>
+        <td class="bench-num ${r.fadePct > 0.01 ? 'bench-warn' : ''}">${r.fadePct.toFixed(4)}</td>
+        <td class="bench-num ${gap > 15 ? 'bench-warn' : gap < 5 ? 'bench-good' : ''}">
+          ${gap < 0.1 ? '— óptimo' : gap.toFixed(1) + '%'}
+        </td>
+        <td class="bench-num">${r.ms.toFixed(1)} ms</td>
+      </tr>`;
+  });
+  tbody.innerHTML = rows.join('');
+}
+
+// ─── SoH renderer ────────────────────────────────────────────────────────────
+
+function renderSoH(efc, costUsdKwh, capacity) {
+  const fadePerEfc = 0.20 / 3500;
+  const totalFade  = efc * fadePerEfc;
+  const soh        = Math.max(0, 1 - totalFade);
+  const yearsLeft  = soh > 0.8 ? ((soh - 0.8) / (0.2 / 3500) / 365).toFixed(1) : '< 1';
+  const degCost    = totalFade * capacity * costUsdKwh;
+
+  const bar = document.getElementById('soh-bar-fill');
+  if (bar) {
+    bar.style.width = (soh * 100).toFixed(1) + '%';
+    bar.style.background = soh > 0.9 ? '#22c55e' : soh > 0.8 ? '#f59e0b' : '#ef4444';
+  }
+  setOptKpi('soh-pct-label',  `SoH: ${(soh * 100).toFixed(2)}%`, 0);
+  setOptKpi('soh-efc-label',  `EFC: ${efc.toFixed(2)}`, 0);
+  setOptKpi('soh-efc', efc, 2);
+  setOptKpi('soh-life', yearsLeft, 0, ' años');
+  setOptKpi('soh-cost', degCost, 2, ' USD');
+}
+
+// ─── Main simulation ──────────────────────────────────────────────────────────
+
+async function runSimulation() {
+  setRunStatus('⏳ Simulando…', true);
+
+  // Read what-if params
+  const capacity   = Number(document.getElementById('wi-capacity')?.value  ?? 200);
+  const pMax       = Number(document.getElementById('wi-power')?.value     ?? 100);
+  const soc0       = Number(document.getElementById('wi-soc')?.value       ?? 50) / 100;
+  const costUsdKwh = Number(document.getElementById('wi-cost')?.value      ?? 260);
+  const profile    = document.getElementById('wi-profile')?.value          ?? 'synthetic';
+
+  // Yield to browser paint before heavy work
+  await new Promise(r => setTimeout(r, 20));
+
+  const cmg = generateCmgProfile(profile);
+
+  const strategies = [
+    { label: 'MILP Óptimo', key: 'milp',   color: '#22d3ee' },
+    { label: 'DRL Agent',   key: 'drl',    color: '#6366f1' },
+    { label: 'Rule-Based',  key: 'rule',   color: '#f59e0b' },
+    { label: 'Random',      key: 'random', color: '#64748b' },
+  ];
+
+  const results = strategies.map(s => ({
+    ...s,
+    ...simulateEpisode(cmg, capacity, pMax, soc0, costUsdKwh, s.key),
+  }));
+
+  // ── Update KPI strip ──────────────────────────────────────────
+  const drl  = results.find(r => r.key === 'drl');
+  const milp = results.find(r => r.key === 'milp');
+  const gap  = milp.revenue > 0 ? ((milp.revenue - drl.revenue) / milp.revenue * 100) : 0;
+
+  setOptKpi('opt-revenue-val', drl.revenue, 2);
+  setOptKpi('opt-gap-val',     gap,         1);
+  setOptKpi('opt-deg-val',     drl.fadePct, 4);
+
+  // ── SOC Trajectory chart ──────────────────────────────────────
+  if (socChart) {
+    const labels = buildTimeLabels(cmg.length);
+    socChart.data.labels = labels;
+    socChart.data.datasets[0].data = results.find(r => r.key === 'drl').socTraj;
+    socChart.data.datasets[1].data = results.find(r => r.key === 'milp').socTraj;
+    socChart.data.datasets[2].data = results.find(r => r.key === 'rule').socTraj;
+    socChart.update();
+  }
+
+  // ── CMg chart ─────────────────────────────────────────────────
+  if (cmgChart) {
+    const labels = Array.from({ length: cmg.length }, (_, i) => {
+      const h = Math.floor((i * 5) / 60).toString().padStart(2, '0');
+      const m = ((i * 5) % 60).toString().padStart(2, '0');
+      return i % 12 === 0 ? `${h}:${m}` : '';
+    });
+    cmgChart.data.labels = labels;
+    cmgChart.data.datasets[0].data = cmg;
+    cmgChart.update();
+  }
+
+  // ── Benchmark table ───────────────────────────────────────────
+  const sorted = [...results].sort((a, b) => b.revenue - a.revenue);
+  renderBenchmarkTable(sorted);
+
+  // ── SoH ──────────────────────────────────────────────────────
+  renderSoH(drl.efcAccum, costUsdKwh, capacity);
+
+  setRunStatus(`✓ Listo — DRL +$${drl.revenue.toFixed(2)} USD (${gap < 0.01 ? '≈ óptimo' : gap.toFixed(1) + '% gap vs MILP'})`, false);
+}
+
+async function runBenchmark() {
+  await runSimulation();
+}
+
+// ─── Tab switch logic ─────────────────────────────────────────────────────────
+
+function switchTab(tabId) {
+  const panels = document.querySelectorAll('.tab-panel');
+  const buttons = document.querySelectorAll('.tab-btn');
+
+  panels.forEach(p => p.classList.remove('tab-panel--active'));
+  buttons.forEach(b => {
+    b.classList.remove('tab-btn--active');
+    b.setAttribute('aria-selected', 'false');
+  });
+
+  const targetPanel = document.getElementById(`panel-${tabId}`);
+  const targetBtn   = document.getElementById(`tab-${tabId}`);
+
+  if (targetPanel) targetPanel.classList.add('tab-panel--active');
+  if (targetBtn) {
+    targetBtn.classList.add('tab-btn--active');
+    targetBtn.setAttribute('aria-selected', 'true');
+  }
+
+  // Lazy-init optimizer charts on first activation
+  if (tabId === 'optimizer' && !socChart) {
+    initOptimizerCharts();
+  }
+}
+
+// ─── Bootstrap ────────────────────────────────────────────────────────────────
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Attach optimizer namespace to global bessai object (created by main.js)
+  if (!window.bessai) window.bessai = {};
+  window.bessai.optimizer = { runSimulation, runBenchmark };
+  window.bessai.switchTab = switchTab;
+
+  // Expose loadSchedule safe fallback if main.js loads after us
+  if (!window.bessai.loadSchedule) {
+    window.bessai.loadSchedule = () => console.warn('[Optimizer] main.js not loaded yet');
+  }
+});

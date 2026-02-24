@@ -17,9 +17,9 @@
 
 // ─── Config ────────────────────────────────────────────────────────────────
 const API_BASE = (window.BESSAI_API_URL || 'http://localhost:8080') + '/api/v1';
-const POLL_INTERVAL_MS   = 3000;   // Main telemetry poll
-const SCHEDULE_INTERVAL  = 60000;  // Arbitrage schedule (1 min)
-const CHART_MAX_POINTS   = 120;    // 6 min @ 3s
+const POLL_INTERVAL_MS = 3000;   // Main telemetry poll
+const SCHEDULE_INTERVAL = 60000;  // Arbitrage schedule (1 min)
+const CHART_MAX_POINTS = 120;    // 6 min @ 3s
 
 // ─── State ──────────────────────────────────────────────────────────────────
 const state = {
@@ -70,13 +70,15 @@ function initChart() {
       maintainAspectRatio: false,
       animation: { duration: 400 },
       interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { display: false }, tooltip: {
-        backgroundColor: 'rgba(13,22,37,.95)',
-        borderColor: '#1e2d42',
-        borderWidth: 1,
-        titleColor: '#e2e8f0',
-        bodyColor: '#7a95b0',
-      }},
+      plugins: {
+        legend: { display: false }, tooltip: {
+          backgroundColor: 'rgba(13,22,37,.95)',
+          borderColor: '#1e2d42',
+          borderWidth: 1,
+          titleColor: '#e2e8f0',
+          bodyColor: '#7a95b0',
+        }
+      },
       scales: {
         x: {
           grid: { color: 'rgba(255,255,255,.04)' },
@@ -320,7 +322,7 @@ async function pollCarbon() {
     const d = await apiFetch('/carbon');
     document.getElementById('co2-val').textContent = d.co2_avoided_kg.toFixed(2);
     document.getElementById('trees-val').textContent = d.equivalent_trees_planted.toFixed(1);
-  } catch (_) {}
+  } catch (_) { }
 }
 
 async function pollFleet() {
@@ -333,7 +335,7 @@ async function pollFleet() {
     alarmsEl.textContent = d.sites_in_alarm;
     alarmsEl.style.color = d.sites_in_alarm > 0 ? '#ef4444' : '#22c55e';
     if (d.sites_in_alarm > 0) addAlert(`Fleet: ${d.sites_in_alarm} sitio(s) con alarma`, 'warning');
-  } catch (_) {}
+  } catch (_) { }
 }
 
 async function pollP2P() {
@@ -342,7 +344,7 @@ async function pollP2P() {
     document.getElementById('p2p-kwh').textContent = d.credits_kwh.toFixed(1);
     document.getElementById('p2p-minted').textContent = d.credits_minted;
     document.getElementById('p2p-pending').textContent = d.credits_pending;
-  } catch (_) {}
+  } catch (_) { }
 }
 
 async function loadSchedule() {
@@ -371,7 +373,7 @@ async function loadVersion() {
   try {
     const d = await apiFetch('/version');
     document.getElementById('footer-version').textContent = `v${d.version}`;
-  } catch (_) {}
+  } catch (_) { }
 }
 
 // ─── Clock ───────────────────────────────────────────────────────────────────
@@ -385,7 +387,8 @@ function startClock() {
 }
 
 // ─── Bootstrap ───────────────────────────────────────────────────────────────
-window.bessai = { loadSchedule };
+// Safe merge: optimizer.js may define window.bessai.switchTab before or after main.js loads
+window.bessai = Object.assign(window.bessai || {}, { loadSchedule });
 
 window.addEventListener('DOMContentLoaded', async () => {
   startClock();
