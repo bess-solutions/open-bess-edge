@@ -328,9 +328,12 @@
         </div>
         <div class="card opt-card-chart">
           <div class="card-header">
-            <span class="card-label">💰 Perfil CMg — Costo Marginal (USD/MWh)</span>
-            <div class="chart-legend">
-              <span class="legend-dot" style="background:#22c55e"></span>CMg Chile (CEN 2024)
+            <span class="card-label">Perfil CMg — Costo Marginal (USD/MWh)</span>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
+              <div class="chart-legend">
+                <span class="legend-dot" style="background:#22c55e"></span>CMg Nodo Maitencillo
+              </div>
+              <span id="opt-data-source" style="font-size:.68rem;color:var(--text-secondary)">Cargando datos...</span>
             </div>
           </div>
           <div class="chart-container chart-container--tall">
@@ -395,9 +398,16 @@
               <span id="wi-cost-val">260</span> USD/kWh
             </label>
             <label class="whatif-label">
-              Perfil CMg
+              Fecha CMg (datos reales)
+              <select id="wi-date"
+                style="flex:1;background:var(--bg-base);border:1px solid var(--border-bright);border-radius:6px;color:var(--text-primary);padding:5px 10px;font-size:.78rem;">
+                <option value="">-- Cargando datos reales... --</option>
+              </select>
+            </label>
+            <label class="whatif-label">
+              Perfil sint&#233;tico (fallback)
               <select id="wi-profile">
-                <option value="synthetic">Sintético Chile CEN 2024</option>
+                <option value="synthetic">Sint&#233;tico Chile CEN 2024</option>
                 <option value="peak">Alta volatilidad (peak)</option>
                 <option value="flat">Precio plano (neutro)</option>
               </select>
