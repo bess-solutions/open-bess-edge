@@ -42,7 +42,6 @@ import pytest
 
 try:
     from aiohttp.test_utils import TestClient, TestServer
-
     from src.interfaces.sep2_adapter import (
         SEP2Adapter,
         SEP2ConfigError,
@@ -396,25 +395,19 @@ class TestMirrorUsagePoint:
 class TestBuildAdapterFromEnv:
     """build_adapter_from_env() factory function."""
 
-    def test_returns_none_when_disabled(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_returns_none_when_disabled(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setenv("SEP2_ENABLED", "false")
         driver = _make_driver()
         result = build_adapter_from_env(driver)
         assert result is None
 
-    def test_returns_adapter_when_enabled(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_returns_adapter_when_enabled(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setenv("SEP2_ENABLED", "true")
         driver = _make_driver()
         result = build_adapter_from_env(driver)
         assert isinstance(result, SEP2Adapter)
 
-    def test_returns_none_when_aiohttp_missing(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_returns_none_when_aiohttp_missing(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setenv("SEP2_ENABLED", "true")
         driver = _make_driver()
         with patch("src.interfaces.sep2_adapter._AIOHTTP_AVAILABLE", False):

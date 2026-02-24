@@ -14,12 +14,9 @@ Tests verify:
 from __future__ import annotations
 
 import base64
-import os
 
 import pytest
-
 from src.interfaces.totp_auth import TOTPAuth, TOTPInfo
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -119,9 +116,14 @@ class TestTOTPInfo:
         """TOTPInfo.to_dict() always returns required keys."""
         d = totp_no_secret.info().to_dict()
         required_keys = {
-            "mfa_enabled", "pyotp_installed", "algorithm",
-            "digits", "period_seconds", "setup",
-            "iec_62443_ref", "gap_status",
+            "mfa_enabled",
+            "pyotp_installed",
+            "algorithm",
+            "digits",
+            "period_seconds",
+            "setup",
+            "iec_62443_ref",
+            "gap_status",
         }
         assert required_keys.issubset(d.keys()), f"Missing keys: {required_keys - set(d.keys())}"
 

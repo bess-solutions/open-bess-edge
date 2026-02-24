@@ -25,20 +25,16 @@ import json
 from typing import Any
 
 import pytest
-
 from src.drivers.simulator_driver import SimulatorDriver
-
 
 # ---------------------------------------------------------------------------
 # pytest-asyncio: auto mode for this directory
 # ---------------------------------------------------------------------------
 
+
 def pytest_configure(config: pytest.Config) -> None:
     """Force asyncio_mode=auto for all tests in this directory."""
-    config.addinivalue_line(
-        "markers",
-        "asyncio: mark test as async (handled by pytest-asyncio)"
-    )
+    config.addinivalue_line("markers", "asyncio: mark test as async (handled by pytest-asyncio)")
 
 
 # ---------------------------------------------------------------------------

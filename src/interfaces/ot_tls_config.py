@@ -43,7 +43,6 @@ import os
 import ssl
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 import structlog
 
@@ -68,9 +67,9 @@ class OtTlsConfig:
     """
 
     enabled: bool
-    ca_cert_path: Optional[Path]
-    client_cert_path: Optional[Path]
-    client_key_path: Optional[Path]
+    ca_cert_path: Path | None
+    client_cert_path: Path | None
+    client_key_path: Path | None
 
     @property
     def is_enabled(self) -> bool:
@@ -83,7 +82,7 @@ class OtTlsConfig:
         )
 
     @classmethod
-    def from_env(cls) -> "OtTlsConfig":
+    def from_env(cls) -> OtTlsConfig:
         """
         Build an ``OtTlsConfig`` from environment variables.
 
@@ -170,8 +169,7 @@ def build_ssl_context(cfg: OtTlsConfig) -> ssl.SSLContext:
         assert path is not None  # guaranteed by is_enabled
         if not path.is_file():
             raise FileNotFoundError(
-                f"{label} not found: {path}. "
-                "Run: bash infrastructure/certs/gen_certs.sh"
+                f"{label} not found: {path}. Run: bash infrastructure/certs/gen_certs.sh"
             )
 
     # Build context: TLS_CLIENT enforces server cert verification by default

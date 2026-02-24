@@ -24,7 +24,7 @@ import json
 import ssl
 import struct
 from pathlib import Path
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 import structlog
 from pymodbus.client import AsyncModbusTcpClient
@@ -32,7 +32,9 @@ from pymodbus.exceptions import ConnectionException, ModbusIOException
 
 # Optional import for TLS config helper (avoids hard dep on structlog in tests)
 try:
-    from src.interfaces.ot_tls_config import OtTlsConfig, build_ssl_context as _build_ssl_ctx
+    from src.interfaces.ot_tls_config import OtTlsConfig  # noqa: F401
+    from src.interfaces.ot_tls_config import build_ssl_context as _build_ssl_ctx  # noqa: F401
+
     _OT_TLS_AVAILABLE = True
 except ImportError:
     _OT_TLS_AVAILABLE = False
@@ -130,10 +132,10 @@ class UniversalDriver:
         # Use ot_tls_config.OtTlsConfig.from_env() to build from env vars,
         # or pass paths directly for explicit configuration.
         # ----------------------------------------------------------------
-        tls_ca_cert: Optional[Path] = None,
-        tls_client_cert: Optional[Path] = None,
-        tls_client_key: Optional[Path] = None,
-        tls_context: Optional[ssl.SSLContext] = None,
+        tls_ca_cert: Path | None = None,
+        tls_client_cert: Path | None = None,
+        tls_client_key: Path | None = None,
+        tls_context: ssl.SSLContext | None = None,
     ) -> None:
         self._host = host
         self._port = port
@@ -147,14 +149,18 @@ class UniversalDriver:
 
         # ── TLS setup (IEC 62443 GAP-003) ────────────────────────────────────
         # Priority: explicit tls_context > cert paths > plain TCP
-        _sslctx: Optional[ssl.SSLContext] = None
+        _sslctx: ssl.SSLContext | None = None
 
         if tls_context is not None:
             _sslctx = tls_context
             log.info("driver.mtls_enabled", host=host, port=port, source="explicit_context")
-        elif tls_ca_cert is not None and tls_client_cert is not None and tls_client_key is not None:
+        elif (
+            tls_ca_cert is not None and tls_client_cert is not None and tls_client_key is not None
+        ):
             if _OT_TLS_AVAILABLE:
-                from src.interfaces.ot_tls_config import OtTlsConfig, build_ssl_context as _build
+                from src.interfaces.ot_tls_config import OtTlsConfig
+                from src.interfaces.ot_tls_config import build_ssl_context as _build
+
                 _cfg = OtTlsConfig(
                     enabled=True,
                     ca_cert_path=tls_ca_cert,
