@@ -13,7 +13,7 @@ build-backend = "hatchling.build"
 # ---------------------------------------------------------------------------
 [project]
 name            = "bessai-edge"
-version         = "2.6.0"
+version         = "2.7.0"
 description     = "Open-source industrial BESS gateway: Modbus, IEEE 2030.5, IEC 62443, MQTT, OpenTelemetry, Prometheus"
 readme          = "README.md"
 license         = { file = "LICENSE" }
@@ -70,6 +70,26 @@ drl = [
 # Simulation / RL environment only (without full Ray RLlib)
 sim = [
     "gymnasium>=0.29",
+]
+# BEP-0215: MILP day-ahead optimizer
+milp = [
+    "pulp>=2.8",
+    "highspy>=1.7",
+]
+# BEP-0220: Multi-agent MARL / VPP fleet
+marl = [
+    "gymnasium>=0.29",
+    "pettingzoo>=1.24",
+]
+# Full DRL stack (all optional deps)
+full = [
+    "gymnasium>=0.29",
+    "ray[rllib]>=2.9",
+    "torch>=2.2",
+    "onnx>=1.15",
+    "pulp>=2.8",
+    "highspy>=1.7",
+    "pettingzoo>=1.24",
 ]
 
 [project.scripts]
