@@ -1,6 +1,7 @@
 name: Weekly Community Update
 
-# OpenSSF Scorecard: Token-Permissions — explicit minimum permissions
+# OpenSSF Scorecard: Token-Permissions — restrict default token to read-only
+permissions: read-all
 
 on:
   schedule:
