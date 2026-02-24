@@ -65,6 +65,15 @@ from src.interfaces.otel_setup import configure_otel, get_tracer, shutdown_otel
 from src.interfaces.pubsub_publisher import PubSubPublisher
 from src.interfaces.sep2_adapter import SEP2Error, build_adapter_from_env
 
+# BEP-0200 — DRL Arbitrage Agent (optional, fail-safe)
+try:
+    from src.agents.arbitrage_policy import ArbitragePolicy
+    from src.agents.drl_agent import ONNXArbitrageAgent
+
+    _DRL_AVAILABLE = True
+except ImportError:  # gymnasium not installed
+    _DRL_AVAILABLE = False
+
 # Resolve settings once at module level (safe — uses _LazySettings proxy)
 _cfg = get_settings()
 
@@ -85,6 +94,12 @@ structlog.configure(
 )
 
 log: structlog.BoundLogger = structlog.get_logger(__name__)
+
+# ---------------------------------------------------------------------------
+# DRL agent model path (env var or default)
+# ---------------------------------------------------------------------------
+_DRL_MODEL_PATH: str = os.getenv("BESSAI_DRL_MODEL_PATH", "models/drl_arbitrage_v1.onnx")
+_DRL_ENABLED: bool = os.getenv("BESSAI_DRL_ENABLED", "false").lower() == "true"
 
 # ---------------------------------------------------------------------------
 # Tags read on every acquisition cycle
@@ -311,6 +326,39 @@ async def main() -> None:  # noqa: C901
                 tip="Set SEP2_ENABLED=true in .env to enable IEEE 2030.5 server",
             )
 
+
+        # ── Step 5e — Optional DRL Arbitrage Agent (fail-safe, BEP-0200) ────
+        _drl_agent: "ONNXArbitrageAgent | None" = None  # type: ignore[type-arg]
+        if _DRL_AVAILABLE and _DRL_ENABLED:
+            _rule_policy = ArbitragePolicy()  # type: ignore[name-defined]
+            _drl_agent = ONNXArbitrageAgent(  # type: ignore[name-defined]
+                model_path=_DRL_MODEL_PATH,
+                fallback=_rule_policy,
+            )
+            if _drl_agent.is_available:
+                log.info(
+                    "drl_agent.enabled",
+                    model=_DRL_MODEL_PATH,
+                    note="BEP-0200 PPO agent active (observe-only mode)",
+                )
+            else:
+                log.info(
+                    "drl_agent.fallback_only",
+                    model=_DRL_MODEL_PATH,
+                    tip="ONNX model not found — using ArbitragePolicy fallback",
+                )
+        elif not _DRL_AVAILABLE:
+            log.info(
+                "drl_agent.disabled",
+                reason="gymnasium not installed",
+                tip="pip install 'open-bess-edge[sim]' to enable",
+            )
+        else:
+            log.info(
+                "drl_agent.disabled",
+                tip="Set BESSAI_DRL_ENABLED=true in .env to enable DRL arbitrage",
+            )
+
         log.info(
             "gateway.started",
             site=_cfg.SITE_ID,
@@ -318,6 +366,7 @@ async def main() -> None:  # noqa: C901
             poll_interval_s=_cfg.WATCHDOG_TIMEOUT,
             health_port=_cfg.HEALTH_PORT,
         )
+
 
         cycle: int = 0
 
@@ -409,8 +458,41 @@ async def main() -> None:  # noqa: C901
                             error=str(exc),
                             action="continuing_without_mqtt_this_cycle",
                         )
+                # ── STEP 4c: DRL Arbitrage setpoint (BEP-0200, observe-only) ─
+                if _drl_agent is not None and "soc" in telemetry:
+                    import numpy as np  # local import — optional for edge
 
-                # Update cycle counters
+                    # Build 8-d observation vector (matches BESSArbitrageEnv)
+                    _soc = float(telemetry.get("soc", 50.0)) / 100.0  # [0,1]
+                    _pwr = float(telemetry.get("active_power", 0.0)) / 1000.0  # kW
+                    _temp = float(telemetry.get("temp_c", 25.0))
+                    # (CMg fields are 0 until CMg Predictor v2 is integrated)
+                    _obs = np.array(
+                        [
+                            _soc,           # soc [0,1]
+                            _temp / 60.0,   # temp_norm
+                            0.0,            # cumulative_deg (not tracked in telemetry yet)
+                            0.1,            # cmg_now_norm: placeholder ~30 USD/MWh
+                            0.1,            # cmg_1h_norm: placeholder
+                            0.1,            # cmg_4h_norm: placeholder
+                            0.0,            # hour_sin
+                            1.0,            # hour_cos
+                        ],
+                        dtype=np.float32,
+                    )
+                    _p_pu, _drl_info = _drl_agent.predict(_obs)
+                    _p_kw = _p_pu * _cfg.MAX_CONTINUOUS_DISCHARGE_KW if hasattr(_cfg, "MAX_CONTINUOUS_DISCHARGE_KW") else _p_pu * 100.0
+                    log.info(
+                        "drl_agent.setpoint",
+                        cycle=cycle,
+                        p_pu=round(_p_pu, 3),
+                        p_kw=round(_p_kw, 1),
+                        source=_drl_info.get("source", "unknown"),
+                        rule=_drl_info.get("rule", ""),
+                        soc_pct=round(_soc * 100, 1),
+                        note="observe-only — write_tag integration in BEP-0200 Phase 4",
+                    )
+
                 CYCLES_TOTAL.labels(site_id=_cfg.SITE_ID).inc()
                 LAST_CYCLE_DURATION_S.labels(site_id=_cfg.SITE_ID).set(
                     time.monotonic() - cycle_start
