@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/Tests-378%2F378%20%E2%9C%85-success)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-490%2F490%20%E2%9C%85-success)](tests/)
 [![Docker](https://img.shields.io/badge/Docker-amd64%20%7C%20arm64-2496ED?logo=docker&logoColor=white)](https://ghcr.io/bess-solutions/open-bess-edge)
 [![CI](https://github.com/bess-solutions/open-bess-edge/actions/workflows/ci.yml/badge.svg)](https://github.com/bess-solutions/open-bess-edge/actions)
 [![Multi-Arch](https://github.com/bess-solutions/open-bess-edge/actions/workflows/docker-multiarch.yml/badge.svg)](https://github.com/bess-solutions/open-bess-edge/actions)
@@ -22,7 +22,7 @@
 
 ---
 
-## 🚀 Estado del Proyecto — v1.7.1
+## 🚀 Estado del Proyecto — v2.7.1
 
 | Componente | Estado |
 |---|---|
@@ -33,26 +33,26 @@
 | Prometheus Metrics (`GET /metrics`) | ✅ 22 métricas + alert_rules.yml |
 | **AI-IDS** (`ModbusAnomalyDetector`) | ✅ IsolationForest + z-score, score 0-1 |
 | **ONNX Dispatcher** (`ONNXDispatcher`) | ✅ Inferencia offline, fallback seguro |
-| **Dashboard Cliente** (`http://:8080`) | ✅ SOC gauge, power flow, IDS ring, arbitraje |
 | GCP Pub/Sub Publisher | ✅ Implementado y conectado |
 | **MQTT Publisher** (`paho-mqtt`) | ✅ Mosquitto / HA / AWS IoT Core / Azure |
+| **IEEE 2030.5 / SEP 2.0** | ✅ **BEP-0100 Active** — 10 endpoints, TLS 1.2+, mTLS, DERControl |
+| **DRL Arbitrage Agent** | ✅ **BEP-0200 Fase 2** — ONNXArbitrageAgent (observe-only) |
 | OpenTelemetry + Cloud Trace | ✅ Implementado |
-| Suite de tests | ✅ **378/378 tests pasan** (6 nuevos chaos) |
+| Suite de tests | ✅ **490/490 tests pasan** (+32 DRL, +26 SEP2) |
 | Docker Compose (+ Simulador) | ✅ Operativo — perfil `monitoring` |
 | **Multi-Arch Docker** (amd64 + arm64) | ✅ Buildx CI → ghcr.io — Raspberry Pi 4/5 |
 | Prometheus + Grafana + Alerting | ✅ `--profile monitoring` + alert rules |
 | Terraform GCP | ✅ 18 recursos en GCP |
-| GitHub Actions CI/CD | ✅ 9 jobs: lint+typecheck+test+security+terraform+helm+docker+trivy+push |
+| GitHub Actions CI/CD | ✅ 10 jobs: lint+typecheck+test+interop+security+terraform+helm+docker+trivy+push |
 | **Hardware Registry** | ✅ 4 perfiles: Huawei, SMA, Victron, Fronius |
-| **Gobernanza OSS** | ✅ SECURITY+COC+GOVERNANCE+CONTRIBUTING |
-| **ADRs (7 decisiones)** | ✅ `docs/adr/` — incluye ADR-007 (JSON Schema) y ADR-008 (BEP Process) |
+| **Gobernanza OSS** | ✅ SECURITY+COC+GOVERNANCE+CONTRIBUTING + **BOA Charter** |
 | **IEC 62443 Compliance** | ✅ SL-1 mapeado · SL-2 certification path en `docs/compliance/` |
-| **IEEE 2030.5** | 📋 Gap analysis disponible en `docs/compliance/ieee_2030_5_compliance.md` |
+| **IEEE 2030.5** | ✅ **Implementado** (BEP-0100) + gap analysis en `docs/compliance/` |
 | **NTSyCS CEN Chile** | ✅ Mapeado en `docs/compliance/` |
 | **OpenSSF Best Practices** | ✅ Passing badge — bestpractices.dev |
-| **Spec Formales (BESSAI-SPEC)** | ✅ 3 specs normativas en `docs/specs/` (driver, safety, telemetry) |
-| **Gobernanza TSC + BEP** | ✅ BEP-0001 · `GOVERNANCE.md` multi-stakeholder |
-| **Interoperabilidad** | ✅ Suite de tests en `tests/interop/` · BESSAI Certified Program |
+| **Spec Formales (BESSAI-SPEC)** | ✅ 4 specs: driver, safety, telemetry, **BMS data model (IEEE P2686)** |
+| **Gobernanza TSC + BEP** | ✅ BEP-0001 · `GOVERNANCE.md` · **BESSAI Open Alliance Charter** |
+| **Interoperabilidad** | ✅ Suite tests `tests/interop/` · BESSAI Certified · 7 dispositivos open |
 
 ---
 
@@ -134,16 +134,18 @@ open-bess-edge/
 ├── src/
 │   ├── core/          # Lógica de negocio (orquestador, config, safety)
 │   ├── drivers/       # Adaptadores de hardware (Modbus TCP, SimulatorDriver, Luna2000)
-│   └── interfaces/    # health · metrics · pubsub · mqtt_publisher · otel_setup · ai_ids · onnx
+│   ├── agents/        # DRL Arbitrage Agent (BEP-0200): BESSArbitrageEnv, ArbitragePolicy, ONNXArbitrageAgent
+│   └── interfaces/    # health · metrics · pubsub · mqtt · sep2_adapter (IEEE 2030.5) · ai_ids · onnx
 ├── registry/          # Perfiles JSON: Huawei, SMA, Victron, Fronius
 ├── config/            # Variables de entorno (.env.example)
-├── tests/             # Suite de tests (pytest, 378/378 ✅ · 6 chaos tests)
+├── models/            # ONNX models: dispatch_policy.onnx · drl_arbitrage_v1.onnx
+├── tests/             # Suite de tests (pytest, 490/490 ✅ · interop · chaos · DRL)
 ├── infrastructure/
 │   ├── terraform/     # IaC para GCP — Pub/Sub + IAM + WIF (aplicado ✅)
 │   ├── prometheus/    # prometheus.yml · alert_rules.yml
 │   ├── grafana/       # Datasource provisioning automático
 │   └── docker/        # Dockerfiles y docker-compose
-└── docs/              # local_development.md · runbook.md · quickstart_rpi.md · mqtt_integration.md
+└── docs/              # specs/ · compliance/ · bep/ · governance/ · outreach/ · certification/
 ```
 
 ### Flujo de datos
@@ -175,14 +177,19 @@ La configuración sigue el principio **12-Factor App** — toda la configuració
 |---|---|---|---|
 | `SITE_ID` | ✅ | Identificador único del sitio | — |
 | `INVERTER_IP` | ✅ | IP o hostname del inversor (acepta DNS, ej: `modbus-simulator`) | — |
-| `INVERTER_PORT` | ➖ | Puerto TCP Modbus | `502` |
-| `HEALTH_PORT` | ➖ | Puerto del servidor /health y /metrics | `8000` |
-| `DRIVER_PROFILE_PATH` | ➖ | Ruta al perfil JSON del dispositivo | `registry/huawei_sun2000.json` |
-| `WATCHDOG_TIMEOUT` | ➖ | Segundos entre heartbeats | `5` |
+| `INVERTER_PORT` | ➕ | Puerto TCP Modbus | `502` |
+| `HEALTH_PORT` | ➕ | Puerto del servidor /health y /metrics | `8000` |
+| `DRIVER_PROFILE_PATH` | ➕ | Ruta al perfil JSON del dispositivo | `registry/huawei_sun2000.json` |
+| `WATCHDOG_TIMEOUT` | ➕ | Segundos entre heartbeats | `5` |
 | `GCP_PROJECT_ID` | ✅¹ | ID del proyecto GCP | `None` |
 | `GCP_PUBSUB_TOPIC` | ✅¹ | Tópico Pub/Sub de telemetría | `None` |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | ➖ | Endpoint OTLP del collector | `http://otel-collector:4317` |
-| `LOG_LEVEL` | ➖ | Nivel de logging | `INFO` |
+| `MQTT_BROKER_URL` | ➕ | URL broker MQTT (ej: `mqtt://localhost:1883`) | `None` |
+| `SEP2_ENABLED` | ➕ | Habilitar IEEE 2030.5 adapter (BEP-0100) | `false` |
+| `SEP2_HOST` / `SEP2_PORT` | ➕ | Bind del servidor IEEE 2030.5 | `0.0.0.0:8443` |
+| `BESSAI_DRL_ENABLED` | ➕ | Activar agente DRL en main.py (BEP-0200) | `false` |
+| `BESSAI_DRL_MODEL_PATH` | ➕ | Ruta al modelo ONNX del agente DRL | `models/drl_arbitrage_v1.onnx` |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | ➕ | Endpoint OTLP del collector | `http://otel-collector:4317` |
+| `LOG_LEVEL` | ➕ | Nivel de logging | `INFO` |
 
 > ¹ Requerida en producción. En desarrollo local puede omitirse si no se conecta a GCP.
 
@@ -202,8 +209,9 @@ pytest tests/ --cov=src --cov-report=html
 
 **Resultado actual:**
 ```
-378 passed in ~15s  ✅
-Python 3.14 · pytest-asyncio · numpy 2.4.x · scikit-learn 1.8.x · onnxruntime 1.24.x
+490 passed in ~17s  ✅
+1 failed (SSL mock pre-existente — no regresión documentada)
+Python 3.10+ · pytest-asyncio · numpy · scikit-learn · onnxruntime · structlog
 ```
 
 > **Nota:** No se requiere archivo `.env` para los tests. El `conftest.py` inyecta las variables mínimas automáticamente.
@@ -267,6 +275,7 @@ BESSAI publishes machine-readable normative specifications enabling third-party 
 | [BESSAI-SPEC-001](docs/specs/BESSAI-SPEC-001.md) | BESSDriver Interface | All drivers MUST implement `DataProvider` protocol |
 | [BESSAI-SPEC-002](docs/specs/BESSAI-SPEC-002.md) | Safety Requirements | SafetyGuard MUST block when SOC < 5% or T > 60°C |
 | [BESSAI-SPEC-003](docs/specs/BESSAI-SPEC-003.md) | Telemetry Schema | JSON Schema 2020-12 for all telemetry messages |
+| [BESSAI-SPEC-004](docs/specs/BESSAI-SPEC-004.md) | BMS Data Model | `BatteryState` dataclass — IEEE P2686 alignment |
 
 Propose a change: open a [BEP (BESSAI Enhancement Proposal)](docs/bep/BEP-0001.md)
 
