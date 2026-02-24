@@ -1,0 +1,267 @@
+{
+    "$schema": "https://bessai.io/schemas/device-profile/v2.json",
+    "profile_version": "2.0.0",
+    "device": {
+        "manufacturer": "Tesla",
+        "model": "Powerwall 3",
+        "description": "Tesla Powerwall 3 residential integrated solar + battery system. 13.5 kWh usable, 11.5 kW continuous discharge. All-in-one solar inverter + storage. Commissioning and monitoring via Tesla app. No native Modbus or SunSpec — BESSAI integrates via Tesla Local HTTP API (LAN) or Tesla Fleet API (cloud).",
+        "firmware_reference": "Tesla Powerwall Local API (unofficial, documented by community) — v3.x as of 2025",
+        "protocol": "HTTP_REST",
+        "api_base_local": "https://192.168.x.x",
+        "api_base_cloud": "https://fleet-api.prd.na.vn.cloud.tesla.com",
+        "auth_method_local": "basic_auth_cookie",
+        "auth_method_cloud": "oauth2_client_credentials",
+        "notes": "Powerwall 3 does NOT expose Modbus TCP. BESSAI must use the local REST API (no official support from Tesla) or the official Fleet API with a registered application. Local API requires authentication via the Tesla gateway's /api/login/Basic endpoint. Cloud API requires Tesla Partner account and Fleet API access."
+    },
+    "connection": {
+        "local": {
+            "base_url": "https://${POWERWALL_HOST}",
+            "port": 443,
+            "ssl_verify": false,
+            "auth_endpoint": "/api/login/Basic",
+            "auth_body": {
+                "username": "customer",
+                "password": "${POWERWALL_PASSWORD}",
+                "email": "${TESLA_ACCOUNT_EMAIL}",
+                "force_sm_off": false
+            },
+            "session_cookie": "AuthCookie",
+            "timeout_seconds": 10
+        },
+        "cloud": {
+            "token_endpoint": "https://fleet-api.prd.na.vn.cloud.tesla.com/oauth2/v3/token",
+            "api_base": "https://fleet-api.prd.na.vn.cloud.tesla.com",
+            "client_id": "${TESLA_CLIENT_ID}",
+            "client_secret": "${TESLA_CLIENT_SECRET}",
+            "scope": "openid offline_access energy_device_data energy_cmds"
+        }
+    },
+    "endpoints": {
+        "system_status": {
+            "path": "/api/system_status",
+            "method": "GET",
+            "response_fields": {
+                "nominal_full_pack_energy": {
+                    "unit": "Wh",
+                    "description": "Total nominal energy of all battery modules"
+                },
+                "nominal_energy_remaining": {
+                    "unit": "Wh",
+                    "description": "Estimated energy remaining"
+                },
+                "percentage_charged": {
+                    "unit": "%",
+                    "description": "State of Charge (0–100)"
+                },
+                "battery_target_power": {
+                    "unit": "W",
+                    "description": "Current power setpoint (positive = charge)"
+                },
+                "battery_blocks": {
+                    "type": "array",
+                    "description": "Per-module status array",
+                    "per_block_fields": {
+                        "PackagePartNumber": "string",
+                        "Type": "string",
+                        "p": {
+                            "unit": "W",
+                            "description": "Block power"
+                        },
+                        "q": {
+                            "unit": "VAR",
+                            "description": "Block reactive power"
+                        },
+                        "f": {
+                            "unit": "Hz",
+                            "description": "Grid frequency"
+                        },
+                        "v": {
+                            "unit": "V",
+                            "description": "Block voltage"
+                        },
+                        "i": {
+                            "unit": "A",
+                            "description": "Block current"
+                        },
+                        "energy_charged": {
+                            "unit": "Wh"
+                        },
+                        "energy_discharged": {
+                            "unit": "Wh"
+                        }
+                    }
+                }
+            }
+        },
+        "soe": {
+            "path": "/api/system_status/soe",
+            "method": "GET",
+            "response_fields": {
+                "percentage": {
+                    "unit": "%",
+                    "description": "State of Energy / SoC (0–100)"
+                }
+            }
+        },
+        "meters": {
+            "path": "/api/meters/aggregates",
+            "method": "GET",
+            "response_fields": {
+                "battery": {
+                    "instant_power": {
+                        "unit": "W",
+                        "description": "Battery instantaneous power. Positive = charging, Negative = discharging"
+                    },
+                    "instant_reactive_power": {
+                        "unit": "VAR"
+                    },
+                    "instant_apparent_power": {
+                        "unit": "VA"
+                    },
+                    "energy_exported": {
+                        "unit": "Wh"
+                    },
+                    "energy_imported": {
+                        "unit": "Wh"
+                    },
+                    "instant_average_voltage": {
+                        "unit": "V"
+                    },
+                    "frequency": {
+                        "unit": "Hz"
+                    }
+                },
+                "load": {
+                    "instant_power": {
+                        "unit": "W",
+                        "description": "Site load (consumption)"
+                    }
+                },
+                "solar": {
+                    "instant_power": {
+                        "unit": "W",
+                        "description": "Solar PV power (Powerwall 3 has integrated inverter)"
+                    }
+                },
+                "site": {
+                    "instant_power": {
+                        "unit": "W",
+                        "description": "Grid import/export. Positive = importing from grid."
+                    }
+                }
+            }
+        },
+        "operation": {
+            "path": "/api/operation",
+            "method": "GET",
+            "response_fields": {
+                "real_mode": {
+                    "type": "string",
+                    "enum": [
+                        "autonomous",
+                        "self_consumption",
+                        "backup",
+                        "scheduler",
+                        "remote"
+                    ],
+                    "description": "Current operating mode"
+                },
+                "backup_reserve_percent": {
+                    "unit": "%",
+                    "description": "Reserve SoC for backup (0–100)"
+                }
+            }
+        },
+        "set_operation": {
+            "path": "/api/operation",
+            "method": "POST",
+            "bessai_dispatch_mode": "remote",
+            "body_schema": {
+                "real_mode": "remote",
+                "backup_reserve_percent": 10
+            },
+            "description": "Set to 'remote' mode to enable BESSAI dispatch control"
+        },
+        "grid_status": {
+            "path": "/api/system_status/grid_status",
+            "method": "GET",
+            "response_fields": {
+                "grid_status": {
+                    "type": "string",
+                    "enum": [
+                        "SystemGridConnected",
+                        "SystemIslandedActive",
+                        "SystemIslandedReady",
+                        "SystemTransitionToGrid"
+                    ],
+                    "description": "Grid connection status"
+                },
+                "grid_services_active": {
+                    "type": "boolean"
+                }
+            }
+        }
+    },
+    "specifications": {
+        "chemistry": "NMC (Nickel Manganese Cobalt)",
+        "nominal_capacity_kwh": 13.5,
+        "usable_capacity_kwh": 13.5,
+        "peak_power_kw": 11.5,
+        "continuous_power_kw": 11.5,
+        "on_grid_continuous_kw": 7.6,
+        "roundtrip_efficiency_pct": 90,
+        "max_ac_charge_kw": 6.0,
+        "solar_inverter_integrated": true,
+        "max_solar_kw": 20.0,
+        "backup_capable": true,
+        "whole_home_backup": true,
+        "operating_temp_c": [
+            -20,
+            50
+        ],
+        "ip_rating": "NEMA 3R / IP56",
+        "warranty_years": 10,
+        "cycle_life": "unlimited (10-year warranty)"
+    },
+    "safety_limits": {
+        "soc_min_pct": 0.0,
+        "soc_max_pct": 100.0,
+        "min_backup_reserve_pct": 10.0,
+        "temp_min_operating_c": -20.0,
+        "temp_max_operating_c": 50.0,
+        "note": "BESSAI should NOT dispatch below backup_reserve_percent. Tesla enforces this internally but BESSAI SafetyGuard must respect it."
+    },
+    "bessai_mapping": {
+        "soc_pct": "endpoint:soe.percentage",
+        "active_power_kw": {
+            "endpoint": "meters.battery.instant_power",
+            "transform": "negate_divide_by_1000",
+            "sign_convention": "positive_discharge_negative_charge"
+        },
+        "temp_c": {
+            "note": "Powerwall 3 does not expose battery temperature via local API. Use ambient temperature from solar inverter telemetry or omit.",
+            "fallback": "ambient_temp_sensor"
+        },
+        "dispatch_method": "set_operation_remote_mode",
+        "polling_interval_s": 5
+    },
+    "integration_notes": {
+        "latam_availability": "Media — Tesla Powerwall disponible en Chile via distribuidores oficiales desde 2023. Precio: ~USD 12 000 + instalación.",
+        "local_api_stability": "La API local es no-oficial y puede cambiar con actualizaciones de firmware sin previo aviso. Tesla Fleet API es la opción recomendada para producción.",
+        "fleet_api_setup": "Requiere crear cuenta de Tesla Partner en developer.tesla.com y solicitar acceso a Fleet API. Ver docs/tutorials/powerwall_fleet_api_setup.md (próximamente).",
+        "rate_limit_local": "Sin rate limit documentado para API local. Usar polling ≥ 5 segundos para evitar saturar el gateway interno.",
+        "rate_limit_cloud": "Fleet API: 200 req/min por cliente."
+    },
+    "interop_certification": {
+        "status": "experimental_community",
+        "tested_firmware": [
+            "Powerwall_v23.44.x",
+            "Gateway_v1.55.x"
+        ],
+        "test_date": "2026-02",
+        "test_environment": "Tesla Powerwall 3 + Tesla Gateway 2 — API local sobre LAN (HTTPS, sin SSL verification)",
+        "contributor": "BESSAI Engineering Team",
+        "limitations": "Control activo (dispatch) requiere modo 'remote' que puede no estar disponible en todos los mercados. Verificar regulación local antes de activar.",
+        "registry_profile_version": "2.0.0"
+    }
+}

@@ -1,0 +1,206 @@
+{
+  "$schema": "https://bessai.io/schemas/device-profile/v2.json",
+  "profile_version": "2.0.0",
+  "device": {
+    "manufacturer": "SolarEdge",
+    "model": "StorEdge SE5000H / SE7K / SE10K",
+    "description": "SolarEdge StorEdge hybrid inverter with LG Chem / SolarEdge Home Battery. Single-phase 5–10 kW AC, DC-coupled 9.8 kWh battery. SolarEdge Modbus TCP Interface v1.0 (2023).",
+    "firmware_reference": "SolarEdge Modbus RTU/TCP Communication Protocol v1.0 — 2023",
+    "protocol": "ModbusTCP",
+    "slave_id_default": 1,
+    "rs485_baud": 115200,
+    "rs485_parity": "N",
+    "rs485_stopbits": 1,
+    "notes": "SolarEdge uses SunSpec Alliance Modbus Map (SunSpec ID 103 for single-phase metering, ID 124 for storage). TCP port 502. Enable Modbus on inverter LCD: Communication → RS485/LAN → Modbus TCP → Enable."
+  },
+  "connection": {
+    "byte_order": "BIG",
+    "word_order": "BIG",
+    "timeout_seconds": 3,
+    "retries": 3,
+    "sunspec_base_address": 40000
+  },
+  "sunspec_model_ids": {
+    "common_model": 1,
+    "inverter_single_phase": 103,
+    "nameplate": 120,
+    "settings": 121,
+    "extended_measurements": 122,
+    "immediate_controls": 123,
+    "storage": 124,
+    "pricing": 125
+  },
+  "registers": {
+    "inverter_status": {
+      "address": 40107,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 1,
+      "unit": "enum",
+      "description": "SunSpec Operating State: 1=Off, 2=Sleeping, 3=Starting, 4=MPPT, 5=Throttled, 6=Shutting down, 7=Fault, 8=Standby"
+    },
+    "ac_power": {
+      "address": 40083,
+      "count": 1,
+      "type": "INT16",
+      "access": "RO",
+      "scale_register": 40085,
+      "unit": "W",
+      "description": "AC active power output. Positive = exporting. Multiply by 10^SF where SF is at register 40085."
+    },
+    "ac_power_sf": {
+      "address": 40085,
+      "count": 1,
+      "type": "INT16",
+      "access": "RO",
+      "scale": 1,
+      "unit": "SF",
+      "description": "Scale factor for AC power (SunSpec Sunssf)"
+    },
+    "ac_frequency": {
+      "address": 40086,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "Hz",
+      "description": "AC grid frequency"
+    },
+    "ac_voltage_ab": {
+      "address": 40073,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 0.1,
+      "unit": "V",
+      "description": "AC phase-to-phase voltage (single-phase: phase A to N)"
+    },
+    "ac_current": {
+      "address": 40071,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 0.1,
+      "unit": "A",
+      "description": "AC output current"
+    },
+    "dc_power": {
+      "address": 40100,
+      "count": 1,
+      "type": "INT16",
+      "access": "RO",
+      "scale": 0.001,
+      "unit": "kW",
+      "description": "DC power input from PV strings"
+    },
+    "temperature": {
+      "address": 40103,
+      "count": 1,
+      "type": "INT16",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "°C",
+      "description": "Heat sink temperature"
+    },
+    "energy_total_wh": {
+      "address": 40093,
+      "count": 2,
+      "type": "UINT32",
+      "access": "RO",
+      "scale": 1,
+      "unit": "Wh",
+      "description": "Lifetime AC energy produced"
+    },
+    "storage_control_mode": {
+      "address": 57348,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "enum",
+      "description": "SunSpec Model 124 — Storage Control Mode: 0=Disabled, 1=Max Self-Consumption, 2=Backup Only, 3=Remote-Dispatch (BESSAI)",
+      "bessai_dispatch_mode": 3
+    },
+    "storage_soc": {
+      "address": 57362,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "%",
+      "description": "Battery State of Charge (0.00–100.00%)"
+    },
+    "storage_power": {
+      "address": 57350,
+      "count": 1,
+      "type": "INT16",
+      "access": "RO",
+      "scale": 1,
+      "unit": "W",
+      "description": "Battery power. Positive = charging, Negative = discharging."
+    },
+    "storage_soh": {
+      "address": 57361,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "%",
+      "description": "Battery State of Health"
+    },
+    "storage_charge_setpoint": {
+      "address": 57354,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "W",
+      "description": "Charge power setpoint (W) when in Remote-Dispatch mode. Write to command battery charging."
+    },
+    "storage_discharge_setpoint": {
+      "address": 57355,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "W",
+      "description": "Discharge power setpoint (W) when in Remote-Dispatch mode."
+    },
+    "storage_reserve_soc": {
+      "address": 57352,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "%",
+      "description": "Minimum reserve SoC for backup (0–100%). BESSAI SafetyGuard should respect this floor."
+    }
+  },
+  "safety_limits": {
+    "soc_min_pct": 10.0,
+    "soc_max_pct": 95.0,
+    "temp_min_c": -10.0,
+    "temp_max_c": 50.0,
+    "dispatch_requires_mode": "storage_control_mode=3"
+  },
+  "bessai_mapping": {
+    "soc_pct": "storage_soc",
+    "active_power_kw": {
+      "register": "storage_power",
+      "transform": "divide_by_1000"
+    },
+    "temp_c": "temperature",
+    "dispatch_register": "storage_charge_setpoint",
+    "dispatch_register_discharge": "storage_discharge_setpoint",
+    "mode_register": "storage_control_mode"
+  },
+  "interop_certification": {
+    "status": "community_validated",
+    "tested_firmware": ["SE_APP_v4.21.xx", "SE_APP_v4.25.xx"],
+    "test_date": "2026-02",
+    "test_environment": "SolarEdge StorEdge SE7K + SolarEdge Home Battery 10kWh (LG Chem RESU10H)",
+    "contributor": "BESSAI Engineering Team",
+    "registry_profile_version": "2.0.0"
+  }
+}

@@ -1,0 +1,257 @@
+{
+    "$schema": "https://bessai.io/schemas/device-profile/v2.json",
+    "profile_version": "2.0.0",
+    "device": {
+        "manufacturer": "BYD",
+        "model": "Battery-Box Premium LVS (4.0 / 8.0 / 12.0 / 16.0 / 20.0 / 24.0 kWh)",
+        "description": "BYD Battery-Box Premium LVS residential/C&I lithium iron phosphate (LFP) battery system. Modular design (4 kWh base + 2 kWh modules). Compatible with SMA, SolarEdge, Fronius, Goodwe, and others via CAN bus or RS485 (BYD CAN Protocol v1.03).",
+        "firmware_reference": "BYD Battery-Box Premium LVS Communication Protocol v1.03 (2024)",
+        "protocol": "CAN",
+        "can_baud": 500000,
+        "can_id_default": "0x0351",
+        "rs485_alternative": true,
+        "rs485_baud": 9600,
+        "rs485_parity": "N",
+        "notes": "BYD uses CAN bus as primary interface. RS485 available as secondary. For BESSAI integration with ModbusTCP inverter, use BYD-compatible inverter as gateway (e.g., SMA Sunny Boy Storage). Direct BESSAI-to-BYD requires CAN-to-USB adapter (e.g., PEAK PCAN-USB)."
+    },
+    "connection": {
+        "interface": "CAN",
+        "byte_order": "LITTLE",
+        "word_order": "LITTLE",
+        "timeout_seconds": 5,
+        "retries": 3,
+        "heartbeat_interval_s": 1
+    },
+    "can_frames": {
+        "battery_status_0x0351": {
+            "can_id": "0x0351",
+            "direction": "RX",
+            "length_bytes": 8,
+            "signals": {
+                "charge_voltage": {
+                    "start_bit": 0,
+                    "length_bits": 16,
+                    "byte_order": "LITTLE_ENDIAN",
+                    "value_type": "UINT16",
+                    "scale": 0.1,
+                    "offset": 0,
+                    "unit": "V",
+                    "description": "Maximum charge voltage CVL"
+                },
+                "charge_current_limit": {
+                    "start_bit": 16,
+                    "length_bits": 16,
+                    "byte_order": "LITTLE_ENDIAN",
+                    "value_type": "INT16",
+                    "scale": 0.1,
+                    "offset": 0,
+                    "unit": "A",
+                    "description": "Maximum charge current limit CCL (+ve = charge)"
+                },
+                "discharge_current_limit": {
+                    "start_bit": 32,
+                    "length_bits": 16,
+                    "byte_order": "LITTLE_ENDIAN",
+                    "value_type": "INT16",
+                    "scale": 0.1,
+                    "offset": 0,
+                    "unit": "A",
+                    "description": "Maximum discharge current limit DCL (+ve = discharge cap)"
+                },
+                "discharge_voltage": {
+                    "start_bit": 48,
+                    "length_bits": 16,
+                    "byte_order": "LITTLE_ENDIAN",
+                    "value_type": "UINT16",
+                    "scale": 0.1,
+                    "offset": 0,
+                    "unit": "V",
+                    "description": "Minimum discharge voltage DVL"
+                }
+            }
+        },
+        "battery_status_0x0355": {
+            "can_id": "0x0355",
+            "direction": "RX",
+            "length_bytes": 8,
+            "signals": {
+                "soc": {
+                    "start_bit": 0,
+                    "length_bits": 16,
+                    "byte_order": "LITTLE_ENDIAN",
+                    "value_type": "UINT16",
+                    "scale": 0.01,
+                    "offset": 0,
+                    "unit": "%",
+                    "description": "State of Charge (0.00–100.00%)"
+                },
+                "soh": {
+                    "start_bit": 16,
+                    "length_bits": 16,
+                    "byte_order": "LITTLE_ENDIAN",
+                    "value_type": "UINT16",
+                    "scale": 0.01,
+                    "offset": 0,
+                    "unit": "%",
+                    "description": "State of Health (0.00–100.00%)"
+                }
+            }
+        },
+        "battery_status_0x0356": {
+            "can_id": "0x0356",
+            "direction": "RX",
+            "length_bytes": 8,
+            "signals": {
+                "pack_voltage": {
+                    "start_bit": 0,
+                    "length_bits": 16,
+                    "byte_order": "LITTLE_ENDIAN",
+                    "value_type": "INT16",
+                    "scale": 0.01,
+                    "offset": 0,
+                    "unit": "V",
+                    "description": "Battery pack voltage (typical: 48V nominal for LVS)"
+                },
+                "pack_current": {
+                    "start_bit": 16,
+                    "length_bits": 16,
+                    "byte_order": "LITTLE_ENDIAN",
+                    "value_type": "INT16",
+                    "scale": 0.1,
+                    "offset": 0,
+                    "unit": "A",
+                    "description": "Battery pack current. Positive = charge, Negative = discharge."
+                },
+                "temperature": {
+                    "start_bit": 32,
+                    "length_bits": 16,
+                    "byte_order": "LITTLE_ENDIAN",
+                    "value_type": "INT16",
+                    "scale": 0.1,
+                    "offset": 0,
+                    "unit": "°C",
+                    "description": "Average cell temperature"
+                }
+            }
+        },
+        "alarm_status_0x035A": {
+            "can_id": "0x035A",
+            "direction": "RX",
+            "length_bytes": 8,
+            "signals": {
+                "protection_flags": {
+                    "start_bit": 0,
+                    "length_bits": 8,
+                    "byte_order": "LITTLE_ENDIAN",
+                    "value_type": "UINT8",
+                    "scale": 1,
+                    "unit": "bitmask",
+                    "bit_definitions": {
+                        "0": "Overvoltage protection",
+                        "1": "Undervoltage protection",
+                        "2": "Overtemperature protection",
+                        "3": "Undertemperature protection",
+                        "4": "Overcurrent charge",
+                        "5": "Overcurrent discharge",
+                        "6": "Short circuit",
+                        "7": "IC hardware failure"
+                    }
+                },
+                "alarm_flags": {
+                    "start_bit": 8,
+                    "length_bits": 8,
+                    "byte_order": "LITTLE_ENDIAN",
+                    "value_type": "UINT8",
+                    "scale": 1,
+                    "unit": "bitmask",
+                    "bit_definitions": {
+                        "0": "Voltage high alarm",
+                        "1": "Voltage low alarm",
+                        "2": "Temperature high alarm",
+                        "3": "Temperature low alarm",
+                        "4": "Charge current high alarm",
+                        "5": "Discharge current high alarm",
+                        "6": "SoC low alarm",
+                        "7": "Isolation fault alarm"
+                    }
+                }
+            }
+        }
+    },
+    "specifications": {
+        "chemistry": "LFP (LiFePO4)",
+        "nominal_voltage_v": 48,
+        "capacity_options_kwh": [
+            4.0,
+            8.0,
+            12.0,
+            16.0,
+            20.0,
+            24.0
+        ],
+        "max_charge_power_kw": {
+            "4kwh": 3.0,
+            "8kwh": 5.0,
+            "12kwh": 7.5,
+            "24kwh": 7.5
+        },
+        "max_discharge_power_kw": {
+            "4kwh": 3.0,
+            "8kwh": 5.0,
+            "12kwh": 7.5,
+            "24kwh": 7.5
+        },
+        "roundtrip_efficiency_pct": 96,
+        "cycle_life_cycles": 6000,
+        "warranty_years": 10,
+        "ip_rating": "IP55",
+        "operating_temp_c": [
+            -10,
+            50
+        ]
+    },
+    "safety_limits": {
+        "soc_min_pct": 5.0,
+        "soc_max_pct": 100.0,
+        "temp_min_operating_c": -10.0,
+        "temp_max_operating_c": 50.0,
+        "temp_charge_min_c": 0.0,
+        "temp_charge_max_c": 45.0
+    },
+    "bessai_mapping": {
+        "soc_pct": "can:0x0355.soc",
+        "soh_pct": "can:0x0355.soh",
+        "active_power_kw": {
+            "can_frame": "0x0356",
+            "signal": "pack_current",
+            "combined_with": "pack_voltage",
+            "transform": "voltage_x_current_div_1000"
+        },
+        "temp_c": "can:0x0356.temperature",
+        "dispatch_mode": "via_paired_inverter"
+    },
+    "integration_notes": {
+        "latam_availability": "Alta — líder de mercado en Chile, Brasil, Argentina para sistemas residenciales y C&I",
+        "compatible_inverters": [
+            "SMA Sunny Boy Storage",
+            "SolarEdge StorEdge",
+            "Fronius Gen24 Plus",
+            "Goodwe GW-HBT",
+            "Sungrow SH-RT"
+        ],
+        "bessai_recommended_integration": "Usar BESSAI con el inversor híbrido compatible como punto de control Modbus. El BMS BYD reporta estado via CAN al inversor, que lo expone via Modbus al gateway.",
+        "direct_can_integration": "Experimental. Requiere CAN-USB adapter. Ver docs/tutorials/can_direct_integration.md (próximamente)."
+    },
+    "interop_certification": {
+        "status": "community_validated",
+        "tested_capacity_kwh": 12.0,
+        "tested_firmware": [
+            "BBPLVS_v2.5",
+            "BBPLVS_v2.6"
+        ],
+        "test_date": "2026-02",
+        "test_environment": "BYD Battery-Box Premium LVS 12kWh + SMA Sunny Boy Storage 6.0 (BESSAI reading Modbus via SMA)",
+        "contributor": "BESSAI Engineering Team",
+        "registry_profile_version": "2.0.0"
+    }
+}
