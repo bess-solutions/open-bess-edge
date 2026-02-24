@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-24T10:48 v2.6.0 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-24T11:50 v2.7.0 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,11 +14,12 @@ Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivad
 
 ---
 
-## ✅ Estado Actual — v2.6.0
+## ✅ Estado Actual — v2.7.0
 
 ### Tests
 ```
-458 passed ✅  (+26 IEEE 2030.5 SEP2 adapter tests — cobertura ≥80%)
+490 passed ✅  (+32 DRL agent tests: 18 BESSArbitrageEnv + 11 ArbitragePolicy + 3 integ)
+1 failed (SSL PEM mock pre-existente, confirmado no-regresión) · 5 skipped · 16.81s
 CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · helm ✅
 Workflows: benchmark.yml · compliance-report.yml · fuzzing.yml · interop contract tests (Job 4)
 ```
@@ -77,11 +78,17 @@ Prometheus v2.51.2                          OK      ← localhost:9090
 | Terraform GCP | `infrastructure/terraform/` | v0.5 | ✅ 18 recursos |
 | Registro Modbus | `registry/huawei_sun2000.json` | **v2.0** | ✅ 28 registros reales |
 | Modbus Simulator | `infrastructure/docker/modbus_sim/` | **v1.0.1** | ✅ pymodbus server, 22 registros |
-| GitHub Actions CI/CD | `.github/workflows/ci.yml` | v2.6.0 | ✅ **10 jobs**: lint+typecheck+test+interop+security+terraform+helm+docker+trivy+push |
+| GitHub Actions CI/CD | `.github/workflows/ci.yml` | v2.7.0 | ✅ **10 jobs**: lint+typecheck+test+interop+security+terraform+helm+docker+trivy+push |
 | OpenSSF Scorecard CI | `.github/workflows/scorecard.yml` | v1.0 | ✅ Supply chain security automático — badge Scorecard activo |
 | Mutation Testing | `.github/workflows/mutation-test.yml` | v1.0 | ✅ mutmut semanal — safety.py + config.py |
 | K8s Manifests | `infrastructure/k8s/` | v1.0 | ✅ 6 manifests: namespace+configmap+service+deployment+netpol+kustomize |
 | SBOM + SLSA L2 | `.github/workflows/release.yml` | v1.1 | ✅ CycloneDX SBOM + cosign signing + SLSA Level 2 provenance |
+| **DRL Arb. Env (BEP-0200)** | `src/agents/bess_rl_env.py` | **v1.0** | ✅ **NUEVO v2.7** — Gymnasium env 5-min timestep, CMg duck curve, obs 8-d |
+| **Arbitrage Policy** | `src/agents/arbitrage_policy.py` | **v1.0** | ✅ **NUEVO v2.7** — 4 reglas CEN Chile, fallback DRL |
+| **ONNX DRL Agent** | `src/agents/drl_agent.py` | **v1.0** | ✅ **NUEVO v2.7** — ONNXArbitrageAgent + train_ppo + export_onnx |
+| **main.py Step 5e** | `src/core/main.py` | **v2.7** | ✅ **NUEVO v2.7** — ONNXArbitrageAgent integrado (observe-only, env var opt-in) |
+| **BESSAI-SPEC-004** | `docs/specs/BESSAI-SPEC-004.md` | **v0.1** | ✅ **NUEVO v2.7** — BatteryState IEEE P2686 data model |
+| **BOA Charter** | `docs/governance/CONSORTIUM_CHARTER.md` | **v1.0** | ✅ **NUEVO v2.7** — BESSAI Open Alliance: TSC 9 asientos, 5 WGs |
 
 ### 🐳 Stack Docker — ✅ COMPLETAMENTE OPERATIVO (v1.0.1)
 
