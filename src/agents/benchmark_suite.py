@@ -7,7 +7,7 @@ This module provides the definitive benchmark comparing BESSAI's DRL dispatch
 agent against all competitor strategies on the SAME price/conditions:
 
 Strategies compared:
-    1. **Rule-Based (Threshold)**  — OpenEMS-style: charge when price < threshold,
+    1. **Rule-Based (Threshold)**  — common threshold strategy: charge when price < threshold,
        discharge when price > threshold. Simple but suboptimal.
     2. **MILP Optimal**            — Mathematical optimum for given price profile
        (solving LP relaxation). Theoretical ceiling for any agent.
@@ -124,10 +124,11 @@ class BenchmarkReport:
 
 
 class RuleBasedAgent:
-    """Rule-based dispatch agent (OpenEMS-like threshold strategy).
+    """Rule-based dispatch agent using price threshold logic.
 
     Strategy: charge when CMg < low_threshold, discharge when CMg > high_threshold.
-    This is representative of OpenEMS's built-in schedulers for price arbitrage.
+    This represents a common rule-based approach used in many commercial BEMS platforms
+    for price arbitrage — simple but systematically suboptimal vs MILP.
 
     Parameters
     ----------

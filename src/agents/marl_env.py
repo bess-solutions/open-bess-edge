@@ -13,9 +13,9 @@ Architecture: **Decentralized Execution, Centralized Training (CTDE)**
       at inference — critical for edge deployment where agents may be offline.
 
 Why this matters:
-    - OpenEMS: single-site only, no VPP coordination.
-    - FlexMeasures: cloud-based VPP, cannot run offline.
-    - Tesla Autobidder: closed, no federation API.
+    - Rule-based BEMS (most commercial platforms): single-site only, no VPP coordination.
+    - Cloud-based scheduling platforms: require connectivity, cannot run offline.
+    - Proprietary bidding platforms: closed APIs, no federation support.
     - **BESSAI VPP**: 10-100 sites coordinated, each runs its ONNX model offline.
 
 Compatibility:
