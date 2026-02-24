@@ -121,6 +121,24 @@ nav:
     - Battery Data Format (BDF): interoperability/BDF_alignment.md
   - Community:
     - Adopters: adopters.md
+    - Early Adopters Program: early_adopters.md
+    - Academic Collaboration: academic_collaboration.md
+    - Research Topics: research_topics.md
+  - Benchmarks:
+    - BENCHMARK-001 Latency: benchmarks/BENCHMARK-001-latency.md
+    - BENCHMARK-002 Scale: benchmarks/BENCHMARK-002-scale.md
+    - BENCHMARK-003 Security: benchmarks/BENCHMARK-003-security.md
+    - BENCHMARK-004 DRL Arbitrage: benchmarks/BENCHMARK-004-drl-arbitrage.md
+    - BENCHMARK-005 Edge Devices: benchmarks/BENCHMARK-005-edge-devices.md
+  - Development:
+    - Release Process: release_process.md
+    - Security Guide (Maintainer): security_guide_maintainer.md
+    - Hardware Profile Tutorial: tutorials/hardware_profile_contribution.md
+    - DRL Training Custom: tutorials/training_custom_drl.md
+  - Project Management:
+    - Pendientes: PENDIENTES.md
+    - Módulos y Datos Simulados: MODULOS_Y_DATOS_SIMULADOS.md
+    - Manual Acciones (Rodrigo): MANUAL_ACCIONES_RODRIGO.md
 
 extra:
   social:
