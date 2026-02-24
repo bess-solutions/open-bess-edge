@@ -95,6 +95,7 @@ nav:
     - SPEC-001 BESSDriver Interface: specs/BESSAI-SPEC-001.md
     - SPEC-002 Safety Requirements: specs/BESSAI-SPEC-002.md
     - SPEC-003 Telemetry Schema: specs/BESSAI-SPEC-003.md
+    - SPEC-004 BMS Data Model (IEEE 2686): specs/BESSAI-SPEC-004.md
   - Enhancement Proposals (BEPs):
     - BEP-0001 — BEP Process: bep/BEP-0001.md
     - BEP-0100 — IEEE 2030.5 Adapter: bep/BEP-0100.md
@@ -131,6 +132,15 @@ nav:
     - Bounty Program: bounty_program.md
     - Pitch Deck: pitch_deck.md
     - Start-Up Chile SSAF: startup_chile_ssaf.md
+  - Governance (BESSAI Open Alliance):
+    - Consortium Charter: governance/CONSORTIUM_CHARTER.md
+  - Certification:
+    - UL 9540 Roadmap: certification/UL9540_certification_roadmap.md
+    - IEC 62443 SL-2 Path: compliance/iec_62443_sl2_certification_path.md
+    - BESSAI Certified Program: interoperability/BESSAI-CERTIFIED.md
+  - Outreach:
+    - Hackathon 2026: outreach/HACKATHON_BESSAI_2026.md
+    - IEEE Paper Abstract: outreach/IEEE_PAPER_ABSTRACT.md
 
 extra:
   social:

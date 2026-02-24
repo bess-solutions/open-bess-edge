@@ -1,6 +1,6 @@
 # Open-BESS-Edge — Global Standard Roadmap
 
-> **Versión:** 1.0 · **Fecha:** 2026-02-23 · **Autor:** BESSAI Engineering Team
+> **Versión:** 2.0 · **Fecha:** 2026-02-24 · **Autor:** BESSAI Engineering Team
 >
 > *Este documento define la hoja de ruta estratégica para evolucionar Open-BESS-Edge de un proyecto open-source funcional a un estándar de facto global en software para gestión de BESS (Battery Energy Storage Systems). Sigue el modelo de madurez de proyectos que se convirtieron en estándares industriales como Linux, Kubernetes, o Modbus.*
 
@@ -9,15 +9,17 @@
 ## Estado Actual vs Objetivo
 
 ```
-HOY (v2.5.0)                           OBJETIVO (v5.0, 2028)
+HOY (v2.6.0)                           OBJETIVO (v5.0, 2028)
 ─────────────────────────────────       ─────────────────────────────────
 ✅ OSS Apache 2.0                       ✅ + Fundación Neutral (LF Energy)
 ✅ IEC 62443 SL-2 path                  ✅ + IEC 62933, UL 9540, IEEE 2686
-✅ 1 implementador activo               ✅ 50+ implementadores en 15+ países
-✅ CI/CD robusto, 432 tests             ✅ Conformance test suite interop
+✅ 490 tests, CI/CD robusto             ✅ Conformance test suite interop
 ✅ Modbus, MQTT, GCP Pub/Sub            ✅ CIM, IEC 61850, OCPP, DNP3
+✅ IEEE 2030.5 / SEP 2.0 (BEP-0100)    ✅ IEC 61850, DNP3, ISO 15118
+✅ DRL Agent PPO (BEP-0200 Fase 1)      ✅ Trained model +25-35% uplift
+✅ BEP process, BESSAI-SPEC-001/004     ✅ Specs formales en ISO/IEC bodies
+✅ BESSAI Open Alliance charter (BOA)   ✅ 50+ implementadores en 15+ países
 ✅ Docs en inglés                       ✅ Docs en EN/ES/ZH/DE
-✅ BEP process, BESSAI-SPEC-*           ✅ Specs formales en ISO/IEC bodies
 ```
 
 ---
@@ -93,13 +95,17 @@ HOY (v2.5.0)                           OBJETIVO (v5.0, 2028)
 ├── OpenSSF Silver/Gold foundations
 ├── MQTT dual-channel (v2.5.0)
 ├── Rate Limiting SR 7.1 (v2.3.0)
-└── BEP process y BESSAI-SPEC-001/002/003
+├── BEP process y BESSAI-SPEC-001/002/003
+├── ✅ IEEE 2030.5 adapter BEP-0100 (v2.6.0) → Active
+├── ✅ DRL Arbitrage Agent BEP-0200 Fase 1 (v2.6.0): BESSArbitrageEnv + ArbitragePolicy + ONNXArbitrageAgent
+├── ✅ BESSAI Open Alliance Charter (docs/governance/CONSORTIUM_CHARTER.md)
+├── ✅ BESSAI-SPEC-004 (IEEE P2686 BMS data model, draft)
+└── ✅ Hackathon 2026 + IEEE Paper Abstract preparados
 
 📋 Pendiente en esta fase
-├── [ ] Activar IEEE 2030.5 adapter (BEP-0100) → v2.6.0
 ├── [ ] Publicar en IEEE Energy Conference / RE+ LATAM
 ├── [ ] Obtener auditor acreditado para IEC 62443 SL-2 formal
-├── [ ] Submit a LF Energy Sandbox (propuesta ya en docs/)
+├── [ ] Submit a LF Energy Sandbox (propuesta actualizada en docs/)
 └── [ ] Primera implementación externa documentada (partner)
 ```
 
@@ -244,10 +250,16 @@ Specs    SPEC-001/3  + 62933     + 61850     + ISO submit
 
 ## Lectura Adicional
 
-- [`docs/lf_energy_proposal.md`](lf_energy_proposal.md) — Propuesta LF Energy Sandbox
+- [`docs/lf_energy_proposal.md`](lf_energy_proposal.md) — Propuesta LF Energy Sandbox (v1.1)
+- [`docs/governance/CONSORTIUM_CHARTER.md`](governance/CONSORTIUM_CHARTER.md) — BESSAI Open Alliance (BOA)
+- [`docs/certification/UL9540_certification_roadmap.md`](certification/UL9540_certification_roadmap.md) — Path UL 9540
+- [`docs/outreach/IEEE_PAPER_ABSTRACT.md`](outreach/IEEE_PAPER_ABSTRACT.md) — Abstract IEEE PES 2026
+- [`docs/outreach/HACKATHON_BESSAI_2026.md`](outreach/HACKATHON_BESSAI_2026.md) — Hackathon Mayo 2026
 - [`docs/compliance/ieee_2030_5_compliance.md`](compliance/ieee_2030_5_compliance.md) — Gap IEEE 2030.5
 - [`docs/compliance/iec_62443_sl2_certification_path.md`](compliance/iec_62443_sl2_certification_path.md) — Ruta SL-2
-- [`docs/bep/BEP-0100.md`](bep/BEP-0100.md) — BEP IEEE 2030.5 Adapter
+- [`docs/specs/BESSAI-SPEC-004.md`](specs/BESSAI-SPEC-004.md) — IEEE P2686 BMS Data Model
+- [`docs/bep/BEP-0100.md`](bep/BEP-0100.md) — BEP IEEE 2030.5 Adapter (Active)
+- [`docs/bep/BEP-0200.md`](bep/BEP-0200.md) — BEP DRL Arbitrage Agent
 - [`docs/bep/BEP-0001.md`](bep/BEP-0001.md) — BEP Process
 - [`docs/interoperability/BESSAI-CERTIFIED.md`](interoperability/BESSAI-CERTIFIED.md) — Programa de certificación
 - [`GOVERNANCE.md`](../GOVERNANCE.md) — Gobernanza actual
