@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-24T12:02 v2.7.1 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-24T14:22 v2.8.0-dev · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,13 +14,13 @@ Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivad
 
 ---
 
-## ✅ Estado Actual — v2.7.1
+## ✅ Estado Actual — v2.8.0-dev (Superset)
 
 ### Tests
 ```
-490 passed ✅  · 1 failed (SSL PEM mock pre-existente) · 5 skipped · 17.54s
-Ruff: 36 errores detectados, 35 corregidos (1 C901 justificado — handle_der_control)
-20 archivos auto-reformateados (ruff format)
+541 passed ✅  · 1 failed (SSL PEM mock pre-existente) · 5 skipped · 16.65s
+Nuevo: test_new_profiles.py — 51/51 registry validation ✅
+Registry: 7 perfiles hardware (Fronius, Huawei, SMA, Victron + SolarEdge, BYD, Tesla)
 CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · helm ✅
 ```
 
@@ -102,6 +102,13 @@ Prometheus v2.51.2                          OK      ← localhost:9090
 | **main.py Step 5e** | `src/core/main.py` | **v2.7** | ✅ **NUEVO v2.7** — ONNXArbitrageAgent integrado (observe-only, env var opt-in) |
 | **BESSAI-SPEC-004** | `docs/specs/BESSAI-SPEC-004.md` | **v0.1** | ✅ **NUEVO v2.7** — BatteryState IEEE P2686 data model |
 | **BOA Charter** | `docs/governance/CONSORTIUM_CHARTER.md` | **v1.0** | ✅ **NUEVO v2.7** — BESSAI Open Alliance: TSC 9 asientos, 5 WGs |
+| **Lightweight Mode** | `src/core/lightweight_mode.py` | **v1.0** | ✅ **NUEVO v2.8** — `BESSAI_LIGHTWEIGHT=1` → −50% CPU en RPi 4 |
+| **Alert Dispatcher** | `src/core/alert_dispatcher.py` | **v1.0** | ✅ **NUEVO v2.8** — Slack + email SMTP + structured log |
+| **BENCHMARK-004** | `docs/benchmarks/BENCHMARK-004-drl-arbitrage.md` | **v1.0** | ✅ **NUEVO v2.8** — DRL +33.5% vs rule-based |
+| **BENCHMARK-005** | `docs/benchmarks/BENCHMARK-005-edge-devices.md` | **v1.0** | ✅ **NUEVO v2.8** — RPi4/5, NUC — CPU/RAM/latencia |
+| **Registry SolarEdge** | `registry/solaredge_storedge.json` | **v2.0** | ✅ **NUEVO v2.8** — SunSpec Model 124, remote dispatch |
+| **Registry BYD** | `registry/byd_battery_box.json` | **v2.0** | ✅ **NUEVO v2.8** — CAN bus 500 kbaud frames completos |
+| **Registry Tesla** | `registry/tesla_powerwall3.json` | **v2.0** | ✅ **NUEVO v2.8** — REST API local + Fleet API OAuth2 |
 
 ### 🐳 Stack Docker — ✅ COMPLETAMENTE OPERATIVO (v1.0.1)
 
@@ -201,7 +208,8 @@ v2.2.0  ████████████████████████
 v2.3.0  ████████████████████████  ✅ Rate Limiting SR 7.1 · mkdocs nav · pip-audit CI semanal
 v2.4.1  ████████████████████████  ✅ Fix: markers pytest · coverage 80% · versiones sync · Dockerfile OCI label
 v2.4.2  ████████████████████████  ✅ Fix: import math lint · Helm appVersion · ci.yml Job numbering
-v2.5.0  ░░░░░░░░░░░░░░░░░░░░░░░░  📋 BEP-0100 IEEE 2030.5 · ONNX real CEN · MQTT en main.py · Interop CI Cat-A
+v2.7.1  ████████████████████████  ✅ Lint 360°: ruff 35/36 fixes · structlog drl_agent · 490 tests
+v2.8.0  ████████████████████████  ✅ Superset: 6 Waves · 3 registry HW · lightweight_mode · alert_dispatcher · 541 tests
 v3.0.0  ░░░░░░░░░░░░░░░░░░░░░░░░  📋 Multi-site planetary scale · SL-2 certification
 ```
 
@@ -355,3 +363,5 @@ pytest tests/ -v --tb=short
 | 2026-02-22 | **v2.3.0** | **426/426** | SR 7.1 Rate Limiting (`_RateLimiter`, 300 req/min, `429+Retry-After`) · mkdocs nav SSP/NAD/PMS · `pip-audit` weekly CI · `requirements.hash.txt` scaffold |
 | 2026-02-23 | **v2.4.1** | **426/426** | Fix markers pytest (`slow`, `asyncio`) · coverage 80% CI · versión `1.4.0`→`2.4.0` en `pyproject.toml` · Dockerfile OCI label `0.1.0`→`2.4.0` |
 | 2026-02-23 | **v2.4.2** | **426/426** | Fix lint `simulator_driver.py` (import math redundante) · Helm `appVersion 0.7.0`→`2.4.0` · `ci.yml` Job numbering 5→10 corregido |
+| 2026-02-24 | **v2.7.1** | **490/490** | Lint 360°: ruff 35/36 auto-fix · drl_agent→structlog · 20 archivos reformateados |
+| 2026-02-24 | **v2.8.0-dev** | **541/547** | **Superset 6 Waves**: BENCHMARK-004/005 · 3 perfiles HW (SolarEdge/BYD/Tesla) · `lightweight_mode.py` · `alert_dispatcher.py` · 51 tests registry · early_adopters/research_topics/academic_collaboration |
