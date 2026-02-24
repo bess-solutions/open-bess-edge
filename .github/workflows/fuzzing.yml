@@ -1,8 +1,11 @@
-name: Fuzzing — Modbus Parser (Atheris)
+name: Fuzzing — Modbus Parser (Atheris + ClusterFuzzLite)
 
 # Fuzz critical input parsers to detect memory safety and parsing errors.
 # Runs weekly on schedule and on manual trigger.
-# Satisfies OpenSSF Gold Badge criterion: fuzzing for critical inputs.
+# Satisfies OpenSSF Scorecard Fuzzing check.
+
+# OpenSSF Scorecard: Token-Permissions — restrict default token to read-only
+permissions: read-all
 
 on:
   schedule:
@@ -13,12 +16,42 @@ on:
         description: "Fuzzing duration in seconds"
         required: false
         default: "120"
+  pull_request:
+    branches: [main]
 
 env:
   PYTHON_VERSION: "3.11"
   FUZZ_DURATION: ${{ github.event.inputs.duration_seconds || '120' }}
 
 jobs:
+  # ─────────────────────────────────────────────────────────────────
+  # ClusterFuzzLite — OSS-Fuzz-compatible continuous fuzzing
+  # This job satisfies the OpenSSF Scorecard "Fuzzing" check.
+  # ─────────────────────────────────────────────────────────────────
+  clusterfuzzlite:
+    name: ClusterFuzzLite (batch fuzzing)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write  # Upload SARIF
+      contents: read
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Run ClusterFuzzLite batch fuzzing
+        uses: google/clusterfuzzlite/actions/build_fuzzers@98fd7c5b93e09b50e490fc10faae9c6f8c5f9b9e  # v1
+        with:
+          language: python
+          sanitizer: address
+
+      - name: Run ClusterFuzzLite fuzz
+        uses: google/clusterfuzzlite/actions/run_fuzzers@98fd7c5b93e09b50e490fc10faae9c6f8c5f9b9e  # v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fuzz-seconds: ${{ env.FUZZ_DURATION }}
+          mode: batch
+          sanitizer: address
+
   # ─────────────────────────────────────────────────────────────────
   # Fuzz the Modbus register parser — critical input in OT security
   # ─────────────────────────────────────────────────────────────────
@@ -30,9 +63,9 @@ jobs:
       security-events: write   # Upload SARIF findings
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
@@ -176,7 +209,7 @@ jobs:
           fi
 
       - name: Upload fuzz corpus and coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0
         if: always()
         with:
           name: fuzz-results-${{ github.run_id }}
@@ -201,4 +234,4 @@ jobs:
           echo "| Modbus Register Parser | ${{ env.FUZZ_DURATION }}s | ${{ steps.results.outputs.FOUND_CRASH == 'false' && '✅ No crashes' || '❌ CRASH DETECTED' }} |" >> "$GITHUB_STEP_SUMMARY"
           echo "| MQTT Payload Parser | ${{ env.FUZZ_DURATION }}s | ${{ steps.results.outputs.FOUND_CRASH == 'false' && '✅ No crashes' || '❌ CRASH DETECTED' }} |" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "_Fuzzing satisfies OpenSSF Gold Badge criterion: fuzzing of critical inputs_" >> "$GITHUB_STEP_SUMMARY"
+          echo "_Fuzzing satisfies OpenSSF Scorecard Fuzzing check_" >> "$GITHUB_STEP_SUMMARY"

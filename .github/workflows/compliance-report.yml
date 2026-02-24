@@ -1,5 +1,7 @@
 name: "Compliance Report"
 
+# OpenSSF Scorecard: Token-Permissions — explicitly declared per-job
+
 on:
   schedule:
     # Run every Monday at 07:00 UTC (after weekly benchmarks at 06:00)
@@ -22,9 +24,9 @@ jobs:
     name: "SAST — Bandit (Python)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
         with:
           python-version: "3.11"
           cache: pip
@@ -38,7 +40,7 @@ jobs:
           bandit -r src/ -ll --format txt  # Human-readable summary
 
       - name: Upload SARIF to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@1bb15d06a6fbb5d9d9ffd228746bf8ee208caec8  # codeql-bundle-v2.20.5
         with:
           sarif_file: bandit-results.sarif
           category: bandit
@@ -47,10 +49,10 @@ jobs:
     name: "SCA — Trivy (dependencies + Docker)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
       - name: Scan Python dependencies
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2  # 0.28.0
         with:
           scan-type: fs
           scan-ref: .
@@ -60,7 +62,7 @@ jobs:
           output: trivy-dep-results.sarif
 
       - name: Upload Trivy dep results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@1bb15d06a6fbb5d9d9ffd228746bf8ee208caec8  # codeql-bundle-v2.20.5
         with:
           sarif_file: trivy-dep-results.sarif
           category: trivy-deps
@@ -70,19 +72,19 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.event_name == 'schedule'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
           persist-credentials: false
 
       - name: Run OpenSSF Scorecard
-        uses: ossf/scorecard-action@v2.3.1
+        uses: ossf/scorecard-action@ff5dd8929f96a8a4dc67d13f32b8c75057829621  # v2.4.0
         with:
           results_file: scorecard_results.sarif
           results_format: sarif
           publish_results: true
 
       - name: Upload Scorecard results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@1bb15d06a6fbb5d9d9ffd228746bf8ee208caec8  # codeql-bundle-v2.20.5
         with:
           sarif_file: scorecard_results.sarif
           category: scorecard
@@ -92,9 +94,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [bandit-sast, trivy-scan]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
         with:
           python-version: "3.11"
           cache: pip

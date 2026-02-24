@@ -3,6 +3,11 @@ name: Dependency Security Audit
 # IEC 62443-2-3 SR 2.2 + OpenSSF Gold Badge: automated CVE scanning
 # Runs weekly on Monday and on every push that touches dependencies.
 
+# OpenSSF Scorecard: Token-Permissions — restrict default token to read-only
+permissions:
+  contents: read
+  security-events: write  # for SARIF upload
+
 on:
   schedule:
     - cron: "0 9 * * 1"   # Every Monday 09:00 UTC
@@ -18,10 +23,6 @@ on:
       - "requirements-dev.txt"
   workflow_dispatch:
 
-permissions:
-  contents: read
-  security-events: write  # for SARIF upload
-
 jobs:
   pip-audit:
     name: pip-audit CVE Scan
@@ -29,10 +30,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
         with:
           python-version: "3.12"
           cache: pip
@@ -81,7 +82,7 @@ jobs:
           EOF
 
       - name: Upload audit results (artifact)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0
         if: always()
         with:
           name: pip-audit-results
@@ -95,10 +96,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
         with:
           python-version: "3.12"
 
