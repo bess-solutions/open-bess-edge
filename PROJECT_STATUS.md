@@ -1,6 +1,6 @@
-# 📊 BESSAI Edge Gateway — Estado del Proyecto
+﻿# 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-24T14:22 v2.8.0-dev · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-24T17:54 v2.9.0-dev · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,7 +14,9 @@ Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivad
 
 ---
 
-## ✅ Estado Actual — v2.8.0-dev (Superset)
+## ✅ Estado Actual — v2.9.0-dev (DRL Optimizer Real + MILP + Scorecard Hardening)
+
+> Ver: [`docs/PENDIENTES.md`](docs/PENDIENTES.md) · [`docs/MODULOS_Y_DATOS_SIMULADOS.md`](docs/MODULOS_Y_DATOS_SIMULADOS.md)
 
 ### Tests
 ```
@@ -26,16 +28,19 @@ CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · 
 
 ### 🔍 Audit 360° — Gaps Conocidos y Plan de Acción
 
+> Ver detalle completo en [`docs/PENDIENTES.md`](docs/PENDIENTES.md)
+
 | Prioridad | Gap | Archivo | Acción | Target |
 |---|---|---|---|---|
-| 🔴 Alta | `handle_der_control` complejidad C901 (15 > 10) | `sep2_adapter.py:569` | Refactor en 2 sub-funciones | v2.8.0 |
-| 🔴 Alta | SSL test mock inválido (1 failed pre-existente) | `test_sep2_adapter.py:447` | Usar `cryptography` lib para gen cert real | v2.8.0 |
-| 🔵 Media | mypy: `AsyncModbusTcpClient(**sslctx)` type mismatch | `modbus_driver.py:179` | `# type: ignore[arg-type]` + bug report pymodbus | v2.8.0 |
-| 🔵 Media | mypy: `totp_auth.py` union-attr `None` | `totp_auth.py:201` | Agregar guard `if self._totp is not None` | v2.8.0 |
-| 🔵 Media | BEP-0200 DRL en modo observe-only | `main.py:Step5e` | Activar `write_tag()` tras validar en staging | v2.9.0 |
-| 🟡 Baja | Pyre2 falsos positivos (sin acceso al venv) | Multiple | Configurar `pyrightconfig.json` con venvPath | v2.8.0 |
-| 🟡 Baja | BESSAI-SPEC-004 draft (sin impl. en drivers) | `BESSAI-SPEC-004.md` | Implementar `BatteryState` dataclass en drivers | v2.9.0 |
-| 🟡 Baja | 7 dispositivos BESSAI-CERTIFIED “Wanted” | BESSAI-CERTIFIED.md | Implementar en Hackathon 2026 | Mayo 2026 |
+| 🔴 Alta | `handle_der_control` complejidad C901 (15 > 10) | `sep2_adapter.py:569` | Refactor en 2 sub-funciones | v2.9.0 |
+| 🔴 Alta | SSL test mock inválido (1 failed pre-existente) | `test_sep2_adapter.py:447` | Usar `cryptography` lib | v2.9.0 |
+| 🔴 Alta | Branch-Protection no configurado | GitHub Settings | Rodrigo: Settings → Branches → Add rule `main` | Manual |
+| 🔴 Alta | cosign keypair sin configurar | `release.yml` | `cosign generate-keypair` + Secrets GH | v2.9.0 |
+| 🔵 Media | BEP-0200 DRL en modo observe-only | `main.py:Step5e` | Activar `write_tag()` tras staging | v2.9.0 |
+| 🔵 Media | mypy `modbus_driver.py:179` + `totp_auth.py:201` | Múltiple | type-ignore + guards | v2.9.0 |
+| 🔵 Media | MILP optimizer sin tests de integración | `milp_optimizer.py` | `tests/agents/test_milp_optimizer.py` | v2.9.0 |
+| 🟡 Baja | Datos CMg dashboard simulados | `dashboard/data/` | API CEN real tras BEP-0200 F3 | v2.10.0 |
+| 🟡 Baja | BESSAI-SPEC-004 draft (sin impl. en drivers) | `BESSAI-SPEC-004.md` | `BatteryState` dataclass | v2.10.0 |
 
 
 ### Stack Docker — Métricas en vivo (confirmado 2026-02-19)
@@ -101,7 +106,6 @@ Prometheus v2.51.2                          OK      ← localhost:9090
 | **ONNX DRL Agent** | `src/agents/drl_agent.py` | **v1.0** | ✅ **NUEVO v2.7** — ONNXArbitrageAgent + train_ppo + export_onnx |
 | **main.py Step 5e** | `src/core/main.py` | **v2.7** | ✅ **NUEVO v2.7** — ONNXArbitrageAgent integrado (observe-only, env var opt-in) |
 | **BESSAI-SPEC-004** | `docs/specs/BESSAI-SPEC-004.md` | **v0.1** | ✅ **NUEVO v2.7** — BatteryState IEEE P2686 data model |
-| **BOA Charter** | `docs/governance/CONSORTIUM_CHARTER.md` | **v1.0** | ✅ **NUEVO v2.7** — BESSAI Open Alliance: TSC 9 asientos, 5 WGs |
 | **Lightweight Mode** | `src/core/lightweight_mode.py` | **v1.0** | ✅ **NUEVO v2.8** — `BESSAI_LIGHTWEIGHT=1` → −50% CPU en RPi 4 |
 | **Alert Dispatcher** | `src/core/alert_dispatcher.py` | **v1.0** | ✅ **NUEVO v2.8** — Slack + email SMTP + structured log |
 | **BENCHMARK-004** | `docs/benchmarks/BENCHMARK-004-drl-arbitrage.md` | **v1.0** | ✅ **NUEVO v2.8** — DRL +33.5% vs rule-based |
@@ -109,6 +113,12 @@ Prometheus v2.51.2                          OK      ← localhost:9090
 | **Registry SolarEdge** | `registry/solaredge_storedge.json` | **v2.0** | ✅ **NUEVO v2.8** — SunSpec Model 124, remote dispatch |
 | **Registry BYD** | `registry/byd_battery_box.json` | **v2.0** | ✅ **NUEVO v2.8** — CAN bus 500 kbaud frames completos |
 | **Registry Tesla** | `registry/tesla_powerwall3.json` | **v2.0** | ✅ **NUEVO v2.8** — REST API local + Fleet API OAuth2 |
+| **MILP Optimizer** | `src/agents/milp_optimizer.py` | **v1.0** | ✅ **NUEVO v2.9** — Optimizador MILP de despacho (PuLP/CBC), complemento DRL |
+| **Degradation Model** | `src/agents/degradation_model.py` | **v1.0** | ✅ **NUEVO v2.9** — Steinbuch calendar-aging + cycle-aging model |
+| **Benchmark Suite** | `src/agents/benchmark_suite.py` | **v1.0** | ✅ **NUEVO v2.9** — A/B benchmark: DRL vs MILP vs rule-based |
+| **CMg Data CEN** | `dashboard/data/cmg_maitencillo.json` | **v1.0** | ✅ **NUEVO v2.9** — 48 días × 288 puntos 5-min, Nodo Maitencillo 220 kV |
+| **CMg Exporter** | `scripts/export_cmg_json.py` | **v1.0** | ✅ **NUEVO v2.9** — Generador reproducible con física real SEN |
+| **Dashboard DRL** | `dashboard/optimizer.js` + `index.html` | **v2.0** | ✅ **NUEVO v2.9** — Tab DRL Optimizer, SOC trajectory, CMg selector 48 días |
 
 ### 🐳 Stack Docker — ✅ COMPLETAMENTE OPERATIVO (v1.0.1)
 
