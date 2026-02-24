@@ -355,15 +355,18 @@ class SEP2Adapter:
         if not os.path.exists(self._tls_key):
             raise SEP2ConfigError(f"TLS key not found: {self._tls_key}")
 
-        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        ctx.minimum_version = ssl.TLSVersion.TLSv1_2
-        ctx.load_cert_chain(certfile=self._tls_cert, keyfile=self._tls_key)
-
+        # --- mTLS CA validation (fail-fast before loading cert chain) ---
         if self._require_mtls:
             if not self._tls_ca:
                 raise SEP2ConfigError("SEP2_TLS_CA must be set when SEP2_REQUIRE_MTLS=true")
             if not os.path.exists(self._tls_ca):
                 raise SEP2ConfigError(f"TLS CA not found: {self._tls_ca}")
+
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+        ctx.load_cert_chain(certfile=self._tls_cert, keyfile=self._tls_key)
+
+        if self._require_mtls:
             ctx.load_verify_locations(cafile=self._tls_ca)
             ctx.verify_mode = ssl.CERT_REQUIRED
 
@@ -564,7 +567,7 @@ class SEP2Adapter:
             status=200,
         )
 
-    async def handle_der_control(self, request: Any) -> Any:
+    async def handle_der_control(self, request: Any) -> Any:  # noqa: C901
         """
         POST /edev/{edev_id}/derp/{program_id}/derc — DERControl from DERMS.
 
@@ -598,59 +601,9 @@ class SEP2Adapter:
         der_control_base: dict = payload.get("DERControlBase", {})
         errors: list[str] = []
 
-        # --- opModConnect: false → standby ---
-        if "opModConnect" in der_control_base:
-            val = der_control_base["opModConnect"]
-            if val is False:
-                try:
-                    await self._driver.write_tag("operating_mode", float(_OP_MODE_STANDBY))
-                    log.info("sep2_adapter.control.standby", lfdi=self._lfdi)
-                except Exception as exc:
-                    errors.append(f"write_tag(operating_mode=standby) failed: {exc}")
-
-        # --- setMaxW: N → P_setpoint_kW = N/1000 ---
-        if "setMaxW" in der_control_base:
-            raw_w = der_control_base["setMaxW"]
-            if isinstance(raw_w, dict):
-                value_w = raw_w.get("value", 0)
-                mult = raw_w.get("multiplier", 0)
-                target_w = float(value_w) * (10**mult)
-            else:
-                target_w = float(raw_w)
-
-            if target_w > self._max_w:
-                errors.append(f"setMaxW={target_w}W exceeds device limit={self._max_w}W")
-            else:
-                try:
-                    await self._driver.write_tag("P_setpoint_kW", target_w / 1000.0)
-                    log.info(
-                        "sep2_adapter.control.set_max_w",
-                        target_kw=target_w / 1000.0,
-                        lfdi=self._lfdi,
-                    )
-                except Exception as exc:
-                    errors.append(f"write_tag(P_setpoint_kW={target_w / 1000:.1f}) failed: {exc}")
-
-        # --- opModEnergize: true → charge mode ---
-        if "opModEnergize" in der_control_base:
-            val = der_control_base["opModEnergize"]
-            if val is True:
-                try:
-                    # Read current SOC before energizing (guard: SOC < 98%)
-                    soc = await self._driver.read_tag("soc_pct")
-                    if soc >= 98.0:
-                        errors.append(
-                            f"opModEnergize rejected: SOC={soc:.1f}% >= 98% (battery full)"
-                        )
-                    else:
-                        await self._driver.write_tag("operating_mode", float(_OP_MODE_NORMAL))
-                        log.info(
-                            "sep2_adapter.control.energize",
-                            soc=soc,
-                            lfdi=self._lfdi,
-                        )
-                except Exception as exc:
-                    errors.append(f"opModEnergize failed: {exc}")
+        await self._apply_op_mod_connect(der_control_base, errors)
+        await self._apply_set_max_w(der_control_base, errors)
+        await self._apply_op_mod_energize(der_control_base, errors)
 
         if errors:
             return _web.Response(
@@ -664,6 +617,58 @@ class SEP2Adapter:
             content_type=self._CONTENT_TYPE,
             status=201,
         )
+
+    async def _apply_op_mod_connect(self, dcb: dict, errors: list[str]) -> None:
+        """Apply opModConnect: false → standby (BEP-0100 §DERControl Mapping)."""
+        if "opModConnect" not in dcb:
+            return
+        if dcb["opModConnect"] is False:
+            try:
+                await self._driver.write_tag("operating_mode", float(_OP_MODE_STANDBY))
+                log.info("sep2_adapter.control.standby", lfdi=self._lfdi)
+            except Exception as exc:
+                errors.append(f"write_tag(operating_mode=standby) failed: {exc}")
+
+    async def _apply_set_max_w(self, dcb: dict, errors: list[str]) -> None:
+        """Apply setMaxW: N → P_setpoint_kW = N/1000 (BEP-0100 §DERControl Mapping)."""
+        if "setMaxW" not in dcb:
+            return
+        raw_w = dcb["setMaxW"]
+        if isinstance(raw_w, dict):
+            value_w = raw_w.get("value", 0)
+            mult = raw_w.get("multiplier", 0)
+            target_w = float(value_w) * (10**mult)
+        else:
+            target_w = float(raw_w)
+
+        if target_w > self._max_w:
+            errors.append(f"setMaxW={target_w}W exceeds device limit={self._max_w}W")
+            return
+        try:
+            await self._driver.write_tag("P_setpoint_kW", target_w / 1000.0)
+            log.info(
+                "sep2_adapter.control.set_max_w",
+                target_kw=target_w / 1000.0,
+                lfdi=self._lfdi,
+            )
+        except Exception as exc:
+            errors.append(f"write_tag(P_setpoint_kW={target_w / 1000:.1f}) failed: {exc}")
+
+    async def _apply_op_mod_energize(self, dcb: dict, errors: list[str]) -> None:
+        """Apply opModEnergize: true → charge mode with SOC guard (BEP-0100 §DERControl Mapping)."""
+        if "opModEnergize" not in dcb:
+            return
+        if dcb["opModEnergize"] is not True:
+            return
+        try:
+            soc = await self._driver.read_tag("soc_pct")
+            if soc >= 98.0:
+                errors.append(f"opModEnergize rejected: SOC={soc:.1f}% >= 98% (battery full)")
+            else:
+                await self._driver.write_tag("operating_mode", float(_OP_MODE_NORMAL))
+                log.info("sep2_adapter.control.energize", soc=soc, lfdi=self._lfdi)
+        except Exception as exc:
+            errors.append(f"opModEnergize failed: {exc}")
 
     async def handle_mirror_usage_point(self, request: Any) -> Any:
         """

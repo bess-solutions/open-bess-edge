@@ -1,6 +1,6 @@
 ﻿# 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-24T17:54 v2.9.0-dev · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-24T21:30 v2.9.0-dev · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -20,8 +20,8 @@ Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivad
 
 ### Tests
 ```
-541 passed ✅  · 1 failed (SSL PEM mock pre-existente) · 5 skipped · 16.65s
-Nuevo: test_new_profiles.py — 51/51 registry validation ✅
+590 passed ✅  · 0 failed · 6 skipped · 19.20s
+Nuevo: test_watchdog_manager.py — 19/19 WatchdogManager ✅
 Registry: 7 perfiles hardware (Fronius, Huawei, SMA, Victron + SolarEdge, BYD, Tesla)
 CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · helm ✅
 ```
@@ -32,15 +32,10 @@ CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · 
 
 | Prioridad | Gap | Archivo | Acción | Target |
 |---|---|---|---|---|
-| 🔴 Alta | `handle_der_control` complejidad C901 (15 > 10) | `sep2_adapter.py:569` | Refactor en 2 sub-funciones | v2.9.0 |
-| 🔴 Alta | SSL test mock inválido (1 failed pre-existente) | `test_sep2_adapter.py:447` | Usar `cryptography` lib | v2.9.0 |
-| 🔴 Alta | Branch-Protection no configurado | GitHub Settings | Rodrigo: Settings → Branches → Add rule `main` | Manual |
-| 🔴 Alta | cosign keypair sin configurar | `release.yml` | `cosign generate-keypair` + Secrets GH | v2.9.0 |
-| 🔵 Media | BEP-0200 DRL en modo observe-only | `main.py:Step5e` | Activar `write_tag()` tras staging | v2.9.0 |
-| 🔵 Media | mypy `modbus_driver.py:179` + `totp_auth.py:201` | Múltiple | type-ignore + guards | v2.9.0 |
-| 🔵 Media | MILP optimizer sin tests de integración | `milp_optimizer.py` | `tests/agents/test_milp_optimizer.py` | v2.9.0 |
-| 🟡 Baja | Datos CMg dashboard simulados | `dashboard/data/` | API CEN real tras BEP-0200 F3 | v2.10.0 |
-| 🟡 Baja | BESSAI-SPEC-004 draft (sin impl. en drivers) | `BESSAI-SPEC-004.md` | `BatteryState` dataclass | v2.10.0 |
+| 🔵 Baja | BEP-0200 DRL en modo observe-only | `main.py:Step5e` | Activar `write_tag()` tras staging | v2.9.0 |
+| 🔵 Baja | mypy `modbus_driver.py:179` | Múltiple | type-ignore + guards | v2.9.0 |
+| 🔮 Baja | MILP optimizer sin tests de integración | `milp_optimizer.py` | `tests/agents/test_milp_optimizer.py` | v2.9.0 |
+| 🔵 Baja | cosign keypair sin configurar | `release.yml` | Rodrigo: `cosign generate-keypair` + Secrets GH | Manual |
 
 
 ### Stack Docker — Métricas en vivo (confirmado 2026-02-19)
@@ -119,6 +114,7 @@ Prometheus v2.51.2                          OK      ← localhost:9090
 | **CMg Data CEN** | `dashboard/data/cmg_maitencillo.json` | **v1.0** | ✅ **NUEVO v2.9** — 48 días × 288 puntos 5-min, Nodo Maitencillo 220 kV |
 | **CMg Exporter** | `scripts/export_cmg_json.py` | **v1.0** | ✅ **NUEVO v2.9** — Generador reproducible con física real SEN |
 | **Dashboard DRL** | `dashboard/optimizer.js` + `index.html` | **v2.0** | ✅ **NUEVO v2.9** — Tab DRL Optimizer, SOC trajectory, CMg selector 48 días |
+| **WatchdogManager** | `src/core/watchdog_manager.py` | **v1.0** | ✅ **NUEVO v2.9-dev** — Self-healing autónomo, exponential backoff, Prometheus, AlertDispatcher |
 
 ### 🐳 Stack Docker — ✅ COMPLETAMENTE OPERATIVO (v1.0.1)
 
@@ -216,7 +212,7 @@ v2.0.0  ████████████████████████
 v2.1.0  ████████████████████████  ✅ mTLS OT segment (GAP-003) · stunnel · OtTlsConfig
 v2.2.0  ████████████████████████  ✅ Auditoría IEC 62443 SL-2: SSP, NAD, PMS, PSIRT
 v2.3.0  ████████████████████████  ✅ Rate Limiting SR 7.1 · mkdocs nav · pip-audit CI semanal
-v2.4.1  ████████████████████████  ✅ Fix: markers pytest · coverage 80% · versiones sync · Dockerfile OCI label
+v2.4.1  ████████████████████████  ✅ Fix: markers pytest · coverage 80% CI · versión `1.4.0`→`2.4.0` en `pyproject.toml` · Dockerfile OCI label
 v2.4.2  ████████████████████████  ✅ Fix: import math lint · Helm appVersion · ci.yml Job numbering
 v2.7.1  ████████████████████████  ✅ Lint 360°: ruff 35/36 fixes · structlog drl_agent · 490 tests
 v2.8.0  ████████████████████████  ✅ Superset: 6 Waves · 3 registry HW · lightweight_mode · alert_dispatcher · 541 tests
@@ -375,3 +371,4 @@ pytest tests/ -v --tb=short
 | 2026-02-23 | **v2.4.2** | **426/426** | Fix lint `simulator_driver.py` (import math redundante) · Helm `appVersion 0.7.0`→`2.4.0` · `ci.yml` Job numbering 5→10 corregido |
 | 2026-02-24 | **v2.7.1** | **490/490** | Lint 360°: ruff 35/36 auto-fix · drl_agent→structlog · 20 archivos reformateados |
 | 2026-02-24 | **v2.8.0-dev** | **541/547** | **Superset 6 Waves**: BENCHMARK-004/005 · 3 perfiles HW (SolarEdge/BYD/Tesla) · `lightweight_mode.py` · `alert_dispatcher.py` · 51 tests registry · early_adopters/research_topics/academic_collaboration |
+| 2026-02-24 | **v2.9.0-dev** | **590/590** | **AI Environment Devoration**: Fix MARL `rewards[__all__]` · Fix C901 `handle_der_control` refactor · Fix SSL mTLS validation order · **WatchdogManager** self-healing autónomo · 19 tests nuevos |

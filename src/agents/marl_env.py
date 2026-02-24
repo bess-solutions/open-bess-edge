@@ -340,6 +340,9 @@ class BESSFleetMARLEnv:
         if all(terminateds.values()):
             self.agents = []
 
+        # PettingZoo API: rewards must include "__all__" aggregated reward
+        rewards["__all__"] = float(np.mean(list(rewards.values())))
+
         terminateds["__all__"] = all(terminateds.values())
         truncateds["__all__"] = all(truncateds.values())
 
