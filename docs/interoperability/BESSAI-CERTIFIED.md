@@ -30,6 +30,8 @@ Certification means:
 
 ## Certified Devices
 
+### ✅ Self-Certified (BESS Solutions)
+
 | Device | Manufacturer | Level | Driver | Certified Date |
 |---|---|---|---|---|
 | SUN2000-100KTL | Huawei | Certified+ | `src/drivers/modbus_driver.py` | 2026-02-22 (self) |
@@ -38,6 +40,20 @@ Certification means:
 | GEN24 Plus | Fronius | Compatible | `src/drivers/fronius_driver.py` | 2026-02-22 (self) |
 
 *"(self)" = self-certification by BESS Solutions. Independent certification by manufacturer pending.*
+
+### 🎯 Wanted — Open for Community Contribution (Hackathon 2026)
+
+The following devices are high-priority targets for the [BESSAI Hackathon 2026](../outreach/HACKATHON_BESSAI_2026.md). Open a PR to add them!
+
+| Device | Manufacturer | Protocol | Complexity | Issue |
+|---|---|---|---|---|
+| Battery-Box Premium HVS | BYD | Modbus TCP | Medium | Wanted |
+| EnerD 100 | CATL | CAN / Modbus | High | Wanted |
+| Powerpack 2 | Tesla | Modbus TCP / REST | High | Wanted |
+| RESU Prime | LG Energy Solution | CAN / SunSpec | Medium | Wanted |
+| US5000 | Pylontech | RS485 | Low | Wanted |
+| Smile5 | Alpha-ESS | Modbus TCP | Low | Wanted |
+| LUNA2000-200KWH | Huawei | Modbus TCP | Medium | Wanted |
 
 ---
 

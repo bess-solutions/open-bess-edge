@@ -1,7 +1,7 @@
 # BESSAI Edge Gateway — LF Energy Landscape Submission
 
-**Version:** 1.0  
-**Date:** 2026-02-22  
+**Version:** 1.1  
+**Date:** 2026-02-24  
 **Status:** Draft — Pending Submission
 
 ---
@@ -31,7 +31,7 @@ This document is a **draft submission package** for the [LF Energy Landscape](ht
 
 ## Project Description (150 words max)
 
-> BESSAI Edge Gateway is an open-source industrial gateway for Battery Energy Storage Systems (BESS). It provides a unified driver interface (BESSAI-SPEC-001) compatible with Huawei, SMA, Victron, and Fronius hardware; real-time safety enforcement aligned with IEC 62619 and IEC 62443; ONNX-based offline AI inference for dispatch optimization; and canonical telemetry streaming to GCP Pub/Sub or MQTT brokers (BESSAI-SPEC-003). Designed for deployment on Raspberry Pi 4/5 and Kubernetes edge nodes, it bridges OT hardware and cloud analytics pipelines for microgrids, industrial facilities, and virtual power plants. BESSAI is governed by a multi-stakeholder Technical Steering Committee (TSC) following a transparent Enhancement Proposal (BEP) process, and targets IEC 62443 SL-2 certification in 2026.
+> BESSAI Edge Gateway is an open-source industrial gateway for Battery Energy Storage Systems (BESS). It provides a unified driver interface (BESSAI-SPEC-001) compatible with Huawei, SMA, Victron, and Fronius hardware; real-time safety enforcement aligned with IEC 62619 and IEC 62443; IEEE 2030.5 / SEP 2.0 protocol support (BEP-0100); ONNX-based AI inference including a Deep Reinforcement Learning arbitrage agent (BEP-0200); and canonical telemetry streaming to GCP Pub/Sub and MQTT brokers (BESSAI-SPEC-003). Designed for deployment on Raspberry Pi 4/5 and Kubernetes edge nodes, it bridges OT hardware and cloud analytics pipelines for microgrids, industrial facilities, and virtual power plants. BESSAI is governed by the BESSAI Open Alliance (BOA) following a transparent Enhancement Proposal (BEP) process, and targets IEC 62443 SL-2 certification in 2026.
 
 ---
 
@@ -54,13 +54,13 @@ This document is a **draft submission package** for the [LF Energy Landscape](ht
 |---|---|
 | Open-source license (OSI-approved) | ✅ Apache 2.0 |
 | Public repository | ✅ GitHub |
-| CI/CD pipeline | ✅ GitHub Actions (378 tests) |
+| CI/CD pipeline | ✅ GitHub Actions (490 tests) |
 | Security policy | ✅ `SECURITY.md` |
 | Governance document | ✅ `GOVERNANCE.md` (TSC + BEP process) |
 | Contributing guide | ✅ `CONTRIBUTING.md` |
 | Changelog | ✅ `CHANGELOG.md` |
 | OpenSSF Passing badge | ✅ Achieved |
-| Release published | ✅ v1.7.1 |
+| Release published | ✅ v2.6.0 |
 | Logo (SVG) | ⚠️ PNG exists — SVG version needed |
 | Crunchbase profile | ❌ To be created |
 
