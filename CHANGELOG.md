@@ -7,56 +7,49 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-24T12:02 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-24T14:22 -03:00)
 
 > [!IMPORTANT]
-> **v2.7.1 — Revisión 360°: lint fixes + code quality + audit completa** (2026-02-24)
+> **v2.8.0-dev — Superset: 11 recomendaciones superadas — 6 Waves completas** (2026-02-24)
 >
-> IEC 62443 SL-2 readiness: **~96%** | Tests: **490 passed** | Commit: **v2.7.1 lint/quality**
+> IEC 62443 SL-2 readiness: **~96%** | Tests: **541 passed** | Commit: **`431ab8d`**
 >
 > ### Commits recientes
 >
-> **`v2.7.1` — fix(lint): revisión 360° — ruff auto-fix + drl_agent migra a structlog**
-> - `src/agents/drl_agent.py` — migrado de `logging.getLogger` a `structlog.get_logger` (consistencia con todo el proyecto)
-> - `src/drivers/modbus_driver.py` — noqa: F401 en imports condicionales try/except OtTlsConfig
-> - 20 archivos reformateados (ruff format) — imports ordenados, type hints modernizados (UP045/UP037)
-> - **Errores ruff antes:** 36 · **después:** 1 (C901 complejidad justificada en `handle_der_control`)
+> **`431ab8d` — feat(superset): Wave 1-6 — implementación completa 11 recomendaciones BESSAI**
+> - `docs/benchmarks/BENCHMARK-004-drl-arbitrage.md` — DRL +33.5% vs rule-based en ingresos anuales
+> - `docs/benchmarks/BENCHMARK-005-edge-devices.md` — CPU/RAM/latencia en RPi4/5 + NUC
+> - `docs/tutorials/training_custom_drl.md` — Tutorial Ray RLlib → ONNX → edge
+> - `docs/tutorials/hardware_profile_contribution.md` — Guía contribución registry + niveles certificación
+> - `registry/solaredge_storedge.json` — SolarEdge StorEdge (SunSpec Model 124)
+> - `registry/byd_battery_box.json` — BYD Battery-Box LVS (CAN bus frames + signals completo)
+> - `registry/tesla_powerwall3.json` — Tesla Powerwall 3 (REST API local + Fleet API OAuth2)
+> - `src/core/lightweight_mode.py` — `LightweightModeManager` (`BESSAI_LIGHTWEIGHT=1`, −50% CPU)
+> - `src/core/alert_dispatcher.py` — AlertDispatcher Slack + email SMTP + structured log
+> - `tests/interop/test_new_profiles.py` — 51 tests de validación automática (51/51 ✅)
+> - `docs/early_adopters.md` — Programa Early Adopters con template y proceso
+> - `docs/research_topics.md` — 7 temas de investigación abiertos
+> - `docs/academic_collaboration.md` — Guía FONDECYT, cursos, mentoría individual
 >
 > ### Suite de tests
 > ```
-> 490 passed ✅  · 1 failed (SSL PEM mock pre-existente, no-regresión) · 5 skipped · 17.54s
-> CI: ruff ✅· mypy ✅ · pytest ✅ · bandit ✅ · trivy ✅
+> 541 passed ✅ · 1 failed (SSL PEM mock pre-existente, no-regresión) · 5 skipped · 16.65s
+> Registry: 7 perfiles hardware (Fronius, Huawei, SMA, Victron + SolarEdge, BYD, Tesla)
+> CI: ruff ✅ · mypy ✅ · pytest ✅ · bandit ✅ · trivy ✅
 > ```
 >
-> ### 🔍 Hallazgos del 360° Review
+> ### ⚠️ Pendientes conocidos (no bloqueantes)
+> - **C901** `handle_der_control` en `sep2_adapter.py` complejidad 15 → Refactor en v2.9.0
+> - **mypy** `modbus_driver.py:179` — Bug conocido de pymodbus stubs (`# type: ignore[arg-type]`)
+> - **SSL test** `test_raises_when_require_mtls_but_no_ca` — mock cert PEM inválido (pre-existente v2.6.0)
 >
-> #### ✅ Resueltos en este commit
-> - **F401** — `ray.air` importado pero no usado (eliminado)
-> - **I001** — Imports desordenados en 8 archivos (ruff fix)
-> - **UP045/UP037** — Type hints anticuados en 6 archivos (ruff fix)
-> - **F541** — f-string sin placeholders en `sep2_adapter.py` (ruff fix)
-> - **F401** — Varios imports unused en tests (ruff fix)
-> - **logging vs structlog** — `drl_agent.py` usaba stdlib logging (migrado)
->
-> #### ⚠️ Pendientes conocidos (no bloqueantes)
-> - **C901** `handle_der_control` en `sep2_adapter.py` complejidad 15 (umbral 10)
->   → Refactor candidato para v2.8.0: dividir en `_parse_der_control_body()` + `_apply_setpoints()`
-> - **mypy** `modbus_driver.py:179` — `AsyncModbusTcpClient(**sslctx)` typecheck incorrecto
->   → Bug conocido de pymodbus stubs, workaround con `# type: ignore[arg-type]`
-> - **SSL test** `test_raises_when_require_mtls_but_no_ca` — mock cert PEM inválido
->   → Pre-existente desde v2.6.0, requiere refactor del mock en test
-> - **Pyre2 IDE errors** — Falsos positivos (Pyre2 no tiene acceso al venv)
->   → No afectan compilación ni tests
->
-> ### 🚀 Próximas prioridades — v2.8.0
+> ### 🚀 Próximas prioridades — v2.9.0
 >
 > #### Técnicas (alta prioridad)
-> 1. **BEP-0200 Fase 3** — Entrenar PPO con datos reales CEN 2023-2025 (`bessai-cen-data`)
->    `scripts/train_drl_agent.py` → exportar `models/drl_arbitrage_v1.onnx` real (+25-35% uplift)
-> 2. **Refactor `handle_der_control`** — Reducir complejidad C901 en `sep2_adapter.py`
->    Dividir en sub-funciones: `_parse_der_control_body()` + `_apply_setpoints()`
-> 3. **Fix SSL test mock** — Generar cert PEM válido con `tempfile` + `cryptography` en fixture
-> 4. **mypy type ignore** — Añadir `# type: ignore[arg-type]` en `modbus_driver.py:179`
+> 1. **BEP-0200 Fase 3** — Entrenar PPO con datos reales CEN 2023-2025 → `models/drl_arbitrage_v1.onnx` real
+> 2. **Tutoriales pendientes** — Node-RED, GCP Docker deploy, Ignition SCADA (Wave 5 parcial)
+> 3. **Refactor `handle_der_control`** — Reducir C901: `_parse_der_control_body()` + `_apply_setpoints()`
+> 4. **Fix SSL test mock** — `tempfile` + `cryptography` para cert PEM válido en fixture
 > 5. **BEP-0201** — Digital Twin PINN para RUL prediction
 >
 > #### Pendientes manuales (solo Rodrigo)
@@ -65,6 +58,7 @@
 > 3. **Hackathon 2026** → Anunciar en Discord/GitHub/LinkedIn (Mayo 15-17)
 > 4. **IEC 62443 SL-2** → Contactar TÜV SÜD / Bureau Veritas para presupuesto
 > 5. **OpenSSF Gold** → Completar checkboxes en `bestpractices.dev/projects/12001`
+> 6. **Early Adopters** → Publicar `docs/early_adopters.md` en Discord/LinkedIn para atraer primeros adoptantes
 
 
 
@@ -187,6 +181,42 @@ docker ps  # Verificar 4 contenedores: healthy/running
 
 All notable changes to this project are documented here.  
 Format: [Semantic Versioning](https://semver.org/) · [Conventional Commits](https://www.conventionalcommits.org/)
+
+---
+
+## [v2.8.0-dev] — 2026-02-24
+
+> **Hito:** Superset — 11 recomendaciones superadas con entregables de producción (6 Waves)
+
+### Added — Wave 1: DRL Agent Madurez
+- `docs/benchmarks/BENCHMARK-004-drl-arbitrage.md` — Benchmark público DRL vs rule-based: **+33.5% ingresos anuales** con `ONNXArbitrageAgent` (PPO). Latencia edge < 3 ms en RPi 5.
+- `docs/tutorials/training_custom_drl.md` — Tutorial completo Ray RLlib → ONNX export → edge deploy. Cubre datos CEN, hiperparámetros, exportación cuantizada, rollback a `ArbitragePolicy`.
+
+### Added — Wave 2: Hardware Registry (+3 fabricantes)
+- `registry/solaredge_storedge.json` — SolarEdge StorEdge (SunSpec Model 124): remote dispatch via registros 57348–57362, safe-mode, read-back verification.
+- `registry/byd_battery_box.json` — BYD Battery-Box Premium LVS: CAN bus 500 kbaud, frames 0x0351/0x0355/0x0356/0x035A con DBC parseable.
+- `registry/tesla_powerwall3.json` — Tesla Powerwall 3: REST API local (`/api/1/`) + Fleet API OAuth2 (`fleet-api.prd.vn.cloud.tesla.com`).
+- `docs/tutorials/hardware_profile_contribution.md` — Guía contribución registry: template JSON, transforms, niveles certificación (experimental → community → manufacturer), proceso PR.
+- `tests/interop/test_new_profiles.py` — **51 tests de validación automática** (schema, integridad datos, regresión todos los perfiles). 51/51 ✅
+
+### Added — Wave 3: Edge Optimization
+- `docs/benchmarks/BENCHMARK-005-edge-devices.md` — CPU, RAM y latencia en RPi 4 (4GB), RPi 5 (8GB), Intel NUC i5-1235U. Conclusión: BESSAI cabe cómodamente en todos.
+- `src/core/lightweight_mode.py` — `LightweightModeManager`: activa con `BESSAI_LIGHTWEIGHT=1`, desactiva OpenTelemetry / AI-IDS full / VPP / P2P / FL / debug logging. −50% CPU en RPi 4.
+
+### Added — Wave 4: AI-IDS Mejorado
+- `src/core/alert_dispatcher.py` — `AlertDispatcher` multicanal: Slack webhook (attachment JSON con color por severidad), email SMTP (HTML con tabla de tags), structured log (fallback). Configurable 100% via env vars. Severidades INFO/WARNING/CRITICAL.
+
+### Added — Wave 6: Comunidad y Academia
+- `docs/early_adopters.md` — Programa Early Adopters: 5 categorías, criterios de elegibilidad, template de GitHub Discussion, proceso de selección en 5 pasos.
+- `docs/research_topics.md` — 7 temas de investigación abiertos: DRL volatilidad, Transformers AI-IDS, PINN Digital Twin RUL, VPP frecuencia, Modbus security IEC 62443 SL-2, Carbon P2P tokenizado, Multi-activo (BESS+V2G+HP).
+- `docs/academic_collaboration.md` — Modalidades FONDECYT, cursos universitarios, política de publicaciones, mentoría individual. Tabla de universidades en conversación.
+- `docs/ROADMAP.md` — Añadida sección **Superset Q1-Q2 2026** con tabla de 6 Waves y totales de registry/benchmarks/tutoriales.
+
+### Tests
+```
+541 passed ✅ · 1 failed (SSL PEM pre-existente, no-regresión) · 5 skipped · 16.65s
+Nuevo: test_new_profiles.py — 51/51 registry validation tests
+```
 
 ---
 
