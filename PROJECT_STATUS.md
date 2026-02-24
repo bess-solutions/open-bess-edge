@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-23T16:44 v2.4.2 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-24T10:48 v2.6.0 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -10,16 +10,16 @@
 Sistema industrial de gestión de baterías (BESS) con inteligencia artificial — **candidato a estándar global**. Conecta inversores reales (Huawei SUN2000, SMA, Victron, Fronius) vía Modbus TCP, valida la operación de forma segura, y publica telemetría a GCP Pub/Sub o MQTT con observabilidad completa.
 
 **Visión:** Convertirse en el estándar de referencia mundial para gestión de BESS en el edge — adoptado por fabricantes, operadores y reguladores.  
-Ver roadmap completo: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
+Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivado: [`docs/bessai_v2_roadmap.md`](docs/bessai_v2_roadmap.md)
 
 ---
 
-## ✅ Estado Actual — v2.4.2
+## ✅ Estado Actual — v2.6.0
 
 ### Tests
 ```
-426 passed ✅  (estimado con cobertura ≥80% — CI actualizado)
-CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · multiarch ✅ · scorecard ✅
+458 passed ✅  (+26 IEEE 2030.5 SEP2 adapter tests — cobertura ≥80%)
+CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · helm ✅
 Workflows: benchmark.yml · compliance-report.yml · fuzzing.yml · interop contract tests (Job 4)
 ```
 
@@ -55,6 +55,7 @@ Prometheus v2.51.2                          OK      ← localhost:9090
 | OTel / Cloud Trace | `src/interfaces/otel_setup.py` | v0.9 | ✅ Producción |
 | GCP Pub/Sub Publisher | `src/interfaces/pubsub_publisher.py` | v0.5 | ✅ Producción |
 | MQTT Publisher | `src/interfaces/mqtt_publisher.py` | **v1.7.1** | ✅ Producción — paho-mqtt, TLS, multi-broker |
+| **IEEE 2030.5 Adapter** | `src/interfaces/sep2_adapter.py` | **v1.0** | ✅ **NUEVO v2.6** — 10 endpoints SEP 2.0, TLS 1.2+, mTLS, DERControl (BEP-0100) |
 | AI-IDS | `src/interfaces/ai_ids.py` | v0.6 | ✅ Producción |
 | ONNX Dispatcher | `src/interfaces/onnx_dispatcher.py` | v0.6 | ✅ Producción |
 | VPP Publisher (OpenADR 3.0) | `src/interfaces/vpp_publisher.py` | v0.7 | ✅ Producción |
@@ -71,12 +72,12 @@ Prometheus v2.51.2                          OK      ← localhost:9090
 | BESS Physics Model | `src/simulation/bess_model.py` | v0.7 | ✅ Producción |
 | ONNX modelo dummy | `models/dispatch_policy.onnx` | v0.6 | ✅ Producción |
 | DRL training script | `scripts/train_drl_policy.py` | v0.7 | ✅ Producción |
-| Helm chart | `infrastructure/helm/bessai-edge/` | v0.7 | ✅ Completo |
+| Helm chart | `infrastructure/helm/bessai-edge/` | **0.9.0** | ✅ appVersion 2.6.0 |
 | Grafana Dashboard | `infrastructure/grafana/dashboards/bessai_main.json` | **v1.0** | ✅ 13 paneles |
 | Terraform GCP | `infrastructure/terraform/` | v0.5 | ✅ 18 recursos |
 | Registro Modbus | `registry/huawei_sun2000.json` | **v2.0** | ✅ 28 registros reales |
 | Modbus Simulator | `infrastructure/docker/modbus_sim/` | **v1.0.1** | ✅ pymodbus server, 22 registros |
-| GitHub Actions CI/CD | `.github/workflows/ci.yml` | v2.4.2 | ✅ **10 jobs**: lint+typecheck+test+interop+security+terraform+helm+docker+trivy+push (Jobs renumerados) |
+| GitHub Actions CI/CD | `.github/workflows/ci.yml` | v2.6.0 | ✅ **10 jobs**: lint+typecheck+test+interop+security+terraform+helm+docker+trivy+push |
 | OpenSSF Scorecard CI | `.github/workflows/scorecard.yml` | v1.0 | ✅ Supply chain security automático — badge Scorecard activo |
 | Mutation Testing | `.github/workflows/mutation-test.yml` | v1.0 | ✅ mutmut semanal — safety.py + config.py |
 | K8s Manifests | `infrastructure/k8s/` | v1.0 | ✅ 6 manifests: namespace+configmap+service+deployment+netpol+kustomize |
