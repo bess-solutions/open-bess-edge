@@ -5,17 +5,18 @@
 
 ---
 
-## Estado actual — v2.6.0 (completado 2026-02-24)
+## Estado actual — v2.7.1 (completado 2026-02-24)
 
 | Área | Entregable | BEP |
 |---|---|---|
 | Comunicación DERMS | IEEE 2030.5 / SEP 2.0 Adapter (`sep2_adapter.py`) | BEP-0100 ✅ Active |
 | Canal dual | MQTT Publisher integrado en `main.py` | — ✅ |
 | Seguridad OT | TLS 1.2 min + mTLS para endpoints DERMS | BEP-0100 ✅ |
-| Estrategia global | Global Standard Roadmap (`docs/GLOBAL_STANDARD_ROADMAP.md`) | — ✅ |
-| Dev tooling | `pyrightconfig.json` · lint fixes · 26 nuevos tests | — ✅ |
+| **DRL Agent (Fase 2)** | `ONNXArbitrageAgent` integrado como Step 5e en `main.py` (observe-only) | **BEP-0200 ✅ Fase 2** |
+| **Global Standard** | BOA Charter, UL9540 roadmap, SPEC-004, Hackathon 2026, IEEE Abstract | — ✅ |
+| **Code quality** | Revisión 360°: ruff auto-fix (35/36), drl_agent → structlog, 20 archivos reformateados | — ✅ |
 
-**Suite de tests**: 458 passed · cobertura ≥ 80 % · CI: ruff ✅ mypy ✅ bandit ✅ trivy ✅
+**Suite de tests**: 490 passed · 1 SSL (pre-existente, no-regresión) · CI: ruff ✅ mypy ✅ bandit ✅ trivy ✅
 
 ---
 
@@ -24,12 +25,17 @@
 ```mermaid
 timeline
     title BESSAI Edge Gateway — De gateway a Planetary Energy OS
+    section 2026 Q1 ✅
+        v2.7.1 : BEP-0100 IEEE 2030.5 Active
+               : BEP-0200 Fase 2 (observe-only)
+               : Global Standard Strategy (BOA, SPEC-004)
+               : Revision 360deg — 35/36 lint fixes
     section 2026 Q2-Q3
-        v2.7.0 : BEP-0200 DRL Arbitrage Agent
+        v2.8.0 : BEP-0200 Fase 3 (entrenar con datos reales CEN)
                : BEP-0201 Digital Twin PINN
                : Protocol Unification (IEC 61850, DNP3, OPC-UA)
     section 2026 Q4
-        v2.8.0 : SEP2 Conformance Harness (BEP-0101 XML)
+        v2.9.0 : SEP2 Conformance Harness (BEP-0101 XML)
                : VPP Pilot Chile — 5 sitios coordinados
                : BESSAI Certified hardware bounty program
     section 2027 Q1-Q2
@@ -44,9 +50,9 @@ timeline
 
 ---
 
-## v2.7.0 — DRL Arbitrage Agent + Digital Twin (Q2-Q3 2026)
+## v2.8.0 — BEP-0200 Fase 3 + Digital Twin + Protocol Unification (Q2-Q3 2026)
 
-> **BEP-0200** (en elaboración) · Target: 2026-04-30
+> **BEP-0200 Fase 3** (entrenar PPO con datos reales CEN 2023-2025) · Target: 2026-04-30
 
 ### BEP-0200: DRL Arbitrage Agent
 
@@ -176,10 +182,10 @@ Modelo híbrido física + IA que simula en tiempo real la degradación, temperat
 | BEP | Título | Estado | Release |
 |---|---|---|---|
 | [BEP-0100](bep/BEP-0100.md) | IEEE 2030.5 / SEP 2.0 Adapter | ✅ **Active** | v2.6.0 |
-| **BEP-0101** | SEP 2.0 XML/EXI Normativo (reemplaza JSON profile) | 📝 Draft | v2.8.0 |
-| **BEP-0200** | DRL Arbitrage Agent (Ray RLlib PPO/SAC + ONNX) | 📝 En elaboración | v2.7.0 |
-| **BEP-0201** | Digital Twin PINN — RUL < 2 % error | 💡 Propuesto | v2.7.0 |
-| **BEP-0202** | Protocol Registry unificado (IEC 61850, DNP3, OPC-UA) | 💡 Propuesto | v2.8.0 |
+| **BEP-0101** | SEP 2.0 XML/EXI Normativo (reemplaza JSON profile) | 📝 Draft | v2.9.0 |
+| **BEP-0200** | DRL Arbitrage Agent (Ray RLlib PPO/SAC + ONNX) | ✅ **Fase 2 Activa** (observe-only) | v2.7.1 |
+| **BEP-0201** | Digital Twin PINN — RUL < 2 % error | 💡 Propuesto | v2.8.0 |
+| **BEP-0202** | Protocol Registry unificado (IEC 61850, DNP3, OPC-UA) | 💡 Propuesto | v2.9.0 |
 | **BEP-0300** | VPP Orchestrator OpenADR 3.0 multi-sitio | 💡 Propuesto | v3.0.0 |
 
 ---
@@ -188,10 +194,11 @@ Modelo híbrido física + IA que simula en tiempo real la degradación, temperat
 
 | Tarea | Prioridad | Desbloqueador |
 |---|---|---|
-| Activar GitHub Pages (MkDocs site) | 🔴 Alta | Settings → Pages → branch `gh-pages` |
+| LF Energy Landscape | 🔴 Alta | Fork `lfenergy/lfenergy-landscape` + PR con YAML + SVG logo + Crunchbase |
 | OpenSSF Gold badge | 🔴 Alta | `bestpractices.dev/projects/12001` — completar checkboxes |
-| LF Energy Landscape | 🟡 Media | Fork `lfenergy/lfenergy-landscape` + PR con YAML + SVG logo |
-| Iniciar IEC 62443 SL-2 formal | 🟡 Media | `docs/compliance/iec_62443_sl2_certification_path.md` + SSAF CORFO |
+| Iniciar IEC 62443 SL-2 formal | 🟡 Media | Contactar TÜV SÜD / Bureau Veritas para presupuesto |
+| Anunciar Hackathon 2026 | 🟡 Media | Discord + LinkedIn + GitHub Discussions (Mayo 15-17) |
+| Activar GitHub Pages (MkDocs site) | 🟢 Baja | Settings → Pages → branch `gh-pages` |
 | Conectar Codecov | 🟢 Baja | `codecov.io/gh/bess-solutions/open-bess-edge` |
 
 ---
