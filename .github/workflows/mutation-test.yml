@@ -1,5 +1,8 @@
 name: Mutation Testing (Weekly)
 
+# OpenSSF Scorecard: Token-Permissions — restrict default token to read-only
+permissions: read-all
+
 on:
   schedule:
     # Todos los domingos a las 06:00 UTC
@@ -16,9 +19,9 @@ jobs:
     timeout-minutes: 60
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
@@ -45,7 +48,7 @@ jobs:
 
       - name: Upload mutation report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0
         with:
           name: mutation-report
           path: |
