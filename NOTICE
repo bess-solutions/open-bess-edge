@@ -1,0 +1,113 @@
+BESSAI Edge Gateway
+Copyright 2024-2026 BESS Solutions SpA
+
+This product is licensed under the Apache License, Version 2.0
+(the "License"). You may not use this product except in compliance
+with the License. You may obtain a copy of the License at:
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+---
+
+## Third-Party Acknowledgments
+
+This product uses the following open-source components:
+
+### pymodbus
+- License: BSD 3-Clause
+- Source: https://github.com/pymodbus-dev/pymodbus
+- BESSAI uses pymodbus to communicate with BESS hardware via Modbus TCP.
+
+### pydantic / pydantic-settings
+- License: MIT
+- Source: https://github.com/pydantic/pydantic
+
+### structlog
+- License: MIT (dual: Apache 2.0 or MIT)
+- Source: https://github.com/hynek/structlog
+
+### prometheus-client
+- License: Apache 2.0
+- Source: https://github.com/prometheus/client_python
+
+### opentelemetry-sdk / opentelemetry-api
+- License: Apache 2.0
+- Source: https://github.com/open-telemetry/opentelemetry-python
+
+### paho-mqtt
+- License: Eclipse Public License 2.0 + Eclipse Distribution License 1.0
+  (EPL 2.0 is compatible with Apache 2.0 for use, not relicensing)
+- Source: https://github.com/eclipse/paho.mqtt.python
+
+### cryptography
+- License: Apache 2.0 / BSD 3-Clause
+- Source: https://github.com/pypa/cryptography
+
+### pyotp
+- License: MIT
+- Source: https://github.com/pyauth/pyotp
+
+### scikit-learn (IsolationForest — AI-IDS)
+- License: BSD 3-Clause
+- Source: https://github.com/scikit-learn/scikit-learn
+
+### onnxruntime
+- License: MIT
+- Source: https://github.com/microsoft/onnxruntime
+
+### ray[rllib] (optional — DRL training only)
+- License: Apache 2.0
+- Source: https://github.com/ray-project/ray
+- Note: ray is an OPTIONAL dependency used only for DRL training offline.
+  It is NOT required to run the BESSAI Edge Gateway.
+
+### PuLP (optional — MILP optimizer)
+- License: MIT
+- Source: https://github.com/coin-or/pulp
+
+### google-cloud-pubsub (optional)
+- License: Apache 2.0
+- Source: https://github.com/googleapis/python-pubsub
+
+### Flower (flwr — optional — federated learning)
+- License: Apache 2.0
+- Source: https://github.com/adap/flower
+
+---
+
+## Hardware Register Documentation
+
+The Modbus register maps used in drivers (e.g., luna2000_driver.py) are
+derived from publicly available technical documentation:
+
+- Huawei SUN2000 Modbus Interface Definition — published by Huawei Technologies
+  for integration purposes. No Huawei proprietary code is included.
+- SMA Modbus registers — publicly available from SMA developer portal.
+- Victron VE.Bus — published by Victron Energy B.V.
+- Fronius Modbus TCP — published by Fronius International GmbH.
+- SolarEdge SunSpec Model 124 — publicly available SunSpec specification.
+- BYD Battery-Box CAN protocol — derived from publicly available documentation.
+- Tesla Powerwall 3 Local API — reverse-engineered community documentation;
+  no Tesla proprietary code is included.
+
+All hardware vendor names are trademarks of their respective owners.
+BESS Solutions SpA is not affiliated with, endorsed by, or sponsored by
+any hardware vendor mentioned in this software.
+
+---
+
+## Regulatory Compliance References
+
+The compliance mappings in this software reference the following standards:
+- IEC 62443 (Industrial Cybersecurity) — © IEC Geneva
+- IEEE 2030.5 / SEP 2.0 — © IEEE
+- NTSyCS (CEN Chile) — © Coordinador Eléctrico Nacional
+
+These references are for compliance documentation purposes only.
+No copyrighted standard text is reproduced in this software.
