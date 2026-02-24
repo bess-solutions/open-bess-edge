@@ -56,7 +56,7 @@ jobs:
         with:
           scan-type: fs
           scan-ref: .
-          security-checks: vuln
+          scanners: vuln
           severity: HIGH,CRITICAL
           format: sarif
           output: trivy-dep-results.sarif
