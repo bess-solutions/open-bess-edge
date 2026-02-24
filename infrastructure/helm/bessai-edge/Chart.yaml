@@ -6,10 +6,10 @@ description: BESSAI Edge Gateway — Kubernetes Helm chart
 type: application
 
 # Chart version (follows SemVer — bump on chart changes)
-version: 0.7.0
+version: 0.9.0
 
 # Application version deployed by this chart
-appVersion: "2.4.0"
+appVersion: "2.6.0"
 
 home: https://github.com/bess-solutions/open-bess-edge
 sources:

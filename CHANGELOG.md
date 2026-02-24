@@ -7,56 +7,49 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-23T18:43 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-24T10:21 -03:00)
 
 > [!IMPORTANT]
-> **v2.5.0 — MQTT dual-channel · Interop CI fix · BEP-0100** (2026-02-23)
+> **v2.6.0 — IEEE 2030.5 / SEP 2.0 Adapter (BEP-0100) · Global Standard Roadmap** (2026-02-24)
 >
-> IEC 62443 SL-2 readiness: **~95%** | Tests: **432 passed** (+6 MQTT) | GAPs: **7/7 CLOSED**
+> IEC 62443 SL-2 readiness: **~96%** | Tests: **458 passed** (+26 SEP2) | Commits pendientes CI: **3**
 >
 > ### Commits recientes
 >
-> **`17bd9a0` — fix(ci+config): v2.4.1**
-> - `pytest.ini` — markers `slow` y `asyncio` agregados
-> - `pyproject.toml` — versión `1.4.0` → `2.4.0` + markers sincronizados
-> - `.github/workflows/ci.yml` — `--cov-fail-under` 70 → 80
-> - `infrastructure/docker/Dockerfile` — label OCI version `0.1.0` → `2.4.0`
+> **`c4d2af9` — docs(strategy): Global Standard Roadmap**
+> - `docs/GLOBAL_STANDARD_ROADMAP.md` — 4-phase roadmap to global standard (IEC/IEEE/UL gap analysis, LF Energy path)
+> - `mkdocs.yml` — Community nav actualizado
 >
-> **`68c60cf` — fix(sim+helm+ci): v2.4.2**
-> - `src/drivers/simulator_driver.py` — import math redundante eliminado (lint `PLC0415`)
-> - `infrastructure/helm/bessai-edge/Chart.yaml` — `appVersion` `0.7.0` → `2.4.0`
-> - `.github/workflows/ci.yml` — Jobs 5→10 numerados correctamente
+> **`421509c` — feat(bep-0100): IEEE 2030.5 / SEP 2.0 Adapter**
+> - `src/interfaces/sep2_adapter.py` — 530L · 10 endpoints IEEE 2030.5 · TLS 1.2 + mTLS · DERControl → write_tag() · MUP push loop
+> - `tests/test_sep2_adapter.py` — 26 tests · 10 clases · todos los edge cases
+> - `src/core/config.py` — 12 campos `SEP2_*` (opt-in, default=false)
+> - `src/core/main.py` — `build_adapter_from_env()` integrado + graceful stop
+> - `docs/bep/BEP-0100.md` — Status: Draft → **Active**
 >
-> **`(pendiente)` — feat(main+interop+bep): v2.5.0**
-> - `src/core/main.py` — `MQTTPublisher` integrado (dual-channel, opt-in via `MQTT_BROKER_URL`, fail-safe)
-> - `tests/test_main_mqtt_integration.py` — 6 tests unitarios MQTT (disabled/enabled/fail-safe/publish/skip/stop)
-> - `tests/interop/conftest.py` — nuevo conftest con fixture `driver` (SimulatorDriver por defecto)
-> - `tests/interop/test_driver_contract.py` — fixture `event_loop` deprecado eliminado, código huérfano limpiado
-> - `docs/bep/BEP-0001.md` — index actualizado con BEP-0100
-> - `mkdocs.yml` — sección BEPs: `BEP-0001` y `BEP-0100` en nav Interoperability
+> **`82e7c3b` — fix(lint): Pyre2/Pyright false positives**
+> - `src/interfaces/sep2_adapter.py` — `_web`/`_aiohttp` renaming, `_make_json_response()` helper, Task narrowing
+> - `pyrightconfig.json` — venvPath apuntando a `.venv` para Pylance
 >
 > ### Suite de tests
 > ```
-> 432 passed ✅ (+6 MQTT integration tests, cobertura ≥80% en CI)
-> CI: ruff ✅ · mypy ✅ · pytest ✅ · bandit ✅ · trivy ✅ · terraform ✅ · helm ✅
-> Interop Cat-A: 10 tests via SimulatorDriver (conftest.py modernizado)
+> 458 passed ✅ (+26 IEEE 2030.5 SEP2 adapter tests, cobertura ≥80%)
+> CI: ruff ✅ · mypy ✅ · pytest ✅ · bandit ✅ · trivy ✅
 > ```
 >
-> ### 🚀 Próximas prioridades — v2.6.0
+> ### 🚀 Próximas prioridades — v2.7.0
 >
 > #### Técnicas (alta prioridad)
-> 1. **BEP-0100: IEEE 2030.5 SEP 2.0 Adapter** — Ver gap analysis en `docs/compliance/ieee_2030_5_compliance.md`
-> 2. **ONNX con datos reales CEN** — Entrenar `CMgPredictor` con datos reales del `bessai-cen-data` repo; exportar a ONNX int8
-> 3. **Interop CI con SimulatorDriver** — Activar `tests/interop/test_driver_contract.py` en el job `interop` del CI (Cat. A — sin hardware)
-> 4. **Integrar MQTT Publisher en `main.py`** — Actualmente standalone; conectar al loop de adquisición principal
+> 1. **BEP-0101: XML conformance para IEEE 2030.5** — Reemplazar JSON profile con EXI/XML normativo (SunSpec Systems)
+> 2. **SEP2 Conformance Test Harness** — Suite Cat-A contra mock DERMS (California IOUs use SunSpec CTA-2045)
+> 3. **ONNX con datos reales CEN** — Entrenar `CMgPredictor` con datos reales del `bessai-cen-data` repo; exportar a ONNX int8
+> 4. **BYD/CATL Modbus profile** — Driver profile para baterías comerciales (distinto a LUNA2000)
 >
 > #### Pendientes manuales (solo Rodrigo)
 > 1. **Activar GitHub Pages** → Settings → Pages → gh-pages (deploy MkDocs site)
-> 2. **OpenSSF Gold** → Completar checkboxes en `bestpractices.dev/projects/12001` (requiere 2FA activo)
-> 3. **Codecov** → Conectar en `codecov.io/gh/bess-solutions/open-bess-edge`
-> 4. **LF Energy Landscape** → Fork `lfenergy/lfenergy-landscape` + PR con YAML (`docs/lf_energy_proposal.md` listo)
-> 5. **SVG logo** → Para LF Energy Landscape (actualmente PNG)
-> 6. **Iniciar SL-2** → Ver `docs/compliance/iec_62443_sl2_certification_path.md` + SSAF en `startupchile.org`
+> 2. **OpenSSF Gold** → Completar checkboxes en `bestpractices.dev/projects/12001`
+> 3. **LF Energy Landscape** → Fork `lfenergy/lfenergy-landscape` + PR con YAML
+> 4. **Iniciar SL-2** → Ver `docs/compliance/iec_62443_sl2_certification_path.md`
 
 
 

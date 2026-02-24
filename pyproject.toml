@@ -13,8 +13,8 @@ build-backend = "hatchling.build"
 # ---------------------------------------------------------------------------
 [project]
 name            = "bessai-edge"
-version         = "2.4.0"
-description     = "Open-source industrial BESS gateway with AI anomaly detection, NTSyCS and IEC 62443 compliance"
+version         = "2.6.0"
+description     = "Open-source industrial BESS gateway: Modbus, IEEE 2030.5, IEC 62443, MQTT, OpenTelemetry, Prometheus"
 readme          = "README.md"
 license         = { file = "LICENSE" }
 requires-python = ">=3.10"
