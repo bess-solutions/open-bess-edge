@@ -17,16 +17,15 @@ Usage:
     # With simulator (default, no extra args needed):
     pytest tests/interop/ -v
 """
+
 from __future__ import annotations
 
 import time
 from pathlib import Path
 
 import pytest
-
 from src.drivers.base import DataProvider
 from src.drivers.simulator_driver import SimulatorDriver
-
 
 # ---------------------------------------------------------------------------
 # Category A — Contract Tests (no hardware required)
@@ -134,8 +133,7 @@ class TestContract:
         registry_dir = Path(__file__).parent.parent.parent / "registry"
         json_files = list(registry_dir.glob("*.json"))
         assert len(json_files) > 0, (
-            "No device profile JSON found in registry/. "
-            "Create a profile per BESSAI-SPEC-001 §7."
+            "No device profile JSON found in registry/. Create a profile per BESSAI-SPEC-001 §7."
         )
 
 
@@ -209,9 +207,7 @@ class TestTiming:
             latencies.append(time.perf_counter() - start)
         p99 = sorted(latencies)[int(len(latencies) * 0.99)]
         await driver.disconnect()
-        assert p99 < 5.0, (
-            f"read_tag() P99 latency = {p99:.2f}s exceeds 5s limit (SPEC-001 §4.5)"
-        )
+        assert p99 < 5.0, f"read_tag() P99 latency = {p99:.2f}s exceeds 5s limit (SPEC-001 §4.5)"
 
     @pytest.mark.asyncio
     async def test_c03_is_connected_does_not_block(self, driver: DataProvider) -> None:
@@ -219,6 +215,4 @@ class TestTiming:
         start = time.perf_counter()
         _ = driver.is_connected
         elapsed_ms = (time.perf_counter() - start) * 1000
-        assert elapsed_ms < 1.0, (
-            f"is_connected took {elapsed_ms:.2f}ms — must not perform I/O"
-        )
+        assert elapsed_ms < 1.0, f"is_connected took {elapsed_ms:.2f}ms — must not perform I/O"

@@ -26,15 +26,17 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import structlog
 
-log = logging.getLogger(__name__)
+log: structlog.BoundLogger = structlog.get_logger(__name__)
+_stdlib_log = logging.getLogger(__name__)  # mypy-friendly fallback ref — not used at runtime
 
 # ---------------------------------------------------------------------------
 # Optional Ray RLlib import (only for training, not required at runtime)
 # ---------------------------------------------------------------------------
 try:
     import ray
-    from ray import air, tune
+    from ray import tune
     from ray.rllib.algorithms.ppo import PPOConfig
     from ray.rllib.policy.policy import Policy
 
@@ -122,8 +124,7 @@ def train_ppo(
     """
     if not _RAY_AVAILABLE:
         raise ImportError(
-            "Ray RLlib is required for training. "
-            "Install with: pip install 'ray[rllib]'"
+            "Ray RLlib is required for training. Install with: pip install 'ray[rllib]'"
         )
 
     # Lazy import to avoid circular dependency at module level
@@ -151,9 +152,7 @@ def train_ppo(
         .resources(num_gpus=0)
     )
 
-    stop_criteria: dict[str, Any] = {
-        "training_iteration": num_iterations
-    }
+    stop_criteria: dict[str, Any] = {"training_iteration": num_iterations}
     if stop_reward is not None:
         stop_criteria["env_runners/episode_reward_mean"] = stop_reward
 
@@ -166,9 +165,7 @@ def train_ppo(
         verbose=1,
     )
 
-    best = results.get_best_result(
-        metric="env_runners/episode_reward_mean", mode="max"
-    )
+    best = results.get_best_result(metric="env_runners/episode_reward_mean", mode="max")
     checkpoint_path = str(best.checkpoint.path)
     log.info("drl_agent.training_complete", checkpoint=checkpoint_path)
     return checkpoint_path
@@ -177,6 +174,7 @@ def train_ppo(
 # ---------------------------------------------------------------------------
 # ONNX Export
 # ---------------------------------------------------------------------------
+
 
 def export_onnx(
     checkpoint_path: str,
@@ -235,13 +233,18 @@ def export_onnx(
             dynamic_axes={"obs": {0: "batch_size"}},
         )
 
-    log.info("drl_agent.onnx_exported", path=str(out_path), size_mb=out_path.stat().st_size / 1e6)
+    log.info(
+        "drl_agent.onnx_exported",
+        path=str(out_path),
+        size_mb=round(out_path.stat().st_size / 1e6, 2),
+    )
     return out_path
 
 
 # ---------------------------------------------------------------------------
 # Edge Inference — ONNX Runtime Agent
 # ---------------------------------------------------------------------------
+
 
 class ONNXArbitrageAgent:
     """Edge runtime DRL agent using ONNX Runtime for inference.
@@ -278,7 +281,7 @@ class ONNXArbitrageAgent:
         if not _ORT_AVAILABLE:  # pragma: no cover
             log.warning(
                 "drl_agent.ort_unavailable",
-                msg="onnxruntime not installed — agent will always use fallback",
+                reason="onnxruntime not installed — agent will always use fallback",
             )
             return
 
@@ -286,13 +289,13 @@ class ONNXArbitrageAgent:
             log.warning(
                 "drl_agent.model_not_found",
                 path=str(self._model_path),
-                msg="ONNX model not found — using fallback",
+                reason="ONNX model not found — using fallback",
             )
             return
 
         try:
             session_opts = ort.SessionOptions()  # type: ignore[union-attr]
-            session_opts.intra_op_num_threads = 1   # edge: single-threaded
+            session_opts.intra_op_num_threads = 1  # edge: single-threaded
             session_opts.inter_op_num_threads = 1
             self._session = ort.InferenceSession(  # type: ignore[union-attr]
                 str(self._model_path),
@@ -309,9 +312,7 @@ class ONNXArbitrageAgent:
         """Return True if the ONNX session is loaded and ready."""
         return self._session is not None
 
-    def predict(
-        self, obs: np.ndarray
-    ) -> tuple[float, dict[str, Any]]:
+    def predict(self, obs: np.ndarray) -> tuple[float, dict[str, Any]]:
         """Compute action from observation.
 
         Parameters

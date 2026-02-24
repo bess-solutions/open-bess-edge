@@ -505,11 +505,15 @@ class DashboardAPI:
             # Exempt OPTIONS preflight and health endpoint from rate limiting
             if request.method == "OPTIONS" or request.path in ("/api/v1/health", "/"):
                 return await handler(request)
-            ip: str = request.headers.get("X-Forwarded-For", request.remote or "unknown").split(",")[0].strip()
+            ip: str = (
+                request.headers.get("X-Forwarded-For", request.remote or "unknown")
+                .split(",")[0]
+                .strip()
+            )
             if not _rate_limiter.is_allowed(ip):
                 retry = _rate_limiter.retry_after(ip)
                 return web.Response(
-                    text='{"error": "Too Many Requests", "retry_after_s": ' + str(retry) + '}',
+                    text='{"error": "Too Many Requests", "retry_after_s": ' + str(retry) + "}",
                     status=429,
                     content_type="application/json",
                     headers={"Retry-After": str(retry)},

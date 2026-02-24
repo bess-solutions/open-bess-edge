@@ -73,8 +73,8 @@ class ArbitragePolicy:
         cmg_high_threshold_norm: float = 80.0 / _CMG_MAX_NORM,
         soc_min: float = 0.15,
         soc_max: float = 0.95,
-        charge_pu: float = -1.0,       # max charge
-        discharge_pu: float = 1.0,     # max discharge
+        charge_pu: float = -1.0,  # max charge
+        discharge_pu: float = 1.0,  # max discharge
     ) -> None:
         self.cmg_low = cmg_low_threshold_norm
         self.cmg_high = cmg_high_threshold_norm
@@ -83,9 +83,7 @@ class ArbitragePolicy:
         self.charge_pu = charge_pu
         self.discharge_pu = discharge_pu
 
-    def predict(
-        self, obs: np.ndarray
-    ) -> tuple[float, dict[str, Any]]:
+    def predict(self, obs: np.ndarray) -> tuple[float, dict[str, Any]]:
         """Compute rule-based action from observation.
 
         Parameters
@@ -116,7 +114,7 @@ class ArbitragePolicy:
         # Rule 2: Peak price + 1-hour forecast also high → discharge now
         if (
             cmg_now >= self.cmg_high
-            and cmg_1h >= self.cmg_high * 0.8   # stay-in-peak confirmation
+            and cmg_1h >= self.cmg_high * 0.8  # stay-in-peak confirmation
             and soc > self.soc_min
         ):
             return self.discharge_pu, {
