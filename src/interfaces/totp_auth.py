@@ -98,7 +98,9 @@ class TOTPInfo:
             "setup": (
                 "Set DASHBOARD_MFA_SECRET env var with a Base32 secret. "
                 "Clients must send X-TOTP-Token header with every request."
-            ) if not self.enabled else (
+            )
+            if not self.enabled
+            else (
                 "MFA active. Clients must send a valid 6-digit TOTP token "
                 "in the X-TOTP-Token header alongside the Bearer token."
             ),
@@ -131,9 +133,7 @@ class TOTPAuth:
         secret: str | None = None,
         site_id: str = "edge-001",
     ) -> None:
-        self._secret: str | None = (
-            secret or os.getenv("DASHBOARD_MFA_SECRET") or None
-        )
+        self._secret: str | None = secret or os.getenv("DASHBOARD_MFA_SECRET") or None
         self._site_id = site_id
         self._totp: Any | None = None
 

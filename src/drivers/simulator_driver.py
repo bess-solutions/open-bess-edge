@@ -325,17 +325,20 @@ class SimulatorDriver:
             # BESSAI-SPEC-001 §5.1 — Required normalized tag names
             # These tags MUST be present in every conformant DataProvider.
             # ----------------------------------------------------------------
-            "SOC_%":        self._soc + noise(0.1),           # 0–100 %
-            "P_kW":         self._power_kw + noise(0.05),    # kW (+charge, -discharge)
-            "T_battery_C":  self._temp_c + noise(0.2),       # −40 to 100 °C
-            "V_dc_V":       max(0.0, self._voltage + noise(2)),  # 0–∞ V
-            "alarm_code":   0.0 if self._mode != SimMode.FAULT else 16.0,  # 0–∞
+            "SOC_%": self._soc + noise(0.1),  # 0–100 %
+            "P_kW": self._power_kw + noise(0.05),  # kW (+charge, -discharge)
+            "T_battery_C": self._temp_c + noise(0.2),  # −40 to 100 °C
+            "V_dc_V": max(0.0, self._voltage + noise(2)),  # 0–∞ V
+            "alarm_code": 0.0 if self._mode != SimMode.FAULT else 16.0,  # 0–∞
             # SPEC-001 §5.1 mode enum: 0=FAULT 1=STRESS 2=NORMAL(TOU) 3=IDLE
-            "mode":         (
-                2.0 if self._mode == SimMode.NORMAL else
-                3.0 if self._mode == SimMode.IDLE else
-                1.0 if self._mode == SimMode.STRESS else
-                0.0  # FAULT
+            "mode": (
+                2.0
+                if self._mode == SimMode.NORMAL
+                else 3.0
+                if self._mode == SimMode.IDLE
+                else 1.0
+                if self._mode == SimMode.STRESS
+                else 0.0  # FAULT
             ),
             # ----------------------------------------------------------------
             # State of charge / health

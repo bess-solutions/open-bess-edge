@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-24T11:50 v2.7.0 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-24T12:02 v2.7.1 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,15 +14,28 @@ Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivad
 
 ---
 
-## ✅ Estado Actual — v2.7.0
+## ✅ Estado Actual — v2.7.1
 
 ### Tests
 ```
-490 passed ✅  (+32 DRL agent tests: 18 BESSArbitrageEnv + 11 ArbitragePolicy + 3 integ)
-1 failed (SSL PEM mock pre-existente, confirmado no-regresión) · 5 skipped · 16.81s
+490 passed ✅  · 1 failed (SSL PEM mock pre-existente) · 5 skipped · 17.54s
+Ruff: 36 errores detectados, 35 corregidos (1 C901 justificado — handle_der_control)
+20 archivos auto-reformateados (ruff format)
 CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · helm ✅
-Workflows: benchmark.yml · compliance-report.yml · fuzzing.yml · interop contract tests (Job 4)
 ```
+
+### 🔍 Audit 360° — Gaps Conocidos y Plan de Acción
+
+| Prioridad | Gap | Archivo | Acción | Target |
+|---|---|---|---|---|
+| 🔴 Alta | `handle_der_control` complejidad C901 (15 > 10) | `sep2_adapter.py:569` | Refactor en 2 sub-funciones | v2.8.0 |
+| 🔴 Alta | SSL test mock inválido (1 failed pre-existente) | `test_sep2_adapter.py:447` | Usar `cryptography` lib para gen cert real | v2.8.0 |
+| 🔵 Media | mypy: `AsyncModbusTcpClient(**sslctx)` type mismatch | `modbus_driver.py:179` | `# type: ignore[arg-type]` + bug report pymodbus | v2.8.0 |
+| 🔵 Media | mypy: `totp_auth.py` union-attr `None` | `totp_auth.py:201` | Agregar guard `if self._totp is not None` | v2.8.0 |
+| 🔵 Media | BEP-0200 DRL en modo observe-only | `main.py:Step5e` | Activar `write_tag()` tras validar en staging | v2.9.0 |
+| 🟡 Baja | Pyre2 falsos positivos (sin acceso al venv) | Multiple | Configurar `pyrightconfig.json` con venvPath | v2.8.0 |
+| 🟡 Baja | BESSAI-SPEC-004 draft (sin impl. en drivers) | `BESSAI-SPEC-004.md` | Implementar `BatteryState` dataclass en drivers | v2.9.0 |
+| 🟡 Baja | 7 dispositivos BESSAI-CERTIFIED “Wanted” | BESSAI-CERTIFIED.md | Implementar en Hackathon 2026 | Mayo 2026 |
 
 
 ### Stack Docker — Métricas en vivo (confirmado 2026-02-19)

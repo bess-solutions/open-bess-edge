@@ -18,7 +18,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -80,7 +79,6 @@ class TestMQTTIntegration:
         ):
             # Simulate the instantiation block from main.py
             from src.core.main import MQTTPublisher as _MQTTPublisher  # noqa: F401
-            from src.interfaces.mqtt_publisher import MQTTConnectionError
 
             broker_url = os.getenv("MQTT_BROKER_URL")
             assert broker_url == "mqtt://localhost:1883"
@@ -91,7 +89,9 @@ class TestMQTTIntegration:
             mock_mqtt.start.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def test_mqtt_fail_safe_on_connection_error(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    async def test_mqtt_fail_safe_on_connection_error(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """
         If MQTTPublisher.start() raises MQTTConnectionError, mqtt_pub should
         be set to None so the main loop continues without MQTT.
@@ -101,9 +101,7 @@ class TestMQTTIntegration:
         from src.interfaces.mqtt_publisher import MQTTConnectionError
 
         mock_mqtt = _make_mqtt_mock(connected=False)
-        mock_mqtt.start = AsyncMock(
-            side_effect=MQTTConnectionError("broker unreachable")
-        )
+        mock_mqtt.start = AsyncMock(side_effect=MQTTConnectionError("broker unreachable"))
 
         mqtt_pub = mock_mqtt
         try:
@@ -134,9 +132,7 @@ class TestMQTTIntegration:
             await mock_mqtt.publish_safety(is_safe=True, watchdog_status="ok")
             await mock_mqtt.publish_heartbeat()
 
-        mock_mqtt.publish_telemetry.assert_awaited_once_with(
-            soc=75.0, power_kw=-50.0, temp_c=28.5
-        )
+        mock_mqtt.publish_telemetry.assert_awaited_once_with(soc=75.0, power_kw=-50.0, temp_c=28.5)
         mock_mqtt.publish_safety.assert_awaited_once_with(is_safe=True, watchdog_status="ok")
         mock_mqtt.publish_heartbeat.assert_awaited_once()
 

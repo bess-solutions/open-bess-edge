@@ -3,17 +3,17 @@ tests/agents/test_bess_rl_env.py
 =================================
 Tests for BESSArbitrageEnv (BEP-0200).
 """
+
 from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.agents.bess_rl_env import BESSArbitrageEnv, _build_synthetic_cmg_profile, clamp01
-
 
 # -----------------------------------------------------------------------
 # Synthetic profile
 # -----------------------------------------------------------------------
+
 
 def test_synthetic_cmg_profile_shape():
     profile = _build_synthetic_cmg_profile()
@@ -33,13 +33,13 @@ def test_synthetic_cmg_duck_curve():
     solar_dump_mean = profile[132:192].mean()
     # Evening peak: steps 216–264 (18:00–22:00)
     evening_peak_mean = profile[216:264].mean()
-    assert evening_peak_mean > solar_dump_mean * 2, \
-        "Evening peak should be at least 2× solar dump"
+    assert evening_peak_mean > solar_dump_mean * 2, "Evening peak should be at least 2× solar dump"
 
 
 # -----------------------------------------------------------------------
 # Environment initialisation
 # -----------------------------------------------------------------------
+
 
 def test_env_init_default():
     env = BESSArbitrageEnv()
@@ -68,6 +68,7 @@ def test_env_action_space_shape():
 # Reset
 # -----------------------------------------------------------------------
 
+
 def test_reset_returns_valid_obs():
     env = BESSArbitrageEnv()
     obs, info = env.reset(seed=42)
@@ -90,6 +91,7 @@ def test_reset_deterministic():
 # -----------------------------------------------------------------------
 # Step
 # -----------------------------------------------------------------------
+
 
 def test_step_returns_correct_types():
     env = BESSArbitrageEnv(noise_std=0.0)
@@ -160,9 +162,15 @@ def test_info_keys():
     env.reset()
     _, _, _, _, info = env.step(np.array([0.0], dtype=np.float32))
     expected_keys = {
-        "soc", "temp_c", "clipped_power_kw", "cmg_usd_mwh",
-        "revenue_usd", "degradation_pct", "episode_revenue_usd",
-        "episode_degradation_pct", "is_safe",
+        "soc",
+        "temp_c",
+        "clipped_power_kw",
+        "cmg_usd_mwh",
+        "revenue_usd",
+        "degradation_pct",
+        "episode_revenue_usd",
+        "episode_degradation_pct",
+        "is_safe",
     }
     assert expected_keys.issubset(info.keys()), f"Missing keys: {expected_keys - info.keys()}"
 
@@ -170,6 +178,7 @@ def test_info_keys():
 # -----------------------------------------------------------------------
 # Render
 # -----------------------------------------------------------------------
+
 
 def test_render_ansi():
     env = BESSArbitrageEnv(render_mode="ansi")
@@ -190,6 +199,7 @@ def test_render_none_mode():
 # -----------------------------------------------------------------------
 # Utility
 # -----------------------------------------------------------------------
+
 
 def test_clamp01():
     assert clamp01(-1.0) == 0.0

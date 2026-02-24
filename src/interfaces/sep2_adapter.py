@@ -237,8 +237,7 @@ class SEP2Adapter:
     ) -> None:
         if not _AIOHTTP_AVAILABLE:
             raise SEP2ConfigError(
-                "aiohttp is required for IEEE 2030.5 adapter. "
-                "Run: pip install aiohttp>=3.9"
+                "aiohttp is required for IEEE 2030.5 adapter. Run: pip install aiohttp>=3.9"
             )
 
         self._driver = driver
@@ -310,9 +309,7 @@ class SEP2Adapter:
         )
 
         if self._derms_mup_url:
-            self._mup_task = asyncio.create_task(
-                self._mup_push_loop(), name="sep2_mup_push"
-            )
+            self._mup_task = asyncio.create_task(self._mup_push_loop(), name="sep2_mup_push")
 
     async def stop(self) -> None:
         """Gracefully stop the IEEE 2030.5 server and cancel the MUP push task."""
@@ -361,9 +358,7 @@ class SEP2Adapter:
 
         if self._require_mtls:
             if not self._tls_ca:
-                raise SEP2ConfigError(
-                    "SEP2_TLS_CA must be set when SEP2_REQUIRE_MTLS=true"
-                )
+                raise SEP2ConfigError("SEP2_TLS_CA must be set when SEP2_REQUIRE_MTLS=true")
             if not os.path.exists(self._tls_ca):
                 raise SEP2ConfigError(f"TLS CA not found: {self._tls_ca}")
             ctx.load_verify_locations(cafile=self._tls_ca)
@@ -460,7 +455,7 @@ class SEP2Adapter:
             "type": "DERList",
             "all": 1,
             "results": 1,
-            "DER": [{"href": f"/edev/0/der/0"}],
+            "DER": [{"href": "/edev/0/der/0"}],
         }
         return _web.Response(
             text=_json_dumps(body),
@@ -616,14 +611,12 @@ class SEP2Adapter:
             if isinstance(raw_w, dict):
                 value_w = raw_w.get("value", 0)
                 mult = raw_w.get("multiplier", 0)
-                target_w = float(value_w) * (10 ** mult)
+                target_w = float(value_w) * (10**mult)
             else:
                 target_w = float(raw_w)
 
             if target_w > self._max_w:
-                errors.append(
-                    f"setMaxW={target_w}W exceeds device limit={self._max_w}W"
-                )
+                errors.append(f"setMaxW={target_w}W exceeds device limit={self._max_w}W")
             else:
                 try:
                     await self._driver.write_tag("P_setpoint_kW", target_w / 1000.0)
@@ -633,7 +626,7 @@ class SEP2Adapter:
                         lfdi=self._lfdi,
                     )
                 except Exception as exc:
-                    errors.append(f"write_tag(P_setpoint_kW={target_w/1000:.1f}) failed: {exc}")
+                    errors.append(f"write_tag(P_setpoint_kW={target_w / 1000:.1f}) failed: {exc}")
 
         # --- opModEnergize: true → charge mode ---
         if "opModEnergize" in der_control_base:
@@ -647,9 +640,7 @@ class SEP2Adapter:
                             f"opModEnergize rejected: SOC={soc:.1f}% >= 98% (battery full)"
                         )
                     else:
-                        await self._driver.write_tag(
-                            "operating_mode", float(_OP_MODE_NORMAL)
-                        )
+                        await self._driver.write_tag("operating_mode", float(_OP_MODE_NORMAL))
                         log.info(
                             "sep2_adapter.control.energize",
                             soc=soc,
@@ -716,9 +707,7 @@ class SEP2Adapter:
         if self._tls_cert and self._tls_key:
             ssl_ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
             ssl_ctx.minimum_version = ssl.TLSVersion.TLSv1_2
-            ssl_ctx.load_cert_chain(
-                certfile=self._tls_cert, keyfile=self._tls_key
-            )
+            ssl_ctx.load_cert_chain(certfile=self._tls_cert, keyfile=self._tls_key)
             if self._tls_ca:
                 ssl_ctx.load_verify_locations(cafile=self._tls_ca)
             else:
@@ -769,9 +758,7 @@ class SEP2Adapter:
                     "lastUpdateTime": now,
                     "description": "BESSAI Active Power",
                     "ReadingType": {"commodity": 4, "uom": 38},  # uom 38 = W
-                    "Reading": {
-                        "value": int(telemetry.get("active_power_kw", 0.0) * 1000)
-                    },
+                    "Reading": {"value": int(telemetry.get("active_power_kw", 0.0) * 1000)},
                 },
             ],
         }

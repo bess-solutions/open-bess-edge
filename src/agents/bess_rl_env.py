@@ -61,6 +61,7 @@ from src.simulation.bess_model import BESSPhysicsModel
 
 __all__ = ["BESSArbitrageEnv"]
 
+
 # ---------------------------------------------------------------------------
 # Synthetic Chilean CMg profile (5-min, 288 steps/day, USD/MWh)
 # Calibrated on CEN data 2023-2025 — Atacama solar duck curve:
@@ -118,8 +119,8 @@ class BESSArbitrageEnv(gym.Env):  # type: ignore[misc]
     DT_MINUTES: float = 5.0
 
     # Forecast horizons (number of steps ahead)
-    FCAST_1H_STEPS: int = 12   # 12 × 5 min = 60 min
-    FCAST_4H_STEPS: int = 48   # 48 × 5 min = 240 min
+    FCAST_1H_STEPS: int = 12  # 12 × 5 min = 60 min
+    FCAST_4H_STEPS: int = 48  # 48 × 5 min = 240 min
 
     def __init__(
         self,
@@ -144,9 +145,7 @@ class BESSArbitrageEnv(gym.Env):  # type: ignore[misc]
         self._n_steps = len(self._cmg_profile)
 
         # Physics model (same as BESSEnv)
-        self._bess = BESSPhysicsModel(
-            capacity_kwh=capacity_kwh, max_power_kw=max_power_kw
-        )
+        self._bess = BESSPhysicsModel(capacity_kwh=capacity_kwh, max_power_kw=max_power_kw)
 
         # Action space: per-unit setpoint ∈ [-1, 1]
         #   -1.0 → max charge (−max_power_kw)
@@ -161,12 +160,8 @@ class BESSArbitrageEnv(gym.Env):  # type: ignore[misc]
         # [soc, power_norm, temp_norm, cmg_now_norm,
         #  cmg_1h_norm, cmg_4h_norm, hour_sin, hour_cos]
         self.observation_space = spaces.Box(  # type: ignore[union-attr]
-            low=np.array(
-                [0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, -1.0], dtype=np.float32
-            ),
-            high=np.array(
-                [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=np.float32
-            ),
+            low=np.array([0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, -1.0], dtype=np.float32),
+            high=np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=np.float32),
             dtype=np.float32,
         )
 
@@ -229,8 +224,8 @@ class BESSArbitrageEnv(gym.Env):  # type: ignore[misc]
         # Reward components (all in USD)
         # ----------------------------------------------------------------
         dt_h = self.DT_MINUTES / 60.0
-        energy_kwh = clipped_kw * dt_h            # + = charging, − = discharging
-        revenue = -energy_kwh * cmg / 1000.0      # USD (positive when discharging)
+        energy_kwh = clipped_kw * dt_h  # + = charging, − = discharging
+        revenue = -energy_kwh * cmg / 1000.0  # USD (positive when discharging)
 
         # Degradation penalty: replace_cost × SoH loss
         deg = physics["degradation"]
@@ -238,7 +233,7 @@ class BESSArbitrageEnv(gym.Env):  # type: ignore[misc]
 
         # Thermal penalty: quadratic above 45 °C
         temp_excess = max(0.0, physics["temp_c"] - 45.0)
-        thermal_penalty = temp_excess ** 2 * 0.05
+        thermal_penalty = temp_excess**2 * 0.05
 
         # Safety guard: hard penalty for out-of-spec operation
         safety_penalty = 0.0 if self._bess.is_safe else 25.0
@@ -295,9 +290,7 @@ class BESSArbitrageEnv(gym.Env):  # type: ignore[misc]
         for reproducibility.
         """
         fcast_idx = min(idx + horizon_steps, self._n_steps - 1)
-        forecast_noise = float(
-            self.np_random.normal(0.0, self._cmg_at(fcast_idx) * 0.08)
-        )
+        forecast_noise = float(self.np_random.normal(0.0, self._cmg_at(fcast_idx) * 0.08))
         return max(0.0, self._cmg_at(fcast_idx) + forecast_noise)
 
     def _observe(self) -> np.ndarray:
@@ -313,14 +306,14 @@ class BESSArbitrageEnv(gym.Env):  # type: ignore[misc]
 
         return np.array(
             [
-                self._bess.soc,                                         # [0, 1]
-                self._bess.temp_c / self._bess.max_temp_c,             # [0, 1]
-                clamp01(self._bess.cumulative_degradation / 0.2),       # [0, 1]
-                clamp01(cmg_now / _CMG_MAX_NORM),                       # [0, 1]
-                clamp01(cmg_1h / _CMG_MAX_NORM),                        # [0, 1]
-                clamp01(cmg_4h / _CMG_MAX_NORM),                        # [0, 1]
-                math.sin(angle),                                        # [-1, 1]
-                math.cos(angle),                                        # [-1, 1]
+                self._bess.soc,  # [0, 1]
+                self._bess.temp_c / self._bess.max_temp_c,  # [0, 1]
+                clamp01(self._bess.cumulative_degradation / 0.2),  # [0, 1]
+                clamp01(cmg_now / _CMG_MAX_NORM),  # [0, 1]
+                clamp01(cmg_1h / _CMG_MAX_NORM),  # [0, 1]
+                clamp01(cmg_4h / _CMG_MAX_NORM),  # [0, 1]
+                math.sin(angle),  # [-1, 1]
+                math.cos(angle),  # [-1, 1]
             ],
             dtype=np.float32,
         )
@@ -329,6 +322,7 @@ class BESSArbitrageEnv(gym.Env):  # type: ignore[misc]
 # ---------------------------------------------------------------------------
 # Utility
 # ---------------------------------------------------------------------------
+
 
 def clamp01(x: float) -> float:
     """Clamp value to [0, 1]."""
