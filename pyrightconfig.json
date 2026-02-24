@@ -1,0 +1,30 @@
+{
+    "$schema": "https://json.schemastore.org/pyrightconfig.json",
+    "pythonVersion": "3.10",
+    "venvPath": ".",
+    "venv": ".venv",
+    "include": [
+        "src",
+        "tests"
+    ],
+    "exclude": [
+        ".venv",
+        ".git",
+        "__pycache__",
+        "docs"
+    ],
+    "typeCheckingMode": "basic",
+    "reportMissingImports": "warning",
+    "reportMissingModuleSource": "none",
+    "reportGeneralTypeIssues": "warning",
+    "reportOptionalMemberAccess": "warning",
+    "useLibraryCodeForTypes": true,
+    "executionEnvironments": [
+        {
+            "root": "src"
+        },
+        {
+            "root": "tests"
+        }
+    ]
+}

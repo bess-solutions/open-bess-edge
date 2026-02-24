@@ -78,18 +78,33 @@ from typing import Any
 import structlog
 
 try:
-    from aiohttp import web
+    import aiohttp as _aiohttp
+    from aiohttp import web as _web
 
     _AIOHTTP_AVAILABLE = True
 except ImportError:  # pragma: no cover
+    _aiohttp = None  # type: ignore[assignment]
+    _web = None  # type: ignore[assignment]
     _AIOHTTP_AVAILABLE = False
-    web = None  # type: ignore[assignment]
 
 from src.drivers.base import DataProvider
 
 __all__ = ["SEP2Adapter", "SEP2Error", "SEP2ConfigError"]
 
 log = structlog.get_logger(__name__)
+
+
+def _make_json_response(body: str, content_type: str, status: int) -> Any:
+    """
+    Create an aiohttp JSON Response.
+
+    Centralises all access to ``aiohttp._web.Response`` in one place so that
+    static analysers (Pyre2 / Pyright) only need to trust that this helper
+    is correct, rather than reasoning about the ``try/except ImportError``
+    guard that affects the module-level ``_web`` binding.
+    """
+    return _web.Response(text=body, content_type=content_type, status=status)  # type: ignore[union-attr]
+
 
 # ---------------------------------------------------------------------------
 # Exceptions
@@ -270,13 +285,13 @@ class SEP2Adapter:
         """
         ssl_ctx = self._build_ssl_context()
 
-        app = web.Application()
+        app = _web.Application()
         self._register_routes(app)
 
-        self._runner = web.AppRunner(app)
+        self._runner = _web.AppRunner(app)
         await self._runner.setup()
 
-        site = web.TCPSite(
+        site = _web.TCPSite(
             self._runner,
             host=self._host,
             port=self._port,
@@ -303,10 +318,11 @@ class SEP2Adapter:
         """Gracefully stop the IEEE 2030.5 server and cancel the MUP push task."""
         self._running = False
 
-        if self._mup_task and not self._mup_task.done():
+        if self._mup_task is not None and not self._mup_task.done():
             self._mup_task.cancel()
+            mup_task = self._mup_task  # narrow type for await
             try:
-                await self._mup_task
+                await mup_task
             except asyncio.CancelledError:
                 pass
 
@@ -410,7 +426,7 @@ class SEP2Adapter:
             "quality": 7,
             "tzOffset": 0,
         }
-        return web.Response(
+        return _web.Response(
             text=_json_dumps(body),
             content_type=self._CONTENT_TYPE,
             status=200,
@@ -424,7 +440,7 @@ class SEP2Adapter:
             "results": 1,
             "EndDevice": [self._build_edev_resource()],
         }
-        return web.Response(
+        return _web.Response(
             text=_json_dumps(body),
             content_type=self._CONTENT_TYPE,
             status=200,
@@ -432,7 +448,7 @@ class SEP2Adapter:
 
     async def handle_edev(self, request: Any) -> Any:
         """GET /edev/{edev_id} — EndDevice resource (IEEE 2030.5 §8.4.2)."""
-        return web.Response(
+        return _web.Response(
             text=_json_dumps(self._build_edev_resource()),
             content_type=self._CONTENT_TYPE,
             status=200,
@@ -446,7 +462,7 @@ class SEP2Adapter:
             "results": 1,
             "DER": [{"href": f"/edev/0/der/0"}],
         }
-        return web.Response(
+        return _web.Response(
             text=_json_dumps(body),
             content_type=self._CONTENT_TYPE,
             status=200,
@@ -486,7 +502,7 @@ class SEP2Adapter:
             "storageModeStatus": {"value": storage_mode},
             "inverterStatus": {"value": 1 if self._driver.is_connected else 6},
         }
-        return web.Response(
+        return _web.Response(
             text=_json_dumps(body),
             content_type=self._CONTENT_TYPE,
             status=200,
@@ -508,7 +524,7 @@ class SEP2Adapter:
             "setMaxDischargeRateW": {"value": self._max_w, "multiplier": 0},
             "updatedTime": int(time.time()),
         }
-        return web.Response(
+        return _web.Response(
             text=_json_dumps(body),
             content_type=self._CONTENT_TYPE,
             status=200,
@@ -524,7 +540,7 @@ class SEP2Adapter:
             "rtgMinPFNormalOperation": {"value": 95, "multiplier": -2},
             "type_": 80,  # DERType: other storage
         }
-        return web.Response(
+        return _web.Response(
             text=_json_dumps(body),
             content_type=self._CONTENT_TYPE,
             status=200,
@@ -544,7 +560,7 @@ class SEP2Adapter:
                 }
             ],
         }
-        return web.Response(
+        return _web.Response(
             text=_json_dumps(body),
             content_type=self._CONTENT_TYPE,
             status=200,
@@ -566,7 +582,7 @@ class SEP2Adapter:
         503 if driver is not connected.
         """
         if not self._driver.is_connected:
-            return web.Response(
+            return _web.Response(
                 text=_json_dumps({"error": "DER not connected"}),
                 content_type=self._CONTENT_TYPE,
                 status=503,
@@ -575,7 +591,7 @@ class SEP2Adapter:
         try:
             payload: dict = await request.json()
         except Exception:
-            return web.Response(
+            return _web.Response(
                 text=_json_dumps({"error": "Invalid JSON payload"}),
                 content_type=self._CONTENT_TYPE,
                 status=400,
@@ -643,13 +659,13 @@ class SEP2Adapter:
                     errors.append(f"opModEnergize failed: {exc}")
 
         if errors:
-            return web.Response(
+            return _web.Response(
                 text=_json_dumps({"errors": errors, "status": "partial_failure"}),
                 content_type=self._CONTENT_TYPE,
                 status=400,
             )
 
-        return web.Response(
+        return _web.Response(
             text=_json_dumps({"status": "accepted"}),
             content_type=self._CONTENT_TYPE,
             status=201,
@@ -668,7 +684,7 @@ class SEP2Adapter:
         except Exception:
             pass
 
-        return web.Response(
+        return _web.Response(
             text=_json_dumps({"status": "registered"}),
             content_type=self._CONTENT_TYPE,
             status=201,
@@ -685,11 +701,10 @@ class SEP2Adapter:
 
         Requires SEP2_DERMS_MUP_URL to be set.
         """
-        try:
-            import aiohttp  # type: ignore[import]
-        except ImportError:  # pragma: no cover
+        if _aiohttp is None:  # pragma: no cover
             log.warning("sep2_adapter.mup.aiohttp_missing")
             return
+        aiohttp = _aiohttp  # local alias with known type
 
         log.info(
             "sep2_adapter.mup.loop_started",
