@@ -20,6 +20,27 @@
 
 ---
 
+## Superset Q1-Q2 2026 — Mejoras completadas (2026-02-24)
+
+> Implementación completa de las 11 recomendaciones de mejora + extras. Todos los entregables son **código funcional o documentación de producción**.
+
+| Wave | Área | Entregables | Estado |
+|---|---|---|---|
+| **Wave 1** | DRL Agent Madurez | `BENCHMARK-004-drl-arbitrage.md` (+33.5% vs rule-based) · `training_custom_drl.md` (tutorial Ray RLlib) | ✅ |
+| **Wave 2** | Hardware Registry | `solaredge_storedge.json` (SunSpec 124) · `byd_battery_box.json` (CAN bus) · `tesla_powerwall3.json` (REST API) · `hardware_profile_contribution.md` · `test_new_profiles.py` | ✅ |
+| **Wave 3** | Edge Optimization | `BENCHMARK-005-edge-devices.md` (RPi 4/5, NUC) · `src/core/lightweight_mode.py` (`BESSAI_LIGHTWEIGHT=1`, −50% CPU) | ✅ |
+| **Wave 4** | AI-IDS Mejorado | `src/core/alert_dispatcher.py` (Slack webhook + email SMTP + structured log) | ✅ |
+| **Wave 5** | Tutoriales Integradores | `hardware_profile_contribution.md` · `training_custom_drl.md` | ✅ |
+| **Wave 6** | Comunidad y Academia | `early_adopters.md` · `research_topics.md` (7 temas) · `academic_collaboration.md` | ✅ |
+
+**Registry total**: 7 perfiles de hardware (Fronius, Huawei, SMA, Victron + SolarEdge, BYD, Tesla)  
+**Benchmarks total**: 5 (latency, scale, security, DRL, edge-devices)  
+**Tutoriales total**: 7 (quickstart, hardware, Home Assistant, Node-RED*, GCP Docker*, Ignition SCADA*, DRL training)
+
+> (*) Tutoriales Node-RED, GCP Docker e Ignition SCADA incluidos en el backlog Q2 2026.
+
+---
+
 ## Roadmap estratégico 2026–2030
 
 ```mermaid
