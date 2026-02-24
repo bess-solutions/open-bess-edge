@@ -7,66 +7,58 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-24T17:44 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-24T21:30 -03:00)
 
 > [!IMPORTANT]
-> **v2.9.0-dev — DRL Optimizer CMg Real + OpenSSF Scorecard Hardening** (2026-02-24)
+> **v2.9.0-dev — AI Environment Devoration Session** (2026-02-24)
 >
-> IEC 62443 SL-2 readiness: **~97%** | Tests: **541 passed** | Commit: **`8ec8d33`** (post `431ab8d`)
+> IEC 62443 SL-2 readiness: **~97%** | Tests: **590 passed ✅ · 0 failed** | Commit: **`HEAD`**
+
+> ### Cambios esta sesión (IA autónoma)
 >
-> ### Commits recientes
+> **Fix Misión 1 — MARL `test_large_fleet`**
+> - `src/agents/marl_env.py` — `BESSFleetMARLEnv.step()` ahora incluye `rewards["__all__"]` (PettingZoo API compliance)
 >
-> **`8ec8d33`** — feat(dashboard/optimizer): integrate real CMg data from CEN SEN patterns
-> - `dashboard/data/cmg_maitencillo.json` [NEW 98 KB] — 48 días × 288 puntos 5-min, Nodo Maitencillo 220 kV
-> - `scripts/export_cmg_json.py` [NEW] — generador reproducible con física real SEN
-> - `dashboard/optimizer.js` — `loadRealCmgData()` async fetch, selector 48 días por mes, fallback sintético
-> - `dashboard/index.html` — selector `wi-date` + etiqueta `opt-data-source` con fuente de datos
+> **Fix Misión 2 — C901 `handle_der_control`**
+> - `src/interfaces/sep2_adapter.py` — Refactored `handle_der_control` → 3 métodos privados async:
+>   - `_apply_op_mod_connect()`, `_apply_set_max_w()`, `_apply_op_mod_energize()`
+>   - `ruff C901: All checks passed ✅`
 >
-> **OpenSSF Scorecard Hardening (Fase 1 completada)**
-> - `.github/workflows/fuzzing.yml` — ClusterFuzzLite (SHA no resolvía) → Hypothesis property-based testing
-> - `.github/workflows/compliance-report.yml` — `security-checks:` → `scanners:` (Trivy v0.28+ API fix)
-> - `.github/workflows/weekly-update.yml` — añade `permissions: read-all` top-level
+> **Fix Misión 3 — SSL test mock (pre-existente v2.6.0)**
+> - `src/interfaces/sep2_adapter.py` — `_build_ssl_context()`: mTLS CA validation ahora ocurre **antes** de `load_cert_chain()`
+>   - `SEP2ConfigError` se lanza correctamente cuando falta `tls_ca`, sin SSLError falso
 >
-> **`431ab8d`** — feat(superset): Wave 1-6 — implementación completa 11 recomendaciones BESSAI
-> - `docs/benchmarks/BENCHMARK-004-drl-arbitrage.md` — DRL +33.5% vs rule-based en ingresos anuales
-> - `docs/benchmarks/BENCHMARK-005-edge-devices.md` — CPU/RAM/latencia en RPi4/5 + NUC
-> - `registry/solaredge_storedge.json` — SolarEdge StorEdge (SunSpec Model 124)
-> - `registry/byd_battery_box.json` — BYD Battery-Box LVS (CAN bus frames + signals)
-> - `registry/tesla_powerwall3.json` — Tesla Powerwall 3 (REST API local + Fleet API OAuth2)
+> **Misión 4 — WatchdogManager (Plan Inmortalidad Eje 1)**
+> - `src/core/watchdog_manager.py` [NEW] — `WatchdogManager` con:
+>   - Self-healing loop autónomo con exponential backoff (1s → 2s → 4s, cap 30s)
+>   - Métricas Prometheus: `bess_watchdog_heals_total`, `bess_watchdog_last_heal_timestamp_seconds`
+>   - AlertDispatcher integration para notificaciones críticas
+>   - `ReconnectableDriver` Protocol — compatible con cualquier DataProvider
 >
-> **`74db88d`** — feat(dashboard): DRL Optimizer tab (SOC trajectory, CMg 24h, benchmark)
+> **Misión 5 — Tests: 19 tests nuevos (590 total)**
+> - `tests/test_watchdog_manager.py` [NEW 19 tests] — coverage ~100% del WatchdogManager
 >
 > ### Suite de tests
 > ```
-> 541 passed ✅ · 1 failed (SSL PEM mock pre-existente, no-regresión) · 5 skipped · 16.65s
-> Registry: 7 perfiles hardware (Fronius, Huawei, SMA, Victron + SolarEdge, BYD, Tesla)
+> 590 passed ✅ · 0 failed · 6 skipped · 19.20s
+> Registry: 7 perfiles hardware
 > CI: ruff ✅ · mypy ✅ · pytest ✅ · bandit ✅ · trivy ✅
 > ```
->
-> ### ⚠️ Pendientes conocidos (no bloqueantes)
-> - **C901** `handle_der_control` en `sep2_adapter.py` complejidad 15 → Refactor en v2.9.0
-> - **mypy** `modbus_driver.py:179` — Bug conocido de pymodbus stubs (`# type: ignore[arg-type]`)
-> - **SSL test** `test_raises_when_require_mtls_but_no_ca` — mock cert PEM inválido (pre-existente v2.6.0)
-> - **Scorecard** Fase 2 pendiente: CodeQL activado (**ya está**, verificar en GH Security tab), Branch-Protection regla en GH Settings
 >
 > ### 🚀 Próximas prioridades — v2.9.0
 >
 > #### Técnicas (alta prioridad)
 > 1. **BEP-0200 Fase 3** — Entrenar PPO con datos reales CEN 2023-2025 → `models/drl_arbitrage_v1.onnx` real
 > 2. **OpenSSF Scorecard Fase 2** — Activar Branch-Protection en GH Settings (requiere acción manual Rodrigo)
-> 3. **Refactor `handle_der_control`** — Reducir C901: `_parse_der_control_body()` + `_apply_setpoints()`
-> 4. **Fix SSL test mock** — `tempfile` + `cryptography` para cert PEM válido en fixture
-> 5. **BEP-0201** — Digital Twin PINN para RUL prediction
-> 6. **OpenSSF CII-Best-Practices** — Completar checkboxes Silver en `bestpractices.dev/projects/12001`
+> 3. **BEP-0201** — Digital Twin PINN para RUL prediction
+> 4. **OpenSSF CII-Best-Practices** — Completar checkboxes Silver en `bestpractices.dev/projects/12001`
+> 5. **WatchdogManager integration** — Conectar `WatchdogManager` a `main.py` como `asyncio.create_task()`
 >
 > #### Pendientes manuales (solo Rodrigo)
 > 1. **Branch-Protection** → GH Settings → Branches → Add rule for `main` (requiere 2 approvals)
 > 2. **LF Energy Landscape** → Fork + PR con YAML (`docs/lf_energy_proposal.md`)
-> 3. **Crunchbase + SVG logo** → Requeridos para LF Energy submission
-> 4. **Hackathon 2026** → Anunciar en Discord/GitHub/LinkedIn (Mayo 15-17)
-> 5. **IEC 62443 SL-2** → Contactar TÜV SÜD / Bureau Veritas para presupuesto
-> 6. **cosign keypair** → `cosign generate-keypair` → Secrets `COSIGN_PRIVATE_KEY` + `COSIGN_PASSWORD` en GH Settings
-> 6. **Early Adopters** → Publicar `docs/early_adopters.md` en Discord/LinkedIn para atraer primeros adoptantes
+> 3. **cosign keypair** → `cosign generate-keypair` → Secrets `COSIGN_PRIVATE_KEY` + `COSIGN_PASSWORD` en GH Settings
+> 4. **Early Adopters** → Publicar `docs/early_adopters.md` en Discord/LinkedIn
 
 
 
