@@ -26,8 +26,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
             action="store",
             default=None,
             help=(
-                "Dotted path to driver class, "
-                "e.g. 'src.drivers.simulator_driver.SimulatorDriver'"
+                "Dotted path to driver class, e.g. 'src.drivers.simulator_driver.SimulatorDriver'"
             ),
         )
         parser.addoption(

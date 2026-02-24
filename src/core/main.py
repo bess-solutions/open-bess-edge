@@ -304,9 +304,7 @@ async def main() -> None:  # noqa: C901
         _sep2_task: asyncio.Task | None = None
         if _sep2_adapter is not None:
             try:
-                _sep2_task = asyncio.create_task(
-                    _sep2_adapter.start(), name="sep2_server"
-                )
+                _sep2_task = asyncio.create_task(_sep2_adapter.start(), name="sep2_server")
                 log.info(
                     "sep2_adapter.enabled",
                     port=_cfg.SEP2_PORT,
@@ -326,9 +324,8 @@ async def main() -> None:  # noqa: C901
                 tip="Set SEP2_ENABLED=true in .env to enable IEEE 2030.5 server",
             )
 
-
         # ── Step 5e — Optional DRL Arbitrage Agent (fail-safe, BEP-0200) ────
-        _drl_agent: "ONNXArbitrageAgent | None" = None  # type: ignore[type-arg]
+        _drl_agent: ONNXArbitrageAgent | None = None  # type: ignore[type-arg]
         if _DRL_AVAILABLE and _DRL_ENABLED:
             _rule_policy = ArbitragePolicy()  # type: ignore[name-defined]
             _drl_agent = ONNXArbitrageAgent(  # type: ignore[name-defined]
@@ -366,7 +363,6 @@ async def main() -> None:  # noqa: C901
             poll_interval_s=_cfg.WATCHDOG_TIMEOUT,
             health_port=_cfg.HEALTH_PORT,
         )
-
 
         cycle: int = 0
 
@@ -469,19 +465,23 @@ async def main() -> None:  # noqa: C901
                     # (CMg fields are 0 until CMg Predictor v2 is integrated)
                     _obs = np.array(
                         [
-                            _soc,           # soc [0,1]
-                            _temp / 60.0,   # temp_norm
-                            0.0,            # cumulative_deg (not tracked in telemetry yet)
-                            0.1,            # cmg_now_norm: placeholder ~30 USD/MWh
-                            0.1,            # cmg_1h_norm: placeholder
-                            0.1,            # cmg_4h_norm: placeholder
-                            0.0,            # hour_sin
-                            1.0,            # hour_cos
+                            _soc,  # soc [0,1]
+                            _temp / 60.0,  # temp_norm
+                            0.0,  # cumulative_deg (not tracked in telemetry yet)
+                            0.1,  # cmg_now_norm: placeholder ~30 USD/MWh
+                            0.1,  # cmg_1h_norm: placeholder
+                            0.1,  # cmg_4h_norm: placeholder
+                            0.0,  # hour_sin
+                            1.0,  # hour_cos
                         ],
                         dtype=np.float32,
                     )
                     _p_pu, _drl_info = _drl_agent.predict(_obs)
-                    _p_kw = _p_pu * _cfg.MAX_CONTINUOUS_DISCHARGE_KW if hasattr(_cfg, "MAX_CONTINUOUS_DISCHARGE_KW") else _p_pu * 100.0
+                    _p_kw = (
+                        _p_pu * _cfg.MAX_CONTINUOUS_DISCHARGE_KW
+                        if hasattr(_cfg, "MAX_CONTINUOUS_DISCHARGE_KW")
+                        else _p_pu * 100.0
+                    )
                     log.info(
                         "drl_agent.setpoint",
                         cycle=cycle,

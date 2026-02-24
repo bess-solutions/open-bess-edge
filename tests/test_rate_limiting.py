@@ -15,11 +15,9 @@ Tests cover:
 
 from __future__ import annotations
 
-import os
 import time
 
 import pytest
-
 
 # ---------------------------------------------------------------------------
 # Import the private _RateLimiter directly from dashboard_api
@@ -33,13 +31,14 @@ def limiter(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("RATE_LIMIT_READ_RPM", "5")
     # Re-import to get a fresh instance using the patched env var
     import importlib
+
     import src.interfaces.dashboard_api as mod
+
     importlib.reload(mod)
     return mod._RateLimiter()
 
 
 class TestRateLimiter:
-
     def test_allows_requests_under_limit(self, limiter) -> None:
         """First 5 requests for an IP must be allowed."""
         for _ in range(5):
@@ -97,7 +96,9 @@ class TestRateLimiter:
         """RATE_LIMIT_READ_RPM env var must set the limiter threshold."""
         monkeypatch.setenv("RATE_LIMIT_READ_RPM", "3")
         import importlib
+
         import src.interfaces.dashboard_api as mod
+
         importlib.reload(mod)
         lim = mod._RateLimiter()
         assert lim._read_limit == 3

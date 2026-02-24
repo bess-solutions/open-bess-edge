@@ -3,17 +3,17 @@ tests/agents/test_arbitrage_policy.py
 ======================================
 Tests for ArbitragePolicy (BEP-0200 rule-based baseline).
 """
+
 from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.agents.arbitrage_policy import (
+    _CMG_MAX_NORM,
     OBS_CMG_1H,
     OBS_CMG_NOW,
     OBS_SOC,
     ArbitragePolicy,
-    _CMG_MAX_NORM,
 )
 
 
@@ -96,10 +96,10 @@ class TestArbitragePolicyRules:
         """Per-unit action must always be ∈ [-1, 1]."""
         policy = ArbitragePolicy()
         test_cases = [
-            _make_obs(soc=0.50, cmg_now=5.0),   # solar dump
+            _make_obs(soc=0.50, cmg_now=5.0),  # solar dump
             _make_obs(soc=0.80, cmg_now=150.0, cmg_1h=120.0),  # peak discharge
-            _make_obs(soc=0.50, cmg_now=50.0),   # idle
-            _make_obs(soc=0.92, cmg_now=70.0),   # high SOC moderate
+            _make_obs(soc=0.50, cmg_now=50.0),  # idle
+            _make_obs(soc=0.92, cmg_now=70.0),  # high SOC moderate
         ]
         for obs in test_cases:
             p_pu, _ = policy.predict(obs)
@@ -115,7 +115,6 @@ class TestArbitragePolicyRules:
         p_pu, info = policy.predict(obs)
         assert p_pu < 0, "Should pre-charge"
         assert info["rule"] == "pre_charge_spike_anticipation"
-
 
     def test_source_always_rule_based(self):
         """Source field must always be 'rule_based'."""

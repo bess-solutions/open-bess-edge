@@ -18,21 +18,17 @@ The self-signed certs are generated via the stdlib ssl module without openssl bi
 
 from __future__ import annotations
 
-import os
 import ssl
 import subprocess
-import sys
-import tempfile
 from pathlib import Path
 
 import pytest
-
 from src.interfaces.ot_tls_config import OtTlsConfig, build_ssl_context
-
 
 # ---------------------------------------------------------------------------
 # Helpers — self-signed cert & key generation (pure Python, no subprocess)
 # ---------------------------------------------------------------------------
+
 
 def _gen_self_signed_cert(tmp_path: Path) -> tuple[Path, Path]:
     """
@@ -43,7 +39,7 @@ def _gen_self_signed_cert(tmp_path: Path) -> tuple[Path, Path]:
     """
     openssl = "openssl"
     try:
-        result = subprocess.run(
+        subprocess.run(
             [openssl, "version"],
             capture_output=True,
             timeout=5,
@@ -64,11 +60,18 @@ def _gen_self_signed_cert(tmp_path: Path) -> tuple[Path, Path]:
     # Generate self-signed certificate (valid 1 day for tests)
     subprocess.run(
         [
-            openssl, "req", "-new", "-x509",
-            "-key", str(key_path),
-            "-out", str(cert_path),
-            "-days", "1",
-            "-subj", "/CN=bessai-test/O=BESSAI-Test",
+            openssl,
+            "req",
+            "-new",
+            "-x509",
+            "-key",
+            str(key_path),
+            "-out",
+            str(cert_path),
+            "-days",
+            "1",
+            "-subj",
+            "/CN=bessai-test/O=BESSAI-Test",
         ],
         check=True,
         capture_output=True,
@@ -108,9 +111,7 @@ class TestOtTlsConfigFromEnv:
         cfg = OtTlsConfig.from_env()
         assert cfg.enabled is False
 
-    def test_enabled_with_all_paths(
-        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-    ) -> None:
+    def test_enabled_with_all_paths(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         """All env vars set → is_enabled True and paths resolved."""
         ca = tmp_path / "ca.crt"
         cert = tmp_path / "client.crt"
