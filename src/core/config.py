@@ -151,6 +151,63 @@ class Settings(BaseSettings):
     )
 
     # ------------------------------------------------------------------
+    # IEEE 2030.5 / SEP 2.0 Adapter (BEP-0100) — opt-in
+    # ------------------------------------------------------------------
+    SEP2_ENABLED: bool = Field(
+        default=False,
+        description="Enable the IEEE 2030.5 REST server (BEP-0100). Off by default.",
+    )
+    SEP2_PORT: int = Field(
+        default=8443,
+        ge=1,
+        le=65535,
+        description="TCP port for the IEEE 2030.5 (SEP 2.0) server.",
+    )
+    SEP2_HOST: str = Field(
+        default="0.0.0.0",
+        description="Bind address for the IEEE 2030.5 server.",
+    )
+    SEP2_TLS_CERT: str | None = Field(
+        default=None,
+        description="Path to TLS server certificate PEM for IEEE 2030.5.",
+    )
+    SEP2_TLS_KEY: str | None = Field(
+        default=None,
+        description="Path to TLS private key PEM for IEEE 2030.5.",
+    )
+    SEP2_TLS_CA: str | None = Field(
+        default=None,
+        description="Path to CA certificate PEM for mTLS client validation.",
+    )
+    SEP2_REQUIRE_MTLS: bool = Field(
+        default=True,
+        description="Require client certificates (mTLS) for IEEE 2030.5. Recommended: True.",
+    )
+    SEP2_MAX_W: int = Field(
+        default=100_000,
+        gt=0,
+        description="Device maximum power in Watts (for DERSettings/DERCapability).",
+    )
+    SEP2_MAX_WH: int = Field(
+        default=400_000,
+        gt=0,
+        description="Battery capacity in Watt-hours (for DERSettings/DERCapability).",
+    )
+    SEP2_LFDI: str | None = Field(
+        default=None,
+        description="Long Form Device Identifier (LFDI). Auto-derived from TLS cert if not set.",
+    )
+    SEP2_DERMS_MUP_URL: str | None = Field(
+        default=None,
+        description="URL of the DERMS MirrorUsagePoint resource for periodic telemetry push.",
+    )
+    SEP2_MUP_INTERVAL: int = Field(
+        default=300,
+        ge=30,
+        description="Interval in seconds for MirrorUsagePoint push to DERMS.",
+    )
+
+    # ------------------------------------------------------------------
     # Derived helpers (not environment variables)
     # ------------------------------------------------------------------
     @property

@@ -63,6 +63,7 @@ from src.interfaces.metrics import (
 from src.interfaces.mqtt_publisher import MQTTConnectionError, MQTTPublisher
 from src.interfaces.otel_setup import configure_otel, get_tracer, shutdown_otel
 from src.interfaces.pubsub_publisher import PubSubPublisher
+from src.interfaces.sep2_adapter import SEP2Error, build_adapter_from_env
 
 # Resolve settings once at module level (safe — uses _LazySettings proxy)
 _cfg = get_settings()
@@ -256,7 +257,6 @@ async def main() -> None:  # noqa: C901
         ) as publisher,
         health_server.run(),
     ):
-        # ── Step 5c — Optional MQTT publisher (fail-safe) —————————————
         _mqtt_broker = os.getenv("MQTT_BROKER_URL")
         mqtt_pub: MQTTPublisher | None = None
         if _mqtt_broker:
@@ -282,6 +282,33 @@ async def main() -> None:  # noqa: C901
             log.info(
                 "mqtt_publisher.disabled",
                 tip="Set MQTT_BROKER_URL in .env to enable dual-channel publishing",
+            )
+
+        # ── Step 5d — Optional IEEE 2030.5 SEP 2.0 adapter (fail-safe) ───
+        _sep2_adapter = build_adapter_from_env(driver)
+        _sep2_task: asyncio.Task | None = None
+        if _sep2_adapter is not None:
+            try:
+                _sep2_task = asyncio.create_task(
+                    _sep2_adapter.start(), name="sep2_server"
+                )
+                log.info(
+                    "sep2_adapter.enabled",
+                    port=_cfg.SEP2_PORT,
+                    site_id=_cfg.SITE_ID,
+                    note="IEEE 2030.5 / CPUC Rule 21 / AEMO AS/NZS 4777.2",
+                )
+            except (SEP2Error, Exception) as exc:
+                log.warning(
+                    "sep2_adapter.start_failed",
+                    error=str(exc),
+                    action="continuing_without_sep2",
+                )
+                _sep2_adapter = None
+        else:
+            log.info(
+                "sep2_adapter.disabled",
+                tip="Set SEP2_ENABLED=true in .env to enable IEEE 2030.5 server",
             )
 
         log.info(
@@ -407,6 +434,8 @@ async def main() -> None:  # noqa: C901
     # PubSubPublisher.__aexit__ already closed the session here.
     if mqtt_pub is not None:
         await mqtt_pub.stop()
+    if _sep2_adapter is not None:
+        await _sep2_adapter.stop()
     await driver.disconnect()
     shutdown_otel()
     log.info("shutdown.complete")
