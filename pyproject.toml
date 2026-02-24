@@ -60,6 +60,17 @@ dev = [
 docs = [
     "mkdocs-material>=9.5", "mkdocs-minify-plugin>=0.8",
 ]
+# BEP-0200: DRL Arbitrage Agent — only needed for training, not runtime
+drl = [
+    "gymnasium>=0.29",
+    "ray[rllib]>=2.9",
+    "torch>=2.2",
+    "onnx>=1.15",
+]
+# Simulation / RL environment only (without full Ray RLlib)
+sim = [
+    "gymnasium>=0.29",
+]
 
 [project.scripts]
 bessai-edge = "bessai_edge.cli:main"
