@@ -1,5 +1,5 @@
 site_name: BESSAI Edge Gateway
-site_description: Open-source industrial BESS gateway — IEC 62443 SL-2 certified path, mTLS OT segment, TOTP MFA, AI-powered arbitrage.
+site_description: Open-source industrial BESS gateway — IEEE 2030.5, IEC 62443 SL-2, DRL arbitrage, mTLS OT, MQTT, ONNX edge inference.
 site_url: https://bess-solutions.github.io/open-bess-edge/
 repo_url: https://github.com/bess-solutions/open-bess-edge
 repo_name: bess-solutions/open-bess-edge
@@ -80,7 +80,8 @@ nav:
   - Architecture:
     - Overview: architecture.md
     - Sim-First Strategy: simulation_registry.md
-    - Roadmap v2.0: bessai_v2_roadmap.md
+    - Roadmap v2.7–3.0: ROADMAP.md
+    - Roadmap v2.0 (archivado): bessai_v2_roadmap.md
     - Decision Records (ADRs):
       - Overview: adr/README.md
       - ADR-001 Pydantic Settings: adr/0001-pydantic-settings-config.md
@@ -97,6 +98,7 @@ nav:
   - Enhancement Proposals (BEPs):
     - BEP-0001 — BEP Process: bep/BEP-0001.md
     - BEP-0100 — IEEE 2030.5 Adapter: bep/BEP-0100.md
+    - BEP-0200 — DRL Arbitrage Agent: bep/BEP-0200.md
   - API Reference: api_reference.md
   - Operations:
     - Runbook: runbook.md
@@ -116,6 +118,7 @@ nav:
     - BEPs:
       - BEP-0001 (Process): bep/BEP-0001.md
       - BEP-0100 (IEEE 2030.5 Adapter): bep/BEP-0100.md
+      - BEP-0200 (DRL Arbitrage Agent): bep/BEP-0200.md
   - Benchmarks:
     - Benchmark 001 — Latency: benchmarks/BENCHMARK-001-latency.md
     - Benchmark 002 — Scale: benchmarks/BENCHMARK-002-scale.md
