@@ -4,8 +4,8 @@ src/agents/degradation_model.py
 BESSAI Edge Gateway — BEP-0210: Semi-Empirical Battery Degradation Model.
 
 Implements a physics-informed degradation model that feeds into the DRL
-reward function, enabling *life-aware* dispatch optimization. Competitors
-Common commercial BESS platforms use simple cycle counters; this model uses
+reward function, enabling *life-aware* dispatch optimization. Common
+commercial BESS platforms use simple cycle counters; this model uses
 a full semi-empirical approach combining:
 
 1. **Rainflow cycle counting** (ASTM E1049) — quantifies DoD and mean-SoC

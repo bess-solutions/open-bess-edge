@@ -314,7 +314,7 @@ class BenchmarkSuite:
                 milp_agent.name = "milp"  # type: ignore[attr-defined]
                 default_agents["milp"] = milp_agent
             except ImportError:
-                log.warning("benchmark_suite.milp_unavailable", reason="PuLP not installed")
+                log.warning("benchmark_suite.milp_unavailable: PuLP not installed (pip install pulp highspy)")
 
         if agents:
             default_agents.update(agents)
@@ -339,7 +339,10 @@ class BenchmarkSuite:
                         },
                     )
                 except Exception as exc:
-                    log.error(f"benchmark_suite.episode_failed", extra={"strategy": name, "ep": ep, "error": str(exc)})
+                    log.error(
+                        "benchmark_suite.episode_failed strategy=%s ep=%d: %s",
+                        name, ep, exc,
+                    )
 
         return BenchmarkReport(
             results=all_results,
