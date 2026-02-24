@@ -18,8 +18,8 @@ Dependencies::
     pip install pulp highspy   # HiGHS solver (open-source MILP)
 
 Competitor comparison:
-    - OpenEMS: Rule-based (peak shaving thresholds). Not optimal.
-    - FlexMeasures: MILP-based but cloud-only, not edge-native.
+    - Rule-based BEMS platforms: use fixed charge/discharge thresholds. Not optimal.
+    - Cloud-based scheduling platforms: MILP-based but require connectivity, not edge-native.
     - **BESSAI MILP**: Runs locally in <500ms, fallback for edge DRL. Unique.
 
 Model formulation
