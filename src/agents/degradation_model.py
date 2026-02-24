@@ -5,7 +5,7 @@ BESSAI Edge Gateway — BEP-0210: Semi-Empirical Battery Degradation Model.
 
 Implements a physics-informed degradation model that feeds into the DRL
 reward function, enabling *life-aware* dispatch optimization. Competitors
-like OpenEMS and FlexMeasures use simple cycle counters; this model uses
+Common commercial BESS platforms use simple cycle counters; this model uses
 a full semi-empirical approach combining:
 
 1. **Rainflow cycle counting** (ASTM E1049) — quantifies DoD and mean-SoC
@@ -58,7 +58,7 @@ class BatteryChemistry(Enum):
 
     LFP = "LFP"   # LiFePO4 — stable, high cycle life, common in industrial BESS
     NMC = "NMC"   # LiNiMnCoO2 — higher energy density, faster calendar aging
-    NCA = "NCA"   # LiNiCoAlO2 — Tesla-style, aggressive thermal sensitivity
+    NCA = "NCA"   # LiNiCoAlO2 — high energy density, aggressive thermal sensitivity
 
 
 # Calibrated parameters per chemistry (from literature + field data)
