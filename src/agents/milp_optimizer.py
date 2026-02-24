@@ -351,7 +351,8 @@ class MILPOptimizer:
         if self._schedule is None or self._step % self._replan_every == 0:
             remaining_steps = len(self._cmg) - self._step
             if remaining_steps > 0:
-                future_cmg = self._cmg[self._step: self._step + max(remaining_steps, 12)]
+                horizon = min(remaining_steps, max(self._replan_every * 24, 12))  # up to 24 replan-windows ahead
+                future_cmg = self._cmg[self._step: self._step + horizon]
                 try:
                     self._schedule = solve_milp_schedule(
                         cmg_profile=future_cmg,
@@ -360,7 +361,7 @@ class MILPOptimizer:
                         soc_init=soc,
                     )
                 except Exception as exc:
-                    log.warning("milp_optimizer.solve_failed", error=str(exc))
+                    log.warning("milp_optimizer.solve_failed: %s", exc)
                     self._schedule = None
 
         # Follow schedule
