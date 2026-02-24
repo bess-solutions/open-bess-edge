@@ -7,49 +7,52 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-24T10:21 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-24T11:50 -03:00)
 
 > [!IMPORTANT]
-> **v2.6.0 — IEEE 2030.5 / SEP 2.0 Adapter (BEP-0100) · Global Standard Roadmap** (2026-02-24)
+> **v2.7.0 — DRL Arbitrage Agent integrado en main.py (BEP-0200 Fase 2) · Global Standard Strategy** (2026-02-24)
 >
-> IEC 62443 SL-2 readiness: **~96%** | Tests: **458 passed** (+26 SEP2) | Commits pendientes CI: **3**
+> IEC 62443 SL-2 readiness: **~96%** | Tests: **490 passed** (+32 DRL agents) | Commits recientes: **2**
 >
 > ### Commits recientes
 >
-> **`c4d2af9` — docs(strategy): Global Standard Roadmap**
-> - `docs/GLOBAL_STANDARD_ROADMAP.md` — 4-phase roadmap to global standard (IEC/IEEE/UL gap analysis, LF Energy path)
-> - `mkdocs.yml` — Community nav actualizado
+> **`ab9387a` — docs(global-standard): 7-step strategy roadmap**
+> - `docs/governance/CONSORTIUM_CHARTER.md` — BESSAI Open Alliance (BOA): TSC 9 asientos, 4 tiers, 5 WGs
+> - `docs/certification/UL9540_certification_roadmap.md` — Gap analysis UL 9540/9540A + plan Q1 2027
+> - `docs/outreach/HACKATHON_BESSAI_2026.md` — 48h hackathon mayo 2026, 3 tracks, premios USD
+> - `docs/outreach/IEEE_PAPER_ABSTRACT.md` — Abstract IEEE PES General Meeting 2027
+> - `docs/specs/BESSAI-SPEC-004.md` — BatteryState data model con alineación IEEE P2686
+> - `docs/GLOBAL_STANDARD_ROADMAP.md` — v2.0 — refleja v2.6.0, nuevos hitos completados
+> - `docs/interoperability/BESSAI-CERTIFIED.md` — +7 dispositivos objetivo (BYD/CATL/Tesla/LG/Pylontech)
+> - `mkdocs.yml` — +4 secciones nav (Governance, Certification, Outreach, SPEC-004)
 >
-> **`421509c` — feat(bep-0100): IEEE 2030.5 / SEP 2.0 Adapter**
-> - `src/interfaces/sep2_adapter.py` — 530L · 10 endpoints IEEE 2030.5 · TLS 1.2 + mTLS · DERControl → write_tag() · MUP push loop
-> - `tests/test_sep2_adapter.py` — 26 tests · 10 clases · todos los edge cases
-> - `src/core/config.py` — 12 campos `SEP2_*` (opt-in, default=false)
-> - `src/core/main.py` — `build_adapter_from_env()` integrado + graceful stop
-> - `docs/bep/BEP-0100.md` — Status: Draft → **Active**
->
-> **`82e7c3b` — fix(lint): Pyre2/Pyright false positives**
-> - `src/interfaces/sep2_adapter.py` — `_web`/`_aiohttp` renaming, `_make_json_response()` helper, Task narrowing
-> - `pyrightconfig.json` — venvPath apuntando a `.venv` para Pylance
+> **`75cfe21` — feat(bep-0200): integrate ONNXArbitrageAgent into main.py Step 5e**
+> - `src/core/main.py` — +83 lneas: try-import DRL, env vars `BESSAI_DRL_ENABLED`/`BESSAI_DRL_MODEL_PATH`,
+>   Step 5e startup (enabled/fallback_only/disabled), Step 4c obs vector 8-d + predict() + log setpoint
+>   **Modo observe-only** — write_tag() en BEP-0200 Fase 4
 >
 > ### Suite de tests
 > ```
-> 458 passed ✅ (+26 IEEE 2030.5 SEP2 adapter tests, cobertura ≥80%)
+> 490 passed ✅  (+32 tests DRL: 18 BESSArbitrageEnv + 11 ArbitragePolicy + 3 integración)
+> 1 failed (SSL PEM mock pre-existente — confirmado no-regresión)
+> 5 skipped · 16.81s
 > CI: ruff ✅ · mypy ✅ · pytest ✅ · bandit ✅ · trivy ✅
 > ```
 >
-> ### 🚀 Próximas prioridades — v2.7.0
+> ### 🚀 Próximas prioridades — v2.8.0
 >
 > #### Técnicas (alta prioridad)
-> 1. **BEP-0101: XML conformance para IEEE 2030.5** — Reemplazar JSON profile con EXI/XML normativo (SunSpec Systems)
-> 2. **SEP2 Conformance Test Harness** — Suite Cat-A contra mock DERMS (California IOUs use SunSpec CTA-2045)
-> 3. **ONNX con datos reales CEN** — Entrenar `CMgPredictor` con datos reales del `bessai-cen-data` repo; exportar a ONNX int8
-> 4. **BYD/CATL Modbus profile** — Driver profile para baterías comerciales (distinto a LUNA2000)
+> 1. **BEP-0200 Fase 3** — Entrenar PPO con datos reales CEN 2023-2025 (`bessai-cen-data`) → exportar ONNX
+> 2. **BEP-0200 Fase 4** — Activar `write_tag()` para setpoint real al inversor (`BESSAI_DRL_ENABLED=true`)
+> 3. **BEP-0201** — Digital Twin PINN para RUL prediction (<2% error)
+> 4. **BEP-0101** — XML conformance IEEE 2030.5 (EXI/XML normativo vs JSON)
 >
 > #### Pendientes manuales (solo Rodrigo)
-> 1. **Activar GitHub Pages** → Settings → Pages → gh-pages (deploy MkDocs site)
-> 2. **OpenSSF Gold** → Completar checkboxes en `bestpractices.dev/projects/12001`
-> 3. **LF Energy Landscape** → Fork `lfenergy/lfenergy-landscape` + PR con YAML
-> 4. **Iniciar SL-2** → Ver `docs/compliance/iec_62443_sl2_certification_path.md`
+> 1. **LF Energy Landscape** → Fork `lfenergy/lfenergy-landscape` + PR con YAML (ver `docs/lf_energy_proposal.md`)
+> 2. **Crunchbase profile** → Requerido para LF Energy submission
+> 3. **SVG logo** → Requerido para LF Energy landscape
+> 4. **Hackathon 2026** → Anunciar en GitHub Discussions + Discord + LinkedIn (ver `docs/outreach/HACKATHON_BESSAI_2026.md`)
+> 5. **OpenSSF Gold** → Completar checkboxes en `bestpractices.dev/projects/12001`
 
 
 
