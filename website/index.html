@@ -206,16 +206,17 @@
             background: radial-gradient(ellipse 70% 90% at 65% 50%, transparent 30%, rgba(6, 8, 15, .75) 80%)
         }
 
-        /* NASA Climate Band */
-        .climate-band {
+        /* ── Sustainability Ticker ── */
+        .sustain-ticker {
             position: relative;
             z-index: 3;
-            background: linear-gradient(90deg, rgba(239, 68, 68, .12), rgba(239, 68, 68, .06), rgba(251, 146, 60, .08));
-            border-bottom: 1px solid rgba(239, 68, 68, .25);
-            padding: 9px 0
+            background: linear-gradient(90deg, rgba(16, 185, 129, .08), rgba(6, 182, 212, .06), rgba(16, 185, 129, .08));
+            border-bottom: 1px solid rgba(16, 185, 129, .2);
+            padding: 9px 0;
+            overflow: hidden
         }
 
-        .climate-band-inner {
+        .sustain-ticker-inner {
             max-width: var(--maxw);
             margin: 0 auto;
             padding: 0 28px;
@@ -225,81 +226,235 @@
             flex-wrap: wrap
         }
 
-        .climate-label {
+        .sustain-label {
             font-family: var(--mono);
             font-size: .68rem;
             letter-spacing: .1em;
             text-transform: uppercase;
-            color: #f87171;
+            color: #34d399;
             display: flex;
             align-items: center;
             gap: 6px;
             flex-shrink: 0
         }
 
-        .climate-label::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #ef4444;
-            animation: pulse-red 2s ease-in-out infinite
+        .sustain-label::before {
+            content: '🌱';
+            font-size: .8rem
         }
 
-        @keyframes pulse-red {
-
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1)
-            }
-
-            50% {
-                opacity: .4;
-                transform: scale(1.5)
-            }
-        }
-
-        .climate-stats {
+        .sustain-stats {
             display: flex;
             gap: 28px;
             flex-wrap: wrap
         }
 
-        .cs {
+        .ss {
             display: flex;
             align-items: baseline;
             gap: 5px;
             font-family: var(--mono)
         }
 
-        .cs-v {
-            font-size: .95rem;
-            font-weight: 500;
-            color: #fb923c
+        .ss-v {
+            font-size: .9rem;
+            font-weight: 600;
+            color: #6ee7b7
         }
 
-        .cs-l {
-            font-size: .65rem;
-            color: rgba(248, 113, 113, .7)
-        }
-
-        .climate-src {
-            margin-left: auto;
+        .ss-l {
             font-size: .62rem;
-            color: rgba(248, 113, 113, .5);
+            color: rgba(110, 231, 183, .6)
+        }
+
+        .sustain-src {
+            margin-left: auto;
+            font-size: .6rem;
+            color: rgba(52, 211, 153, .4);
             font-family: var(--mono)
         }
 
-        .climate-src a {
+        .sustain-src a {
             color: inherit;
             text-decoration: underline;
             text-underline-offset: 2px;
-            opacity: .7
+            opacity: .7;
+            transition: opacity .2s
         }
 
-        .climate-src a:hover {
+        .sustain-src a:hover {
             opacity: 1
+        }
+
+        /* ── Sustainability Story Section ── */
+        .story-section {
+            padding: 80px 0;
+            background: linear-gradient(180deg, var(--bg) 0%, rgba(13, 17, 23, 1) 50%, var(--bg) 100%);
+            position: relative;
+            overflow: hidden
+        }
+
+        .story-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(16, 185, 129, .07) 0%, transparent 65%);
+            pointer-events: none
+        }
+
+        .story-intro {
+            text-align: center;
+            max-width: 720px;
+            margin: 0 auto 64px
+        }
+
+        .story-intro .eyebrow {
+            color: #34d399
+        }
+
+        .story-intro .sec-h2 {
+            margin-bottom: 16px
+        }
+
+        .story-intro .sec-h2 .green {
+            color: #34d399
+        }
+
+        .story-intro .sec-p {
+            font-size: 1.05rem;
+            max-width: 600px;
+            margin: 0 auto
+        }
+
+        .story-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 56px
+        }
+
+        .story-card {
+            background: rgba(13, 17, 23, .9);
+            border: 1px solid rgba(16, 185, 129, .12);
+            border-radius: 14px;
+            padding: 32px 28px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color var(--tr), transform var(--tr), box-shadow var(--tr)
+        }
+
+        .story-card:hover {
+            border-color: rgba(16, 185, 129, .3);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(16, 185, 129, .08)
+        }
+
+        .story-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(16, 185, 129, .4), transparent)
+        }
+
+        .sc-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+            display: block
+        }
+
+        .sc-number {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.6rem;
+            font-weight: 700;
+            color: #34d399;
+            line-height: 1;
+            margin-bottom: 6px
+        }
+
+        .sc-label {
+            font-size: .875rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 8px
+        }
+
+        .sc-desc {
+            font-size: .82rem;
+            color: var(--muted);
+            line-height: 1.65
+        }
+
+        .sc-source {
+            font-family: var(--mono);
+            font-size: .6rem;
+            color: rgba(52, 211, 153, .5);
+            margin-top: 12px;
+            display: block
+        }
+
+        .story-mission {
+            text-align: center;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 44px 48px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, .07), rgba(6, 182, 212, .05));
+            border: 1px solid rgba(16, 185, 129, .15);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden
+        }
+
+        .story-mission::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(52, 211, 153, .5), transparent)
+        }
+
+        .story-mission blockquote {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(1.1rem, 2.5vw, 1.45rem);
+            font-weight: 700;
+            color: var(--white);
+            line-height: 1.4;
+            letter-spacing: -.02em;
+            margin-bottom: 20px
+        }
+
+        .story-mission blockquote .green {
+            color: #34d399
+        }
+
+        .story-mission p {
+            font-size: .9rem;
+            color: var(--muted);
+            line-height: 1.7
+        }
+
+        @media(max-width:900px) {
+            .story-grid {
+                grid-template-columns: 1fr 1fr
+            }
+
+            .story-mission {
+                padding: 32px 24px
+            }
+        }
+
+        @media(max-width:540px) {
+            .story-grid {
+                grid-template-columns: 1fr
+            }
         }
 
         /* Hero content */
@@ -1224,21 +1379,25 @@
         </div>
     </nav>
 
-    <!-- NASA CLIMATE CHANGE BAND -->
-    <div class="climate-band">
-        <div class="climate-band-inner">
-            <span class="climate-label">Alerta Climática Global · NASA</span>
-            <div class="climate-stats">
-                <div class="cs"><span class="cs-v">424 ppm</span><span class="cs-l">CO₂ atmosférico</span></div>
-                <div class="cs"><span class="cs-v">+1.2°C</span><span class="cs-l">anomalía temp. global</span></div>
-                <div class="cs"><span class="cs-v">3.7 mm/año</span><span class="cs-l">nivel del mar</span></div>
-                <div class="cs"><span class="cs-v">-13%/década</span><span class="cs-l">hielo ártico</span></div>
+    <!-- SUSTAINABILITY TICKER -->
+    <div class="sustain-ticker">
+        <div class="sustain-ticker-inner">
+            <span class="sustain-label">Transición Energética Global</span>
+            <div class="sustain-stats">
+                <div class="ss"><span class="ss-v">+50%</span><span class="ss-l">solar crece cada año</span></div>
+                <div class="ss"><span class="ss-v">300 GW</span><span class="ss-l">renovables instalados en 2023</span>
+                </div>
+                <div class="ss"><span class="ss-v">#1</span><span class="ss-l">solar = fuente más barata de la
+                        historia</span></div>
+                <div class="ss"><span class="ss-v">2030</span><span class="ss-l">objetivo 60% renovable en Chile</span>
+                </div>
             </div>
-            <span class="climate-src"><a href="https://science.nasa.gov/climate-change/" target="_blank"
-                    rel="noopener">science.nasa.gov/climate-change ↗</a></span>
+            <span class="sustain-src"><a href="https://science.nasa.gov/climate-change/" target="_blank"
+                    rel="noopener">NASA · IEA · CNE Chile ↗</a></span>
         </div>
     </div>
 
+    <!-- HERO -->
     <!-- HERO -->
     <section class="hero" id="inicio">
         <canvas id="bess-canvas"></canvas>
@@ -1247,12 +1406,13 @@
             <div class="hero-inner">
                 <div class="hero-tag"><span class="tag-dot"></span>Apache 2.0 · v2.10.0 · IEC 62443 SL-2</div>
                 <h1 class="hero-h1">
-                    La transición energética<br>necesita
+                    El mundo que queremos<br>funciona con
                     <span class="typewriter" id="typewriter"></span>
                 </h1>
                 <p class="hero-sub">
-                    Sistema operativo open-source para baterías industriales. Optimización MILP, agente DRL entrenado
-                    con datos CMg reales del CEN/SEN, y recuperación autónoma — ejecutando en el borde, sin nube.
+                    El sol y el viento ya producen energía más barata que nunca. El desafío es <em
+                        style="color:var(--white);font-style:normal;font-weight:500">almacenarla con inteligencia</em>.
+                    BESSAI Edge es el software de borde que hace posible esa transición.
                 </p>
                 <div class="hero-actions">
                     <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank" class="btn-primary">
@@ -1313,6 +1473,54 @@
                         <div class="hs-l">Datos CMg reales CEN</div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SUSTAINABILITY STORY SECTION -->
+    <section class="story-section" id="por-que">
+        <div class="wrap">
+            <div class="story-intro reveal">
+                <div class="eyebrow">Por qué existimos</div>
+                <h2 class="sec-h2">La <span class="green">mayor oportunidad energética</span><br>de la historia está
+                    ocurriendo ahora.</h2>
+                <p class="sec-p">El planeta está en plena transformación. Las fuentes renovables ya son las más baratas
+                    jamás vistas. Lo que falta es la inteligencia para orquestarlas. Eso construimos nosotros.</p>
+            </div>
+            <div class="story-grid reveal">
+                <div class="story-card">
+                    <span class="sc-icon">☀️</span>
+                    <div class="sc-number">10x</div>
+                    <div class="sc-label">más energía solar disponible que en 2010</div>
+                    <p class="sc-desc">La caída de costos del fotovoltaico es la más rápida en la historia de cualquier
+                        tecnología. Ahora necesitamos almacenarla.</p>
+                    <span class="sc-source">Fuente: IEA World Energy Outlook 2023</span>
+                </div>
+                <div class="story-card">
+                    <span class="sc-icon">🔋</span>
+                    <div class="sc-number">+300 GW</div>
+                    <div class="sc-label">de renovables instalados solo en 2023</div>
+                    <p class="sc-desc">El mundo no se detiene. Chile lleva el ritmo en LatAm con 20 GW proyectados al
+                        2030 — y cada MW instalado necesita gestión inteligente.</p>
+                    <span class="sc-source">Fuente: IRENA / CNE Chile 2024</span>
+                </div>
+                <div class="story-card">
+                    <span class="sc-icon">🌎</span>
+                    <div class="sc-number">195</div>
+                    <div class="sc-label">países comprometidos con la transición</div>
+                    <p class="sc-desc">El Acuerdo de París marcó el rumbo. La NASA confirma que los indicadores
+                        climáticos ya muestran el impacto de la energía limpia. Estamos avanzando.</p>
+                    <span class="sc-source">Fuente: NASA Climate / UNFCCC</span>
+                </div>
+            </div>
+            <div class="story-mission reveal">
+                <blockquote>
+                    "Las baterías son el <span class="green">músculo</span> de la red eléctrica del futuro.<br>BESSAI
+                    Edge es el <span class="green">cerebro</span> que las hace pensar."
+                </blockquote>
+                <p>Construimos software open-source de grado industrial para que cualquier operador de BESS — desde una
+                    empresa eléctrica hasta una cooperativa rural — pueda participar activamente en la transición
+                    energética con herramientas de clase mundial.</p>
             </div>
         </div>
     </section>
@@ -1709,7 +1917,8 @@
 
             // ── Typewriter ──
             const tw = document.getElementById('typewriter');
-            const words = ['inteligencia de borde.', 'optimización en tiempo real.', 'gestión autónoma BESS.', 'datos reales del CEN/SEN.'];
+            const words = ['energía limpia almacenada.', 'baterías que piensan.', 'inteligencia de borde.', 'el sol y el viento optimizados.'];
+
             let wi = 0, ci = 0, del = false;
             function type() {
                 const w = words[wi];
