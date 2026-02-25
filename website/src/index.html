@@ -3,494 +3,428 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>BESS Solutions — Inteligencia para el almacenamiento de energía</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BESS Solutions — Edge Intelligence for Battery Systems</title>
     <meta name="description"
-        content="BESSAI Edge: gateway open-source industrial-grade para BESS. Optimización IA, IEC 62443, NTSyCS Chile. Apache 2.0." />
-    <meta property="og:title" content="BESS Solutions — Edge AI para BESS" />
+        content="Open-source BESS management system. MILP optimization, real CEN/SEN CMg data, IEC 62443 SL-2 compliance. Edge-native, production-grade." />
+    <meta property="og:title" content="BESS Solutions" />
     <meta property="og:description"
-        content="Gateway open-source industrial-grade para sistemas de almacenamiento de energía en baterías." />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="assets/logo-bess.png" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+        content="Edge intelligence for battery energy storage systems. 613 tests. IEC 62443 SL-2." />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+    <!-- Google Fonts: Inter (body) + Barlow Condensed (headlines masivas) + JetBrains Mono (code) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet" />
-    <!-- BUILD:CSS -->
+
+    <!-- ── CSS (orden importante) ── -->
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/sections.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
 </head>
 
 <body>
 
-    <!-- ── NAV ── -->
-    <nav id="main-nav">
-        <a class="nav-logo" href="#">
-            <img src="assets/logo-bess.png" alt="BESS Solutions" />
-            <span>BESSAI</span>
-        </a>
-        <div id="nav-menu">
-            <a href="#problema" data-i18n="nav.problema">El Problema</a>
-            <a href="#features" data-i18n="nav.features">Funciones</a>
-            <a href="#stack" data-i18n="nav.solucion">Solución</a>
-            <a href="#comunidad" data-i18n="nav.comunidad">Comunidad</a>
-            <a href="#roadmap" data-i18n="nav.roadmap">Roadmap</a>
-            <a href="#early-adopter" data-i18n="nav.contacto">Contacto</a>
-            <div class="nav-lang">
-                <button data-lang-btn="es" onclick="I18N.switchTo('es')">ES</button>
-                <button data-lang-btn="en" onclick="I18N.switchTo('en')">EN</button>
+    <!-- ═══ NAV ═══════════════════════════════════════════════════ -->
+    <nav class="nav" id="nav">
+        <div class="nav-inner">
+            <!-- Logo con rayo (estilo screenshots) -->
+            <a href="#" class="nav-logo">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M10.5 1L3 10.5H9L7.5 17L15 7.5H9L10.5 1Z" fill="#22d3ee" stroke="#22d3ee"
+                        stroke-width="0.5" stroke-linejoin="round" />
+                </svg>
+                BESS Solutions
+            </a>
+
+            <!-- Links de navegación -->
+            <ul class="nav-links">
+                <li><a href="#sistema">Origen</a></li>
+                <li><a href="#datos">La Red</a></li>
+                <li><a href="#hardware">Hardware</a></li>
+                <li><a href="#roadmap">Roadmap</a></li>
+                <li><a href="#contacto">Contacto</a></li>
+            </ul>
+
+            <div class="nav-end">
+                <!-- Selector de idioma -->
+                <div class="lang-switch">
+                    <a href="#" class="active">ES</a>
+                    <a href="#">EN</a>
+                </div>
+                <!-- CTA verde -->
+                <a href="#contacto" class="btn-nav btn-nav-primary">Solicitar demo</a>
             </div>
         </div>
-        <button id="nav-burger" aria-label="Menu">
-            <span></span><span></span><span></span>
-        </button>
     </nav>
 
-    <!-- ── HERO ── -->
-    <section id="hero">
-        <div class="hero-badge">
-            <span class="badge" data-i18n="hero.badge">Open Source · Apache 2.0 · IEC 62443</span>
-        </div>
-        <h1 class="hero-headline">
-            <span id="hero-l1">El cerebro de tu</span>
-            <span id="hero-l2">batería es <em>open-source.</em></span>
-        </h1>
-        <p class="hero-sub" data-i18n-html="hero.sub">Gateway industrial open-source para sistemas de almacenamiento de
-            energía en baterías.</p>
-        <div class="hero-ctas">
-            <a href="https://github.com/bess-solutions/open-bess-edge" class="btn-primary" target="_blank"
-                rel="noopener">
-                <span data-i18n="hero.cta_primary">Ver en GitHub</span> →
-            </a>
-            <a href="#early-adopter" class="btn-secondary">
-                <span data-i18n="hero.cta_secondary">Unirme al programa Early Adopter</span>
-            </a>
-        </div>
-    </section>
+    <!-- ═══ HERO ═══════════════════════════════════════════════════ -->
+    <section class="hero" id="inicio">
+        <canvas id="bess-universe"></canvas>
+        <div class="hero-overlay"></div>
+        <div class="wrap" style="width:100%">
+            <div class="hero-content">
+                <div class="eyebrow">ACT I · BESSAI EDGE</div>
 
-    <!-- ── LIVE METRICS STRIP ── -->
-    <div id="live-strip">
-        <div class="container">
-            <div class="live-inner">
-                <div class="live-metric">
-                    <div class="live-tag" data-i18n="live.live_tag">EN VIVO</div>
-                    <div class="live-value"><span id="lm-savings">13248</span></div>
-                    <div class="live-unit" data-i18n="live.unit_savings">$/día</div>
-                    <div class="live-label" data-i18n="live.label_savings">Ahorro energético</div>
-                </div>
-                <div class="live-metric">
-                    <div class="live-tag" data-i18n="live.live_tag">EN VIVO</div>
-                    <div class="live-value"><span id="lm-latency">38.4</span></div>
-                    <div class="live-unit" data-i18n="live.unit_latency">ms</div>
-                    <div class="live-label" data-i18n="live.label_latency">Latencia edge</div>
-                </div>
-                <div class="live-metric">
-                    <div class="live-tag" data-i18n="live.live_tag">EN VIVO</div>
-                    <div class="live-value"><span id="lm-soc">84.2</span></div>
-                    <div class="live-unit" data-i18n="live.unit_soc">% promedio</div>
-                    <div class="live-label" data-i18n="live.label_soc">SoC activo</div>
-                </div>
-                <div class="live-metric">
-                    <div class="live-tag" data-i18n="live.live_tag">EN VIVO</div>
-                    <div class="live-value"><span id="lm-cycles">5</span></div>
-                    <div class="live-unit" data-i18n="live.unit_cycles">instancias</div>
-                    <div class="live-label" data-i18n="live.label_cycles">Ciclos protegidos</div>
-                </div>
-            </div>
-        </div>
-    </div>
+                <h1 class="hero-h1 type-target" data-type-delay="300">
+                    Las baterías<br>son el músculo.
+                    <em class="text-cyan">BESSAI Edge<br>es el cerebro.</em>
+                </h1>
 
-    <!-- ── AUDIENCES ── -->
-    <section id="audiencias" class="section">
-        <div class="container">
-            <h2 class="section-title reveal" data-i18n="audiences.title">¿Por qué BESSAI es para ti?</h2>
-            <div class="aud-tabs-wrap" id="aud-tabs"></div>
-            <div id="aud-content"></div>
-        </div>
-    </section>
+                <p class="hero-sub">
+                    Adquisición Modbus TCP, optimización MILP, agente DRL entrenado<br>
+                    con datos CMg reales del CEN/SEN — ejecutando en hardware de<br>
+                    borde, sin dependencia de nube.
+                </p>
 
-    <!-- ── PROBLEMA ── -->
-    <section id="problema" class="section"
-        style="background:var(--bg2); border-top:1px solid var(--line); border-bottom:1px solid var(--line)">
-        <div class="container">
-            <h2 class="section-title reveal" data-i18n="problem.title">El problema que resolvemos</h2>
-            <p class="section-sub reveal reveal-delay-1" data-i18n="problem.subtitle">Los sistemas BESS industriales
-                dependen de software propietario opaco, costoso y no certificable.</p>
-            <div class="stats-grid reveal reveal-delay-2">
-                <div class="stat-card">
-                    <div class="stat-value"><span data-count="38">0</span>%</div>
-                    <div class="stat-label" data-i18n="problem.stats.0.label">Crecimiento anual BESS en LatAm</div>
-                    <div class="stat-detail" data-i18n="problem.stats.0.detail">CAGR 2024–2027</div>
+                <div class="hero-actions">
+                    <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank" class="btn-primary">
+                        Ver repositorio
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <path d="M7 17L17 7M7 7h10v10" />
+                        </svg>
+                    </a>
+                    <a href="#sistema" class="btn-secondary">Arquitectura del sistema</a>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value">$2.4B</div>
-                    <div class="stat-label" data-i18n="problem.stats.1.label">Mercado addressable 2027</div>
-                    <div class="stat-detail" data-i18n="problem.stats.1.detail">BNEF Research</div>
+
+                <!-- Terminal widget -->
+                <div class="terminal">
+                    <div class="terminal-bar">
+                        <div class="terminal-dot"></div>
+                        <div class="terminal-dot"></div>
+                        <div class="terminal-dot"></div>
+                        <span class="terminal-path">bessai-edge · optimizer v2.1 · Maitencillo-220kV</span>
+                    </div>
+                    <div class="terminal-body">
+                        <span class="t-line"><span class="t-comment">$ bessai start --mode=optimize</span></span>
+                        <span class="t-line"><span class="t-ok">✓</span> Loading config edge.toml...</span>
+                        <span class="t-line"><span class="t-ok">✓</span> BMS connected · Modbus RTU /dev/ttyUSB0</span>
+                        <span class="t-line"><span class="t-ok">✓</span> Grid API · SEN Coordinador · OK</span>
+                        <span class="t-line"><span class="t-key">+</span> Fetching CMg forecast (24h)...</span>
+                        <span class="t-line"><span class="t-ok">✓</span> Modelo cargado · MAPE <span
+                                class="t-num">4.2%</span></span>
+                        <span class="t-line"><span class="t-key">+</span> Running MILP optimizer...</span>
+                        <span class="t-line"><span class="t-ok">✓</span> Dispatch plan ready · <span
+                                class="t-num">18</span> cycles</span>
+                        <span class="t-line"><span class="t-warn">⚡</span> Peak window: <span
+                                class="t-num">18:00–22:00</span> · discharge</span>
+                        <span class="t-line"><span class="t-ok">✓</span> Latency: <span class="t-num">3.1ms</span> ·
+                            SoC: <span class="t-num">87.4%</span></span>
+                        <span class="t-line"><span style="color:#4a5568">$</span> <span class="t-cursor"></span></span>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value"><span data-count="4.2">0</span>%</div>
-                    <div class="stat-label" data-i18n="problem.stats.2.label">MAPE predicción de precio CMg</div>
-                    <div class="stat-detail" data-i18n="problem.stats.2.detail">vs 8-12% competencia</div>
+
+                <!-- Stats bar -->
+                <div class="stats-bar" style="margin-top:20px">
+                    <div class="stat-item">
+                        <div class="stat-v" id="cnt-tests">613</div>
+                        <div class="stat-l">Tests · 0 failures</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-v">&lt;5ms</div>
+                        <div class="stat-l">Latencia ciclo · RPi 5</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-v">~98%</div>
+                        <div class="stat-l">IEC 62443 SL-2</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-v">48d+</div>
+                        <div class="stat-l">Datos CMg reales CEN</div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value"><span data-count="490">0</span>+</div>
-                    <div class="stat-label" data-i18n="problem.stats.3.label">Tests automatizados</div>
-                    <div class="stat-detail" data-i18n="problem.stats.3.detail">cobertura >85%</div>
-                </div>
+
             </div>
         </div>
     </section>
 
-    <!-- ── FEATURES ── -->
-    <section id="features" class="section">
-        <div class="container">
-            <h2 class="section-title reveal" data-i18n="features.title">Todo lo que necesitas, nada que no necesitas
-            </h2>
-            <div class="features-grid reveal reveal-delay-1">
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <div class="feature-title" data-i18n="features.items.0.title">IA en el Edge</div>
-                    <div class="feature-desc" data-i18n="features.items.0.desc">DRL, MILP y modelos ONNX corriendo
-                        localmente. Sin latencia cloud, sin dependencias externas.</div>
+    <hr class="rule">
+
+    <!-- ═══ SISTEMA ════════════════════════════════════════════════ -->
+    <section id="sistema">
+        <div class="wrap">
+            <div class="sec-head reveal">
+                <div class="eyebrow">ACT II · LA CONSTRUCCIÓN</div>
+                <h2 class="type-target" data-type-delay="200">Cada componente tiene<br>una responsabilidad definida.
+                </h2>
+            </div>
+            <div class="feature-grid reveal">
+                <div class="f-cell">
+                    <div class="f-index">01</div>
+                    <div class="f-title">Capa de adquisición</div>
+                    <p class="f-body">Driver universal Modbus TCP con perfiles YAML por fabricante. Lee SoC, potencia
+                        activa y temperatura en cada ciclo. Reconexión autónoma con backoff exponencial.</p>
+                    <span class="f-tag">modbus-tcp · yaml-profile</span>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔌</div>
-                    <div class="feature-title" data-i18n="features.items.1.title">Conectividad Industrial</div>
-                    <div class="feature-desc" data-i18n="features.items.1.desc">Modbus TCP, IEC 61850, MQTT, DNP3, REST
-                        y OPC-UA listos para usar.</div>
+                <div class="f-cell">
+                    <div class="f-index">02</div>
+                    <div class="f-title">SafetyGuard</div>
+                    <p class="f-body">Validación de rangos antes de cualquier despacho. Si el telemetro sale de banda,
+                        la publicación se bloquea y se emite alerta inmediata. No hay lógica de negocio sin datos
+                        validados.</p>
+                    <span class="f-tag">pre-dispatch · range-check</span>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🛡️</div>
-                    <div class="feature-title" data-i18n="features.items.2.title">Seguridad IEC 62443</div>
-                    <div class="feature-desc" data-i18n="features.items.2.desc">Certificación SL-2, gestión de
-                        certificados x.509, logs auditables firmados digitalmente.</div>
+                <div class="f-cell">
+                    <div class="f-index">03</div>
+                    <div class="f-title">MILP Optimizer</div>
+                    <p class="f-body">HiGHS/CBC planifica el perfil de despacho de las próximas 24h considerando
+                        precios CMg reales del nodo Maitencillo 220 kV, degradación semi-empírica y restricciones
+                        de SoC.</p>
+                    <span class="f-tag">HiGHS · CBC · Maitencillo-220kV</span>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <div class="feature-title" data-i18n="features.items.3.title">Observabilidad Total</div>
-                    <div class="feature-desc" data-i18n="features.items.3.desc">Prometheus + Grafana embebidos,
-                        dashboard web en tiempo real, alertas configurables.</div>
+                <div class="f-cell">
+                    <div class="f-index">04</div>
+                    <div class="f-title">Agente DRL (BEP-0200)</div>
+                    <p class="f-body">Agente PPO entrenado sobre 48+ días de datos CMg reales. Exportado a ONNX para
+                        inferencia en Raspberry Pi 5. Fallback determinístico si el modelo no está disponible.</p>
+                    <span class="f-tag">PPO · ONNX · gymnasium</span>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🌎</div>
-                    <div class="feature-title" data-i18n="features.items.4.title">NTSyCS Chile</div>
-                    <div class="feature-desc" data-i18n="features.items.4.desc">Cumplimiento nativo con la normativa
-                        técnica de sistemas de coordinación eléctrica chilena.</div>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🐳</div>
-                    <div class="feature-title" data-i18n="features.items.5.title">Deploy Anywhere</div>
-                    <div class="feature-desc" data-i18n="features.items.5.desc">Docker multi-arch ARM64/AMD64. Corre en
-                        Raspberry Pi, PLCs, servidores edge y cloud.</div>
+                <div class="f-cell f-cell--wide">
+                    <div class="f-index">05</div>
+                    <div class="f-title">WatchdogManager + Publicación dual</div>
+                    <p class="f-body">Loop autónomo de detección y recuperación de conectividad del driver. Telemetría
+                        publicada simultáneamente a GCP Pub/Sub y MQTT. Métricas Prometheus en
+                        <code class="inline">/metrics</code>, health check en <code class="inline">/health</code>.
+                    </p>
+                    <span class="f-tag">asyncio · pub/sub · mqtt · prometheus · otel</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ── TERMINAL ── -->
-    <section id="stack" class="section"
-        style="background:var(--bg2); border-top:1px solid var(--line); border-bottom:1px solid var(--line)">
-        <div class="container">
-            <h2 class="section-title reveal" data-i18n="stack.title">Especificaciones técnicas</h2>
-            <div class="terminal-wrap reveal reveal-delay-1">
-                <div class="term-bar">
-                    <div class="term-dot"></div>
-                    <div class="term-dot"></div>
-                    <div class="term-dot"></div>
-                    <span class="term-title">bessai-edge — bash</span>
-                </div>
-                <div id="term-output"></div>
+    <hr class="rule">
+
+    <!-- ═══ TELEMETRÍA ═════════════════════════════════════════════ -->
+    <section id="datos">
+        <div class="wrap">
+            <div class="sec-head reveal">
+                <div class="eyebrow">ACT III · LOS DATOS</div>
+                <h2 class="type-target" data-type-delay="200">Lo que el sistema ve.<br>Lo que el sistema decide.</h2>
             </div>
-            <div class="spec-grid" style="margin-top:2rem">
-                <!-- Conectividad -->
-                <div class="spec-section reveal reveal-delay-1">
-                    <div class="spec-heading" data-i18n="stack.sections.0.heading">Conectividad</div>
-                    <table class="spec-table">
-                        <tr>
-                            <td data-i18n="stack.sections.0.rows.0.0">Protocolos OT</td>
-                            <td data-i18n="stack.sections.0.rows.0.1">Modbus TCP, IEC 61850, DNP3, OPC-UA</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.0.rows.1.0">Protocolos IT</td>
-                            <td data-i18n="stack.sections.0.rows.1.1">MQTT 5, REST/HTTP, gRPC, WebSocket</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.0.rows.2.0">Seguridad red</td>
-                            <td data-i18n="stack.sections.0.rows.2.1">mTLS, VPN WireGuard, firewall integrado</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.0.rows.3.0">Latencia edge</td>
-                            <td data-i18n="stack.sections.0.rows.3.1">&lt; 50 ms ciclo de control</td>
-                        </tr>
-                    </table>
+            <div class="tele-grid reveal">
+                <div class="tele-panel">
+                    <div class="tele-label">TELEMETRÍA DE DRIVER · ciclo actual</div>
+                    <div class="data-row"><span class="data-key">soc_percent</span><span
+                            class="data-val cyan">72.4</span></div>
+                    <div class="data-row"><span class="data-key">active_power_w</span><span class="data-val">−148
+                            200</span></div>
+                    <div class="data-row"><span class="data-key">temp_c</span><span class="data-val">31.2</span></div>
+                    <div class="data-row"><span class="data-key">driver.connected</span><span
+                            class="data-val green">true</span></div>
+                    <div class="data-row"><span class="data-key">safety_status</span><span
+                            class="data-val green">ok</span></div>
+                    <div class="data-row"><span class="data-key">watchdog.heals_total</span><span
+                            class="data-val">0</span></div>
                 </div>
-                <!-- IA -->
-                <div class="spec-section reveal reveal-delay-2">
-                    <div class="spec-heading" data-i18n="stack.sections.1.heading">Inteligencia Artificial</div>
-                    <table class="spec-table">
-                        <tr>
-                            <td data-i18n="stack.sections.1.rows.0.0">Algoritmos</td>
-                            <td data-i18n="stack.sections.1.rows.0.1">Deep Reinforcement Learning (DRL), MILP</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.1.rows.1.0">Inferencia</td>
-                            <td data-i18n="stack.sections.1.rows.1.1">ONNX Runtime, TensorRT (opcional)</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.1.rows.2.0">Predicción CMg</td>
-                            <td data-i18n="stack.sections.1.rows.2.1">MAPE 4.2% · histórico CEN Chile</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.1.rows.3.0">Entrenamiento</td>
-                            <td data-i18n="stack.sections.1.rows.3.1">Incremental online + batch offline</td>
-                        </tr>
-                    </table>
+                <div class="tele-panel">
+                    <div class="tele-label">OPTIMIZADOR MILP · decisión</div>
+                    <div class="data-row"><span class="data-key">cmg_now_usd_mwh</span><span
+                            class="data-val cyan">62.4</span></div>
+                    <div class="data-row"><span class="data-key">cmg_4h_forecast</span><span
+                            class="data-val warn">41.1</span></div>
+                    <div class="data-row"><span class="data-key">schedule</span><span
+                            class="data-val green">discharge</span></div>
+                    <div class="data-row"><span class="data-key">p_setpoint_pu</span><span class="data-val">0.82</span>
+                    </div>
+                    <div class="data-row"><span class="data-key">deg_cost_usd_kwh</span><span
+                            class="data-val">0.031</span></div>
+                    <div class="data-row"><span class="data-key">source</span><span
+                            class="data-val">milp_optimizer</span></div>
                 </div>
-                <!-- Observabilidad -->
-                <div class="spec-section reveal reveal-delay-1">
-                    <div class="spec-heading" data-i18n="stack.sections.2.heading">Observabilidad</div>
-                    <table class="spec-table">
-                        <tr>
-                            <td data-i18n="stack.sections.2.rows.0.0">Métricas</td>
-                            <td data-i18n="stack.sections.2.rows.0.1">Prometheus + Grafana embebidos</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.2.rows.1.0">Logs</td>
-                            <td data-i18n="stack.sections.2.rows.1.1">Structured JSON · firma digital SHA-256</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.2.rows.2.0">Dashboard</td>
-                            <td data-i18n="stack.sections.2.rows.2.1">Web UI tiempo real · WebSocket</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.2.rows.3.0">Alertas</td>
-                            <td data-i18n="stack.sections.2.rows.3.1">PagerDuty, Slack, Email, Webhook</td>
-                        </tr>
-                    </table>
+            </div>
+            <p style="margin-top:14px;font-size:0.76rem;color:var(--c-muted);font-family:var(--font-mono)">
+                // Datos representativos. Nodo Maitencillo 220 kV · CEN Coordinador Eléctrico Nacional.
+            </p>
+        </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ═══ HARDWARE ═══════════════════════════════════════════════ -->
+    <section id="hardware">
+        <div class="wrap">
+            <div class="sec-head reveal">
+                <div class="eyebrow">ACT IV · CONECTIVIDAD</div>
+                <h2 class="type-target" data-type-delay="200">Perfiles YAML validados en field.</h2>
+            </div>
+            <div class="compat-grid reveal">
+                <div class="compat-item">
+                    <div class="compat-name">Huawei SUN2000</div>
+                    <div class="compat-proto">Modbus TCP</div>
+                    <div><span class="compat-badge badge-stable">estable</span></div>
                 </div>
-                <!-- Compliance -->
-                <div class="spec-section reveal reveal-delay-2">
-                    <div class="spec-heading" data-i18n="stack.sections.3.heading">Compliance</div>
-                    <table class="spec-table">
-                        <tr>
-                            <td data-i18n="stack.sections.3.rows.0.0">Ciberseguridad</td>
-                            <td data-i18n="stack.sections.3.rows.0.1">IEC 62443 SL-2 certificable</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.3.rows.1.0">Chile</td>
-                            <td data-i18n="stack.sections.3.rows.1.1">NTSyCS coordinación eléctrica</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.3.rows.2.0">PKI</td>
-                            <td data-i18n="stack.sections.3.rows.2.1">Gestión certificados x.509 integrada</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.3.rows.3.0">Auditoría</td>
-                            <td data-i18n="stack.sections.3.rows.3.1">Logs inmutables · trazabilidad completa</td>
-                        </tr>
-                    </table>
+                <div class="compat-item">
+                    <div class="compat-name">Fronius Primo</div>
+                    <div class="compat-proto">Modbus TCP</div>
+                    <div><span class="compat-badge badge-stable">estable</span></div>
+                </div>
+                <div class="compat-item">
+                    <div class="compat-name">SMA Sunny Boy</div>
+                    <div class="compat-proto">Modbus TCP</div>
+                    <div><span class="compat-badge badge-stable">estable</span></div>
+                </div>
+                <div class="compat-item">
+                    <div class="compat-name">Victron MultiPlus</div>
+                    <div class="compat-proto">VE.Bus</div>
+                    <div><span class="compat-badge badge-stable">estable</span></div>
+                </div>
+                <div class="compat-item">
+                    <div class="compat-name">SolarEdge</div>
+                    <div class="compat-proto">SunSpec</div>
+                    <div><span class="compat-badge badge-beta">beta</span></div>
+                </div>
+                <div class="compat-item">
+                    <div class="compat-name">BYD Battery-Box</div>
+                    <div class="compat-proto">Modbus TCP</div>
+                    <div><span class="compat-badge badge-beta">beta</span></div>
+                </div>
+                <div class="compat-item">
+                    <div class="compat-name">Tesla Powerwall</div>
+                    <div class="compat-proto">REST</div>
+                    <div><span class="compat-badge badge-beta">beta</span></div>
+                </div>
+            </div>
+            <p style="margin-top:18px;font-size:0.8rem;color:var(--c-muted)">
+                Nuevo perfil de hardware en menos de 2 horas. Ver <a
+                    href="https://github.com/bess-solutions/open-bess-edge/blob/main/docs/DRIVER_PROFILES.md"
+                    style="color:var(--c-cyan-dim);text-decoration:underline;text-underline-offset:3px"
+                    target="_blank">DRIVER_PROFILES.md</a>.
+            </p>
+        </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ═══ ROADMAP ════════════════════════════════════════════════ -->
+    <section id="roadmap">
+        <div class="wrap">
+            <div class="two-col reveal" style="display:grid;grid-template-columns:1fr 1fr;gap:80px">
+                <div>
+                    <div class="sec-head">
+                        <div class="eyebrow">ACT V · ROADMAP</div>
+                        <h2 class="type-target" data-type-delay="200">Estado del proyecto.</h2>
+                    </div>
+                    <div class="roadmap-track">
+                        <div class="rm-item done">
+                            <div class="rm-date">Q4 2025</div>
+                            <div class="rm-title">Núcleo Edge v1</div>
+                            <p class="rm-body">Modbus TCP, GCP Pub/Sub, SafetyGuard, MQTT, OpenTelemetry, IEEE 2030.5
+                                SEP 2.0</p>
+                        </div>
+                        <div class="rm-item done">
+                            <div class="rm-date">Ene – Feb 2026</div>
+                            <div class="rm-title">IA y Seguridad</div>
+                            <p class="rm-body">MILP optimizer, DRL PPO con datos CEN reales (BEP-0200 F3),
+                                WatchdogManager, IEC 62443 SL-2 ~98%, OpenSSF Scorecard</p>
+                        </div>
+                        <div class="rm-item now">
+                            <div class="rm-date">Q1 2026 — en curso</div>
+                            <div class="rm-title">Plataforma y Comunidad</div>
+                            <p class="rm-body">Certificación BESSAI, dashboard multi-sitio, primeros early adopters</p>
+                        </div>
+                        <div class="rm-item">
+                            <div class="rm-date">Q2 2026</div>
+                            <div class="rm-title">Control de Despacho</div>
+                            <p class="rm-body">write_tag activo, OpenADR 2.0, agregación de flota MARL</p>
+                        </div>
+                        <div class="rm-item">
+                            <div class="rm-date">Q3 – Q4 2026</div>
+                            <div class="rm-title">Expansión LatAm</div>
+                            <p class="rm-body">Colombia, Perú, Brasil · ONS / CAMMESA · pt-BR</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="sec-head">
+                        <div class="eyebrow">CI/CD · main</div>
+                        <h2 class="type-target" data-type-delay="500">Cada commit verificado.</h2>
+                    </div>
+                    <div class="ci-panel">
+                        <div class="ci-header">Pipeline automático · GitHub Actions</div>
+                        <div class="ci-row"><span class="ci-key">pytest</span><span class="ci-val">613 passed · 0
+                                failed</span></div>
+                        <div class="ci-row"><span class="ci-key">ruff + mypy</span><span class="ci-val">clean</span>
+                        </div>
+                        <div class="ci-row"><span class="ci-key">bandit SAST</span><span class="ci-val">0 high / 0
+                                critical</span></div>
+                        <div class="ci-row"><span class="ci-key">trivy container</span><span class="ci-val">0 critical
+                                CVEs</span></div>
+                        <div class="ci-row"><span class="ci-key">docker build</span><span class="ci-val">linux/amd64 ·
+                                arm64</span></div>
+                        <div class="ci-row"><span class="ci-key">helm lint</span><span class="ci-val">passing</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ── COMUNIDAD ── -->
-    <section id="comunidad" class="section">
-        <div class="container">
-            <h2 class="section-title reveal" data-i18n="community.title">Únete a la comunidad</h2>
-            <p class="section-sub reveal reveal-delay-1" data-i18n="community.subtitle">Somos un proyecto open-source
-                impulsado por la comunidad de energía de América Latina.</p>
-            <div class="community-grid">
-                <div class="comm-card reveal reveal-delay-1">
-                    <div class="comm-icon">💬</div>
-                    <div class="comm-title" data-i18n="community.cards.0.title">Discord</div>
-                    <div class="comm-desc" data-i18n="community.cards.0.desc">Discusión técnica, soporte y newsletter
-                        semanal.</div>
-                    <a href="https://discord.gg/bessai" class="btn-secondary" target="_blank" rel="noopener"
-                        data-i18n="community.cards.0.cta">Unirse al servidor</a>
+    <hr class="rule">
+
+    <!-- ═══ CTA ════════════════════════════════════════════════════ -->
+    <section id="contacto">
+        <div class="wrap">
+            <div class="cta-block reveal">
+                <div>
+                    <div class="eyebrow">ACT VI · CONTACTO</div>
+                    <h2 class="type-target" data-type-delay="200">¿Tienes un BESS que gestionar?</h2>
+                    <p>Agendamos una sesión técnica de 30 minutos. Sin presentaciones comerciales — revisamos tu
+                        arquitectura actual y evaluamos el fit con BESSAI Edge.</p>
                 </div>
-                <div class="comm-card reveal reveal-delay-2">
-                    <div class="comm-icon">🐙</div>
-                    <div class="comm-title" data-i18n="community.cards.1.title">GitHub</div>
-                    <div class="comm-desc" data-i18n="community.cards.1.desc">Código abierto, issues, PRs y roadmap
-                        público.</div>
-                    <a href="https://github.com/bess-solutions/open-bess-edge" class="btn-secondary" target="_blank"
-                        rel="noopener" data-i18n="community.cards.1.cta">Ver repositorio</a>
-                </div>
-                <div class="comm-card reveal reveal-delay-3">
-                    <div class="comm-icon">📄</div>
-                    <div class="comm-title" data-i18n="community.cards.2.title">Documentación</div>
-                    <div class="comm-desc" data-i18n="community.cards.2.desc">Guías, API reference y tutoriales.</div>
-                    <a href="https://bess-solutions.github.io/open-bess-edge" class="btn-secondary" target="_blank"
-                        rel="noopener" data-i18n="community.cards.2.cta">Leer docs</a>
+                <div class="cta-actions">
+                    <a href="mailto:contacto@bess-solutions.cl?subject=BESSAI%20Edge%20%E2%80%94%20Sesi%C3%B3n%20t%C3%A9cnica"
+                        class="btn-primary">
+                        contacto@bess-solutions.cl
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <path d="M7 17L17 7M7 7h10v10" />
+                        </svg>
+                    </a>
+                    <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank"
+                        class="btn-secondary">Explorar el repositorio</a>
+                    <span class="cta-note">// Santiago, Chile · Respuesta en &lt;24h</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ── ROADMAP ── -->
-    <section id="roadmap" class="section"
-        style="background:var(--bg2); border-top:1px solid var(--line); border-bottom:1px solid var(--line)">
-        <div class="container">
-            <h2 class="section-title reveal" data-i18n="roadmap.title">Roadmap público</h2>
-            <p class="section-sub reveal reveal-delay-1" data-i18n="roadmap.subtitle">Desarrollo transparente con fechas
-                reales.</p>
-            <div class="roadmap-grid reveal reveal-delay-2">
-                <div class="roadmap-phase">
-                    <div class="phase-tag released" data-i18n="roadmap.phases.0.tag">LANZADO</div>
-                    <div class="phase-date" data-i18n="roadmap.phases.0.date">Q4 2024</div>
-                    <div class="phase-title" data-i18n="roadmap.phases.0.title">v1.0 — Foundation</div>
-                    <ul class="phase-items">
-                        <li data-i18n="roadmap.phases.0.items.0">490+ tests · cobertura >85%</li>
-                        <li data-i18n="roadmap.phases.0.items.1">Docker multi-arch ARM64/AMD64</li>
-                        <li data-i18n="roadmap.phases.0.items.2">Modbus + MQTT + REST</li>
-                        <li data-i18n="roadmap.phases.0.items.3">Dashboard web básico</li>
-                    </ul>
+    <!-- ═══ FOOTER ═════════════════════════════════════════════════ -->
+    <footer class="footer">
+        <div class="wrap">
+            <div class="footer-inner">
+                <span class="footer-copy">© 2026 BESS Solutions SpA</span>
+                <div class="footer-links">
+                    <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank">GitHub</a>
+                    <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/CHANGELOG.md"
+                        target="_blank">Changelog</a>
+                    <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/SECURITY.md"
+                        target="_blank">Security</a>
+                    <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/LICENSE" target="_blank">Apache
+                        2.0</a>
                 </div>
-                <div class="roadmap-phase">
-                    <div class="phase-tag progress" data-i18n="roadmap.phases.1.tag">EN PROGRESO</div>
-                    <div class="phase-date" data-i18n="roadmap.phases.1.date">Q1 2025</div>
-                    <div class="phase-title" data-i18n="roadmap.phases.1.title">v1.5 — Intelligence</div>
-                    <ul class="phase-items">
-                        <li data-i18n="roadmap.phases.1.items.0">Motor DRL producción</li>
-                        <li data-i18n="roadmap.phases.1.items.1">Predictor CMg v2 (MAPE 4.2%)</li>
-                        <li data-i18n="roadmap.phases.1.items.2">Arbitraje de precio autónomo</li>
-                        <li data-i18n="roadmap.phases.1.items.3">API pública documentada</li>
-                    </ul>
-                </div>
-                <div class="roadmap-phase">
-                    <div class="phase-tag next" data-i18n="roadmap.phases.2.tag">PRÓXIMO</div>
-                    <div class="phase-date" data-i18n="roadmap.phases.2.date">Q2 2025</div>
-                    <div class="phase-title" data-i18n="roadmap.phases.2.title">v2.0 — Compliance</div>
-                    <ul class="phase-items">
-                        <li data-i18n="roadmap.phases.2.items.0">Certificación IEC 62443 SL-2</li>
-                        <li data-i18n="roadmap.phases.2.items.1">Reporte NTSyCS automático</li>
-                        <li data-i18n="roadmap.phases.2.items.2">Logs con firma digital</li>
-                        <li data-i18n="roadmap.phases.2.items.3">Multi-tenant enterprise</li>
-                    </ul>
-                </div>
-                <div class="roadmap-phase">
-                    <div class="phase-tag planned" data-i18n="roadmap.phases.3.tag">PLANIFICADO</div>
-                    <div class="phase-date" data-i18n="roadmap.phases.3.date">Q3 2025</div>
-                    <div class="phase-title" data-i18n="roadmap.phases.3.title">v2.5 — Ecosystem</div>
-                    <ul class="phase-items">
-                        <li data-i18n="roadmap.phases.3.items.0">Marketplace de algoritmos</li>
-                        <li data-i18n="roadmap.phases.3.items.1">SDK TypeScript</li>
-                        <li data-i18n="roadmap.phases.3.items.2">Certificación LatAm regional</li>
-                        <li data-i18n="roadmap.phases.3.items.3">Programa partner integrador</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ── EARLY ADOPTER ── -->
-    <section id="early-adopter" class="section">
-        <div class="container">
-            <h2 class="section-title reveal" data-i18n="early_adopter.title">Programa Early Adopter</h2>
-            <p class="section-sub reveal reveal-delay-1" data-i18n="early_adopter.subtitle">Cupos limitados. Sin
-                segundas rondas.</p>
-            <div class="ea-grid">
-                <div class="ea-card reveal reveal-delay-1">
-                    <div class="ea-tier" data-i18n="early_adopter.cards.0.tier">Pioneer</div>
-                    <div class="ea-price" data-i18n="early_adopter.cards.0.price">Gratis</div>
-                    <div class="ea-slots" data-i18n="early_adopter.cards.0.slots">5 cupos</div>
-                    <ul class="ea-benefits">
-                        <li data-i18n="early_adopter.cards.0.benefits.0">Acceso prioritario a v2.0</li>
-                        <li data-i18n="early_adopter.cards.0.benefits.1">Soporte directo del equipo core</li>
-                        <li data-i18n="early_adopter.cards.0.benefits.2">Co-autoría en BESSAI-SPEC</li>
-                        <li data-i18n="early_adopter.cards.0.benefits.3">Badge 'BESSAI Pioneer' verificado</li>
-                        <li data-i18n="early_adopter.cards.0.benefits.4">Discord canal privado</li>
-                    </ul>
-                    <a href="mailto:hello@bess-solutions.cl?subject=Early Adopter Pioneer" class="btn-primary"
-                        data-i18n="early_adopter.cards.0.cta">Solicitar cupo Pioneer</a>
-                </div>
-                <div class="ea-card featured reveal reveal-delay-2">
-                    <div class="ea-tier" data-i18n="early_adopter.cards.1.tier">Strategic Partner</div>
-                    <div class="ea-price" data-i18n="early_adopter.cards.1.price">A convenir</div>
-                    <div class="ea-slots" data-i18n="early_adopter.cards.1.slots">3 cupos</div>
-                    <ul class="ea-benefits">
-                        <li data-i18n="early_adopter.cards.1.benefits.0">Todo lo de Pioneer</li>
-                        <li data-i18n="early_adopter.cards.1.benefits.1">Roadmap co-diseñado</li>
-                        <li data-i18n="early_adopter.cards.1.benefits.2">Integración personalizada</li>
-                        <li data-i18n="early_adopter.cards.1.benefits.3">SLA enterprise 99.9%</li>
-                        <li data-i18n="early_adopter.cards.1.benefits.4">Mención en documentación oficial</li>
-                    </ul>
-                    <a href="mailto:hello@bess-solutions.cl?subject=Strategic Partner" class="btn-primary"
-                        data-i18n="early_adopter.cards.1.cta">Hablar con el equipo</a>
-                </div>
-            </div>
-            <div class="ea-urgency" data-i18n="early_adopter.urgency">⚠️ Solo 8 cupos en total. Disponibles hasta
-                llenar.</div>
-        </div>
-    </section>
-
-    <!-- ── FOOTER ── -->
-    <footer>
-        <div class="container">
-            <div class="foot-grid">
-                <div class="foot-brand">
-                    <img src="assets/logo-bess.png" alt="BESS Solutions" />
-                    <p class="foot-tagline" data-i18n="footer.tagline">Gestión inteligente de energía, open-source.</p>
-                </div>
-                <div class="foot-col">
-                    <h4>Proyecto</h4>
-                    <ul>
-                        <li><a href="https://github.com/bess-solutions/open-bess-edge">GitHub</a></li>
-                        <li><a href="https://bess-solutions.github.io/open-bess-edge">Docs</a></li>
-                        <li><a
-                                href="https://github.com/bess-solutions/open-bess-edge/blob/main/CHANGELOG.md">CHANGELOG</a>
-                        </li>
-                        <li><a href="https://github.com/bess-solutions/open-bess-edge/blob/main/LICENSE">Apache 2.0</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="foot-col">
-                    <h4>Comunidad</h4>
-                    <ul>
-                        <li><a href="https://discord.gg/bessai">Discord</a></li>
-                        <li><a href="https://github.com/bess-solutions/open-bess-edge/issues">Reportar bug</a></li>
-                        <li><a
-                                href="https://github.com/bess-solutions/open-bess-edge/blob/main/CONTRIBUTING.md">Contribuir</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="foot-col">
-                    <h4>Empresa</h4>
-                    <ul>
-                        <li><a href="mailto:hello@bess-solutions.cl">Contacto</a></li>
-                        <li><a href="#early-adopter">Early Adopter</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="foot-bottom">
-                <span data-i18n="footer.copy">© 2025 BESS Solutions SpA · Santiago, Chile</span>
-                <span data-i18n="footer.license">Software libre bajo Apache License 2.0</span>
             </div>
         </div>
     </footer>
 
-    <!-- ── FLOATING MUSIC PLAYER ── -->
-    <div id="music-player">
-        <img class="mp-cover" src="https://cdn2.suno.ai/edbd3009-1ef6-4a49-9c09-937395b6a4db_dc1e96bf.jpeg"
-            alt="BESS Anthem" />
-        <div class="mp-info">
-            <div class="mp-title" data-i18n="player.title">BESS Solutions in the House</div>
-            <div class="mp-sub" data-i18n="player.subtitle">Phonk Chilean · Suno AI</div>
-            <div id="mp-progress-wrap">
-                <div id="mp-bar"></div>
-            </div>
-        </div>
-        <button id="mp-btn" onclick="toggleMusic()">▶</button>
-        <button id="mp-close" onclick="this.closest('#music-player').style.display='none'">✕</button>
-        <a class="mp-suno-link" href="https://suno.com/s/3fl7sTP1M0Oitou3" target="_blank" rel="noopener"
-            data-i18n="player.suno_link">suno ↗</a>
-    </div>
-    <audio id="bess-audio" crossorigin="anonymous" src="https://cdn1.suno.ai/edbd3009-1ef6-4a49-9c09-937395b6a4db.mp3"
-        preload="none"></audio>
+    <!-- ═══ THREE.JS — ES Module via importmap ════════════════════ -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module" src="js/universe3d.js"></script>
 
-    <!-- BUILD:JS -->
+    <!-- ═══ UI SCRIPTS ══════════════════════════════════════════════ -->
+    <script src="js/ui.js"></script>
+
 </body>
 
 </html>

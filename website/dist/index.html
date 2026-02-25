@@ -1,2265 +1,2138 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>BESS Solutions — Inteligencia para el almacenamiento de energía</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BESS Solutions — Edge Intelligence for Battery Systems</title>
     <meta name="description"
-        content="BESSAI Edge: gateway open-source industrial-grade para BESS. Optimización IA, IEC 62443, NTSyCS Chile. Apache 2.0." />
-    <meta property="og:title" content="BESS Solutions — Edge AI para BESS" />
+        content="Open-source BESS management system. MILP optimization, real CEN/SEN CMg data, IEC 62443 SL-2 compliance. Edge-native, production-grade." />
+    <meta property="og:title" content="BESS Solutions" />
     <meta property="og:description"
-        content="Gateway open-source industrial-grade para sistemas de almacenamiento de energía en baterías." />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="assets/logo-bess.png" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+        content="Edge intelligence for battery energy storage systems. 613 tests. IEC 62443 SL-2." />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+    <!-- Google Fonts: Inter (body) + Barlow Condensed (headlines masivas) + JetBrains Mono (code) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet" />
+
+    <!-- ── CSS (orden importante) ── -->
     <style>
-/* ── BASE: Reset · Tokens · Tipografía ──────────────────── */
+/* ── css/variables.css ── */
+/* ═══════════════════════════════════════════════════════════
+   BESS Solutions — Design Tokens
+   Edita ESTE archivo para cambiar la paleta completa.
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+    /* Backgrounds */
+    --c-bg: #000000;
+    /* negro puro (look "planeta") */
+    --c-surface: #0a0a0a;
+    /* paneles oscuros */
+    --c-surface2: #111111;
+    /* hover / cards */
+
+    /* Borders */
+    --c-border: rgba(255, 255, 255, 0.07);
+    --c-border-h: rgba(34, 211, 238, 0.3);
+
+    /* Brand — cyan */
+    --c-cyan: #22d3ee;
+    --c-cyan-dim: #0891b2;
+
+    /* Accent — naranja (del look de referencia) */
+    --c-orange: #f5a623;
+    /* naranja ámbar principal */
+    --c-orange-dim: #d4891e;
+    /* versión oscura */
+
+    /* Green CTA (del botón "Solicitar demo" del look de referencia) */
+    --c-green-cta: #00c853;
+
+    /* Text */
+    --c-text: #c9d1d9;
+    --c-muted: #6e7681;
+    --c-white: #ffffff;
+
+    /* Status */
+    --c-green: #3fb950;
+    --c-warn: #d29922;
+
+    /* Typography */
+    --font-display: 'Barlow Condensed', 'Inter', system-ui, sans-serif;
+    /* headlines masivas */
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+    /* Geometry */
+    --radius: 6px;
+    --max-w: 1160px;
+}
+
+/* ── css/base.css ── */
+/* ═══════════════════════════════════════════════════════════
+   BESS Solutions — Base / Reset
+   ═══════════════════════════════════════════════════════════ */
+
 *,
 *::before,
 *::after {
     box-sizing: border-box;
     margin: 0;
-    padding: 0
-}
-
-:root {
-    /* Colores */
-    --bg: #070810;
-    --bg2: #0b0d18;
-    --bg3: #10121e;
-    --line: rgba(255, 255, 255, .07);
-    --line2: rgba(255, 255, 255, .04);
-    --muted: #5a6480;
-    --muted2: #373d54;
-    --text: #edf0ff;
-    --text2: #b0b8d4;
-    --accent: #22d3ee;
-    /* cyan */
-    --accent2: #34d399;
-    /* emerald */
-    --accent3: #818cf8;
-    /* indigo */
-    --warn: #fbbf24;
-    /* amber */
-
-    /* Espaciado */
-    --space-xs: .5rem;
-    --space-sm: 1rem;
-    --space-md: 2rem;
-    --space-lg: 4rem;
-    --space-xl: 8rem;
-
-    /* Tipografía */
-    --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-
-    /* Bordes */
-    --radius: 8px;
-    --radius-lg: 16px;
-    --radius-xl: 24px;
+    padding: 0;
 }
 
 html {
     scroll-behavior: smooth;
-    font-size: 16px;
 }
 
 body {
-    background: var(--bg);
-    color: var(--text);
+    background: var(--c-bg);
+    color: var(--c-text);
     font-family: var(--font-sans);
+    font-size: 16px;
     line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
 }
 
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+}
+
+/* ── Layout containers ── */
+.wrap {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding: 0 48px;
+}
+
+section {
+    padding: 96px 0;
+}
+
+hr.rule {
+    border: none;
+    border-top: 1px solid var(--c-border);
+    margin: 0;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--c-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #222;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #333;
+}
+
+/* ── css/components.css ── */
+/* ═══════════════════════════════════════════════════════════
+   BESS Solutions — Components
+   Nav · Buttons · Terminal · Stats · Scroll Reveal
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Typography helpers ── */
+.eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-cyan);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.eyebrow::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--c-orange);
+    flex-shrink: 0;
+}
+
+/* Headlines — estilo masivo/condensado */
 h1,
 h2,
-h3,
-h4 {
-    line-height: 1.15;
+h3 {
+    color: var(--c-white);
+    letter-spacing: -0.02em;
+    line-height: 1.0;
 }
 
-a {
-    color: inherit;
-    text-decoration: none;
-}
-
-img {
-    max-width: 100%;
-}
-
-button {
-    font-family: inherit;
-}
-
-/* ── Grid background ── */
-body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    background-image:
-        linear-gradient(var(--line2) 1px, transparent 1px),
-        linear-gradient(90deg, var(--line2) 1px, transparent 1px);
-    background-size: 60px 60px;
-}
-
-/* ── Utility ── */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 var(--space-md);
-}
-
-.section {
-    padding: var(--space-xl) 0;
-    position: relative;
-    z-index: 1;
-}
-
-.section-title {
-    font-size: clamp(1.8rem, 4vw, 3rem);
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: .75rem;
-}
-
-.section-sub {
-    text-align: center;
-    color: var(--text2);
-    font-size: 1.1rem;
-    margin-bottom: var(--space-lg);
-    max-width: 640px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: .5rem;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #070810;
-    font-weight: 700;
-    font-size: .9rem;
-    padding: .75rem 1.75rem;
-    border-radius: var(--radius);
-    border: none;
-    cursor: pointer;
-    transition: transform .2s, box-shadow .2s;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(34, 211, 238, .3);
-}
-
-.btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    gap: .5rem;
-    background: transparent;
-    color: var(--text2);
-    font-size: .9rem;
-    padding: .7rem 1.6rem;
-    border-radius: var(--radius);
-    border: 1px solid var(--line);
-    cursor: pointer;
-    transition: all .2s;
-}
-
-.btn-secondary:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-}
-
-.badge {
-    display: inline-flex;
-    align-items: center;
-    gap: .5rem;
-    font-size: .72rem;
-    font-family: var(--font-mono);
-    letter-spacing: .06em;
+h1 {
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 9vw, 7rem);
+    font-weight: 800;
     text-transform: uppercase;
-    color: var(--accent2);
-    background: rgba(52, 211, 153, .08);
-    border: 1px solid rgba(52, 211, 153, .2);
-    padding: .3rem .9rem;
-    border-radius: 100px;
+    line-height: 0.95;
 }
 
-/* ── Reveal on scroll ── */
-.reveal {
-    opacity: 0;
-    transform: translateY(28px);
-    transition: opacity .6s ease, transform .6s ease;
+h2 {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 800;
+    text-transform: uppercase;
 }
 
-.reveal.revealed {
-    opacity: 1;
-    transform: none;
+h3 {
+    font-size: 1.05rem;
+    font-weight: 500;
 }
 
-.reveal-delay-1 {
-    transition-delay: .1s;
+/* Accent text colors */
+.text-orange {
+    color: var(--c-orange);
 }
 
-.reveal-delay-2 {
-    transition-delay: .2s;
+.text-cyan {
+    color: var(--c-cyan);
 }
 
-.reveal-delay-3 {
-    transition-delay: .3s;
+code.inline {
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+    color: var(--c-cyan);
+    background: rgba(34, 211, 238, 0.07);
+    padding: 1px 6px;
+    border-radius: 3px;
 }
 
-/* ── Fade animation ── */
-.fade-in {
-    animation: fadeIn .4s ease both;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(12px)
-    }
-
-    to {
-        opacity: 1;
-        transform: none
-    }
-}
-/* ── LAYOUT: Nav · Hero · Secciones ────────────────────── */
-
-/* ── NAV ── */
-#main-nav {
+/* ── Nav ── */
+.nav {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    z-index: 900;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: .9rem 2rem;
-    transition: background .3s, backdrop-filter .3s, border-bottom .3s;
+    z-index: 100;
+    height: 60px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: background 0.3s;
 }
 
-#main-nav.scrolled {
-    background: rgba(7, 8, 16, .9);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--line);
+.nav-inner {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding: 0 48px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 40px;
 }
 
 .nav-logo {
     display: flex;
     align-items: center;
-    gap: .6rem;
-    font-weight: 700;
-    font-size: 1.05rem;
+    gap: 8px;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--c-white);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
 }
 
-.nav-logo img {
-    height: 28px;
-    width: auto;
+.nav-logo svg {
+    flex-shrink: 0;
 }
 
-.nav-logo span {
-    color: var(--accent);
-}
-
-#nav-menu {
+.nav-links {
     display: flex;
-    align-items: center;
-    gap: 2rem;
-}
-
-#nav-menu a {
-    font-size: .85rem;
-    color: var(--text2);
-    transition: color .2s;
-}
-
-#nav-menu a:hover {
-    color: var(--text);
-}
-
-.nav-lang {
-    display: flex;
-    gap: .3rem;
-}
-
-.nav-lang button {
-    font: 600 .7rem var(--font-mono);
-    color: var(--muted);
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    padding: .2rem .5rem;
-    cursor: pointer;
-    transition: all .2s;
-}
-
-.nav-lang button.active {
-    color: var(--accent);
-    border-color: var(--accent);
-}
-
-.nav-lang button:hover:not(.active) {
-    color: var(--text2);
-    border-color: var(--line);
-}
-
-/* Hamburger */
-#nav-burger {
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: .3rem;
-}
-
-#nav-burger span {
-    display: block;
-    width: 22px;
-    height: 2px;
-    background: var(--text2);
-    border-radius: 2px;
-    transition: all .3s;
-}
-
-#nav-burger.open span:nth-child(1) {
-    transform: translateY(7px) rotate(45deg);
-}
-
-#nav-burger.open span:nth-child(2) {
-    opacity: 0;
-}
-
-#nav-burger.open span:nth-child(3) {
-    transform: translateY(-7px) rotate(-45deg);
-}
-
-/* ── HERO ── */
-#hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 6rem 2rem 4rem;
-    position: relative;
-    z-index: 1;
-}
-
-.hero-badge {
-    margin-bottom: 1.5rem;
-}
-
-.hero-headline {
-    font-size: clamp(2.8rem, 8vw, 6rem);
-    font-weight: 800;
-    line-height: 1.05;
-    letter-spacing: -.02em;
-    margin-bottom: 1.5rem;
-}
-
-#hero-l1,
-#hero-l2 {
-    display: block;
-    transition: opacity .35s ease;
-}
-
-#hero-l2 em {
-    font-style: normal;
-    color: var(--accent);
-}
-
-.hero-sub {
-    font-size: clamp(.95rem, 2vw, 1.2rem);
-    color: var(--text2);
-    max-width: 640px;
-    margin: 0 auto 2.5rem;
-}
-
-.hero-ctas {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-/* ── LIVE METRICS STRIP ── */
-#live-strip {
-    background: var(--bg2);
-    border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
-    padding: 1rem 0;
-    position: relative;
-    z-index: 1;
-}
-
-.live-inner {
-    display: flex;
-    gap: 0;
-    overflow: hidden;
-}
-
-.live-metric {
+    gap: 2px;
     flex: 1;
+}
+
+.nav-links a {
+    padding: 5px 12px;
+    border-radius: var(--radius);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.5);
+    transition: color 0.15s, background 0.15s;
+    white-space: nowrap;
+}
+
+.nav-links a:hover {
+    color: var(--c-white);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-end {
+    margin-left: auto;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: .75rem 1rem;
-    border-right: 1px solid var(--line);
-    min-width: 140px;
+    gap: 12px;
 }
 
-.live-metric:last-child {
-    border-right: none;
+/* Language switcher */
+.lang-switch {
+    display: flex;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
 }
 
-.live-tag {
-    font: .55rem var(--font-mono);
-    color: var(--accent2);
-    letter-spacing: .1em;
+.lang-switch a {
+    color: rgba(255, 255, 255, 0.35);
+    padding: 2px 4px;
+    transition: color 0.15s;
+}
+
+.lang-switch a:hover,
+.lang-switch a.active {
+    color: var(--c-white);
+}
+
+/* Nav buttons */
+.btn-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: 1px solid var(--c-border);
+    color: var(--c-text);
+    transition: border-color 0.15s, color 0.15s, transform 0.15s;
+    white-space: nowrap;
+}
+
+.btn-nav:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--c-white);
+    transform: translateY(-1px);
+}
+
+/* Botón CTA verde — igual que en las screenshots */
+.btn-nav-primary {
+    background: var(--c-green-cta);
+    border-color: var(--c-green-cta);
+    color: #000;
+    font-weight: 700;
+    border-radius: 4px;
+}
+
+.btn-nav-primary:hover {
+    background: #00e060;
+    border-color: #00e060;
+    color: #000;
+}
+
+/* ── Buttons (hero/cta level) ── */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: var(--c-cyan-dim);
+    color: white;
+    border: 1px solid var(--c-cyan-dim);
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+    background: #0ea5c9;
+    border-color: #0ea5c9;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(8, 145, 178, 0.35);
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--c-muted);
+    border: 1px solid var(--c-border);
+    transition: color 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.btn-secondary:hover {
+    color: var(--c-white);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* ── Terminal ── */
+.terminal {
+    background: rgba(10, 10, 10, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 10px;
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1.75;
+    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(34, 211, 238, 0.06);
+}
+
+.terminal-bar {
     display: flex;
     align-items: center;
-    gap: .3rem;
-    margin-bottom: .2rem;
+    gap: 6px;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
 }
 
-.live-tag::before {
-    content: '';
-    width: 5px;
-    height: 5px;
+.terminal-dot {
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    background: var(--accent2);
-    animation: blink 1.4s ease-in-out infinite;
 }
 
-.live-value {
-    font: 700 1.6rem var(--font-mono);
-    color: var(--text);
+.terminal-dot:nth-child(1) {
+    background: #ff5f57;
 }
 
-.live-unit {
-    font: .65rem var(--font-mono);
-    color: var(--muted);
+.terminal-dot:nth-child(2) {
+    background: #febc2e;
 }
 
-.live-label {
-    font: .65rem 'Inter', sans-serif;
-    color: var(--text2);
-    margin-top: .1rem;
+.terminal-dot:nth-child(3) {
+    background: #28c840;
+}
+
+.terminal-path {
+    margin-left: 8px;
+    color: var(--c-muted);
+    font-size: 0.72rem;
+}
+
+.terminal-body {
+    padding: 18px 20px 22px;
+}
+
+.t-line {
+    display: block;
+}
+
+.t-key {
+    color: #79c0ff;
+}
+
+.t-val {
+    color: #a5d6ff;
+}
+
+.t-str {
+    color: #a8d8a8;
+}
+
+.t-num {
+    color: var(--c-cyan);
+}
+
+.t-comment {
+    color: #4a5568;
+    font-style: italic;
+}
+
+.t-ok {
+    color: var(--c-green);
+}
+
+.t-warn {
+    color: var(--c-orange);
+}
+
+.t-cursor {
+    display: inline-block;
+    width: 7px;
+    height: 13px;
+    background: var(--c-cyan);
+    vertical-align: middle;
+    animation: blink 1.1s step-end infinite;
 }
 
 @keyframes blink {
 
     0%,
     100% {
-        opacity: 1
+        opacity: 1;
     }
 
     50% {
-        opacity: .3
+        opacity: 0;
     }
 }
 
-/* ── AUDIENCE TABS ── */
-.aud-tabs-wrap {
-    display: flex;
-    gap: .5rem;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 2rem;
-}
-
-.aud-tab {
-    font: .8rem var(--font-mono);
-    color: var(--muted);
-    background: transparent;
-    border: 1px solid var(--line);
-    border-radius: 100px;
-    padding: .4rem 1.1rem;
-    cursor: pointer;
-    transition: all .2s;
-    white-space: nowrap;
-}
-
-.aud-tab.active {
-    color: var(--accent);
-    border-color: var(--accent);
-    background: rgba(34, 211, 238, .07);
-}
-
-.aud-tab:hover:not(.active) {
-    color: var(--text2);
-    border-color: var(--muted2);
-}
-
-.aud-panel {
-    max-width: 720px;
-    margin: 0 auto;
-    text-align: left;
-    padding: 2rem;
-    background: var(--bg2);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-}
-
-.aud-headline {
-    font: 700 1.6rem 'Inter', sans-serif;
-    color: var(--text);
-    margin-bottom: 1rem;
-}
-
-.aud-body {
-    font-size: 1rem;
-    color: var(--text2);
-    margin-bottom: 1.5rem;
-    line-height: 1.7;
-}
-
-.aud-benefits {
-    list-style: none;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: .5rem 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.aud-benefits li {
-    font-size: .85rem;
-    color: var(--text2);
-    display: flex;
-    align-items: flex-start;
-    gap: .5rem;
-}
-
-.aud-benefits li::before {
-    content: '→';
-    color: var(--accent2);
-    flex-shrink: 0;
-    margin-top: .1rem;
-}
-
-/* ── PROBLEM STATS ── */
-.stats-grid {
+/* ── Stats bar ── */
+.stats-bar {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1px;
-    background: var(--line);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
+    border: 1px solid var(--c-border);
+    border-radius: 8px;
     overflow: hidden;
+    margin-top: 20px;
+    background: rgba(10, 10, 10, 0.8);
+    backdrop-filter: blur(8px);
 }
 
-.stat-card {
-    background: var(--bg2);
-    padding: 2.5rem 1.5rem;
-    text-align: center;
+.stat-item {
+    padding: 22px 24px;
+    border-right: 1px solid var(--c-border);
+    transition: background 0.2s;
 }
 
-.stat-value {
-    font: 800 3rem var(--font-mono);
-    color: var(--accent);
+.stat-item:last-child {
+    border-right: none;
+}
+
+.stat-item:hover {
+    background: rgba(34, 211, 238, 0.04);
+}
+
+.stat-v {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--c-white);
     line-height: 1;
+    margin-bottom: 6px;
 }
 
-.stat-label {
-    font: .85rem 'Inter', sans-serif;
-    color: var(--text2);
-    margin: .5rem 0 .25rem;
+.stat-l {
+    font-size: 0.78rem;
+    color: var(--c-muted);
 }
 
-.stat-detail {
-    font: .7rem var(--font-mono);
-    color: var(--muted);
+/* ── Scroll reveal ── */
+.reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ── FEATURES GRID ── */
-.features-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-    background: var(--line);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Section header ── */
+.sec-head {
+    margin-bottom: 56px;
+}
+
+/* ── Animations ── */
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.4;
+        transform: scale(1.4);
+    }
+}
+
+@keyframes pulse-ring {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.1);
+    }
+
+    50% {
+        box-shadow: 0 0 0 8px rgba(34, 211, 238, 0.05);
+    }
+}
+
+/* ── Typewriter cursor ── */
+.tw-cursor {
+    display: inline;
+    color: var(--c-cyan);
+    font-weight: 300;
+    opacity: 1;
+    animation: tw-blink 0.5s step-end infinite;
+    /* No hereda text-transform del h1/h2 para evitar que se vea raro */
+    text-transform: none;
+    font-family: var(--font-mono);
+}
+
+@keyframes tw-blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+/* Mientras se está escribiendo el tipo-target, evitar el layout jump */
+.type-target {
+    min-height: 1em;
+}
+
+/* ── css/sections.css ── */
+/* ═══════════════════════════════════════════════════════════
+   BESS Solutions — Sections
+   Hero · Features · Telemetría · Hardware · Roadmap · CTA · Footer · CI
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Hero ── */
+.hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding-top: 60px;
     overflow: hidden;
 }
 
-.feature-card {
-    background: var(--bg2);
-    padding: 2rem 1.75rem;
-    transition: background .3s;
-}
-
-.feature-card:hover {
-    background: var(--bg3);
-}
-
-.feature-icon {
-    font-size: 1.8rem;
-    margin-bottom: 1rem;
-}
-
-.feature-title {
-    font: 700 1.05rem 'Inter', sans-serif;
-    color: var(--text);
-    margin-bottom: .5rem;
-}
-
-.feature-desc {
-    font: .87rem 'Inter', sans-serif;
-    color: var(--text2);
-    line-height: 1.6;
-}
-
-/* ── STACK / SPEC TABLE ── */
-.spec-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-}
-
-.spec-section {
-    background: var(--bg2);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-}
-
-.spec-heading {
-    font: .7rem var(--font-mono);
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--accent);
-    padding: .75rem 1.25rem;
-    border-bottom: 1px solid var(--line);
-    background: rgba(34, 211, 238, .04);
-}
-
-.spec-table {
+#bess-universe {
+    position: absolute;
+    inset: 0;
     width: 100%;
-    border-collapse: collapse;
+    height: 100%;
+    z-index: 0;
+    display: block;
 }
 
-.spec-table td {
-    padding: .6rem 1.25rem;
-    font-size: .82rem;
-    border-bottom: 1px solid var(--line2);
-    vertical-align: top;
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: radial-gradient(ellipse 60% 80% at 70% 50%,
+            transparent 40%,
+            rgba(8, 12, 18, 0.7) 100%);
+    pointer-events: none;
 }
 
-.spec-table tr:last-child td {
+.hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 80px 0 60px;
+    max-width: 600px;
+}
+
+.hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--c-muted);
+    margin-bottom: 40px;
+}
+
+.hero-tag::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--c-cyan-dim);
+}
+
+.hero-tag .pulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--c-cyan);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.hero-h1 {
+    margin-bottom: 24px;
+}
+
+.hero-h1 em {
+    font-style: normal;
+    color: var(--c-cyan);
+    display: block;
+}
+
+.hero-sub {
+    font-size: 1.0rem;
+    color: var(--c-muted);
+    line-height: 1.8;
+    margin-bottom: 44px;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 72px;
+}
+
+/* ── Feature grid ── */
+.feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--c-border);
+    border: 1px solid var(--c-border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.f-cell {
+    background: var(--c-surface);
+    padding: 40px 36px;
+    transition: background 0.25s, transform 0.25s;
+    position: relative;
+    overflow: hidden;
+}
+
+.f-cell::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(8, 145, 178, 0.04), transparent);
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.f-cell:hover {
+    background: #0f1620;
+}
+
+.f-cell:hover::after {
+    opacity: 1;
+}
+
+.f-cell--wide {
+    grid-column: span 2;
+}
+
+.f-index {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.12);
+    margin-bottom: 20px;
+}
+
+.f-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--c-white);
+    margin-bottom: 10px;
+}
+
+.f-body {
+    font-size: 0.875rem;
+    color: var(--c-muted);
+    line-height: 1.75;
+}
+
+.f-tag {
+    display: inline-block;
+    margin-top: 16px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--c-cyan-dim);
+    border: 1px solid rgba(8, 145, 178, 0.2);
+    padding: 2px 8px;
+    border-radius: 3px;
+}
+
+/* ── Telemetry ── */
+.tele-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--c-border);
+    border: 1px solid var(--c-border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.tele-panel {
+    background: var(--c-surface);
+    padding: 32px;
+}
+
+.tele-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--c-muted);
+    margin-bottom: 20px;
+    letter-spacing: 0.1em;
+}
+
+.data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--c-border);
+}
+
+.data-row:last-child {
     border-bottom: none;
 }
 
-.spec-table td:first-child {
-    color: var(--muted);
-    white-space: nowrap;
-    width: 38%;
+.data-key {
+    font-size: 0.8rem;
+    color: var(--c-muted);
+    font-family: var(--font-mono);
 }
 
-.spec-table td:last-child {
-    color: var(--text2);
+.data-val {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--c-white);
 }
 
-/* ── TERMINAL ── */
-.terminal-wrap {
-    background: #080c14;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    max-width: 780px;
-    margin: 0 auto;
+.data-val.green {
+    color: var(--c-green);
 }
 
-.term-bar {
-    background: #111827;
-    padding: .6rem 1rem;
-    display: flex;
-    gap: .4rem;
-    align-items: center;
+.data-val.cyan {
+    color: var(--c-cyan);
 }
 
-.term-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
+.data-val.warn {
+    color: var(--c-warn);
 }
 
-.term-dot:nth-child(1) {
-    background: #ef4444;
-}
-
-.term-dot:nth-child(2) {
-    background: #f59e0b;
-}
-
-.term-dot:nth-child(3) {
-    background: #22c55e;
-}
-
-.term-title {
-    font: .65rem var(--font-mono);
-    color: var(--muted);
-    margin-left: .5rem;
-}
-
-#term-output {
-    padding: 1.25rem 1.5rem;
-    font: .8rem var(--font-mono);
-    line-height: 2;
-    height: 320px;
-    overflow-y: auto;
-}
-
-#term-output::-webkit-scrollbar {
-    width: 4px;
-}
-
-#term-output::-webkit-scrollbar-thumb {
-    background: var(--muted2);
-    border-radius: 2px;
-}
-
-.term-line {
-    animation: termFade .3s ease both;
-}
-
-@keyframes termFade {
-    from {
-        opacity: 0;
-        transform: translateX(-6px)
-    }
-
-    to {
-        opacity: 1;
-        transform: none
-    }
-}
-
-/* ── COMMUNITY CARDS ── */
-.community-grid {
+/* ── Hardware compatibility ── */
+.compat-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-}
-
-.comm-card {
-    background: var(--bg2);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    transition: border-color .3s, transform .3s;
-}
-
-.comm-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-4px);
-}
-
-.comm-icon {
-    font-size: 2rem;
-}
-
-.comm-title {
-    font: 700 1.1rem 'Inter', sans-serif;
-    color: var(--text);
-}
-
-.comm-desc {
-    font: .87rem 'Inter', sans-serif;
-    color: var(--text2);
-    flex: 1;
-    line-height: 1.6;
-}
-
-/* ── ROADMAP ── */
-.roadmap-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0;
-    background: var(--line);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--c-border);
+    border: 1px solid var(--c-border);
+    border-radius: 10px;
     overflow: hidden;
 }
 
-.roadmap-phase {
-    background: var(--bg2);
-    padding: 1.75rem 1.25rem;
-    position: relative;
-}
-
-.phase-tag {
-    font: .6rem var(--font-mono);
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    padding: .25rem .7rem;
-    border-radius: 100px;
-    display: inline-block;
-    margin-bottom: .75rem;
-}
-
-.phase-tag.released {
-    color: #22c55e;
-    background: rgba(34, 197, 94, .1);
-    border: 1px solid rgba(34, 197, 94, .25);
-}
-
-.phase-tag.progress {
-    color: #fbbf24;
-    background: rgba(251, 191, 36, .1);
-    border: 1px solid rgba(251, 191, 36, .25);
-    animation: blink 2s infinite;
-}
-
-.phase-tag.next {
-    color: #22d3ee;
-    background: rgba(34, 211, 238, .07);
-    border: 1px solid rgba(34, 211, 238, .2);
-}
-
-.phase-tag.planned {
-    color: var(--muted);
-    background: transparent;
-    border: 1px solid var(--line);
-}
-
-.phase-date {
-    font: .65rem var(--font-mono);
-    color: var(--muted);
-    margin-bottom: .5rem;
-}
-
-.phase-title {
-    font: 700 .95rem 'Inter', sans-serif;
-    color: var(--text);
-    margin-bottom: 1rem;
-}
-
-.phase-items {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: .4rem;
-}
-
-.phase-items li {
-    font: .78rem 'Inter', sans-serif;
-    color: var(--text2);
-    display: flex;
-    gap: .4rem;
-}
-
-.phase-items li::before {
-    content: '·';
-    color: var(--accent2);
-    flex-shrink: 0;
-}
-
-/* ── EARLY ADOPTER ── */
-.ea-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.ea-card {
-    background: var(--bg2);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    padding: 2.5rem 2rem;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden;
-    transition: border-color .3s;
-}
-
-.ea-card.featured {
-    border-color: rgba(34, 211, 238, .4);
-}
-
-.ea-card.featured::before {
-    content: '⭐ RECOMMENDED';
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    font: .55rem var(--font-mono);
-    letter-spacing: .1em;
-    color: var(--accent);
-    background: rgba(34, 211, 238, .1);
-    border: 1px solid rgba(34, 211, 238, .2);
-    padding: .2rem .6rem;
-    border-radius: 100px;
-}
-
-.ea-tier {
-    font: .65rem var(--font-mono);
-    letter-spacing: .15em;
-    text-transform: uppercase;
-    color: var(--accent2);
-    margin-bottom: .5rem;
-}
-
-.ea-price {
-    font: 800 2.2rem 'Inter', sans-serif;
-    color: var(--text);
-    margin-bottom: .25rem;
-}
-
-.ea-slots {
-    font: .75rem var(--font-mono);
-    color: var(--warn);
-    margin-bottom: 1.5rem;
-}
-
-.ea-benefits {
-    list-style: none;
-    flex: 1;
-    margin-bottom: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: .5rem;
-}
-
-.ea-benefits li {
-    font: .85rem 'Inter', sans-serif;
-    color: var(--text2);
-    display: flex;
-    gap: .5rem;
-    align-items: flex-start;
-}
-
-.ea-benefits li::before {
-    content: '✓';
-    color: var(--accent2);
-    flex-shrink: 0;
-    margin-top: .1rem;
-}
-
-.ea-urgency {
+.compat-item {
+    background: var(--c-surface);
+    padding: 24px 16px;
     text-align: center;
-    font: .8rem 'Inter', sans-serif;
-    color: var(--warn);
-    margin-top: 2rem;
+    transition: background 0.2s, transform 0.2s;
 }
 
-/* ── FOOTER ── */
-footer {
-    background: var(--bg2);
-    border-top: 1px solid var(--line);
-    padding: var(--space-lg) 0 var(--space-sm);
-    position: relative;
+.compat-item:hover {
+    background: #111820;
+    transform: scale(1.02);
     z-index: 1;
 }
 
-.foot-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    gap: 3rem;
-    margin-bottom: 3rem;
+.compat-name {
+    font-size: 0.78rem;
+    color: var(--c-muted);
+    margin-bottom: 8px;
 }
 
-.foot-brand img {
-    height: 32px;
-    margin-bottom: 1rem;
+.compat-proto {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: rgba(110, 118, 129, 0.6);
 }
 
-.foot-tagline {
-    font: .85rem 'Inter', sans-serif;
-    color: var(--text2);
+.compat-badge {
+    display: inline-block;
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    padding: 2px 6px;
+    border-radius: 2px;
 }
 
-.foot-col h4 {
-    font: .65rem var(--font-mono);
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 1rem;
+.badge-stable {
+    background: rgba(63, 185, 80, 0.1);
+    color: var(--c-green);
 }
 
-.foot-col ul {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: .4rem;
+.badge-beta {
+    background: rgba(210, 153, 34, 0.1);
+    color: var(--c-warn);
 }
 
-.foot-col ul a {
-    font: .82rem 'Inter', sans-serif;
-    color: var(--text2);
-    transition: color .2s;
+/* ── Roadmap ── */
+.roadmap-track {
+    position: relative;
+    padding-left: 28px;
 }
 
-.foot-col ul a:hover {
-    color: var(--text);
+.roadmap-track::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    background: var(--c-border);
 }
 
-.foot-bottom {
-    border-top: 1px solid var(--line);
-    padding-top: 1.5rem;
+.rm-item {
+    position: relative;
+    padding: 0 0 40px 28px;
+}
+
+.rm-item::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 7px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1.5px solid var(--c-border);
+    background: var(--c-bg);
+    transition: border-color 0.3s, background 0.3s;
+}
+
+.rm-item.done::before {
+    background: var(--c-cyan-dim);
+    border-color: var(--c-cyan-dim);
+}
+
+.rm-item.now::before {
+    background: var(--c-bg);
+    border-color: var(--c-cyan);
+    box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.1);
+    animation: pulse-ring 2s ease-in-out infinite;
+}
+
+.rm-date {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--c-muted);
+    margin-bottom: 6px;
+}
+
+.rm-title {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--c-white);
+    margin-bottom: 4px;
+}
+
+.rm-body {
+    font-size: 0.875rem;
+    color: var(--c-muted);
+    line-height: 1.6;
+}
+
+/* ── CI panel ── */
+.ci-panel {
+    border: 1px solid var(--c-border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.ci-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--c-border);
+    background: var(--c-surface);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--c-muted);
+}
+
+.ci-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font: .72rem var(--font-mono);
-    color: var(--muted);
-}
-/* ── RESPONSIVE ─────────────────────────────────────────── */
-
-@media (max-width:1024px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .features-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .foot-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-    }
-
-    .roadmap-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    padding: 13px 20px;
+    border-top: 1px solid var(--c-border);
+    transition: background 0.15s;
 }
 
-@media (max-width:768px) {
-    :root {
-        font-size: 15px;
-    }
-
-    .container {
-        padding: 0 1.25rem;
-    }
-
-    #main-nav {
-        padding: .75rem 1.25rem;
-    }
-
-    #nav-menu {
-        display: none;
-        position: fixed;
-        top: 60px;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(7, 8, 16, .97);
-        backdrop-filter: blur(20px);
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 2rem;
-        z-index: 899;
-    }
-
-    #nav-menu.open {
-        display: flex;
-    }
-
-    #nav-menu a {
-        font-size: 1.1rem;
-    }
-
-    #nav-burger {
-        display: flex;
-    }
-
-    .live-inner {
-        overflow-x: auto;
-    }
-
-    .live-metric {
-        min-width: 110px;
-    }
-
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .features-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .spec-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .community-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .roadmap-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .ea-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .aud-benefits {
-        grid-template-columns: 1fr;
-    }
-
-    .foot-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-
-    .foot-bottom {
-        flex-direction: column;
-        gap: .5rem;
-        text-align: center;
-    }
-
-    #music-player {
-        width: calc(100% - 2rem);
-        left: 1rem;
-        right: 1rem;
-    }
+.ci-row:first-of-type {
+    border-top: none;
 }
 
-@media (max-width:480px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .hero-ctas {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .hero-ctas .btn-primary,
-    .hero-ctas .btn-secondary {
-        justify-content: center;
-    }
+.ci-row:hover {
+    background: rgba(255, 255, 255, 0.02);
 }
 
-/* ── FLOATING MUSIC PLAYER ──────────────────────────────── */
-#music-player {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 990;
-    background: rgba(11, 13, 24, .95);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, .1);
-    border-radius: var(--radius-lg);
-    padding: 14px 16px;
-    display: flex;
+.ci-key {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--c-muted);
+}
+
+.ci-val {
+    font-size: 0.8rem;
+    color: var(--c-green);
+    font-family: var(--font-mono);
+}
+
+/* ── CTA block ── */
+.cta-block {
+    border: 1px solid var(--c-border);
+    border-radius: 10px;
+    padding: 64px 56px;
+    background: var(--c-surface);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 64px;
     align-items: center;
-    gap: 12px;
-    width: 280px;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, .5);
-    transform: translateY(80px);
-    opacity: 0;
-    transition: transform .5s cubic-bezier(.22, 1, .36, 1), opacity .5s ease;
-}
-
-#music-player .mp-cover {
-    width: 42px;
-    height: 42px;
-    border-radius: 8px;
-    flex-shrink: 0;
-    object-fit: cover;
-}
-
-.mp-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.mp-title {
-    font: 600 .72rem 'Inter', sans-serif;
-    color: var(--text);
-    white-space: nowrap;
+    position: relative;
     overflow: hidden;
-    text-overflow: ellipsis;
 }
 
-.mp-sub {
-    font: .6rem var(--font-mono);
-    color: var(--muted);
-    margin: 2px 0 6px;
+.cta-block::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(8, 145, 178, 0.4), transparent);
 }
 
-#mp-progress-wrap {
-    height: 3px;
-    background: rgba(255, 255, 255, .08);
-    border-radius: 2px;
-    cursor: pointer;
+.cta-block h2 {
+    margin-bottom: 12px;
+    font-size: 1.75rem;
 }
 
-#mp-bar {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    border-radius: 2px;
-    transition: width .3s linear;
+.cta-block p {
+    color: var(--c-muted);
+    font-size: 0.9375rem;
+    line-height: 1.7;
 }
 
-#mp-btn {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    border: none;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: var(--bg);
-    font-size: .85rem;
-    cursor: pointer;
-    flex-shrink: 0;
+.cta-actions {
     display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.cta-note {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--c-muted);
+    margin-top: 4px;
+}
+
+/* ── Footer ── */
+.footer {
+    border-top: 1px solid var(--c-border);
+    padding: 40px 0;
+}
+
+.footer-inner {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    transition: transform .2s;
 }
 
-#mp-btn:hover {
-    transform: scale(1.08);
+.footer-links {
+    display: flex;
+    gap: 24px;
 }
 
-#mp-close {
-    position: absolute;
-    top: 6px;
-    right: 8px;
-    background: none;
-    border: none;
-    color: var(--muted2);
-    cursor: pointer;
-    font-size: .65rem;
-    line-height: 1;
-    padding: 2px;
-    transition: color .2s;
+.footer-links a {
+    font-size: 0.8125rem;
+    color: var(--c-muted);
+    transition: color 0.15s;
 }
 
-#mp-close:hover {
-    color: var(--muted);
+.footer-links a:hover {
+    color: var(--c-cyan);
 }
 
-.mp-suno-link {
-    position: absolute;
-    bottom: 7px;
-    right: 12px;
-    font: .52rem var(--font-mono);
-    color: var(--muted2);
-    transition: color .2s;
+.footer-copy {
+    font-size: 0.8125rem;
+    color: var(--c-muted);
 }
 
-.mp-suno-link:hover {
-    color: var(--muted);
+/* ── css/responsive.css ── */
+/* ═══════════════════════════════════════════════════════════
+   BESS Solutions — Responsive
+   Breakpoints: 900px (tablet) · 540px (mobile)
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+    .nav-links {
+        display: none;
+    }
+
+    .hero-content {
+        padding: 40px 0;
+        max-width: 100%;
+    }
+
+    .stats-bar {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .stat-item:nth-child(2) {
+        border-right: none;
+    }
+
+    .stat-item:nth-child(3),
+    .stat-item:nth-child(4) {
+        border-top: 1px solid var(--c-border);
+    }
+
+    .feature-grid,
+    .tele-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .f-cell--wide {
+        grid-column: span 1;
+    }
+
+    .compat-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .cta-block {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 40px 28px;
+    }
+
+    .two-col {
+        grid-template-columns: 1fr !important;
+        gap: 48px !important;
+    }
 }
-</style>
+
+@media (max-width: 540px) {
+    .wrap {
+        padding: 0 20px;
+    }
+
+    .compat-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stats-bar {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+    </style>
+
 </head>
 
 <body>
 
-    <!-- ── NAV ── -->
-    <nav id="main-nav">
-        <a class="nav-logo" href="#">
-            <img src="assets/logo-bess.png" alt="BESS Solutions" />
-            <span>BESSAI</span>
-        </a>
-        <div id="nav-menu">
-            <a href="#problema" data-i18n="nav.problema">El Problema</a>
-            <a href="#features" data-i18n="nav.features">Funciones</a>
-            <a href="#stack" data-i18n="nav.solucion">Solución</a>
-            <a href="#comunidad" data-i18n="nav.comunidad">Comunidad</a>
-            <a href="#roadmap" data-i18n="nav.roadmap">Roadmap</a>
-            <a href="#early-adopter" data-i18n="nav.contacto">Contacto</a>
-            <div class="nav-lang">
-                <button data-lang-btn="es" onclick="I18N.switchTo('es')">ES</button>
-                <button data-lang-btn="en" onclick="I18N.switchTo('en')">EN</button>
+    <!-- ═══ NAV ═══════════════════════════════════════════════════ -->
+    <nav class="nav" id="nav">
+        <div class="nav-inner">
+            <!-- Logo con rayo (estilo screenshots) -->
+            <a href="#" class="nav-logo">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M10.5 1L3 10.5H9L7.5 17L15 7.5H9L10.5 1Z" fill="#22d3ee" stroke="#22d3ee"
+                        stroke-width="0.5" stroke-linejoin="round" />
+                </svg>
+                BESS Solutions
+            </a>
+
+            <!-- Links de navegación -->
+            <ul class="nav-links">
+                <li><a href="#sistema">Origen</a></li>
+                <li><a href="#datos">La Red</a></li>
+                <li><a href="#hardware">Hardware</a></li>
+                <li><a href="#roadmap">Roadmap</a></li>
+                <li><a href="#contacto">Contacto</a></li>
+            </ul>
+
+            <div class="nav-end">
+                <!-- Selector de idioma -->
+                <div class="lang-switch">
+                    <a href="#" class="active">ES</a>
+                    <a href="#">EN</a>
+                </div>
+                <!-- CTA verde -->
+                <a href="#contacto" class="btn-nav btn-nav-primary">Solicitar demo</a>
             </div>
         </div>
-        <button id="nav-burger" aria-label="Menu">
-            <span></span><span></span><span></span>
-        </button>
     </nav>
 
-    <!-- ── HERO ── -->
-    <section id="hero">
-        <div class="hero-badge">
-            <span class="badge" data-i18n="hero.badge">Open Source · Apache 2.0 · IEC 62443</span>
-        </div>
-        <h1 class="hero-headline">
-            <span id="hero-l1">El cerebro de tu</span>
-            <span id="hero-l2">batería es <em>open-source.</em></span>
-        </h1>
-        <p class="hero-sub" data-i18n-html="hero.sub">Gateway industrial open-source para sistemas de almacenamiento de
-            energía en baterías.</p>
-        <div class="hero-ctas">
-            <a href="https://github.com/bess-solutions/open-bess-edge" class="btn-primary" target="_blank"
-                rel="noopener">
-                <span data-i18n="hero.cta_primary">Ver en GitHub</span> →
-            </a>
-            <a href="#early-adopter" class="btn-secondary">
-                <span data-i18n="hero.cta_secondary">Unirme al programa Early Adopter</span>
-            </a>
-        </div>
-    </section>
+    <!-- ═══ HERO ═══════════════════════════════════════════════════ -->
+    <section class="hero" id="inicio">
+        <canvas id="bess-universe"></canvas>
+        <div class="hero-overlay"></div>
+        <div class="wrap" style="width:100%">
+            <div class="hero-content">
+                <div class="eyebrow">ACT I · BESSAI EDGE</div>
 
-    <!-- ── LIVE METRICS STRIP ── -->
-    <div id="live-strip">
-        <div class="container">
-            <div class="live-inner">
-                <div class="live-metric">
-                    <div class="live-tag" data-i18n="live.live_tag">EN VIVO</div>
-                    <div class="live-value"><span id="lm-savings">13248</span></div>
-                    <div class="live-unit" data-i18n="live.unit_savings">$/día</div>
-                    <div class="live-label" data-i18n="live.label_savings">Ahorro energético</div>
-                </div>
-                <div class="live-metric">
-                    <div class="live-tag" data-i18n="live.live_tag">EN VIVO</div>
-                    <div class="live-value"><span id="lm-latency">38.4</span></div>
-                    <div class="live-unit" data-i18n="live.unit_latency">ms</div>
-                    <div class="live-label" data-i18n="live.label_latency">Latencia edge</div>
-                </div>
-                <div class="live-metric">
-                    <div class="live-tag" data-i18n="live.live_tag">EN VIVO</div>
-                    <div class="live-value"><span id="lm-soc">84.2</span></div>
-                    <div class="live-unit" data-i18n="live.unit_soc">% promedio</div>
-                    <div class="live-label" data-i18n="live.label_soc">SoC activo</div>
-                </div>
-                <div class="live-metric">
-                    <div class="live-tag" data-i18n="live.live_tag">EN VIVO</div>
-                    <div class="live-value"><span id="lm-cycles">5</span></div>
-                    <div class="live-unit" data-i18n="live.unit_cycles">instancias</div>
-                    <div class="live-label" data-i18n="live.label_cycles">Ciclos protegidos</div>
-                </div>
-            </div>
-        </div>
-    </div>
+                <h1 class="hero-h1 type-target" data-type-delay="300">
+                    Las baterías<br>son el músculo.
+                    <em class="text-cyan">BESSAI Edge<br>es el cerebro.</em>
+                </h1>
 
-    <!-- ── AUDIENCES ── -->
-    <section id="audiencias" class="section">
-        <div class="container">
-            <h2 class="section-title reveal" data-i18n="audiences.title">¿Por qué BESSAI es para ti?</h2>
-            <div class="aud-tabs-wrap" id="aud-tabs"></div>
-            <div id="aud-content"></div>
-        </div>
-    </section>
+                <p class="hero-sub">
+                    Adquisición Modbus TCP, optimización MILP, agente DRL entrenado<br>
+                    con datos CMg reales del CEN/SEN — ejecutando en hardware de<br>
+                    borde, sin dependencia de nube.
+                </p>
 
-    <!-- ── PROBLEMA ── -->
-    <section id="problema" class="section"
-        style="background:var(--bg2); border-top:1px solid var(--line); border-bottom:1px solid var(--line)">
-        <div class="container">
-            <h2 class="section-title reveal" data-i18n="problem.title">El problema que resolvemos</h2>
-            <p class="section-sub reveal reveal-delay-1" data-i18n="problem.subtitle">Los sistemas BESS industriales
-                dependen de software propietario opaco, costoso y no certificable.</p>
-            <div class="stats-grid reveal reveal-delay-2">
-                <div class="stat-card">
-                    <div class="stat-value"><span data-count="38">0</span>%</div>
-                    <div class="stat-label" data-i18n="problem.stats.0.label">Crecimiento anual BESS en LatAm</div>
-                    <div class="stat-detail" data-i18n="problem.stats.0.detail">CAGR 2024–2027</div>
+                <div class="hero-actions">
+                    <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank" class="btn-primary">
+                        Ver repositorio
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <path d="M7 17L17 7M7 7h10v10" />
+                        </svg>
+                    </a>
+                    <a href="#sistema" class="btn-secondary">Arquitectura del sistema</a>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value">$2.4B</div>
-                    <div class="stat-label" data-i18n="problem.stats.1.label">Mercado addressable 2027</div>
-                    <div class="stat-detail" data-i18n="problem.stats.1.detail">BNEF Research</div>
+
+                <!-- Terminal widget -->
+                <div class="terminal">
+                    <div class="terminal-bar">
+                        <div class="terminal-dot"></div>
+                        <div class="terminal-dot"></div>
+                        <div class="terminal-dot"></div>
+                        <span class="terminal-path">bessai-edge · optimizer v2.1 · Maitencillo-220kV</span>
+                    </div>
+                    <div class="terminal-body">
+                        <span class="t-line"><span class="t-comment">$ bessai start --mode=optimize</span></span>
+                        <span class="t-line"><span class="t-ok">✓</span> Loading config edge.toml...</span>
+                        <span class="t-line"><span class="t-ok">✓</span> BMS connected · Modbus RTU /dev/ttyUSB0</span>
+                        <span class="t-line"><span class="t-ok">✓</span> Grid API · SEN Coordinador · OK</span>
+                        <span class="t-line"><span class="t-key">+</span> Fetching CMg forecast (24h)...</span>
+                        <span class="t-line"><span class="t-ok">✓</span> Modelo cargado · MAPE <span
+                                class="t-num">4.2%</span></span>
+                        <span class="t-line"><span class="t-key">+</span> Running MILP optimizer...</span>
+                        <span class="t-line"><span class="t-ok">✓</span> Dispatch plan ready · <span
+                                class="t-num">18</span> cycles</span>
+                        <span class="t-line"><span class="t-warn">⚡</span> Peak window: <span
+                                class="t-num">18:00–22:00</span> · discharge</span>
+                        <span class="t-line"><span class="t-ok">✓</span> Latency: <span class="t-num">3.1ms</span> ·
+                            SoC: <span class="t-num">87.4%</span></span>
+                        <span class="t-line"><span style="color:#4a5568">$</span> <span class="t-cursor"></span></span>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value"><span data-count="4.2">0</span>%</div>
-                    <div class="stat-label" data-i18n="problem.stats.2.label">MAPE predicción de precio CMg</div>
-                    <div class="stat-detail" data-i18n="problem.stats.2.detail">vs 8-12% competencia</div>
+
+                <!-- Stats bar -->
+                <div class="stats-bar" style="margin-top:20px">
+                    <div class="stat-item">
+                        <div class="stat-v" id="cnt-tests">613</div>
+                        <div class="stat-l">Tests · 0 failures</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-v">&lt;5ms</div>
+                        <div class="stat-l">Latencia ciclo · RPi 5</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-v">~98%</div>
+                        <div class="stat-l">IEC 62443 SL-2</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-v">48d+</div>
+                        <div class="stat-l">Datos CMg reales CEN</div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value"><span data-count="490">0</span>+</div>
-                    <div class="stat-label" data-i18n="problem.stats.3.label">Tests automatizados</div>
-                    <div class="stat-detail" data-i18n="problem.stats.3.detail">cobertura >85%</div>
-                </div>
+
             </div>
         </div>
     </section>
 
-    <!-- ── FEATURES ── -->
-    <section id="features" class="section">
-        <div class="container">
-            <h2 class="section-title reveal" data-i18n="features.title">Todo lo que necesitas, nada que no necesitas
-            </h2>
-            <div class="features-grid reveal reveal-delay-1">
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <div class="feature-title" data-i18n="features.items.0.title">IA en el Edge</div>
-                    <div class="feature-desc" data-i18n="features.items.0.desc">DRL, MILP y modelos ONNX corriendo
-                        localmente. Sin latencia cloud, sin dependencias externas.</div>
+    <hr class="rule">
+
+    <!-- ═══ SISTEMA ════════════════════════════════════════════════ -->
+    <section id="sistema">
+        <div class="wrap">
+            <div class="sec-head reveal">
+                <div class="eyebrow">ACT II · LA CONSTRUCCIÓN</div>
+                <h2 class="type-target" data-type-delay="200">Cada componente tiene<br>una responsabilidad definida.
+                </h2>
+            </div>
+            <div class="feature-grid reveal">
+                <div class="f-cell">
+                    <div class="f-index">01</div>
+                    <div class="f-title">Capa de adquisición</div>
+                    <p class="f-body">Driver universal Modbus TCP con perfiles YAML por fabricante. Lee SoC, potencia
+                        activa y temperatura en cada ciclo. Reconexión autónoma con backoff exponencial.</p>
+                    <span class="f-tag">modbus-tcp · yaml-profile</span>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔌</div>
-                    <div class="feature-title" data-i18n="features.items.1.title">Conectividad Industrial</div>
-                    <div class="feature-desc" data-i18n="features.items.1.desc">Modbus TCP, IEC 61850, MQTT, DNP3, REST
-                        y OPC-UA listos para usar.</div>
+                <div class="f-cell">
+                    <div class="f-index">02</div>
+                    <div class="f-title">SafetyGuard</div>
+                    <p class="f-body">Validación de rangos antes de cualquier despacho. Si el telemetro sale de banda,
+                        la publicación se bloquea y se emite alerta inmediata. No hay lógica de negocio sin datos
+                        validados.</p>
+                    <span class="f-tag">pre-dispatch · range-check</span>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🛡️</div>
-                    <div class="feature-title" data-i18n="features.items.2.title">Seguridad IEC 62443</div>
-                    <div class="feature-desc" data-i18n="features.items.2.desc">Certificación SL-2, gestión de
-                        certificados x.509, logs auditables firmados digitalmente.</div>
+                <div class="f-cell">
+                    <div class="f-index">03</div>
+                    <div class="f-title">MILP Optimizer</div>
+                    <p class="f-body">HiGHS/CBC planifica el perfil de despacho de las próximas 24h considerando
+                        precios CMg reales del nodo Maitencillo 220 kV, degradación semi-empírica y restricciones
+                        de SoC.</p>
+                    <span class="f-tag">HiGHS · CBC · Maitencillo-220kV</span>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <div class="feature-title" data-i18n="features.items.3.title">Observabilidad Total</div>
-                    <div class="feature-desc" data-i18n="features.items.3.desc">Prometheus + Grafana embebidos,
-                        dashboard web en tiempo real, alertas configurables.</div>
+                <div class="f-cell">
+                    <div class="f-index">04</div>
+                    <div class="f-title">Agente DRL (BEP-0200)</div>
+                    <p class="f-body">Agente PPO entrenado sobre 48+ días de datos CMg reales. Exportado a ONNX para
+                        inferencia en Raspberry Pi 5. Fallback determinístico si el modelo no está disponible.</p>
+                    <span class="f-tag">PPO · ONNX · gymnasium</span>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🌎</div>
-                    <div class="feature-title" data-i18n="features.items.4.title">NTSyCS Chile</div>
-                    <div class="feature-desc" data-i18n="features.items.4.desc">Cumplimiento nativo con la normativa
-                        técnica de sistemas de coordinación eléctrica chilena.</div>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🐳</div>
-                    <div class="feature-title" data-i18n="features.items.5.title">Deploy Anywhere</div>
-                    <div class="feature-desc" data-i18n="features.items.5.desc">Docker multi-arch ARM64/AMD64. Corre en
-                        Raspberry Pi, PLCs, servidores edge y cloud.</div>
+                <div class="f-cell f-cell--wide">
+                    <div class="f-index">05</div>
+                    <div class="f-title">WatchdogManager + Publicación dual</div>
+                    <p class="f-body">Loop autónomo de detección y recuperación de conectividad del driver. Telemetría
+                        publicada simultáneamente a GCP Pub/Sub y MQTT. Métricas Prometheus en
+                        <code class="inline">/metrics</code>, health check en <code class="inline">/health</code>.
+                    </p>
+                    <span class="f-tag">asyncio · pub/sub · mqtt · prometheus · otel</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ── TERMINAL ── -->
-    <section id="stack" class="section"
-        style="background:var(--bg2); border-top:1px solid var(--line); border-bottom:1px solid var(--line)">
-        <div class="container">
-            <h2 class="section-title reveal" data-i18n="stack.title">Especificaciones técnicas</h2>
-            <div class="terminal-wrap reveal reveal-delay-1">
-                <div class="term-bar">
-                    <div class="term-dot"></div>
-                    <div class="term-dot"></div>
-                    <div class="term-dot"></div>
-                    <span class="term-title">bessai-edge — bash</span>
-                </div>
-                <div id="term-output"></div>
+    <hr class="rule">
+
+    <!-- ═══ TELEMETRÍA ═════════════════════════════════════════════ -->
+    <section id="datos">
+        <div class="wrap">
+            <div class="sec-head reveal">
+                <div class="eyebrow">ACT III · LOS DATOS</div>
+                <h2 class="type-target" data-type-delay="200">Lo que el sistema ve.<br>Lo que el sistema decide.</h2>
             </div>
-            <div class="spec-grid" style="margin-top:2rem">
-                <!-- Conectividad -->
-                <div class="spec-section reveal reveal-delay-1">
-                    <div class="spec-heading" data-i18n="stack.sections.0.heading">Conectividad</div>
-                    <table class="spec-table">
-                        <tr>
-                            <td data-i18n="stack.sections.0.rows.0.0">Protocolos OT</td>
-                            <td data-i18n="stack.sections.0.rows.0.1">Modbus TCP, IEC 61850, DNP3, OPC-UA</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.0.rows.1.0">Protocolos IT</td>
-                            <td data-i18n="stack.sections.0.rows.1.1">MQTT 5, REST/HTTP, gRPC, WebSocket</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.0.rows.2.0">Seguridad red</td>
-                            <td data-i18n="stack.sections.0.rows.2.1">mTLS, VPN WireGuard, firewall integrado</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.0.rows.3.0">Latencia edge</td>
-                            <td data-i18n="stack.sections.0.rows.3.1">&lt; 50 ms ciclo de control</td>
-                        </tr>
-                    </table>
+            <div class="tele-grid reveal">
+                <div class="tele-panel">
+                    <div class="tele-label">TELEMETRÍA DE DRIVER · ciclo actual</div>
+                    <div class="data-row"><span class="data-key">soc_percent</span><span
+                            class="data-val cyan">72.4</span></div>
+                    <div class="data-row"><span class="data-key">active_power_w</span><span class="data-val">−148
+                            200</span></div>
+                    <div class="data-row"><span class="data-key">temp_c</span><span class="data-val">31.2</span></div>
+                    <div class="data-row"><span class="data-key">driver.connected</span><span
+                            class="data-val green">true</span></div>
+                    <div class="data-row"><span class="data-key">safety_status</span><span
+                            class="data-val green">ok</span></div>
+                    <div class="data-row"><span class="data-key">watchdog.heals_total</span><span
+                            class="data-val">0</span></div>
                 </div>
-                <!-- IA -->
-                <div class="spec-section reveal reveal-delay-2">
-                    <div class="spec-heading" data-i18n="stack.sections.1.heading">Inteligencia Artificial</div>
-                    <table class="spec-table">
-                        <tr>
-                            <td data-i18n="stack.sections.1.rows.0.0">Algoritmos</td>
-                            <td data-i18n="stack.sections.1.rows.0.1">Deep Reinforcement Learning (DRL), MILP</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.1.rows.1.0">Inferencia</td>
-                            <td data-i18n="stack.sections.1.rows.1.1">ONNX Runtime, TensorRT (opcional)</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.1.rows.2.0">Predicción CMg</td>
-                            <td data-i18n="stack.sections.1.rows.2.1">MAPE 4.2% · histórico CEN Chile</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.1.rows.3.0">Entrenamiento</td>
-                            <td data-i18n="stack.sections.1.rows.3.1">Incremental online + batch offline</td>
-                        </tr>
-                    </table>
+                <div class="tele-panel">
+                    <div class="tele-label">OPTIMIZADOR MILP · decisión</div>
+                    <div class="data-row"><span class="data-key">cmg_now_usd_mwh</span><span
+                            class="data-val cyan">62.4</span></div>
+                    <div class="data-row"><span class="data-key">cmg_4h_forecast</span><span
+                            class="data-val warn">41.1</span></div>
+                    <div class="data-row"><span class="data-key">schedule</span><span
+                            class="data-val green">discharge</span></div>
+                    <div class="data-row"><span class="data-key">p_setpoint_pu</span><span class="data-val">0.82</span>
+                    </div>
+                    <div class="data-row"><span class="data-key">deg_cost_usd_kwh</span><span
+                            class="data-val">0.031</span></div>
+                    <div class="data-row"><span class="data-key">source</span><span
+                            class="data-val">milp_optimizer</span></div>
                 </div>
-                <!-- Observabilidad -->
-                <div class="spec-section reveal reveal-delay-1">
-                    <div class="spec-heading" data-i18n="stack.sections.2.heading">Observabilidad</div>
-                    <table class="spec-table">
-                        <tr>
-                            <td data-i18n="stack.sections.2.rows.0.0">Métricas</td>
-                            <td data-i18n="stack.sections.2.rows.0.1">Prometheus + Grafana embebidos</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.2.rows.1.0">Logs</td>
-                            <td data-i18n="stack.sections.2.rows.1.1">Structured JSON · firma digital SHA-256</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.2.rows.2.0">Dashboard</td>
-                            <td data-i18n="stack.sections.2.rows.2.1">Web UI tiempo real · WebSocket</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.2.rows.3.0">Alertas</td>
-                            <td data-i18n="stack.sections.2.rows.3.1">PagerDuty, Slack, Email, Webhook</td>
-                        </tr>
-                    </table>
+            </div>
+            <p style="margin-top:14px;font-size:0.76rem;color:var(--c-muted);font-family:var(--font-mono)">
+                // Datos representativos. Nodo Maitencillo 220 kV · CEN Coordinador Eléctrico Nacional.
+            </p>
+        </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ═══ HARDWARE ═══════════════════════════════════════════════ -->
+    <section id="hardware">
+        <div class="wrap">
+            <div class="sec-head reveal">
+                <div class="eyebrow">ACT IV · CONECTIVIDAD</div>
+                <h2 class="type-target" data-type-delay="200">Perfiles YAML validados en field.</h2>
+            </div>
+            <div class="compat-grid reveal">
+                <div class="compat-item">
+                    <div class="compat-name">Huawei SUN2000</div>
+                    <div class="compat-proto">Modbus TCP</div>
+                    <div><span class="compat-badge badge-stable">estable</span></div>
                 </div>
-                <!-- Compliance -->
-                <div class="spec-section reveal reveal-delay-2">
-                    <div class="spec-heading" data-i18n="stack.sections.3.heading">Compliance</div>
-                    <table class="spec-table">
-                        <tr>
-                            <td data-i18n="stack.sections.3.rows.0.0">Ciberseguridad</td>
-                            <td data-i18n="stack.sections.3.rows.0.1">IEC 62443 SL-2 certificable</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.3.rows.1.0">Chile</td>
-                            <td data-i18n="stack.sections.3.rows.1.1">NTSyCS coordinación eléctrica</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.3.rows.2.0">PKI</td>
-                            <td data-i18n="stack.sections.3.rows.2.1">Gestión certificados x.509 integrada</td>
-                        </tr>
-                        <tr>
-                            <td data-i18n="stack.sections.3.rows.3.0">Auditoría</td>
-                            <td data-i18n="stack.sections.3.rows.3.1">Logs inmutables · trazabilidad completa</td>
-                        </tr>
-                    </table>
+                <div class="compat-item">
+                    <div class="compat-name">Fronius Primo</div>
+                    <div class="compat-proto">Modbus TCP</div>
+                    <div><span class="compat-badge badge-stable">estable</span></div>
+                </div>
+                <div class="compat-item">
+                    <div class="compat-name">SMA Sunny Boy</div>
+                    <div class="compat-proto">Modbus TCP</div>
+                    <div><span class="compat-badge badge-stable">estable</span></div>
+                </div>
+                <div class="compat-item">
+                    <div class="compat-name">Victron MultiPlus</div>
+                    <div class="compat-proto">VE.Bus</div>
+                    <div><span class="compat-badge badge-stable">estable</span></div>
+                </div>
+                <div class="compat-item">
+                    <div class="compat-name">SolarEdge</div>
+                    <div class="compat-proto">SunSpec</div>
+                    <div><span class="compat-badge badge-beta">beta</span></div>
+                </div>
+                <div class="compat-item">
+                    <div class="compat-name">BYD Battery-Box</div>
+                    <div class="compat-proto">Modbus TCP</div>
+                    <div><span class="compat-badge badge-beta">beta</span></div>
+                </div>
+                <div class="compat-item">
+                    <div class="compat-name">Tesla Powerwall</div>
+                    <div class="compat-proto">REST</div>
+                    <div><span class="compat-badge badge-beta">beta</span></div>
+                </div>
+            </div>
+            <p style="margin-top:18px;font-size:0.8rem;color:var(--c-muted)">
+                Nuevo perfil de hardware en menos de 2 horas. Ver <a
+                    href="https://github.com/bess-solutions/open-bess-edge/blob/main/docs/DRIVER_PROFILES.md"
+                    style="color:var(--c-cyan-dim);text-decoration:underline;text-underline-offset:3px"
+                    target="_blank">DRIVER_PROFILES.md</a>.
+            </p>
+        </div>
+    </section>
+
+    <hr class="rule">
+
+    <!-- ═══ ROADMAP ════════════════════════════════════════════════ -->
+    <section id="roadmap">
+        <div class="wrap">
+            <div class="two-col reveal" style="display:grid;grid-template-columns:1fr 1fr;gap:80px">
+                <div>
+                    <div class="sec-head">
+                        <div class="eyebrow">ACT V · ROADMAP</div>
+                        <h2 class="type-target" data-type-delay="200">Estado del proyecto.</h2>
+                    </div>
+                    <div class="roadmap-track">
+                        <div class="rm-item done">
+                            <div class="rm-date">Q4 2025</div>
+                            <div class="rm-title">Núcleo Edge v1</div>
+                            <p class="rm-body">Modbus TCP, GCP Pub/Sub, SafetyGuard, MQTT, OpenTelemetry, IEEE 2030.5
+                                SEP 2.0</p>
+                        </div>
+                        <div class="rm-item done">
+                            <div class="rm-date">Ene – Feb 2026</div>
+                            <div class="rm-title">IA y Seguridad</div>
+                            <p class="rm-body">MILP optimizer, DRL PPO con datos CEN reales (BEP-0200 F3),
+                                WatchdogManager, IEC 62443 SL-2 ~98%, OpenSSF Scorecard</p>
+                        </div>
+                        <div class="rm-item now">
+                            <div class="rm-date">Q1 2026 — en curso</div>
+                            <div class="rm-title">Plataforma y Comunidad</div>
+                            <p class="rm-body">Certificación BESSAI, dashboard multi-sitio, primeros early adopters</p>
+                        </div>
+                        <div class="rm-item">
+                            <div class="rm-date">Q2 2026</div>
+                            <div class="rm-title">Control de Despacho</div>
+                            <p class="rm-body">write_tag activo, OpenADR 2.0, agregación de flota MARL</p>
+                        </div>
+                        <div class="rm-item">
+                            <div class="rm-date">Q3 – Q4 2026</div>
+                            <div class="rm-title">Expansión LatAm</div>
+                            <p class="rm-body">Colombia, Perú, Brasil · ONS / CAMMESA · pt-BR</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="sec-head">
+                        <div class="eyebrow">CI/CD · main</div>
+                        <h2 class="type-target" data-type-delay="500">Cada commit verificado.</h2>
+                    </div>
+                    <div class="ci-panel">
+                        <div class="ci-header">Pipeline automático · GitHub Actions</div>
+                        <div class="ci-row"><span class="ci-key">pytest</span><span class="ci-val">613 passed · 0
+                                failed</span></div>
+                        <div class="ci-row"><span class="ci-key">ruff + mypy</span><span class="ci-val">clean</span>
+                        </div>
+                        <div class="ci-row"><span class="ci-key">bandit SAST</span><span class="ci-val">0 high / 0
+                                critical</span></div>
+                        <div class="ci-row"><span class="ci-key">trivy container</span><span class="ci-val">0 critical
+                                CVEs</span></div>
+                        <div class="ci-row"><span class="ci-key">docker build</span><span class="ci-val">linux/amd64 ·
+                                arm64</span></div>
+                        <div class="ci-row"><span class="ci-key">helm lint</span><span class="ci-val">passing</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ── COMUNIDAD ── -->
-    <section id="comunidad" class="section">
-        <div class="container">
-            <h2 class="section-title reveal" data-i18n="community.title">Únete a la comunidad</h2>
-            <p class="section-sub reveal reveal-delay-1" data-i18n="community.subtitle">Somos un proyecto open-source
-                impulsado por la comunidad de energía de América Latina.</p>
-            <div class="community-grid">
-                <div class="comm-card reveal reveal-delay-1">
-                    <div class="comm-icon">💬</div>
-                    <div class="comm-title" data-i18n="community.cards.0.title">Discord</div>
-                    <div class="comm-desc" data-i18n="community.cards.0.desc">Discusión técnica, soporte y newsletter
-                        semanal.</div>
-                    <a href="https://discord.gg/bessai" class="btn-secondary" target="_blank" rel="noopener"
-                        data-i18n="community.cards.0.cta">Unirse al servidor</a>
+    <hr class="rule">
+
+    <!-- ═══ CTA ════════════════════════════════════════════════════ -->
+    <section id="contacto">
+        <div class="wrap">
+            <div class="cta-block reveal">
+                <div>
+                    <div class="eyebrow">ACT VI · CONTACTO</div>
+                    <h2 class="type-target" data-type-delay="200">¿Tienes un BESS que gestionar?</h2>
+                    <p>Agendamos una sesión técnica de 30 minutos. Sin presentaciones comerciales — revisamos tu
+                        arquitectura actual y evaluamos el fit con BESSAI Edge.</p>
                 </div>
-                <div class="comm-card reveal reveal-delay-2">
-                    <div class="comm-icon">🐙</div>
-                    <div class="comm-title" data-i18n="community.cards.1.title">GitHub</div>
-                    <div class="comm-desc" data-i18n="community.cards.1.desc">Código abierto, issues, PRs y roadmap
-                        público.</div>
-                    <a href="https://github.com/bess-solutions/open-bess-edge" class="btn-secondary" target="_blank"
-                        rel="noopener" data-i18n="community.cards.1.cta">Ver repositorio</a>
-                </div>
-                <div class="comm-card reveal reveal-delay-3">
-                    <div class="comm-icon">📄</div>
-                    <div class="comm-title" data-i18n="community.cards.2.title">Documentación</div>
-                    <div class="comm-desc" data-i18n="community.cards.2.desc">Guías, API reference y tutoriales.</div>
-                    <a href="https://bess-solutions.github.io/open-bess-edge" class="btn-secondary" target="_blank"
-                        rel="noopener" data-i18n="community.cards.2.cta">Leer docs</a>
+                <div class="cta-actions">
+                    <a href="mailto:contacto@bess-solutions.cl?subject=BESSAI%20Edge%20%E2%80%94%20Sesi%C3%B3n%20t%C3%A9cnica"
+                        class="btn-primary">
+                        contacto@bess-solutions.cl
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <path d="M7 17L17 7M7 7h10v10" />
+                        </svg>
+                    </a>
+                    <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank"
+                        class="btn-secondary">Explorar el repositorio</a>
+                    <span class="cta-note">// Santiago, Chile · Respuesta en &lt;24h</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ── ROADMAP ── -->
-    <section id="roadmap" class="section"
-        style="background:var(--bg2); border-top:1px solid var(--line); border-bottom:1px solid var(--line)">
-        <div class="container">
-            <h2 class="section-title reveal" data-i18n="roadmap.title">Roadmap público</h2>
-            <p class="section-sub reveal reveal-delay-1" data-i18n="roadmap.subtitle">Desarrollo transparente con fechas
-                reales.</p>
-            <div class="roadmap-grid reveal reveal-delay-2">
-                <div class="roadmap-phase">
-                    <div class="phase-tag released" data-i18n="roadmap.phases.0.tag">LANZADO</div>
-                    <div class="phase-date" data-i18n="roadmap.phases.0.date">Q4 2024</div>
-                    <div class="phase-title" data-i18n="roadmap.phases.0.title">v1.0 — Foundation</div>
-                    <ul class="phase-items">
-                        <li data-i18n="roadmap.phases.0.items.0">490+ tests · cobertura >85%</li>
-                        <li data-i18n="roadmap.phases.0.items.1">Docker multi-arch ARM64/AMD64</li>
-                        <li data-i18n="roadmap.phases.0.items.2">Modbus + MQTT + REST</li>
-                        <li data-i18n="roadmap.phases.0.items.3">Dashboard web básico</li>
-                    </ul>
+    <!-- ═══ FOOTER ═════════════════════════════════════════════════ -->
+    <footer class="footer">
+        <div class="wrap">
+            <div class="footer-inner">
+                <span class="footer-copy">© 2026 BESS Solutions SpA</span>
+                <div class="footer-links">
+                    <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank">GitHub</a>
+                    <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/CHANGELOG.md"
+                        target="_blank">Changelog</a>
+                    <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/SECURITY.md"
+                        target="_blank">Security</a>
+                    <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/LICENSE" target="_blank">Apache
+                        2.0</a>
                 </div>
-                <div class="roadmap-phase">
-                    <div class="phase-tag progress" data-i18n="roadmap.phases.1.tag">EN PROGRESO</div>
-                    <div class="phase-date" data-i18n="roadmap.phases.1.date">Q1 2025</div>
-                    <div class="phase-title" data-i18n="roadmap.phases.1.title">v1.5 — Intelligence</div>
-                    <ul class="phase-items">
-                        <li data-i18n="roadmap.phases.1.items.0">Motor DRL producción</li>
-                        <li data-i18n="roadmap.phases.1.items.1">Predictor CMg v2 (MAPE 4.2%)</li>
-                        <li data-i18n="roadmap.phases.1.items.2">Arbitraje de precio autónomo</li>
-                        <li data-i18n="roadmap.phases.1.items.3">API pública documentada</li>
-                    </ul>
-                </div>
-                <div class="roadmap-phase">
-                    <div class="phase-tag next" data-i18n="roadmap.phases.2.tag">PRÓXIMO</div>
-                    <div class="phase-date" data-i18n="roadmap.phases.2.date">Q2 2025</div>
-                    <div class="phase-title" data-i18n="roadmap.phases.2.title">v2.0 — Compliance</div>
-                    <ul class="phase-items">
-                        <li data-i18n="roadmap.phases.2.items.0">Certificación IEC 62443 SL-2</li>
-                        <li data-i18n="roadmap.phases.2.items.1">Reporte NTSyCS automático</li>
-                        <li data-i18n="roadmap.phases.2.items.2">Logs con firma digital</li>
-                        <li data-i18n="roadmap.phases.2.items.3">Multi-tenant enterprise</li>
-                    </ul>
-                </div>
-                <div class="roadmap-phase">
-                    <div class="phase-tag planned" data-i18n="roadmap.phases.3.tag">PLANIFICADO</div>
-                    <div class="phase-date" data-i18n="roadmap.phases.3.date">Q3 2025</div>
-                    <div class="phase-title" data-i18n="roadmap.phases.3.title">v2.5 — Ecosystem</div>
-                    <ul class="phase-items">
-                        <li data-i18n="roadmap.phases.3.items.0">Marketplace de algoritmos</li>
-                        <li data-i18n="roadmap.phases.3.items.1">SDK TypeScript</li>
-                        <li data-i18n="roadmap.phases.3.items.2">Certificación LatAm regional</li>
-                        <li data-i18n="roadmap.phases.3.items.3">Programa partner integrador</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ── EARLY ADOPTER ── -->
-    <section id="early-adopter" class="section">
-        <div class="container">
-            <h2 class="section-title reveal" data-i18n="early_adopter.title">Programa Early Adopter</h2>
-            <p class="section-sub reveal reveal-delay-1" data-i18n="early_adopter.subtitle">Cupos limitados. Sin
-                segundas rondas.</p>
-            <div class="ea-grid">
-                <div class="ea-card reveal reveal-delay-1">
-                    <div class="ea-tier" data-i18n="early_adopter.cards.0.tier">Pioneer</div>
-                    <div class="ea-price" data-i18n="early_adopter.cards.0.price">Gratis</div>
-                    <div class="ea-slots" data-i18n="early_adopter.cards.0.slots">5 cupos</div>
-                    <ul class="ea-benefits">
-                        <li data-i18n="early_adopter.cards.0.benefits.0">Acceso prioritario a v2.0</li>
-                        <li data-i18n="early_adopter.cards.0.benefits.1">Soporte directo del equipo core</li>
-                        <li data-i18n="early_adopter.cards.0.benefits.2">Co-autoría en BESSAI-SPEC</li>
-                        <li data-i18n="early_adopter.cards.0.benefits.3">Badge 'BESSAI Pioneer' verificado</li>
-                        <li data-i18n="early_adopter.cards.0.benefits.4">Discord canal privado</li>
-                    </ul>
-                    <a href="mailto:hello@bess-solutions.cl?subject=Early Adopter Pioneer" class="btn-primary"
-                        data-i18n="early_adopter.cards.0.cta">Solicitar cupo Pioneer</a>
-                </div>
-                <div class="ea-card featured reveal reveal-delay-2">
-                    <div class="ea-tier" data-i18n="early_adopter.cards.1.tier">Strategic Partner</div>
-                    <div class="ea-price" data-i18n="early_adopter.cards.1.price">A convenir</div>
-                    <div class="ea-slots" data-i18n="early_adopter.cards.1.slots">3 cupos</div>
-                    <ul class="ea-benefits">
-                        <li data-i18n="early_adopter.cards.1.benefits.0">Todo lo de Pioneer</li>
-                        <li data-i18n="early_adopter.cards.1.benefits.1">Roadmap co-diseñado</li>
-                        <li data-i18n="early_adopter.cards.1.benefits.2">Integración personalizada</li>
-                        <li data-i18n="early_adopter.cards.1.benefits.3">SLA enterprise 99.9%</li>
-                        <li data-i18n="early_adopter.cards.1.benefits.4">Mención en documentación oficial</li>
-                    </ul>
-                    <a href="mailto:hello@bess-solutions.cl?subject=Strategic Partner" class="btn-primary"
-                        data-i18n="early_adopter.cards.1.cta">Hablar con el equipo</a>
-                </div>
-            </div>
-            <div class="ea-urgency" data-i18n="early_adopter.urgency">⚠️ Solo 8 cupos en total. Disponibles hasta
-                llenar.</div>
-        </div>
-    </section>
-
-    <!-- ── FOOTER ── -->
-    <footer>
-        <div class="container">
-            <div class="foot-grid">
-                <div class="foot-brand">
-                    <img src="assets/logo-bess.png" alt="BESS Solutions" />
-                    <p class="foot-tagline" data-i18n="footer.tagline">Gestión inteligente de energía, open-source.</p>
-                </div>
-                <div class="foot-col">
-                    <h4>Proyecto</h4>
-                    <ul>
-                        <li><a href="https://github.com/bess-solutions/open-bess-edge">GitHub</a></li>
-                        <li><a href="https://bess-solutions.github.io/open-bess-edge">Docs</a></li>
-                        <li><a
-                                href="https://github.com/bess-solutions/open-bess-edge/blob/main/CHANGELOG.md">CHANGELOG</a>
-                        </li>
-                        <li><a href="https://github.com/bess-solutions/open-bess-edge/blob/main/LICENSE">Apache 2.0</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="foot-col">
-                    <h4>Comunidad</h4>
-                    <ul>
-                        <li><a href="https://discord.gg/bessai">Discord</a></li>
-                        <li><a href="https://github.com/bess-solutions/open-bess-edge/issues">Reportar bug</a></li>
-                        <li><a
-                                href="https://github.com/bess-solutions/open-bess-edge/blob/main/CONTRIBUTING.md">Contribuir</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="foot-col">
-                    <h4>Empresa</h4>
-                    <ul>
-                        <li><a href="mailto:hello@bess-solutions.cl">Contacto</a></li>
-                        <li><a href="#early-adopter">Early Adopter</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="foot-bottom">
-                <span data-i18n="footer.copy">© 2025 BESS Solutions SpA · Santiago, Chile</span>
-                <span data-i18n="footer.license">Software libre bajo Apache License 2.0</span>
             </div>
         </div>
     </footer>
 
-    <!-- ── FLOATING MUSIC PLAYER ── -->
-    <div id="music-player">
-        <img class="mp-cover" src="https://cdn2.suno.ai/edbd3009-1ef6-4a49-9c09-937395b6a4db_dc1e96bf.jpeg"
-            alt="BESS Anthem" />
-        <div class="mp-info">
-            <div class="mp-title" data-i18n="player.title">BESS Solutions in the House</div>
-            <div class="mp-sub" data-i18n="player.subtitle">Phonk Chilean · Suno AI</div>
-            <div id="mp-progress-wrap">
-                <div id="mp-bar"></div>
-            </div>
-        </div>
-        <button id="mp-btn" onclick="toggleMusic()">▶</button>
-        <button id="mp-close" onclick="this.closest('#music-player').style.display='none'">✕</button>
-        <a class="mp-suno-link" href="https://suno.com/s/3fl7sTP1M0Oitou3" target="_blank" rel="noopener"
-            data-i18n="player.suno_link">suno ↗</a>
-    </div>
-    <audio id="bess-audio" crossorigin="anonymous" src="https://cdn1.suno.ai/edbd3009-1ef6-4a49-9c09-937395b6a4db.mp3"
-        preload="none"></audio>
-
-    <script>
-/* BESSAI Website — i18n Engine
- * Supports: ES, EN
- * Storage: localStorage('bessai_lang')
- * Usage:  data-i18n="key.nested" on any element
- *         data-i18n-html="key" to set innerHTML
- *         data-i18n-attr="placeholder:key" to set attrs
+    <!-- ═══ THREE.JS — ES Module via importmap ════════════════════ -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module">
+/**
+ * ═══════════════════════════════════════════════════════════
+ *  BESS Solutions — 3D Neural Energy Universe
+ *  ES Module · Three.js r157 + UnrealBloomPass + Vignette
+ *
+ *  Cargado como <script type="module"> desde index.html.
+ *  Todos los addons se resuelven via importmap.
+ *
+ *  ► Para tunar el efecto, edita el objeto CONFIG.
+ * ═══════════════════════════════════════════════════════════
  */
 
-const I18N = (() => {
-    let _strings = {};
-    let _lang = 'es';
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { GammaCorrectionShader } from 'three/addons/shaders/GammaCorrectionShader.js';
 
-    // Deep-get a key like "hero.cta_primary" from object
-    function get(key) {
-        return key.split('.').reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), _strings);
-    }
+/* ──────────────────────────────────────────────────────────
+   CONFIG — todos los parámetros en un solo lugar
+   ────────────────────────────────────────────────────────── */
+const CONFIG = {
+    // ── Bloom ─────────────────────────────────────────────
+    bloomStrength: 1.6,    // intensidad del glow (0 = ninguno, 3 = máximo)
+    bloomRadius: 0.55,   // radio de dispersión del bloom
+    bloomThreshold: 0.0,    // umbral de luminancia para activar bloom
 
-    // Apply all data-i18n translations to DOM
-    function applyAll() {
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const val = get(el.dataset.i18n);
-            if (val !== null) el.textContent = val;
-        });
-        document.querySelectorAll('[data-i18n-html]').forEach(el => {
-            const val = get(el.dataset.i18nHtml);
-            if (val !== null) el.innerHTML = val;
-        });
-        document.querySelectorAll('[data-i18n-attr]').forEach(el => {
-            const [attr, key] = el.dataset.i18nAttr.split(':');
-            const val = get(key);
-            if (val !== null) el.setAttribute(attr, val);
-        });
-        // Update html lang attr
-        document.documentElement.lang = _lang;
-        // Update lang toggle buttons
-        document.querySelectorAll('[data-lang-btn]').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.langBtn === _lang);
-        });
-    }
+    // ── Stars ──────────────────────────────────────────────
+    starCount: 7000,
+    starSpread: 400,
+    starSize: 0.09,
+    starOpacity: 0.45,
+    starColor: 0x8bb8cc,
 
-    // Load strings object and apply
-    function load(strings, lang) {
-        _strings = strings;
-        _lang = lang;
-        applyAll();
-    }
+    // ── Energy Field A (verde — energía principal) ─────────
+    energyACount: 4000,   // partículas
+    energyARadius: 1.6,    // radio de la nube esférica (unidades scene)
+    energyAColor: 0x10b981, // Emerald
+    energyASize: 0.018,
+    energyARotX: -0.07,  // velocidad rot X
+    energyARotY: -0.05,  // velocidad rot Y
 
-    // Switch language — fetches JSON from i18n/ folder
-    async function switchTo(lang) {
-        if (lang === _lang) return;
-        try {
-            const res = await fetch(`i18n/${lang}.json`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-            load(data, lang);
-            localStorage.setItem('bessai_lang', lang);
-            // Re-run any dynamic rendering that depends on i18n
-            if (window.BESSAI && window.BESSAI.refreshDynamic) window.BESSAI.refreshDynamic();
-        } catch (e) {
-            console.warn('[i18n] Failed to load', lang, e);
-        }
-    }
+    // ── Energy Field B (azul — datos / red) ───────────────
+    energyBCount: 1500,
+    energyBRadius: 2.8,    // nube más dispersa
+    energyBColor: 0x3b82f6, // Blue
+    energyBSize: 0.012,
+    energyBRotX: 0.04,
+    energyBRotY: 0.025,
 
-    // Init: detect lang from localStorage or browser
-    async function init(inlineStrings) {
-        const stored = localStorage.getItem('bessai_lang');
-        const browser = navigator.language.slice(0, 2).toLowerCase();
-        const preferred = stored || (['es', 'en'].includes(browser) ? browser : 'es');
+    // ── Planet ────────────────────────────────────────────
+    planetRadius: 1.1,
+    planetSegments: 64,
+    planetColor: 0x0d2a3e,
+    planetAtmColor: 0x22d3ee,
+    planetAtmOpacity: 0.12,
+    planetOffsetX: 0.65,   // desplazamiento a la derecha (fracción del ancho)
+    planetRotSpeed: 0.0006,
+    cloudCount: 3000,
+    cloudColor: 0x1a5a7a,
+    cloudSize: 0.005,
+    cloudOpacity: 0.55,
 
-        if (preferred === 'es' || !preferred) {
-            // Use inline strings (already bundled) for default ES
-            load(inlineStrings, 'es');
-        } else {
-            load(inlineStrings, 'es'); // paint immediately with default
-            await switchTo(preferred);  // then fetch preferred
-        }
-    }
+    // ── BESS node network ─────────────────────────────────
+    nodeCount: 14,
+    nodeRadiusMin: 1.45,
+    nodeRadiusMax: 2.1,
+    nodeColor: 0x22d3ee,
+    nodeSphereSize: 0.018,
+    haloColor: 0x0891b2,
+    haloSize: 0.045,
+    connDist: 1.6,
+    connColor: 0x0c3d52,
+    packetCount: 10,
+    packetColor: 0x22d3ee,
+    packetSize: 0.010,
+    packetSpeedMin: 0.003,
+    packetSpeedMax: 0.008,
 
-    return { init, switchTo, get, load };
-})();
+    // ── Camera ────────────────────────────────────────────
+    cameraFov: 60,
+    cameraZ: 3.5,
+    cameraY: 0.2,
 
-/* BESSAI Website — main.js
- * Requires: I18N global (i18n.js)
- */
+    // ── Animation ─────────────────────────────────────────
+    networkRotY: 0.04,   // velocidad de rotación de la red
+    animStep: 0.003,
+    haloSpeedMin: 1.0,
+    haloSpeedMax: 2.0,
+    parallaxX: 0.4,
+    parallaxY: 0.2,
+    parallaxLerp: 0.035,
 
-window.BESSAI = (() => {
+    // ── Float (campo de energía — oscilación suave) ───────
+    floatAmpX: 0.08,   // amplitud oscilación
+    floatAmpY: 0.06,
+    floatFreqX: 0.4,
+    floatFreqY: 0.6,
+};
 
-    // ── ROTATING HERO PHRASES ──────────────────────────────
-    let phraseIdx = 0;
-    let phraseTimer = null;
+/* ──────────────────────────────────────────────────────────
+   Canvas
+   ────────────────────────────────────────────────────────── */
+const canvas = document.getElementById('bess-universe');
+if (!canvas) throw new Error('Canvas #bess-universe no encontrado');
 
-    function startPhrases() {
-        const phrases = I18N.get('hero.phrases');
-        if (!phrases || !phrases.length) return;
-        const l1El = document.getElementById('hero-l1');
-        const l2El = document.getElementById('hero-l2');
-        if (!l1El || !l2El) return;
+/* ──────────────────────────────────────────────────────────
+   Renderer
+   ────────────────────────────────────────────────────────── */
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setClearColor(0x000000, 1);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1;
 
-        function show(i) {
-            l1El.style.opacity = '0'; l2El.style.opacity = '0';
-            setTimeout(() => {
-                l1El.innerHTML = phrases[i].l1;
-                l2El.innerHTML = phrases[i].l2;
-                l1El.style.opacity = '1'; l2El.style.opacity = '1';
-            }, 350);
-        }
+/* ──────────────────────────────────────────────────────────
+   Scene & Camera
+   ────────────────────────────────────────────────────────── */
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(CONFIG.cameraFov, 1, 0.01, 500);
+camera.position.set(0, CONFIG.cameraY, CONFIG.cameraZ);
+camera.lookAt(0, 0, 0);
 
-        show(phraseIdx);
-        phraseTimer = setInterval(() => {
-            phraseIdx = (phraseIdx + 1) % phrases.length;
-            show(phraseIdx);
-        }, 3200);
-    }
-
-    // ── AUDIENCE TABS ──────────────────────────────────────
-    const AUDIENCE_KEYS = ['integrador', 'developer', 'investor', 'academia', 'regulator'];
-
-    function buildAudienceTabs() {
-        const tabs = document.getElementById('aud-tabs');
-        const content = document.getElementById('aud-content');
-        if (!tabs || !content) return;
-
-        const labels = I18N.get('audiences.tabs') || [];
-        const data = I18N.get('audiences.content') || {};
-
-        // Build tab buttons
-        tabs.innerHTML = labels.map((label, i) =>
-            `<button class="aud-tab${i === 0 ? ' active' : ''}" data-idx="${i}">${label}</button>`
-        ).join('');
-
-        function renderPanel(idx) {
-            const key = AUDIENCE_KEYS[idx];
-            const d = data[key] || {};
-            content.innerHTML = `
-        <div class="aud-panel fade-in">
-          <h3 class="aud-headline">${d.headline || ''}</h3>
-          <p class="aud-body">${d.body || ''}</p>
-          <ul class="aud-benefits">
-            ${(d.benefits || []).map(b => `<li>${b}</li>`).join('')}
-          </ul>
-          <a href="#early-adopter" class="btn-secondary">${d.cta || ''}</a>
-        </div>`;
-        }
-
-        renderPanel(0);
-        tabs.addEventListener('click', e => {
-            const btn = e.target.closest('[data-idx]');
-            if (!btn) return;
-            tabs.querySelectorAll('.aud-tab').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderPanel(+btn.dataset.idx);
-        });
-    }
-
-    // ── LIVE METRICS STRIP ────────────────────────────────
-    function startLiveMetrics() {
-        const defs = [
-            { id: 'lm-savings', min: 12400, max: 14800, decimals: 0 },
-            { id: 'lm-latency', min: 23, max: 48, decimals: 1 },
-            { id: 'lm-soc', min: 72, max: 91, decimals: 1 },
-            { id: 'lm-cycles', min: 3, max: 7, decimals: 0 },
-        ];
-        function rnd(mn, mx, d) { return (Math.random() * (mx - mn) + mn).toFixed(d); }
-        function update() {
-            defs.forEach(({ id, min, max, decimals }) => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = rnd(min, max, decimals);
-            });
-        }
-        update();
-        setInterval(update, 3000);
-    }
-
-    // ── TERMINAL BOOT SEQUENCE ────────────────────────────
-    function runTerminal() {
-        const out = document.getElementById('term-output');
-        if (!out) return;
-        const lines = [
-            { text: '$ bessai-edge start --config /etc/bessai/prod.yml', delay: 0, color: '#34d399' },
-            { text: '[BOOT] Initializing BESSAI Edge v1.5.0 …', delay: 400, color: '#94a3b8' },
-            { text: '[CONN] Modbus TCP   → 192.168.1.10:502 ✓', delay: 900, color: '#94a3b8' },
-            { text: '[CONN] MQTT broker  → mqtt://edge:1883   ✓', delay: 1300, color: '#94a3b8' },
-            { text: '[CONN] Prometheus   → :9090              ✓', delay: 1700, color: '#94a3b8' },
-            { text: '[AI]  Loading DRL model (ONNX) …', delay: 2200, color: '#94a3b8' },
-            { text: '[AI]  Model loaded  → inference 12 ms latency', delay: 2800, color: '#94a3b8' },
-            { text: '[OPT] Price forecast:  CMg  $42.3/MWh  (MAPE 4.2%)', delay: 3400, color: '#fbbf24' },
-            { text: '[OPT] Decision: CHARGE  → SoC 72% → 91%  +$847/day', delay: 4000, color: '#34d399' },
-            { text: '[SEC] IEC 62443 SL-2 audit: PASS  ✓', delay: 4600, color: '#22d3ee' },
-            { text: '● BESSAI Edge ready  │  Dashboard: http://edge:8080', delay: 5200, color: '#e2e8f0' },
-        ];
-        lines.forEach(({ text, delay, color }) => {
-            setTimeout(() => {
-                const line = document.createElement('div');
-                line.className = 'term-line';
-                line.style.color = color;
-                line.textContent = text;
-                out.appendChild(line);
-                out.scrollTop = out.scrollHeight;
-            }, delay);
-        });
-    }
-
-    // ── SCROLL REVEAL + COUNTERS ──────────────────────────
-    function initReveal() {
-        const obs = new IntersectionObserver(entries => {
-            entries.forEach(e => {
-                if (e.isIntersecting) {
-                    e.target.classList.add('revealed');
-                    obs.unobserve(e.target);
-                    const counter = e.target.querySelector('[data-count]');
-                    if (counter) animateCount(counter);
-                }
-            });
-        }, { threshold: 0.15 });
-        document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
-    }
-
-    function animateCount(el) {
-        const raw = el.dataset.count;
-        const isFloat = raw.includes('.');
-        const target = parseFloat(raw);
-        const duration = 1400;
-        const start = performance.now();
-        function step(now) {
-            const p = Math.min((now - start) / duration, 1);
-            const ease = 1 - Math.pow(1 - p, 3);
-            const val = target * ease;
-            el.textContent = isFloat ? val.toFixed(1) : Math.round(val).toLocaleString();
-            if (p < 1) requestAnimationFrame(step);
-        }
-        requestAnimationFrame(step);
-    }
-
-    // ── NAV SCROLL BEHAVIOUR ─────────────────────────────
-    function initNav() {
-        const nav = document.getElementById('main-nav');
-        if (!nav) return;
-        window.addEventListener('scroll', () => {
-            nav.classList.toggle('scrolled', window.scrollY > 60);
-        }, { passive: true });
-
-        // Hamburger
-        const burger = document.getElementById('nav-burger');
-        const menu = document.getElementById('nav-menu');
-        if (burger && menu) {
-            burger.addEventListener('click', () => {
-                menu.classList.toggle('open');
-                burger.classList.toggle('open');
-            });
-            menu.querySelectorAll('a').forEach(a => {
-                a.addEventListener('click', () => {
-                    menu.classList.remove('open');
-                    burger.classList.remove('open');
-                });
-            });
-        }
-    }
-
-    // ── MUSIC PLAYER ─────────────────────────────────────
-    function initPlayer() {
-        const audio = document.getElementById('bess-audio');
-        const btn = document.getElementById('mp-btn');
-        const bar = document.getElementById('mp-bar');
-        const wrap = document.getElementById('mp-progress-wrap');
-        const player = document.getElementById('music-player');
-        if (!audio || !player) return;
-
-        setTimeout(() => {
-            player.style.transform = 'translateY(0)';
-            player.style.opacity = '1';
-        }, 2000);
-
-        window.toggleMusic = () => {
-            if (audio.paused) {
-                audio.play();
-                btn.textContent = '⏸';
-            } else {
-                audio.pause();
-                btn.textContent = '▶';
-            }
-        };
-        if (bar && wrap) {
-            audio.addEventListener('timeupdate', () => {
-                if (audio.duration) bar.style.width = (audio.currentTime / audio.duration * 100) + '%';
-            });
-            wrap.addEventListener('click', e => {
-                const r = wrap.getBoundingClientRect();
-                audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
-            });
-        }
-        audio.addEventListener('ended', () => {
-            btn.textContent = '▶';
-            if (bar) bar.style.width = '0%';
-        });
-    }
-
-    // ── REFRESH AFTER LANG SWITCH ─────────────────────────
-    function refreshDynamic() {
-        clearInterval(phraseTimer);
-        startPhrases();
-        buildAudienceTabs();
-    }
-
-    // ── INIT ──────────────────────────────────────────────
-    function init() {
-        initNav();
-        startPhrases();
-        buildAudienceTabs();
-        startLiveMetrics();
-        runTerminal();
-        initReveal();
-        initPlayer();
-    }
-
-    return { init, refreshDynamic };
-})();
-
-document.addEventListener('DOMContentLoaded', () => BESSAI.init());
-
-
-/* i18n inline bootstrap */
-(function(){
-  var ES_STRINGS = {
-  "lang": "es",
-  "nav": {
-    "problema": "El Problema",
-    "solucion": "Solución",
-    "features": "Funciones",
-    "comunidad": "Comunidad",
-    "roadmap": "Roadmap",
-    "contacto": "Contacto"
-  },
-  "hero": {
-    "badge": "Open Source · Apache 2.0 · IEC 62443",
-    "phrases": [
-      { "l1": "El cerebro de tu",        "l2": "batería es <em>open-source.</em>" },
-      { "l1": "Optimización de energía", "l2": "con <em>IA en el edge.</em>" },
-      { "l1": "Más rentabilidad,",       "l2": "menos pérdidas, <em>más control.</em>" },
-      { "l1": "Cumple NTSyCS",           "l2": "e IEC 62443 <em>desde el día 1.</em>" },
-      { "l1": "Arbitraje de precio",     "l2": "autónomo, <em>sin cloud.</em>" },
-      { "l1": "Construido para LatAm,",  "l2": "<em>abierto al mundo.</em>" }
-    ],
-    "sub": "Gateway industrial open-source para sistemas de almacenamiento de energía en baterías. IEC 62443 · NTSyCS Chile · <strong>490+ tests</strong>.",
-    "cta_primary": "Ver en GitHub",
-    "cta_secondary": "Unirme al programa Early Adopter"
-  },
-  "live": {
-    "label_savings":  "Ahorro energético",
-    "label_latency":  "Latencia edge",
-    "label_soc":      "SoC activo",
-    "label_cycles":   "Ciclos protegidos",
-    "unit_savings":   "$/día",
-    "unit_latency":   "ms",
-    "unit_soc":       "% promedio",
-    "unit_cycles":    "instancias",
-    "live_tag":       "EN VIVO"
-  },
-  "audiences": {
-    "title": "¿Por qué BESSAI es para ti?",
-    "tabs": ["Integrador", "Desarrollador", "Inversionista", "Academia", "Regulador"],
-    "content": {
-      "integrador": {
-        "headline": "Deploy en horas, no semanas",
-        "body": "BESSAI Edge corre en cualquier hardware con Linux: Raspberry Pi, PLCs industriales, servidores edge. Soporte Modbus TCP, IEC 61850, MQTT, DNP3 y REST sin configuración adicional.",
-        "benefits": ["Stack Docker multi-arch (ARM64 + AMD64)", "Wizard de configuración guiado", "Soporte Modbus, IEC 61850, MQTT, DNP3", "Certificación IEC 62443 incluida"],
-        "cta": "Ver guía de instalación"
-      },
-      "developer": {
-        "headline": "API-first, test-first, open by design",
-        "body": "490+ tests automatizados, cobertura >85%, hooks de extensión para algoritmos propios (DRL/MILP/ONNX). Contribuye y acredita tu trabajo en la especificación BESSAI.",
-        "benefits": ["490+ tests · cobertura >85%", "Motor pluggable: DRL, MILP, ONNX", "SDK Python con tipos completos", "Discord activo + issues etiquetados"],
-        "cta": "Explorar el código"
-      },
-      "investor": {
-        "headline": "$2.4B TAM, posición de primero en LatAm",
-        "body": "El mercado BESS crece 38% anual en América Latina. BESSAI es el único stack open-source certificable para NTSyCS Chile y regulaciones similares en la región.",
-        "benefits": ["38% CAGR mercado BESS LatAm", "$2.4B TAM addressable 2027", "Primer mover en stack open-source certificable", "Modelo dual: open-core + soporte enterprise"],
-        "cta": "Descargar pitch deck"
-      },
-      "academia": {
-        "headline": "Infraestructura real para investigación real",
-        "body": "Usa BESSAI como plataforma de experimentación para algoritmos de optimización energética. Datos reales, entorno reproducible, publicaciones citables.",
-        "benefits": ["Dataset CMg histórico incluido", "Módulos DRL y MILP extensibles", "Entorno Docker reproducible", "Co-autoría en publicaciones BESSAI-SPEC"],
-        "cta": "Solicitar acceso académico"
-      },
-      "regulator": {
-        "headline": "Trazabilidad y cumplimiento por diseño",
-        "body": "Logs auditables firmados, reportes de cumplimiento NTSyCS automáticos, gestión de certificados x.509 integrada. Auditá el código completo: es open-source.",
-        "benefits": ["Logs inmutables con firma digital", "Reportes NTSyCS automáticos", "OT/IT seguro: IEC 62443 SL-2", "Código auditable al 100%"],
-        "cta": "Ver documentación de compliance"
-      }
-    }
-  },
-  "problem": {
-    "title": "El problema que resolvemos",
-    "subtitle": "Los sistemas BESS industriales dependen de software propietario opaco, costoso y no certificable.",
-    "stats": [
-      { "value": "38%", "label": "Crecimiento anual BESS en LatAm", "detail": "CAGR 2024–2027" },
-      { "value": "$2.4B", "label": "Mercado addressable 2027", "detail": "BNEF Research" },
-      { "value": "4.2%", "label": "MAPE predicción de precio CMg", "detail": "vs 8-12% competencia" },
-      { "value": "490+", "label": "Tests automatizados", "detail": "cobertura >85%" }
-    ]
-  },
-  "features": {
-    "title": "Todo lo que necesitas, nada que no necesitas",
-    "items": [
-      { "icon": "⚡", "title": "IA en el Edge",           "desc": "DRL, MILP y modelos ONNX corriendo localmente. Sin latencia cloud, sin dependencias externas." },
-      { "icon": "🔌", "title": "Conectividad Industrial", "desc": "Modbus TCP, IEC 61850, MQTT, DNP3, REST y OPC-UA listos para usar." },
-      { "icon": "🛡️", "title": "Seguridad IEC 62443",    "desc": "Certificación SL-2, gestión de certificados x.509, logs auditables firmados digitalmente." },
-      { "icon": "📊", "title": "Observabilidad Total",    "desc": "Prometheus + Grafana embebidos, dashboard web en tiempo real, alertas configurables." },
-      { "icon": "🌎", "title": "NTSyCS Chile",            "desc": "Cumplimiento nativo con la normativa técnica de sistemas de coordinación eléctrica chilena." },
-      { "icon": "🐳", "title": "Deploy Anywhere",         "desc": "Docker multi-arch ARM64/AMD64. Corre en Raspberry Pi, PLCs, servidores edge y cloud." }
-    ]
-  },
-  "stack": {
-    "title": "Especificaciones técnicas",
-    "sections": [
-      {
-        "heading": "Conectividad",
-        "rows": [
-          ["Protocolos OT",   "Modbus TCP, IEC 61850, DNP3, OPC-UA"],
-          ["Protocolos IT",   "MQTT 5, REST/HTTP, gRPC, WebSocket"],
-          ["Seguridad red",   "mTLS, VPN WireGuard, firewall integrado"],
-          ["Latencia edge",   "< 50 ms ciclo de control"]
-        ]
-      },
-      {
-        "heading": "Inteligencia Artificial",
-        "rows": [
-          ["Algoritmos",    "Deep Reinforcement Learning (DRL), MILP"],
-          ["Inferencia",    "ONNX Runtime, TensorRT (opcional)"],
-          ["Predicción CMg","MAPE 4.2% · histórico CEN Chile"],
-          ["Entrenamiento", "Incremental online + batch offline"]
-        ]
-      },
-      {
-        "heading": "Observabilidad",
-        "rows": [
-          ["Métricas",    "Prometheus + Grafana embebidos"],
-          ["Logs",        "Structured JSON · firma digital SHA-256"],
-          ["Dashboard",   "Web UI tiempo real · WebSocket"],
-          ["Alertas",     "PagerDuty, Slack, Email, Webhook"]
-        ]
-      },
-      {
-        "heading": "Compliance",
-        "rows": [
-          ["Ciberseguridad",  "IEC 62443 SL-2 certificable"],
-          ["Chile",           "NTSyCS coordinación eléctrica"],
-          ["PKI",             "Gestión certificados x.509 integrada"],
-          ["Auditoría",       "Logs inmutables · trazabilidad completa"]
-        ]
-      }
-    ]
-  },
-  "community": {
-    "title": "Únete a la comunidad",
-    "subtitle": "Somos un proyecto open-source impulsado por la comunidad de energía de América Latina.",
-    "cards": [
-      { "icon": "💬", "title": "Discord",    "desc": "Discusión técnica, soporte y newscletter semanal.", "cta": "Unirse al servidor", "href": "https://discord.gg/bessai" },
-      { "icon": "🐙", "title": "GitHub",     "desc": "Código abierto, issues, PRs y roadmap público.",   "cta": "Ver repositorio",   "href": "https://github.com/bess-solutions/open-bess-edge" },
-      { "icon": "📄", "title": "Documentación", "desc": "Guías, API reference y tutoriales.",             "cta": "Leer docs",         "href": "https://bess-solutions.github.io/open-bess-edge" }
-    ]
-  },
-  "roadmap": {
-    "title": "Roadmap público",
-    "subtitle": "Desarrollo transparente con fechas reales.",
-    "phases": [
-      { "tag": "LANZADO",    "date": "Q4 2024", "title": "v1.0 — Foundation",  "items": ["490+ tests · cobertura >85%", "Docker multi-arch ARM64/AMD64", "Modbus + MQTT + REST", "Dashboard web básico"] },
-      { "tag": "EN PROGRESO","date": "Q1 2025", "title": "v1.5 — Intelligence","items": ["Motor DRL producción", "Predictor CMg v2 (MAPE 4.2%)", "Arbitraje de precio autónomo", "API pública documentada"] },
-      { "tag": "PRÓXIMO",    "date": "Q2 2025", "title": "v2.0 — Compliance",  "items": ["Certificación IEC 62443 SL-2", "Reporte NTSyCS automático", "Logs con firma digital", "Multi-tenant enterprise"] },
-      { "tag": "PLANIFICADO","date": "Q3 2025", "title": "v2.5 — Ecosystem",   "items": ["Marketplace de algoritmos", "SDK TypeScript", "Certificación LatAm regional", "Programa partner integrador"] }
-    ]
-  },
-  "early_adopter": {
-    "title": "Programa Early Adopter",
-    "subtitle": "Cupos limitados. Sin segundas rondas.",
-    "cards": [
-      {
-        "tier": "Pioneer",
-        "slots": "5 cupos",
-        "price": "Gratis",
-        "benefits": ["Acceso prioritario a v2.0", "Soporte directo del equipo core", "Co-autoría en BESSAI-SPEC", "Badge 'BESSAI Pioneer' verificado", "Discord canal privado"],
-        "cta": "Solicitar cupo Pioneer"
-      },
-      {
-        "tier": "Strategic Partner",
-        "slots": "3 cupos",
-        "price": "A convenir",
-        "benefits": ["Todo lo de Pioneer", "Roadmap co-diseñado", "Integración personalizada", "SLA enterprise 99.9%", "Mención en documentación oficial"],
-        "cta": "Hablar con el equipo"
-      }
-    ],
-    "urgency": "⚠️ Solo 8 cupos en total. Disponibles hasta llenar."
-  },
-  "footer": {
-    "tagline": "Gestión inteligente de energía, open-source.",
-    "links": {
-      "proyecto": ["GitHub", "Documentación", "CHANGELOG", "Licencia Apache 2.0"],
-      "comunidad": ["Discord", "Reportar un bug", "Contribuir", "Hall of Fame"],
-      "empresa":   ["Sobre BESS Solutions", "Contacto", "Programa Early Adopter", "Blog técnico"]
-    },
-    "copy": "© 2025 BESS Solutions SpA · Santiago, Chile",
-    "license": "Software libre bajo Apache License 2.0"
-  },
-  "player": {
-    "title": "BESS Solutions in the House",
-    "subtitle": "Phonk Chilean · Suno AI",
-    "suno_link": "suno ↗"
-  }
+function resize() {
+    const w = canvas.parentElement?.offsetWidth || window.innerWidth;
+    const h = canvas.parentElement?.offsetHeight || window.innerHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    composer.setSize(w, h);
+    bloomPass.resolution.set(w, h);
 }
-;
-  document.addEventListener('DOMContentLoaded', function(){
-    I18N.init(ES_STRINGS);
-    BESSAI.init();
-  });
-})();
+
+/* ──────────────────────────────────────────────────────────
+   Post-processing: EffectComposer + UnrealBloom + Gamma
+   ────────────────────────────────────────────────────────── */
+const composer = new EffectComposer(renderer);
+const renderPass = new RenderPass(scene, camera);
+composer.addPass(renderPass);
+
+const bloomPass = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    CONFIG.bloomStrength,
+    CONFIG.bloomRadius,
+    CONFIG.bloomThreshold
+);
+composer.addPass(bloomPass);
+
+const gammaPass = new ShaderPass(GammaCorrectionShader);
+gammaPass.renderToScreen = true;
+composer.addPass(gammaPass);
+
+/* ──────────────────────────────────────────────────────────
+   Helpers
+   ────────────────────────────────────────────────────────── */
+function randomInSphere(count, radius) {
+    const arr = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
+        const r = Math.cbrt(Math.random()) * radius; // distribución uniforme en volumen
+        arr[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+        arr[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+        arr[i * 3 + 2] = r * Math.cos(phi);
+    }
+    return arr;
+}
+
+function randomOnSphere(count, radius) {
+    const arr = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
+        const r = radius + Math.random() * 0.03;
+        arr[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+        arr[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+        arr[i * 3 + 2] = r * Math.cos(phi);
+    }
+    return arr;
+}
+
+function makePoints(positions, color, size, opacity = 1) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const mat = new THREE.PointsMaterial({
+        color,
+        size,
+        transparent: true,
+        opacity,
+        sizeAttenuation: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+    });
+    return new THREE.Points(geo, mat);
+}
+
+/* ──────────────────────────────────────────────────────────
+   Stars (fondo estático)
+   ────────────────────────────────────────────────────────── */
+const starPos = new Float32Array(CONFIG.starCount * 3);
+for (let i = 0; i < CONFIG.starCount * 3; i++) {
+    starPos[i] = (Math.random() - 0.5) * CONFIG.starSpread;
+}
+scene.add(makePoints(starPos, CONFIG.starColor, CONFIG.starSize, CONFIG.starOpacity));
+
+/* ──────────────────────────────────────────────────────────
+   Energy Field A — verde (campo principal)
+   ────────────────────────────────────────────────────────── */
+const energyGroupA = new THREE.Group();
+energyGroupA.rotation.z = Math.PI / 4; // mismo que R3F example
+scene.add(energyGroupA);
+const energyA = makePoints(
+    randomInSphere(CONFIG.energyACount, CONFIG.energyARadius),
+    CONFIG.energyAColor, CONFIG.energyASize
+);
+energyGroupA.add(energyA);
+
+/* ──────────────────────────────────────────────────────────
+   Energy Field B — azul (data stream)
+   ────────────────────────────────────────────────────────── */
+const energyGroupB = new THREE.Group();
+energyGroupB.rotation.z = Math.PI / 4;
+scene.add(energyGroupB);
+const energyB = makePoints(
+    randomInSphere(CONFIG.energyBCount, CONFIG.energyBRadius),
+    CONFIG.energyBColor, CONFIG.energyBSize
+);
+energyGroupB.add(energyB);
+
+/* ──────────────────────────────────────────────────────────
+   Planet group
+   ────────────────────────────────────────────────────────── */
+const planetGroup = new THREE.Group();
+// Se posiciona horizontalmente en el hero (se actualiza en resize)
+scene.add(planetGroup);
+
+// Core
+const planetMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(CONFIG.planetRadius, CONFIG.planetSegments, CONFIG.planetSegments),
+    new THREE.MeshBasicMaterial({ color: CONFIG.planetColor })
+);
+planetGroup.add(planetMesh);
+
+// Atmósfera
+planetGroup.add(new THREE.Mesh(
+    new THREE.SphereGeometry(CONFIG.planetRadius * 1.06, 32, 32),
+    new THREE.MeshBasicMaterial({
+        color: CONFIG.planetAtmColor, transparent: true,
+        opacity: CONFIG.planetAtmOpacity, side: THREE.FrontSide,
+    })
+));
+
+// Nube de superficie
+planetGroup.add(makePoints(
+    randomOnSphere(CONFIG.cloudCount, CONFIG.planetRadius),
+    CONFIG.cloudColor, CONFIG.cloudSize, CONFIG.cloudOpacity
+));
+
+/* ──────────────────────────────────────────────────────────
+   BESS node network (orbita el planeta)
+   ────────────────────────────────────────────────────────── */
+const netRoot = new THREE.Group();
+const nodeMat = new THREE.MeshBasicMaterial({ color: CONFIG.nodeColor });
+const localPos = [];
+const haloMats = [];
+const haloSpeeds = [];
+
+for (let i = 0; i < CONFIG.nodeCount; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    const r = CONFIG.nodeRadiusMin + Math.random() * (CONFIG.nodeRadiusMax - CONFIG.nodeRadiusMin);
+    const x = r * Math.sin(phi) * Math.cos(theta);
+    const y = r * Math.sin(phi) * Math.sin(theta) * 0.55;
+    const z = r * Math.cos(phi);
+    localPos.push(new THREE.Vector3(x, y, z));
+
+    const core = new THREE.Mesh(
+        new THREE.SphereGeometry(CONFIG.nodeSphereSize, 8, 8), nodeMat
+    );
+    core.position.set(x, y, z);
+    netRoot.add(core);
+
+    const hm = new THREE.MeshBasicMaterial({
+        color: CONFIG.haloColor, transparent: true, opacity: 0.12,
+    });
+    haloMats.push(hm);
+    haloSpeeds.push(CONFIG.haloSpeedMin + Math.random() * (CONFIG.haloSpeedMax - CONFIG.haloSpeedMin));
+
+    const halo = new THREE.Mesh(
+        new THREE.SphereGeometry(CONFIG.haloSize, 8, 8), hm
+    );
+    halo.position.set(x, y, z);
+    netRoot.add(halo);
+}
+
+// Conexiones
+const connPairs = [];
+for (let i = 0; i < CONFIG.nodeCount; i++) {
+    for (let j = i + 1; j < CONFIG.nodeCount; j++) {
+        const d = localPos[i].distanceTo(localPos[j]);
+        if (d < CONFIG.connDist) {
+            connPairs.push({ i, j, d });
+            netRoot.add(new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([localPos[i], localPos[j]]),
+                new THREE.LineBasicMaterial({
+                    color: CONFIG.connColor, transparent: true,
+                    opacity: Math.max(0.1, 0.45 - d / CONFIG.connDist * 0.35),
+                })
+            ));
+        }
+    }
+}
+
+// Energy packets
+const packetMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(CONFIG.packetSize, 5, 5),
+    new THREE.MeshBasicMaterial({ color: CONFIG.packetColor })
+);
+const packets = [];
+const activePairs = connPairs.slice(0, Math.min(CONFIG.packetCount, connPairs.length));
+for (const pair of activePairs) {
+    const m = packetMesh.clone();
+    netRoot.add(m);
+    packets.push({
+        mesh: m,
+        from: localPos[pair.i], to: localPos[pair.j],
+        t: Math.random(),
+        speed: CONFIG.packetSpeedMin + Math.random() * (CONFIG.packetSpeedMax - CONFIG.packetSpeedMin),
+        dir: Math.random() > 0.5 ? 1 : -1,
+    });
+}
+
+planetGroup.add(netRoot);
+
+/* ──────────────────────────────────────────────────────────
+   Mouse parallax
+   ────────────────────────────────────────────────────────── */
+let mx = 0, my = 0;
+document.addEventListener('mousemove', e => {
+    mx = (e.clientX / window.innerWidth - 0.5) * 2;
+    my = (e.clientY / window.innerHeight - 0.5) * 2;
+}, { passive: true });
+
+/* ──────────────────────────────────────────────────────────
+   Planet horizontal position based on viewport
+   ────────────────────────────────────────────────────────── */
+function updatePlanetPosition() {
+    const aspect = camera.aspect;
+    const vFovRad = (CONFIG.cameraFov * Math.PI) / 180;
+    const halfH = Math.tan(vFovRad / 2) * CONFIG.cameraZ;
+    const halfW = halfH * aspect;
+    // Planeta centrado 65% hacia la derecha
+    planetGroup.position.x = halfW * CONFIG.planetOffsetX;
+    planetGroup.position.y = 0;
+}
+
+/* ──────────────────────────────────────────────────────────
+   Animation loop
+   ────────────────────────────────────────────────────────── */
+let t = 0;
+function animate() {
+    requestAnimationFrame(animate);
+    t += CONFIG.animStep;
+
+    // Planeta — rotación lenta
+    planetMesh.rotation.y += CONFIG.planetRotSpeed;
+
+    // Energy fields — rotación + flotación suave (Float de drei)
+    energyGroupA.rotation.x = Math.PI / 4 + Math.sin(t * CONFIG.floatFreqX) * CONFIG.floatAmpX + t * CONFIG.energyARotX;
+    energyGroupA.rotation.y = Math.cos(t * CONFIG.floatFreqY) * CONFIG.floatAmpY + t * CONFIG.energyARotY;
+
+    energyGroupB.rotation.x = Math.PI / 4 - Math.sin(t * CONFIG.floatFreqX * 1.1) * CONFIG.floatAmpX + t * CONFIG.energyBRotX;
+    energyGroupB.rotation.y = -Math.cos(t * CONFIG.floatFreqY * 0.9) * CONFIG.floatAmpY + t * CONFIG.energyBRotY;
+
+    // Red de nodos — órbita
+    netRoot.rotation.y = t * CONFIG.networkRotY;
+    netRoot.rotation.x = Math.sin(t * 0.06) * 0.03;
+
+    // Pulse halos
+    for (let i = 0; i < haloMats.length; i++) {
+        haloMats[i].opacity = 0.06 + 0.12 * (0.5 + 0.5 * Math.sin(t * haloSpeeds[i] + i * 0.9));
+    }
+
+    // Packets
+    for (const p of packets) {
+        p.t += p.speed * p.dir;
+        if (p.t >= 1) { p.t = 1; p.dir = -1; }
+        if (p.t <= 0) { p.t = 0; p.dir = 1; }
+        p.mesh.position.lerpVectors(p.from, p.to, p.t);
+    }
+
+    // Camera parallax
+    camera.position.x += (mx * CONFIG.parallaxX - camera.position.x) * CONFIG.parallaxLerp;
+    camera.position.y += (-my * CONFIG.parallaxY + CONFIG.cameraY - camera.position.y) * CONFIG.parallaxLerp;
+    camera.lookAt(0, 0, 0);
+
+    composer.render();
+}
+
+/* ──────────────────────────────────────────────────────────
+   Init
+   ────────────────────────────────────────────────────────── */
+resize();
+updatePlanetPosition();
+window.addEventListener('resize', () => { resize(); updatePlanetPosition(); });
+animate();
+
 </script>
+
+    <!-- ═══ UI SCRIPTS ══════════════════════════════════════════════ -->
+    <script>
+/**
+ * ═══════════════════════════════════════════════════════════
+ *  BESS Solutions — UI Scripts
+ *  Archivo: src/js/ui.js
+ *
+ *  • Typewriter effect en headlines con clase .type-target
+ *  • Scroll reveal (IntersectionObserver)
+ *  • Nav background on scroll
+ * ═══════════════════════════════════════════════════════════
+ */
+
+(function () {
+    'use strict';
+
+    /* ──────────────────────────────────────────────────────────
+       TYPEWRITER CONFIG
+       ────────────────────────────────────────────────────────── */
+    const TW = {
+        baseSpeed: 38,    // ms por carácter (menor = más rápido)
+        variance: 22,    // variación aleatoria de velocidad (más natural)
+        cursorChar: '|',   // carácter cursor
+        cursorBlink: 500,   // ms periodo parpadeo
+        pauseAfter: 800,   // ms pausa al terminar de escribir antes de ocultar cursor
+    };
+
+    /* ──────────────────────────────────────────────────────────
+       Typewriter core
+       target     : el elemento DOM a animar
+       html       : el contenido HTML final a "escribir"
+       onComplete : callback cuando termina
+       ────────────────────────────────────────────────────────── */
+    function typewrite(target, html, onComplete) {
+        // Extraemos el texto plano del HTML para mantener tags intactos
+        // (escribimos tag por tag, no caracter por caracter dentro de tags)
+
+        // Convertimos el innerHTML en una lista de "tokens":
+        // - strings de texto => se escriben carácter a carácter
+        // - tags HTML => se insertan completos al instante
+        const tokens = tokenizeHTML(html);
+        let cursor = createCursor();
+
+        target.innerHTML = '';
+        target.appendChild(cursor);
+
+        let tokenIdx = 0;
+        let charIdx = 0;
+        let rendered = ''; // HTML ya renderizado
+
+        function step() {
+            if (tokenIdx >= tokens.length) {
+                // Terminó — blink cursor un momento y luego lo quita
+                setTimeout(() => {
+                    cursor.remove();
+                    if (onComplete) onComplete();
+                }, TW.pauseAfter);
+                return;
+            }
+
+            const token = tokens[tokenIdx];
+
+            if (token.type === 'tag') {
+                // Tags se insertan completos de una vez
+                rendered += token.value;
+                tokenIdx++;
+                charIdx = 0;
+                target.innerHTML = rendered;
+                target.appendChild(cursor);
+                // pequeña pausa después de un tag (p.ej. <br>)
+                setTimeout(step, 40);
+            } else {
+                // Texto — un carácter a la vez
+                if (charIdx < token.value.length) {
+                    rendered += token.value[charIdx];
+                    charIdx++;
+                    target.innerHTML = rendered;
+                    target.appendChild(cursor);
+                    const delay = TW.baseSpeed + Math.random() * TW.variance;
+                    setTimeout(step, delay);
+                } else {
+                    tokenIdx++;
+                    charIdx = 0;
+                    step();
+                }
+            }
+        }
+
+        step();
+    }
+
+    /* Tokeniza HTML en [{type:'tag'|'text', value:string}] */
+    function tokenizeHTML(html) {
+        const tokens = [];
+        const tagRe = /<[^>]+>/g;
+        let last = 0;
+        let m;
+        while ((m = tagRe.exec(html)) !== null) {
+            if (m.index > last) {
+                // Texto antes del tag
+                tokens.push({ type: 'text', value: html.slice(last, m.index) });
+            }
+            tokens.push({ type: 'tag', value: m[0] });
+            last = m.index + m[0].length;
+        }
+        if (last < html.length) {
+            tokens.push({ type: 'text', value: html.slice(last) });
+        }
+        return tokens;
+    }
+
+    /* Crea el elemento cursor parpadeante */
+    function createCursor() {
+        const c = document.createElement('span');
+        c.className = 'tw-cursor';
+        c.textContent = TW.cursorChar;
+        return c;
+    }
+
+    /* ──────────────────────────────────────────────────────────
+       Observar elementos .type-target:
+       Cuando entran al viewport → arrancar el efecto
+       ────────────────────────────────────────────────────────── */
+    const typeTargets = document.querySelectorAll('.type-target');
+
+    const typeObs = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                typeObs.unobserve(el);
+
+                // Guardamos el HTML original antes de vaciarlo
+                const originalHTML = el.getAttribute('data-type-html') || el.innerHTML;
+                el.setAttribute('data-type-html', originalHTML);
+
+                // Pequeña pausa antes de iniciar (sección acaba de entrar)
+                const delay = parseInt(el.getAttribute('data-type-delay') || '0', 10);
+                setTimeout(() => typewrite(el, originalHTML), delay);
+            }
+        });
+    }, { threshold: 0.3 });
+
+    typeTargets.forEach(el => {
+        // Esconder el contenido inicial — el typewriter lo va a escribir
+        const html = el.innerHTML;
+        el.setAttribute('data-type-html', html);
+        el.innerHTML = ''; // vaciar hasta que entre al viewport
+        typeObs.observe(el);
+    });
+
+    /* ──────────────────────────────────────────────────────────
+       Hero h1 — typewriter inmediato al cargar la página
+       ────────────────────────────────────────────────────────── */
+    const heroH1 = document.querySelector('.hero-h1.type-target');
+    // (Se maneja por el observer de arriba ya que está en el viewport desde el inicio)
+
+    /* ──────────────────────────────────────────────────────────
+       Scroll Reveal para otros elementos .reveal
+       ────────────────────────────────────────────────────────── */
+    const revealEls = document.querySelectorAll('.reveal');
+
+    const revealObs = new IntersectionObserver(entries => {
+        entries.forEach((entry, i) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => entry.target.classList.add('visible'), i * 60);
+                revealObs.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.08 });
+
+    revealEls.forEach(el => revealObs.observe(el));
+
+    /* ──────────────────────────────────────────────────────────
+       Nav — background on scroll
+       ────────────────────────────────────────────────────────── */
+    const nav = document.getElementById('nav');
+    if (nav) {
+        window.addEventListener('scroll', () => {
+            nav.style.background = window.scrollY > 50
+                ? 'rgba(0, 0, 0, 0.98)'
+                : 'rgba(0, 0, 0, 0.85)';
+        }, { passive: true });
+    }
+
+})();
+
+</script>
+
 </body>
 
 </html>
