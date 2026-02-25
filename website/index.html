@@ -67,7 +67,8 @@
                         class="badge-dot badge-dot-i"></span>ACTO I &#183; Origen</div>
                 <h1 class="act-h1 act-line" data-i18n="a1.h1">424 partes<br>por mill&#243;n.</h1>
                 <h2 class="act-h2 act-line" style="margin-top:14px" data-i18n="a1.h2">El CO&#x2082; m&#225;s alto<br>en
-                    <span style="color:var(--amber)">800.000 a&#241;os.</span></h2>
+                    <span style="color:var(--amber)">800.000 a&#241;os.</span>
+                </h2>
                 <p class="act-sub act-line" style="margin-top:24px" data-i18n="a1.sub">Y en lugar de paralizarse, el
                     mundo eligi&#243; <em>acelerar la transformaci&#243;n energ&#233;tica</em> m&#225;s grande de la
                     historia.</p>
@@ -157,42 +158,31 @@
                 <div class="feat-grid act-line" style="margin-top:32px">
                     <div class="feat-card">
                         <div class="feat-icon">&#x1F9E0;</div>
-                        <div class="feat-title">MILP + DRL Optimizer</div>
-                        <div class="feat-desc">Optimizaci&#243;n mixta-entera + Deep RL entrenado con datos reales del
-                            SEN chileno. Latencia &lt;5ms.</div>
-                        <div class="feat-tag">arbitrage_engine.py</div>
+                        <div class="feat-title">Optimizaci&#243;n inteligente</div>
+                        <div class="feat-desc">Algoritmos avanzados de IA que aprenden del mercado en tiempo real y
+                            toman decisiones de carga/descarga &#243;ptimas.</div>
                     </div>
                     <div class="feat-card">
                         <div class="feat-icon">&#x1F50C;</div>
-                        <div class="feat-title">Modbus/TCP Native</div>
-                        <div class="feat-desc">Drivers BMS/inversor hot-swappable. Huawei SUN2000, CATL, BYD. Registro
-                            din&#225;mico en JSON.</div>
-                        <div class="feat-tag">modbus_driver.py</div>
+                        <div class="feat-title">Compatible con cualquier BESS</div>
+                        <div class="feat-desc">Arquitectura modular que se adapta a cualquier fabricante de
+                            bater&#237;as e inversores del mercado.</div>
                     </div>
                     <div class="feat-card">
                         <div class="feat-icon">&#x1F512;</div>
-                        <div class="feat-title">IEC 62443 SL-2</div>
-                        <div class="feat-desc">Security Level 2 de f&#225;brica. Auditor&#237;a integrada, logs
-                            inmutables, watchdog de 3 capas.</div>
-                        <div class="feat-tag">security_auditor.py</div>
+                        <div class="feat-title">Seguridad industrial</div>
+                        <div class="feat-desc">Dise&#241;ado bajo est&#225;ndares internacionales de ciberseguridad para
+                            infraestructura cr&#237;tica.</div>
                     </div>
                     <div class="feat-card">
                         <div class="feat-icon">&#x1F4E1;</div>
-                        <div class="feat-title">Edge-First / IEEE 2030.5</div>
-                        <div class="feat-desc">Todo corre local. Pub/Sub a GCP opcional. Interop con SEP2 para utilities
-                            y demand response.</div>
-                        <div class="feat-tag">sep2_adapter.py</div>
+                        <div class="feat-title">Edge-First</div>
+                        <div class="feat-desc">Todo corre en el sitio. Sin dependencia de nube. Latencia m&#237;nima.
+                            M&#225;xima autonom&#237;a operativa.</div>
                     </div>
                 </div>
-                <div class="terminal act-line">
-                    <div><span class="term-prompt">bessai@edge:~$ </span><span class="term-cmd">python -m
-                            bessai.optimize --site CL-001</span></div>
-                    <div class="term-out">[INFO] Loading driver: huawei_sun2000.json</div>
-                    <div class="term-out">[INFO] SoC: 72.3% | CMg: $87/MWh | Mode: DISCHARGE</div>
-                    <div class="term-out">[MILP] Optimal dispatch: +280kW for 3.2h</div>
-                    <div class="term-ok">[OK] Latency: 3.1ms | Revenue delta: +$142/day</div>
-                </div>
             </div>
+        </div>
         </div>
     </section>
 
@@ -235,24 +225,20 @@
                         id="chart-main" height="200"></canvas>
                 </div>
                 <div class="status-panel">
-                    <div class="ci-head">&#x2699;&#xFE0F; Sistema Status</div>
-                    <div class="status-row"><span class="sk">Edge Gateway</span><span class="sv">running &#x2713;</span>
+                    <div class="ci-head">&#x2699;&#xFE0F; Estado del sistema</div>
+                    <div class="status-row"><span class="sk">Gateway</span><span class="sv">operativo &#x2713;</span>
                     </div>
-                    <div class="status-row"><span class="sk">MILP Engine</span><span class="sv">optimal &#x2713;</span>
+                    <div class="status-row"><span class="sk">Optimizador</span><span class="sv">activo &#x2713;</span>
                     </div>
-                    <div class="status-row"><span class="sk">DRL Agent</span><span class="sv">inference &#x2713;</span>
-                    </div>
-                    <div class="status-row"><span class="sk">BMS Link</span><span class="sv">connected &#x2713;</span>
-                    </div>
-                    <div class="status-row"><span class="sk">Watchdog</span><span class="sv">healthy &#x2713;</span>
-                    </div>
-                    <div class="status-row"><span class="sk">IEC 62443</span><span class="sv">SL-2 passed
+                    <div class="status-row"><span class="sk">Conexi&#243;n BMS</span><span class="sv">enlazado
                             &#x2713;</span></div>
-                    <div class="status-row"><span class="sk">GCP Pub/Sub</span><span class="sv">streaming
+                    <div class="status-row"><span class="sk">Seguridad</span><span class="sv">certificado
                             &#x2713;</span></div>
-                    <div class="status-row"><span class="sk">OpenSSF</span><span class="sv">~8/10 &#x2713;</span></div>
+                    <div class="status-row"><span class="sk">Latencia</span><span class="sv">&lt;5ms &#x2713;</span>
+                    </div>
                 </div>
             </div>
+        </div>
         </div>
     </section>
 
@@ -271,48 +257,45 @@
                 <div class="rm-track">
                     <div class="rm done">
                         <div class="rm-date">Q4 2025</div>
-                        <div class="rm-title">v1.0 &#183; Core Gateway</div>
-                        <div class="rm-body">Modbus driver, MILP b&#225;sico, watchdog, IEC 62443 SL-2</div>
+                        <div class="rm-title">Fase 1 &#183; Fundaci&#243;n</div>
+                        <div class="rm-body">Conectividad industrial, optimizaci&#243;n b&#225;sica, seguridad
+                            certificada</div>
                     </div>
                     <div class="rm done">
                         <div class="rm-date">Q1 2026</div>
-                        <div class="rm-title">v2.0 &#183; AI Stack</div>
-                        <div class="rm-body">DRL agent, CMg predictor, real-time telemetry, arbitrage engine v2</div>
+                        <div class="rm-title">Fase 2 &#183; Inteligencia</div>
+                        <div class="rm-body">Motor de IA, predicci&#243;n de precios, telemetr&#237;a en tiempo real
+                        </div>
                     </div>
                     <div class="rm now">
                         <div class="rm-date">Q2 2026</div>
-                        <div class="rm-title">v3.0 &#183; Fleet + SEP2</div>
-                        <div class="rm-body">Multi-site orchestration, IEEE 2030.5 (SEP2), demand response nativo</div>
+                        <div class="rm-title">Fase 3 &#183; Flota</div>
+                        <div class="rm-body">Orquestaci&#243;n multi-sitio, respuesta a demanda, interoperabilidad</div>
                     </div>
                     <div class="rm">
                         <div class="rm-date">Q3 2026</div>
-                        <div class="rm-title">v4.0 &#183; Marketplace</div>
-                        <div class="rm-body">Marketplace de algoritmos, hardware registry abierto, certificaci&#243;n
-                            BESSAI</div>
+                        <div class="rm-title">Fase 4 &#183; Ecosistema</div>
+                        <div class="rm-body">Marketplace de soluciones, certificaci&#243;n BESSAI, expansi&#243;n LatAm
+                        </div>
                     </div>
                 </div>
                 <div>
                     <div class="ci-panel">
-                        <div class="ci-head">GitHub Actions &#183; CI Pipeline</div>
-                        <div class="ci-row"><span class="ci-k">pytest</span><span class="ci-v">passing &#x2713;</span>
-                        </div>
-                        <div class="ci-row"><span class="ci-k">mypy strict</span><span class="ci-v">clean
+                        <div class="ci-head">Calidad de software</div>
+                        <div class="ci-row"><span class="ci-k">Tests autom&#225;ticos</span><span class="ci-v">passing
                                 &#x2713;</span></div>
-                        <div class="ci-row"><span class="ci-k">ruff</span><span class="ci-v">0 issues &#x2713;</span>
-                        </div>
-                        <div class="ci-row"><span class="ci-k">bandit SAST</span><span class="ci-v">pass &#x2713;</span>
-                        </div>
-                        <div class="ci-row"><span class="ci-k">pip-audit</span><span class="ci-v">clean &#x2713;</span>
-                        </div>
-                        <div class="ci-row"><span class="ci-k">Trivy scan</span><span class="ci-v">0 CVE &#x2713;</span>
-                        </div>
-                        <div class="ci-row"><span class="ci-k">Docker build</span><span class="ci-v">amd64/arm64
+                        <div class="ci-row"><span class="ci-k">An&#225;lisis est&#225;tico</span><span
+                                class="ci-v">limpio &#x2713;</span></div>
+                        <div class="ci-row"><span class="ci-k">Auditor&#237;a de seguridad</span><span
+                                class="ci-v">aprobada &#x2713;</span></div>
+                        <div class="ci-row"><span class="ci-k">Vulnerabilidades</span><span class="ci-v">0 conocidas
                                 &#x2713;</span></div>
-                        <div class="ci-row"><span class="ci-k">OpenSSF Score</span><span class="ci-v">~8/10
-                                &#x2713;</span></div>
+                        <div class="ci-row"><span class="ci-k">Build multi-plataforma</span><span
+                                class="ci-v">&#x2713;</span></div>
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </section>
 
@@ -393,70 +376,42 @@
                 <p class="sec-p">BESSAI Edge es un proyecto open-source. Cualquier ingeniero el&#233;ctrico,
                     desarrollador o investigador puede contribuir.</p>
             </div>
-            <div class="contrib-grid reveal">
-                <div class="contrib-card">
-                    <div class="contrib-avatar">TG</div>
-                    <div class="contrib-name">TCI-GECOMP</div>
-                    <div class="contrib-role">Founder &#183; Core Architect</div>
-                    <div class="contrib-badges"><span class="badge-sm">MILP</span><span class="badge-sm">DRL</span><span
-                            class="badge-sm">Edge</span><span class="badge-sm">IEC 62443</span></div>
-                </div>
-                <div class="contrib-card">
-                    <div class="contrib-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
-                        &#x1F9D1;&#x200D;&#x1F4BB;</div>
-                    <div class="contrib-name">T&#250; podr&#237;as ser aqu&#237;</div>
-                    <div class="contrib-role">Primer colaborador externo</div>
-                    <div class="contrib-badges"><span class="badge-sm">&#x1F9E0; IA</span><span
-                            class="badge-sm">&#x26A1; Grid</span><span class="badge-sm">&#x1F527; HW</span></div>
-                </div>
-                <div class="contrib-card" style="border-style:dashed;opacity:.5">
-                    <div class="contrib-avatar" style="background:rgba(255,255,255,.05)">+</div>
-                    <div class="contrib-name">Contribuidor #3</div>
-                    <div class="contrib-role">Cupo abierto</div>
-                </div>
-            </div>
             <div class="ways-grid reveal">
                 <div class="way-card">
                     <div class="way-icon">&#x1F4BB;</div>
-                    <div class="way-title">Software</div>
-                    <p class="way-desc">Python 3.11+, pytest, mypy, ruff. Optimizaci&#243;n, drivers Modbus, cloud.</p>
-                    <a class="way-link"
-                        href="https://github.com/bess-solutions/open-bess-edge/blob/main/CONTRIBUTING.md"
-                        target="_blank">CONTRIBUTING.md &#8594;</a>
+                    <div class="way-title">Desarrollo</div>
+                    <p class="way-desc">Algoritmos de optimizaci&#243;n, integraciones, automatizaci&#243;n de
+                        despliegues.</p>
                 </div>
                 <div class="way-card">
                     <div class="way-icon">&#x26A1;</div>
-                    <div class="way-title">Hardware &amp; EE</div>
-                    <p class="way-desc">Drivers BMS, integraci&#243;n inversores (Huawei, SMA, ABB), perfiles LFP/NMC.
-                    </p><a class="way-link"
-                        href="https://github.com/bess-solutions/open-bess-edge/issues?q=label%3Ahardware"
-                        target="_blank">Issues hardware &#8594;</a>
+                    <div class="way-title">Ingenier&#237;a El&#233;ctrica</div>
+                    <p class="way-desc">Validaci&#243;n en terreno, compatibilidad de equipos, protocolos industriales.
+                    </p>
                 </div>
                 <div class="way-card">
                     <div class="way-icon">&#x1F4CA;</div>
-                    <div class="way-title">Datos &amp; IA</div>
-                    <p class="way-desc">CMg spot, DRL training con datos LatAm, validaci&#243;n MILP multi-mercado.</p>
-                    <a class="way-link" href="https://github.com/bess-solutions/open-bess-edge/tree/main/src/ai"
-                        target="_blank">M&#243;dulo IA &#8594;</a>
+                    <div class="way-title">Datos y Modelos</div>
+                    <p class="way-desc">Entrenamiento de modelos con datos reales de mercados energ&#233;ticos LatAm.
+                    </p>
                 </div>
                 <div class="way-card">
                     <div class="way-icon">&#x1F310;</div>
-                    <div class="way-title">Docs &amp; i18n</div>
-                    <p class="way-desc">Docs en ES/EN. Buscamos revisores t&#233;cnicos en PT para Brasil.</p><a
-                        class="way-link" href="https://bess-solutions.github.io/open-bess-edge/" target="_blank">MkDocs
-                        &#8594;</a>
+                    <div class="way-title">Documentaci&#243;n</div>
+                    <p class="way-desc">T&#233;cnica y de usuario, en espa&#241;ol, ingl&#233;s y portugu&#233;s.</p>
                 </div>
             </div>
             <div class="cta-block reveal" style="margin-top:48px">
-                <div class="cta-h2">&#x1F91D; &#218;nase al ecosistema BESSAI</div>
-                <p class="cta-sub">Discord, GitHub issues, o contacto directo. Toda contribuci&#243;n tiene cr&#233;dito
-                    en el c&#243;digo, los papers, y el changelog.</p>
+                <div class="cta-h2">&#218;nase al movimiento</div>
+                <p class="cta-sub">La transici&#243;n energ&#233;tica de LatAm se construye entre todos. Contacte al
+                    equipo para explorar c&#243;mo ser parte.</p>
                 <div class="cta-btns">
                     <a class="btn-primary" href="https://github.com/bess-solutions/open-bess-edge"
-                        target="_blank">&#x2B50; Star en GitHub</a>
+                        target="_blank">&#x2B50; Ver en GitHub</a>
                     <a class="btn-secondary" href="mailto:contacto@bess-solutions.cl">Contactar al equipo</a>
                 </div>
             </div>
+        </div>
         </div>
     </section>
 
