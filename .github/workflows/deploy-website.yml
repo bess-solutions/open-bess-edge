@@ -5,11 +5,11 @@ on:
     branches: [main]
     paths:
       - 'website/**'
-  workflow_dispatch:          # permite disparo manual desde GitHub
+  workflow_dispatch:          # allows manual trigger from GitHub
 
 jobs:
-  deploy:
-    name: FTP deploy to cPanel
+  build-and-deploy:
+    name: Build + FTP deploy to cPanel
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -18,21 +18,25 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Build site (inline CSS+JS → dist/)
+        shell: pwsh
+        run: |
+          Set-Location website
+          .\build.ps1
+
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server:       ${{ secrets.FTP_SERVER }}
           username:     ${{ secrets.FTP_USERNAME }}
           password:     ${{ secrets.FTP_PASSWORD }}
-          port:         ${{ secrets.FTP_PORT }}          # 21 para FTP, 22 para SFTP
-          protocol:     ftps                             # cPanel usa FTPS por defecto
-          local-dir:    ./website/
-          server-dir:   ${{ secrets.FTP_REMOTE_DIR }}    # ej: /public_html/
+          port:         ${{ secrets.FTP_PORT }}
+          protocol:     ftps
+          local-dir:    ./website/dist/
+          server-dir:   ${{ secrets.FTP_REMOTE_DIR }}
           exclude:      |
             **/.git*
             **/.git*/**
             **/node_modules/**
-            **/*.zip
-            **/bess-deploy-*.zip
           log-level:    standard
           dangerous-clean-slate: false

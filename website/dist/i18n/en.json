@@ -1,0 +1,411 @@
+{
+    "lang": "en",
+    "nav": {
+        "problema": "The Problem",
+        "solucion": "Solution",
+        "features": "Features",
+        "comunidad": "Community",
+        "roadmap": "Roadmap",
+        "contacto": "Contact"
+    },
+    "hero": {
+        "badge": "Open Source · Apache 2.0 · IEC 62443",
+        "phrases": [
+            {
+                "l1": "Your battery's brain",
+                "l2": "is <em>open-source.</em>"
+            },
+            {
+                "l1": "Energy optimization",
+                "l2": "with <em>edge AI.</em>"
+            },
+            {
+                "l1": "More revenue,",
+                "l2": "less losses, <em>more control.</em>"
+            },
+            {
+                "l1": "IEC 62443 compliant",
+                "l2": "<em>from day one.</em>"
+            },
+            {
+                "l1": "Autonomous price",
+                "l2": "arbitrage, <em>no cloud.</em>"
+            },
+            {
+                "l1": "Built for LatAm,",
+                "l2": "<em>open to the world.</em>"
+            }
+        ],
+        "sub": "Industrial open-source gateway for Battery Energy Storage Systems. IEC 62443 · NTSyCS Chile · <strong>490+ tests</strong>.",
+        "cta_primary": "View on GitHub",
+        "cta_secondary": "Join Early Adopter Program"
+    },
+    "live": {
+        "label_savings": "Energy savings",
+        "label_latency": "Edge latency",
+        "label_soc": "Active SoC",
+        "label_cycles": "Protected cycles",
+        "unit_savings": "$/day",
+        "unit_latency": "ms",
+        "unit_soc": "% avg",
+        "unit_cycles": "instances",
+        "live_tag": "LIVE"
+    },
+    "audiences": {
+        "title": "Why BESSAI is for you?",
+        "tabs": [
+            "Integrator",
+            "Developer",
+            "Investor",
+            "Academia",
+            "Regulator"
+        ],
+        "content": {
+            "integrador": {
+                "headline": "Deploy in hours, not weeks",
+                "body": "BESSAI Edge runs on any Linux hardware: Raspberry Pi, industrial PLCs, edge servers. Modbus TCP, IEC 61850, MQTT, DNP3 and REST supported out of the box.",
+                "benefits": [
+                    "Multi-arch Docker (ARM64 + AMD64)",
+                    "Guided configuration wizard",
+                    "Modbus, IEC 61850, MQTT, DNP3 support",
+                    "IEC 62443 certification included"
+                ],
+                "cta": "View installation guide"
+            },
+            "developer": {
+                "headline": "API-first, test-first, open by design",
+                "body": "490+ automated tests, >85% coverage, extension hooks for custom algorithms (DRL/MILP/ONNX). Contribute and credit your work in the BESSAI specification.",
+                "benefits": [
+                    "490+ tests · >85% coverage",
+                    "Pluggable engine: DRL, MILP, ONNX",
+                    "Python SDK with full type hints",
+                    "Active Discord + labeled issues"
+                ],
+                "cta": "Explore the code"
+            },
+            "investor": {
+                "headline": "$2.4B TAM, first-mover position in LatAm",
+                "body": "The BESS market grows 38% annually in Latin America. BESSAI is the only open-source certifiable stack for NTSyCS Chile and similar regional regulations.",
+                "benefits": [
+                    "38% CAGR BESS market LatAm",
+                    "$2.4B addressable TAM 2027",
+                    "First mover in certifiable open-source stack",
+                    "Dual model: open-core + enterprise support"
+                ],
+                "cta": "Download pitch deck"
+            },
+            "academia": {
+                "headline": "Real infrastructure for real research",
+                "body": "Use BESSAI as an experimentation platform for energy optimization algorithms. Real data, reproducible environment, citable publications.",
+                "benefits": [
+                    "Historical CMg dataset included",
+                    "Extensible DRL and MILP modules",
+                    "Reproducible Docker environment",
+                    "Co-authorship in BESSAI-SPEC publications"
+                ],
+                "cta": "Request academic access"
+            },
+            "regulator": {
+                "headline": "Traceability and compliance by design",
+                "body": "Signed auditable logs, automatic NTSyCS compliance reports, integrated x.509 certificate management. Audit the full code: it's open-source.",
+                "benefits": [
+                    "Immutable logs with digital signature",
+                    "Automatic NTSyCS reports",
+                    "OT/IT secure: IEC 62443 SL-2",
+                    "100% auditable code"
+                ],
+                "cta": "View compliance documentation"
+            }
+        }
+    },
+    "problem": {
+        "title": "The problem we solve",
+        "subtitle": "Industrial BESS systems rely on opaque, expensive, non-certifiable proprietary software.",
+        "stats": [
+            {
+                "value": "38%",
+                "label": "Annual BESS growth in LatAm",
+                "detail": "CAGR 2024–2027"
+            },
+            {
+                "value": "$2.4B",
+                "label": "Addressable market 2027",
+                "detail": "BNEF Research"
+            },
+            {
+                "value": "4.2%",
+                "label": "CMg price prediction MAPE",
+                "detail": "vs 8-12% competition"
+            },
+            {
+                "value": "490+",
+                "label": "Automated tests",
+                "detail": ">85% coverage"
+            }
+        ]
+    },
+    "features": {
+        "title": "Everything you need, nothing you don't",
+        "items": [
+            {
+                "icon": "⚡",
+                "title": "Edge AI",
+                "desc": "DRL, MILP and ONNX models running locally. No cloud latency, no external dependencies."
+            },
+            {
+                "icon": "🔌",
+                "title": "Industrial Connectivity",
+                "desc": "Modbus TCP, IEC 61850, MQTT, DNP3, REST and OPC-UA ready to use out of the box."
+            },
+            {
+                "icon": "🛡️",
+                "title": "IEC 62443 Security",
+                "desc": "SL-2 certifiable, x.509 certificate management, digitally signed auditable logs."
+            },
+            {
+                "icon": "📊",
+                "title": "Full Observability",
+                "desc": "Embedded Prometheus + Grafana, real-time web dashboard, configurable alerts."
+            },
+            {
+                "icon": "🌎",
+                "title": "NTSyCS Chile",
+                "desc": "Native compliance with Chile's technical standard for electrical coordination systems."
+            },
+            {
+                "icon": "🐳",
+                "title": "Deploy Anywhere",
+                "desc": "Multi-arch ARM64/AMD64 Docker. Runs on Raspberry Pi, PLCs, edge servers and cloud."
+            }
+        ]
+    },
+    "stack": {
+        "title": "Technical specifications",
+        "sections": [
+            {
+                "heading": "Connectivity",
+                "rows": [
+                    [
+                        "OT Protocols",
+                        "Modbus TCP, IEC 61850, DNP3, OPC-UA"
+                    ],
+                    [
+                        "IT Protocols",
+                        "MQTT 5, REST/HTTP, gRPC, WebSocket"
+                    ],
+                    [
+                        "Network security",
+                        "mTLS, WireGuard VPN, integrated firewall"
+                    ],
+                    [
+                        "Edge latency",
+                        "< 50 ms control cycle"
+                    ]
+                ]
+            },
+            {
+                "heading": "Artificial Intelligence",
+                "rows": [
+                    [
+                        "Algorithms",
+                        "Deep Reinforcement Learning (DRL), MILP"
+                    ],
+                    [
+                        "Inference",
+                        "ONNX Runtime, TensorRT (optional)"
+                    ],
+                    [
+                        "CMg prediction",
+                        "4.2% MAPE · CEN Chile historical data"
+                    ],
+                    [
+                        "Training",
+                        "Incremental online + batch offline"
+                    ]
+                ]
+            },
+            {
+                "heading": "Observability",
+                "rows": [
+                    [
+                        "Metrics",
+                        "Embedded Prometheus + Grafana"
+                    ],
+                    [
+                        "Logs",
+                        "Structured JSON · SHA-256 digital signature"
+                    ],
+                    [
+                        "Dashboard",
+                        "Real-time Web UI · WebSocket"
+                    ],
+                    [
+                        "Alerts",
+                        "PagerDuty, Slack, Email, Webhook"
+                    ]
+                ]
+            },
+            {
+                "heading": "Compliance",
+                "rows": [
+                    [
+                        "Cybersecurity",
+                        "IEC 62443 SL-2 certifiable"
+                    ],
+                    [
+                        "Chile",
+                        "NTSyCS electrical coordination"
+                    ],
+                    [
+                        "PKI",
+                        "Integrated x.509 certificate management"
+                    ],
+                    [
+                        "Audit",
+                        "Immutable logs · full traceability"
+                    ]
+                ]
+            }
+        ]
+    },
+    "community": {
+        "title": "Join the community",
+        "subtitle": "We are an open-source project driven by Latin America's energy community.",
+        "cards": [
+            {
+                "icon": "💬",
+                "title": "Discord",
+                "desc": "Technical discussion, support and weekly newsletter.",
+                "cta": "Join server",
+                "href": "https://discord.gg/bessai"
+            },
+            {
+                "icon": "🐙",
+                "title": "GitHub",
+                "desc": "Open source code, issues, PRs and public roadmap.",
+                "cta": "View repository",
+                "href": "https://github.com/bess-solutions/open-bess-edge"
+            },
+            {
+                "icon": "📄",
+                "title": "Documentation",
+                "desc": "Guides, API reference and tutorials.",
+                "cta": "Read the docs",
+                "href": "https://bess-solutions.github.io/open-bess-edge"
+            }
+        ]
+    },
+    "roadmap": {
+        "title": "Public Roadmap",
+        "subtitle": "Transparent development with real dates.",
+        "phases": [
+            {
+                "tag": "RELEASED",
+                "date": "Q4 2024",
+                "title": "v1.0 — Foundation",
+                "items": [
+                    "490+ tests · >85% coverage",
+                    "Multi-arch Docker ARM64/AMD64",
+                    "Modbus + MQTT + REST",
+                    "Basic web dashboard"
+                ]
+            },
+            {
+                "tag": "IN PROGRESS",
+                "date": "Q1 2025",
+                "title": "v1.5 — Intelligence",
+                "items": [
+                    "Production DRL engine",
+                    "CMg predictor v2 (4.2% MAPE)",
+                    "Autonomous price arbitrage",
+                    "Documented public API"
+                ]
+            },
+            {
+                "tag": "NEXT",
+                "date": "Q2 2025",
+                "title": "v2.0 — Compliance",
+                "items": [
+                    "IEC 62443 SL-2 certification",
+                    "Automatic NTSyCS report",
+                    "Digitally signed logs",
+                    "Enterprise multi-tenant"
+                ]
+            },
+            {
+                "tag": "PLANNED",
+                "date": "Q3 2025",
+                "title": "v2.5 — Ecosystem",
+                "items": [
+                    "Algorithm marketplace",
+                    "TypeScript SDK",
+                    "Regional LatAm certification",
+                    "Integrator partner program"
+                ]
+            }
+        ]
+    },
+    "early_adopter": {
+        "title": "Early Adopter Program",
+        "subtitle": "Limited slots. No second rounds.",
+        "cards": [
+            {
+                "tier": "Pioneer",
+                "slots": "5 slots",
+                "price": "Free",
+                "benefits": [
+                    "Priority access to v2.0",
+                    "Direct core team support",
+                    "Co-authorship in BESSAI-SPEC",
+                    "Verified 'BESSAI Pioneer' badge",
+                    "Private Discord channel"
+                ],
+                "cta": "Request Pioneer slot"
+            },
+            {
+                "tier": "Strategic Partner",
+                "slots": "3 slots",
+                "price": "Negotiated",
+                "benefits": [
+                    "Everything in Pioneer",
+                    "Co-designed roadmap",
+                    "Custom integration",
+                    "Enterprise SLA 99.9%",
+                    "Official documentation mention"
+                ],
+                "cta": "Talk to the team"
+            }
+        ],
+        "urgency": "⚠️ Only 8 slots total. Available until full."
+    },
+    "footer": {
+        "tagline": "Intelligent energy management, open-source.",
+        "links": {
+            "project": [
+                "GitHub",
+                "Documentation",
+                "CHANGELOG",
+                "Apache 2.0 License"
+            ],
+            "community": [
+                "Discord",
+                "Report a bug",
+                "Contribute",
+                "Hall of Fame"
+            ],
+            "company": [
+                "About BESS Solutions",
+                "Contact",
+                "Early Adopter Program",
+                "Tech blog"
+            ]
+        },
+        "copy": "© 2025 BESS Solutions SpA · Santiago, Chile",
+        "license": "Free software under Apache License 2.0"
+    },
+    "player": {
+        "title": "BESS Solutions in the House",
+        "subtitle": "Chilean Phonk · Suno AI",
+        "suno_link": "suno ↗"
+    }
+}
