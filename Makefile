@@ -93,11 +93,15 @@ build: ## Build Docker image locally for current platform
 
 # ── AI / BESSAIEvolve ─────────────────────────────────────────────────────────
 
-fetch-cmg: ## Fetch last 30 days of real CMg data from CEN Chile
-	$(PYTHON) scripts/fetch_cmg_evolution.py --days 30
-	@echo "CMg data saved to data/cmg_historico.parquet"
+scrape: ## Run full multi-source data scraper (CMg, ERNC, demand, weather, frequency)
+	$(PYTHON) scripts/bessai_data_scraper.py --days 30 --sources all
 
-evolve: ## Run BESSAIEvolve locally (manual trigger — reads CMg data if available)
+scrape-status: ## Show status of all locally cached data sources
+	$(PYTHON) scripts/bessai_data_scraper.py --status
+
+fetch-cmg: scrape ## Alias for scrape (backwards compat)
+
+evolve: ## Run BESSAIEvolve locally (manual trigger — reads parquet data if available)
 	$(PYTHON) -m src.agents.bessai_evolve --generations 5 --population 10 --eval-days 30
 	@echo "Results in models/evolution/"
 
@@ -109,6 +113,7 @@ export-cmg: ## Export CMg data as JSON for dashboard
 
 train-drl: ## Train DRL policy  (requires ray[rllib] + real CMg data)
 	$(PYTHON) scripts/train_drl_policy.py
+
 
 # ── Hardware Registry ──────────────────────────────────────────────────────────
 

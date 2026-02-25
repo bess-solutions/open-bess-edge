@@ -52,31 +52,36 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          # BESSAIEvolve core + CMg data fetcher deps
+          # BESSAIEvolve core + data scraper deps
           pip install gymnasium numpy structlog pandas requests openpyxl pyarrow
 
-      - name: Fetch real CMg data from CEN Chile
+      - name: 🔍 Scrape market & environmental data (El Busquilla)
         id: fetch_cmg
         run: |
-          echo "📡 Fetching CMg price data for evolution evaluation..."
+          echo "🔍 BESSAIEvolve Data Scraper — fetching all sources..."
           EVAL_DAYS="${{ github.event.inputs.eval_days || '30' }}"
 
-          python scripts/fetch_cmg_evolution.py --days "$EVAL_DAYS"
+          python scripts/bessai_data_scraper.py --days "$EVAL_DAYS" --sources all
           EXIT_CODE=$?
 
           if [ $EXIT_CODE -eq 0 ] && [ -f data/cmg_historico.parquet ]; then
             RECORDS=$(python -c "import pandas as pd; df=pd.read_parquet('data/cmg_historico.parquet'); print(len(df))" 2>/dev/null || echo '?')
-            SOURCE=$(python -c "import pandas as pd; df=pd.read_parquet('data/cmg_historico.parquet'); print(df['source'].iloc[0] if 'source' in df.columns else 'unknown')" 2>/dev/null || echo '?')
-            echo "✅ CMg data ready: $RECORDS records (source: $SOURCE)"
-            echo "cmg_source=$SOURCE" >> "$GITHUB_OUTPUT"
+            echo "✅ Data ready: $RECORDS CMg records"
             echo "cmg_records=$RECORDS" >> "$GITHUB_OUTPUT"
+
+            # Show manifest if available
+            if [ -f data/scraper_manifest.json ]; then
+              cat data/scraper_manifest.json
+              SOURCES_OK=$(python -c "import json; d=json.load(open('data/scraper_manifest.json')); print(','.join(d['sources_ok']))" 2>/dev/null || echo '?')
+              echo "cmg_source=$SOURCES_OK" >> "$GITHUB_OUTPUT"
+            fi
           else
-            echo "⚠️  CMg fetch returned error or no file — evolution will use synthetic fallback"
+            echo "⚠️  Scraper returned no CMg data — evolution will use synthetic fallback"
             echo "cmg_source=synthetic_fallback" >> "$GITHUB_OUTPUT"
             echo "cmg_records=0" >> "$GITHUB_OUTPUT"
           fi
 
-          # Never fail the job here — synthetic fallback handles missing data
+          # Never fail the job — FitnessEvaluator has synthetic fallback
           exit 0
 
       - name: Run BESSAIEvolve
