@@ -14,6 +14,7 @@
 [![NTSyCS](https://img.shields.io/badge/NTSyCS-CEN_Chile-green)](docs/compliance/ntscys_compliance.md)
 [![BESSAI-SPEC](https://img.shields.io/badge/BESSAI--SPEC-3_normative_docs-blueviolet)](docs/specs/)
 [![BEP Process](https://img.shields.io/badge/Governance-BEP_Process-lightblue)](docs/bep/BEP-0001.md)
+[![BESSAIEvolve](https://img.shields.io/badge/🧬_BESSAIEvolve-AlphaEvolve--Inspired-8A2BE2?logo=googledeepmind&logoColor=white)](docs/BESSAI_EVOLVE.md)
 [![Discord](https://img.shields.io/badge/Discord-BESSAI_Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/ZqpE8AZs)
 
 > **Gateway industrial de código abierto para gestión segura y optimizada de activos BESS — cumpliendo normativa NTSyCS del CEN Chile, IEC 62443 SL-1 y estándares internacionales de software industrial.**
