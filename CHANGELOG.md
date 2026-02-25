@@ -10,7 +10,7 @@
 ## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-25T13:43 -03:00)
 
 > [!IMPORTANT]
-> **v2.10.0-dev — Plan de Inmortalidad + Scrollytelling Landing** (2026-02-25)
+> **v2.10.0 — Plan de Inmortalidad + Scrollytelling Landing + OpenSSF + BEPs 300-302** (2026-02-25)
 >
 > IEC 62443 SL-2 readiness: **~98%** | Tests: **613 passed ✅ · 0 failed · 6 skipped** | Commit: **`HEAD`**
 
@@ -45,7 +45,7 @@
 > CI: ruff ✅ · mypy ✅ · pytest ✅ · bandit ✅ · trivy ✅
 > ```
 >
-> ### 🚀 Próximas prioridades — v2.9.0
+> ### 🚀 Próximas prioridades — v2.11.0
 >
 > #### Técnicas (alta prioridad)
 > 1. **BEP-0200 Fase 3** — Entrenar PPO con datos reales CEN 2023-2025 → `models/drl_arbitrage_v1.onnx` real
@@ -184,27 +184,36 @@ Format: [Semantic Versioning](https://semver.org/) · [Conventional Commits](htt
 
 ---
 
-## [v2.10.0-dev] — 2026-02-25
+## [v2.10.0] — 2026-02-25
 
-> **Hito:** Scrollytelling Landing Page (React) + Diseño profesional + 360° doc sync
+> **Hito:** Scrollytelling Landing + OpenSSF Compliance + 360° Audit + BEPs 0300/0301/0302
 
-### Added — Scrollytelling Landing Page
-- `landing/` — Aplicación React + Vite completamente nueva:
-  - Arquitectura en escenas: `HeroScene`, `MetricsScene`, `FeaturesScene`, `FAQScene`, `CTAScene`, `FooterScene`
-  - i18n ES/EN con JSON separados en `src/i18n/`
-  - Iconos Lucide SVG (no dependencia de emojis) en Features y FAQ
-  - Diseño scrollytelling con animaciones progresivas
-  - Hook `useScrollAnimation` para activación de secciones al hacer scroll
-  - FAQ acordeon y Features grid con iconos alineados a la línea top
-  - Footer con columnas: Producto, Recursos, Contacto
-- `landing/README.md` — instrucciones de instalación + build + deploy
+### Added
+- `docs/API.md` — Documentación de interfaz externa (Modbus, REST, MQTT, Pub/Sub, SEP2, OTel, env vars) para cumplimiento OpenSSF
+- `docs/bep/BEP-0300.md` — DRL Autonomous Control: protocolo para activar `write_tag()` real con safety protocol
+- `docs/bep/BEP-0301.md` — XAI Layer: SHAP explainability para agentes DRL e IDS
+- `docs/bep/BEP-0302.md` — Real-Time Market Integration: CMg live feed multi-fuente (CEN API v2 + Excel scraper)
 
-### Changed
-- `README.md` — Badge tests *490 → 613*, versión *v2.7.1 → v2.10.0-dev*, hardware 4 → 7 profiles
-- `CITATION.cff` — versión *1.7.1 → 2.10.0*, abstract ampliado con nuevas capacidades
-- `pyproject.toml` — versión *2.7.0 → 2.10.0*
-- `docs/PENDIENTES.md` — sincronizado: tareas 1-2 completadas marcadas, landing añadida
-- `PROJECT_STATUS.md` — fila `landing/` en módulos, entrada historial v2.10.0-dev
+### Changed — 360° Consistency Audit (13 fixes)
+- `CONTRIBUTING.md` — test count `372` → `613` (era v2.7)
+- `README.md` — árbol de archivos `490/490` → `613/613`; estado proyecto `-dev` eliminado; OpenSSF badge `Passing` → `In Progress`
+- `pyproject.toml` — email autor `@bess-solutions.com` → `@bess-solutions.cl`
+- `CHANGELOG.md` — AGENT HANDOFF test count `590` → `613`; comandos validación `54/45` → `613`
+- `PROJECT_STATUS.md` — Helm `appVersion 2.6.0` → `2.10.0`; gaps table targets `v2.9.0` → `v2.11.0`
+- `docs/ROADMAP.md` — título `v2.7` → `v2.10`; Estado actual heading; BEP-0200 target actualizado
+- `mkdocs.yml` — `docs/API.md` añadido a navegación; BEP-0300/0301/0302 añadidos
+- `docs/bep/BEP-0202.md` — release targets `v2.9.0` → `v2.11.0`
+- `docs/interoperability/BDF_alignment.md` — target `v2.9.0` → `v2.11.0`
+
+### Removed — Privacy & Repository Sanitization
+- `landing/` (35 archivos) — Aplicación React/Vite movida a repo privado
+- `dashboard/` (5 archivos) — UI propietaria + datos CMg CEN Chile removidos
+- `docs/MANUAL_ACCIONES_RODRIGO.md` — Documento interno de acceso propietario
+- `docs/PLAN_INMORTALIDAD.md` — Plan estratégico interno
+- `docs/MODULOS_Y_DATOS_SIMULADOS.md` — Estado operacional interno
+- `docs/PENDIENTES.md` — Backlog interno con detalles de infraestructura privada
+- `.gitignore` — Rutas propietarias bloqueadas permanentemente
+- **Historial git purgado** via `git filter-repo` — 138 commits reescritos
 
 ### Tests
 ```

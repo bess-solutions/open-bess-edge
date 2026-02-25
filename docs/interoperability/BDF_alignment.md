@@ -2,7 +2,7 @@
 
 > **BEP:** BEP-0202 (Protocol Registry)  
 > **Referencia:** https://github.com/lfenergy/battery-data-format · LF Energy  
-> **Estado:** 📋 Análisis de alineación — implementación en v2.9.0
+> **Estado:** 📋 Análisis de alineación — implementación en v2.11.0
 
 ---
 
