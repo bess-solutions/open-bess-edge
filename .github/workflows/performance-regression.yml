@@ -1,4 +1,4 @@
-# BESSAI Performance Regression — Latency & throughput guard
+ # BESSAI Performance Regression — Latency & throughput guard
 # Fails PRs if critical performance metrics regress >10%.
 
 name: Performance Regression

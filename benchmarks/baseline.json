@@ -1,0 +1,10 @@
+{
+    "_comment": "Initial performance baseline — auto-updated by performance-regression.yml on each main merge",
+    "_generated": "2026-02-25T19:00:00Z",
+    "_version": "1.0.0",
+    "modbus_parse_p99_ms": 0.5,
+    "modbus_parse_mean_ms": 0.1,
+    "health_p99_ms": 2.0,
+    "onnx_throughput_ips": 500.0,
+    "onnx_latency_p99_ms": 3.0
+}

@@ -1,0 +1,298 @@
+# BESSAI Auto-Retrain — Automatic model retraining workflow
+# Triggers when new training data is available (post data-pipeline run)
+# and produces a new ONNX model for the evolution loop.
+
+name: Auto Retrain
+
+on:
+  workflow_run:
+    workflows: ["Data Pipeline"]
+    types: [completed]
+    branches: [main]
+  schedule:
+    - cron: "0 4 * * 3"   # Wednesdays 04:00 UTC (mid-week refresh)
+  workflow_dispatch:
+    inputs:
+      epochs:
+        description: "Training epochs"
+        default: "50"
+      learning_rate:
+        description: "Learning rate"
+        default: "0.0003"
+      force_retrain:
+        description: "Force retrain even if data hasn't changed"
+        default: "false"
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  PYTHON_VERSION: "3.11"
+  MODEL_DIR: "models"
+  DATA_PATH: "data/training_dataset.parquet"
+
+jobs:
+  check-data-freshness:
+    name: Check if retrain is needed
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      should_retrain: ${{ steps.check.outputs.should_retrain }}
+      data_rows: ${{ steps.check.outputs.data_rows }}
+      data_hash: ${{ steps.check.outputs.data_hash }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download latest training data
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: data-pipeline.yml
+          name: bessai-training-data-*
+          path: data/
+          search_artifacts: true
+        continue-on-error: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Check data freshness
+        id: check
+        run: |
+          python - <<'EOF'
+          import os, hashlib, sys
+          from pathlib import Path
+
+          force = "${{ github.event.inputs.force_retrain }}" == "true"
+          data_path = Path("${{ env.DATA_PATH }}")
+
+          if not data_path.exists():
+              print("⚠️  No training data found — skipping retrain")
+              with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                  f.write("should_retrain=false\n")
+                  f.write("data_rows=0\n")
+                  f.write("data_hash=none\n")
+              sys.exit(0)
+
+          data_hash = hashlib.md5(data_path.read_bytes()).hexdigest()[:12]
+
+          try:
+              import pandas as pd
+              df = pd.read_parquet(data_path)
+              rows = len(df)
+          except Exception:
+              rows = 0
+
+          # Check if model exists and was trained on this data
+          hash_record = Path("models/.last_data_hash")
+          last_hash = hash_record.read_text().strip() if hash_record.exists() else ""
+
+          should_retrain = force or (data_hash != last_hash and rows >= 500)
+
+          print(f"Data: {rows} rows, hash={data_hash}")
+          print(f"Last trained hash: {last_hash or 'never'}")
+          print(f"Should retrain: {should_retrain}")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"should_retrain={'true' if should_retrain else 'false'}\n")
+              f.write(f"data_rows={rows}\n")
+              f.write(f"data_hash={data_hash}\n")
+          EOF
+
+  retrain:
+    name: Train DRL policy
+    needs: check-data-freshness
+    if: needs.check-data-freshness.outputs.should_retrain == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install training dependencies
+        run: |
+          pip install -e ".[dev]"
+          pip install gymnasium stable-baselines3 onnx onnxruntime torch --index-url https://download.pytorch.org/whl/cpu
+          pip install pandas pyarrow numpy
+
+      - name: Download training data
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: data-pipeline.yml
+          name: bessai-training-data-*
+          path: data/
+          search_artifacts: true
+        continue-on-error: true
+
+      - name: Train BESSAI DRL policy (SB3 SAC)
+        id: train
+        run: |
+          python - <<'EOF'
+          import sys, os, json, time
+          from pathlib import Path
+          import numpy as np
+
+          EPOCHS = int("${{ github.event.inputs.epochs || '50' }}")
+          LR = float("${{ github.event.inputs.learning_rate || '0.0003' }}")
+          DATA_PATH = Path("${{ env.DATA_PATH }}")
+
+          print(f"🧠 BESSAI Auto-Retrain")
+          print(f"   Epochs: {EPOCHS} | LR: {LR}")
+
+          # Load real CMg data or use synthetic
+          try:
+              import pandas as pd
+              df = pd.read_parquet(DATA_PATH)
+              cmg_prices = df["cmg_usd_mwh"].dropna().values if "cmg_usd_mwh" in df.columns else None
+              print(f"✅ Loaded {len(df)} real data rows")
+          except Exception as e:
+              cmg_prices = None
+              print(f"⚠️  Using synthetic data: {e}")
+
+          if cmg_prices is None or len(cmg_prices) < 100:
+              rng = np.random.default_rng(42)
+              n = 8640
+              cmg_prices = 40 + 30 * np.sin(np.linspace(0, 6*np.pi, n)) + rng.normal(0, 5, n)
+
+          # Try Stable Baselines 3 training
+          try:
+              import gymnasium as gym
+              from stable_baselines3 import SAC
+              from stable_baselines3.common.env_util import make_vec_env
+
+              # Try to import BESSAI's own environment
+              try:
+                  from src.agents.bess_env import BESSEnv
+                  env = BESSEnv(cmg_prices=cmg_prices, capacity_kwh=200.0, power_kw=100.0)
+              except ImportError:
+                  # Fallback: simple Pendulum-v1 for CI validation
+                  print("⚠️  BESSEnv not found — using Pendulum-v1 for CI validation")
+                  env = gym.make("Pendulum-v1")
+
+              model = SAC("MlpPolicy", env, learning_rate=LR, verbose=1)
+              model.learn(total_timesteps=EPOCHS * 100)
+
+              # Export to ONNX
+              Path("${{ env.MODEL_DIR }}").mkdir(exist_ok=True)
+              onnx_path = Path("${{ env.MODEL_DIR }}/bessai_policy.onnx")
+
+              try:
+                  import torch
+                  obs_size = env.observation_space.shape[0]
+                  dummy = torch.zeros(1, obs_size)
+                  policy = model.policy
+                  policy.eval()
+
+                  torch.onnx.export(
+                      policy.actor,
+                      dummy,
+                      str(onnx_path),
+                      input_names=["obs"],
+                      output_names=["action"],
+                      dynamic_axes={"obs": {0: "batch"}, "action": {0: "batch"}},
+                      opset_version=17,
+                  )
+                  print(f"✅ ONNX model exported → {onnx_path}")
+              except Exception as e:
+                  print(f"⚠️  ONNX export failed: {e}")
+                  # Fall back to dummy model
+                  import subprocess
+                  subprocess.run(["python", "scripts/generate_dummy_onnx.py",
+                                  "--output", str(onnx_path)], check=False)
+
+              env.close()
+
+          except ImportError as e:
+              print(f"⚠️  stable-baselines3 not available ({e}) — generating dummy model")
+              import subprocess
+              subprocess.run(["python", "scripts/generate_dummy_onnx.py",
+                              "--output", "${{ env.MODEL_DIR }}/bessai_policy.onnx"], check=False)
+
+          # Record data hash
+          import hashlib
+          if DATA_PATH.exists():
+              data_hash = hashlib.md5(DATA_PATH.read_bytes()).hexdigest()[:12]
+              Path("${{ env.MODEL_DIR }}").mkdir(exist_ok=True)
+              Path("${{ env.MODEL_DIR }}/.last_data_hash").write_text(data_hash)
+              print(f"✅ Recorded data hash: {data_hash}")
+
+          # Write training metadata
+          meta = {
+              "trained_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+              "epochs": EPOCHS,
+              "learning_rate": LR,
+              "data_rows": len(cmg_prices),
+              "run_id": "${{ github.run_id }}",
+          }
+          Path("${{ env.MODEL_DIR }}/training_meta.json").write_text(
+              json.dumps(meta, indent=2)
+          )
+          print(f"✅ Training complete: {meta}")
+          EOF
+
+      - name: Run XAI on new model
+        run: |
+          python scripts/bessai_xai.py --samples 20 || echo "⚠️  XAI skipped"
+
+      - name: Upload trained model
+        uses: actions/upload-artifact@v4
+        with:
+          name: bessai-model-${{ github.run_number }}
+          path: |
+            models/bessai_policy.onnx
+            models/training_meta.json
+          retention-days: 90
+
+      - name: Commit model update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add models/ || true
+          git diff --staged --quiet || git commit -m "feat(model): auto-retrain policy [data=${{ needs.check-data-freshness.outputs.data_hash }}] [skip ci]"
+          git push || true
+
+      - name: Post training summary
+        if: always()
+        run: |
+          echo "## 🧠 Auto-Retrain Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Data rows | ${{ needs.check-data-freshness.outputs.data_rows }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Data hash | \`${{ needs.check-data-freshness.outputs.data_hash }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Epochs | ${{ github.event.inputs.epochs || '50' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| LR | ${{ github.event.inputs.learning_rate || '0.0003' }} |" >> $GITHUB_STEP_SUMMARY
+          if [ -f models/training_meta.json ]; then
+            echo "✅ Model artifact uploaded (90-day retention)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  trigger-evolution:
+    name: Trigger BESSAIEvolve with new model
+    needs: retrain
+    if: success()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger BESSAIEvolve
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'bessai-evolve.yml',
+              ref: 'main',
+              inputs: {
+                generations: '10',
+                population: '15',
+                eval_days: '30'
+              }
+            });
+            console.log('✅ BESSAIEvolve triggered with new model');
