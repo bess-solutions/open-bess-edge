@@ -100,6 +100,9 @@ nav:
     - BEP-0100 — IEEE 2030.5 Adapter: bep/BEP-0100.md
     - BEP-0200 — DRL Arbitrage Agent: bep/BEP-0200.md
     - BEP-0202 — Protocol Registry: bep/BEP-0202.md
+    - BEP-0300 — DRL Autonomous Control: bep/BEP-0300.md
+    - BEP-0301 — XAI — Explainable AI: bep/BEP-0301.md
+    - BEP-0302 — Market Integration CMg Live: bep/BEP-0302.md
   - API Reference:
     - External Interface (API): API.md
     - API Reference (Legacy): api_reference.md

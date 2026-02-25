@@ -1,6 +1,6 @@
 # BESSAI Edge Gateway — Roadmap Oficial v2.7–3.0
 
-> **Versión:** 2026-02-24 · **Estado:** Activo  
+> **Versión:** 2026-02-25 · **Estado:** Activo  
 > **Sustituye:** `docs/bessai_v2_roadmap.md` (archivado — era pre-v2.6)
 
 ---
@@ -16,7 +16,7 @@
 | **Global Standard** | BOA Charter, UL9540 roadmap, SPEC-004, Hackathon 2026, IEEE Abstract | — ✅ |
 | **Code quality** | Revisión 360°: ruff auto-fix (35/36), drl_agent → structlog, 20 archivos reformateados | — ✅ |
 
-**Suite de tests**: 490 passed · 1 SSL (pre-existente, no-regresión) · CI: ruff ✅ mypy ✅ bandit ✅ trivy ✅
+**Suite de tests**: 613 passed · 0 failed · 6 skipped · CI: ruff ✅ mypy ✅ bandit ✅ trivy ✅
 
 ---
 
@@ -52,8 +52,11 @@ timeline
                : Global Standard Strategy (BOA, SPEC-004)
                : Revision 360deg — 35/36 lint fixes
     section 2026 Q2-Q3
-        v2.8.0 : BEP-0200 Fase 3 (entrenar con datos reales CEN)
-               : BEP-0201 Digital Twin PINN
+        v2.10.0 : BEP-0200 Fase 3 (datos reales CEN)
+               : BEP-0300 Draft (DRL write mode)
+               : BEP-0301 Draft (XAI SHAP)
+        v2.11.0 : BEP-0201 Digital Twin PINN
+               : BEP-0302 Draft (CMg live feed)
                : Protocol Unification (IEC 61850, DNP3, OPC-UA)
     section 2026 Q4
         v2.9.0 : SEP2 Conformance Harness (BEP-0101 XML)
@@ -203,11 +206,14 @@ Modelo híbrido física + IA que simula en tiempo real la degradación, temperat
 | BEP | Título | Estado | Release |
 |---|---|---|---|
 | [BEP-0100](bep/BEP-0100.md) | IEEE 2030.5 / SEP 2.0 Adapter | ✅ **Active** | v2.6.0 |
-| **BEP-0101** | SEP 2.0 XML/EXI Normativo (reemplaza JSON profile) | 📝 Draft | v2.9.0 |
+| **BEP-0101** | SEP 2.0 XML/EXI Normativo (reemplaza JSON profile) | 📝 Draft | v2.11.0 |
 | **BEP-0200** | DRL Arbitrage Agent (Ray RLlib PPO/SAC + ONNX) | ✅ **Fase 2 Activa** (observe-only) | v2.7.1 |
-| **BEP-0201** | Digital Twin PINN — RUL < 2 % error | 💡 Propuesto | v2.8.0 |
-| **BEP-0202** | Protocol Registry unificado (IEC 61850, DNP3, OPC-UA) | 💡 Propuesto | v2.9.0 |
-| **BEP-0300** | VPP Orchestrator OpenADR 3.0 multi-sitio | 💡 Propuesto | v3.0.0 |
+| **BEP-0201** | Digital Twin PINN — RUL < 2 % error | 💡 Propuesto | v2.11.0 |
+| **BEP-0202** | Protocol Registry unificado (IEC 61850, DNP3, OPC-UA) | 💡 Propuesto | v2.11.0 |
+| **[BEP-0300](bep/BEP-0300.md)** | DRL Autonomous Control — Write Mode + Safety Protocol | 📝 **Draft** (nuevo) | v2.10.0 |
+| **[BEP-0301](bep/BEP-0301.md)** | XAI Layer — SHAP Explainability para agentes IA | 📝 **Draft** (nuevo) | v2.10.0 |
+| **[BEP-0302](bep/BEP-0302.md)** | Real-Time Market Integration — CMg Live + Arbitraje Dinámico | 📝 **Draft** (nuevo) | v2.11.0 |
+| **BEP-0400** | VPP Orchestrator OpenADR 3.0 multi-sitio | 💡 Propuesto | v3.0.0 |
 
 ---
 
