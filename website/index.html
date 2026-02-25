@@ -3,587 +3,1803 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BESS Solutions — Inteligencia Energética Autónoma</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>BESS Solutions — Edge Intelligence for Battery Systems</title>
     <meta name="description"
-        content="BESSAI Edge es el sistema de gestión de baterías más avanzado de LatAm. IA, optimización MILP-DRL y cumplimiento IEEE 2030.5 — directo en el edge." />
-    <meta property="og:title" content="BESS Solutions — Inteligencia Energética Autónoma" />
-    <meta property="og:description"
-        content="Optimización autónoma de BESS con IA real. 613 tests. IEC 62443 SL-2. Datos CEN en tiempo real." />
-    <meta property="og:url" content="https://bess-solutions.cl" />
-    <meta property="og:type" content="website" />
+        content="Open-source BESS management system. MILP optimization, real CEN/SEN CMg data, IEC 62443 SL-2 compliance. Edge-native, production-grade." />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@700&display=swap"
         rel="stylesheet" />
-    <link rel="stylesheet" href="style.css?v=20260225" />
+    <style>
+        :root {
+            --cyan: #22d3ee;
+            --cyan-d: #0891b2;
+            --cyan-dd: #0e7490;
+            --bg: #06080f;
+            --bg2: #0d1117;
+            --bg3: #111827;
+            --text: #c9d1d9;
+            --muted: #6e7681;
+            --white: #f0f6fc;
+            --mono: 'JetBrains Mono', monospace;
+            --r: 8px;
+            --rL: 16px;
+            --maxw: 1160px;
+            --tr: 0.2s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit
+        }
+
+        ul {
+            list-style: none
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg)
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1e2936;
+            border-radius: 3px
+        }
+
+        /* ── NAV ── */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 200;
+            height: 60px;
+            background: rgba(6, 8, 15, .85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, .06);
+            transition: background var(--tr)
+        }
+
+        .nav-inner {
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: 0 28px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 32px
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-weight: 600;
+            font-size: .9rem;
+            color: var(--white)
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--cyan-d), var(--cyan-dd));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(8, 145, 178, .4)
+        }
+
+        .logo-icon svg {
+            width: 16px;
+            height: 16px
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2px;
+            flex: 1
+        }
+
+        .nav-links a {
+            padding: 5px 12px;
+            border-radius: var(--r);
+            font-size: .85rem;
+            color: var(--muted);
+            transition: color var(--tr), background var(--tr)
+        }
+
+        .nav-links a:hover {
+            color: var(--white);
+            background: rgba(255, 255, 255, .05)
+        }
+
+        .nav-end {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .btn-ghost {
+            padding: 6px 14px;
+            border-radius: var(--r);
+            font-size: .8rem;
+            color: var(--muted);
+            border: 1px solid rgba(255, 255, 255, .08);
+            transition: all var(--tr)
+        }
+
+        .btn-ghost:hover {
+            color: var(--white);
+            border-color: rgba(255, 255, 255, .2)
+        }
+
+        .btn-cta {
+            padding: 7px 16px;
+            border-radius: var(--r);
+            font-size: .8rem;
+            font-weight: 500;
+            background: var(--cyan-d);
+            color: #fff;
+            border: 1px solid var(--cyan-d);
+            transition: all var(--tr)
+        }
+
+        .btn-cta:hover {
+            background: #0ea5c9;
+            box-shadow: 0 4px 20px rgba(8, 145, 178, .4);
+            transform: translateY(-1px)
+        }
+
+        /* ── HERO ── */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-top: 60px;
+            overflow: hidden
+        }
+
+        #bess-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background: radial-gradient(ellipse 70% 90% at 65% 50%, transparent 30%, rgba(6, 8, 15, .75) 80%)
+        }
+
+        /* NASA Climate Band */
+        .climate-band {
+            position: relative;
+            z-index: 3;
+            background: linear-gradient(90deg, rgba(239, 68, 68, .12), rgba(239, 68, 68, .06), rgba(251, 146, 60, .08));
+            border-bottom: 1px solid rgba(239, 68, 68, .25);
+            padding: 9px 0
+        }
+
+        .climate-band-inner {
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: 0 28px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap
+        }
+
+        .climate-label {
+            font-family: var(--mono);
+            font-size: .68rem;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #f87171;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0
+        }
+
+        .climate-label::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: pulse-red 2s ease-in-out infinite
+        }
+
+        @keyframes pulse-red {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1)
+            }
+
+            50% {
+                opacity: .4;
+                transform: scale(1.5)
+            }
+        }
+
+        .climate-stats {
+            display: flex;
+            gap: 28px;
+            flex-wrap: wrap
+        }
+
+        .cs {
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+            font-family: var(--mono)
+        }
+
+        .cs-v {
+            font-size: .95rem;
+            font-weight: 500;
+            color: #fb923c
+        }
+
+        .cs-l {
+            font-size: .65rem;
+            color: rgba(248, 113, 113, .7)
+        }
+
+        .climate-src {
+            margin-left: auto;
+            font-size: .62rem;
+            color: rgba(248, 113, 113, .5);
+            font-family: var(--mono)
+        }
+
+        .climate-src a {
+            color: inherit;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            opacity: .7
+        }
+
+        .climate-src a:hover {
+            opacity: 1
+        }
+
+        /* Hero content */
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: 0 28px;
+            width: 100%
+        }
+
+        .hero-inner {
+            max-width: 620px;
+            padding: 60px 0
+        }
+
+        .hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--mono);
+            font-size: .7rem;
+            color: var(--muted);
+            margin-bottom: 36px;
+            background: rgba(34, 211, 238, .06);
+            border: 1px solid rgba(34, 211, 238, .12);
+            padding: 5px 12px;
+            border-radius: 999px
+        }
+
+        .tag-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--cyan);
+            animation: pulse 2s ease-in-out infinite
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1)
+            }
+
+            50% {
+                opacity: .4;
+                transform: scale(1.4)
+            }
+        }
+
+        .hero-h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.2rem, 5vw, 3.8rem);
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -.03em;
+            color: var(--white);
+            margin-bottom: 20px
+        }
+
+        .hero-h1 .typewriter {
+            color: var(--cyan);
+            display: block;
+            min-height: 1.2em
+        }
+
+        .hero-sub {
+            font-size: 1rem;
+            color: var(--muted);
+            line-height: 1.8;
+            margin-bottom: 40px;
+            max-width: 540px
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 56px;
+            flex-wrap: wrap
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 24px;
+            border-radius: var(--r);
+            font-size: .875rem;
+            font-weight: 500;
+            background: var(--cyan-d);
+            color: #fff;
+            border: 1px solid var(--cyan-d);
+            transition: all var(--tr)
+        }
+
+        .btn-primary:hover {
+            background: #0ea5c9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(8, 145, 178, .4)
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 24px;
+            border-radius: var(--r);
+            font-size: .875rem;
+            color: var(--muted);
+            border: 1px solid rgba(255, 255, 255, .1);
+            transition: all var(--tr)
+        }
+
+        .btn-secondary:hover {
+            color: var(--white);
+            border-color: rgba(255, 255, 255, .25);
+            transform: translateY(-2px)
+        }
+
+        /* Stats counter row */
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            background: rgba(13, 17, 23, .8);
+            border: 1px solid rgba(255, 255, 255, .07);
+            border-radius: var(--r);
+            overflow: hidden;
+            backdrop-filter: blur(12px)
+        }
+
+        .hs {
+            padding: 20px 22px;
+            border-right: 1px solid rgba(255, 255, 255, .06);
+            transition: background var(--tr)
+        }
+
+        .hs:last-child {
+            border-right: none
+        }
+
+        .hs:hover {
+            background: rgba(8, 145, 178, .06)
+        }
+
+        .hs-v {
+            font-family: var(--mono);
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: var(--white);
+            line-height: 1;
+            margin-bottom: 5px
+        }
+
+        .hs-l {
+            font-size: .73rem;
+            color: var(--muted)
+        }
+
+        /* ── TERMINAL ── */
+        .terminal {
+            background: rgba(6, 8, 15, .95);
+            border: 1px solid rgba(255, 255, 255, .09);
+            border-radius: 10px;
+            overflow: hidden;
+            font-family: var(--mono);
+            font-size: .78rem;
+            line-height: 1.8;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, .6), 0 0 0 1px rgba(34, 211, 238, .04);
+            margin-bottom: 32px
+        }
+
+        .term-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, .06);
+            background: rgba(255, 255, 255, .02)
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%
+        }
+
+        .dot:nth-child(1) {
+            background: #ff5f57
+        }
+
+        .dot:nth-child(2) {
+            background: #febc2e
+        }
+
+        .dot:nth-child(3) {
+            background: #28c840
+        }
+
+        .term-path {
+            margin-left: 8px;
+            color: var(--muted);
+            font-size: .7rem
+        }
+
+        .term-body {
+            padding: 16px 18px 20px
+        }
+
+        .tl {
+            display: block
+        }
+
+        .tk {
+            color: #79c0ff
+        }
+
+        .tv {
+            color: #a5d6ff
+        }
+
+        .ts {
+            color: #a8d8a8
+        }
+
+        .tn {
+            color: var(--cyan)
+        }
+
+        .tc {
+            color: #374151;
+            font-style: italic
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 7px;
+            height: 12px;
+            background: var(--cyan);
+            vertical-align: middle;
+            animation: blink 1.1s step-end infinite
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0
+            }
+        }
+
+        /* ── SECTIONS ── */
+        section {
+            padding: 88px 0
+        }
+
+        .wrap {
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: 0 28px
+        }
+
+        hr.rule {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, .06);
+            margin: 0
+        }
+
+        .eyebrow {
+            font-family: var(--mono);
+            font-size: .68rem;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--cyan-d);
+            margin-bottom: 16px
+        }
+
+        .sec-h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(1.6rem, 3.5vw, 2.5rem);
+            font-weight: 700;
+            letter-spacing: -.03em;
+            color: var(--white);
+            line-height: 1.15;
+            margin-bottom: 12px
+        }
+
+        .sec-p {
+            color: var(--muted);
+            font-size: .95rem;
+            line-height: 1.75
+        }
+
+        .sec-head {
+            margin-bottom: 52px
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity .6s cubic-bezier(.16, 1, .3, 1), transform .6s cubic-bezier(.16, 1, .3, 1)
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        /* ── LIVE DASHBOARD ── */
+        .dash-section {
+            background: linear-gradient(180deg, var(--bg), var(--bg2), var(--bg))
+        }
+
+        .dash-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 24px
+        }
+
+        .dash-panel {
+            background: rgba(13, 17, 23, .9);
+            border: 1px solid rgba(255, 255, 255, .07);
+            border-radius: 12px;
+            overflow: hidden;
+            backdrop-filter: blur(8px)
+        }
+
+        .dash-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, .06);
+            background: rgba(255, 255, 255, .02)
+        }
+
+        .dash-title {
+            font-family: var(--mono);
+            font-size: .68rem;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--muted)
+        }
+
+        .live-badge {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-family: var(--mono);
+            font-size: .62rem;
+            color: #3fb950
+        }
+
+        .live-badge::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #3fb950;
+            animation: pulse-green 1.5s ease-in-out infinite
+        }
+
+        @keyframes pulse-green {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .3
+            }
+        }
+
+        .dash-body {
+            padding: 16px 18px
+        }
+
+        .chart-wrap {
+            position: relative;
+            height: 180px
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 14px
+        }
+
+        .kpi {
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: var(--r);
+            padding: 12px 14px
+        }
+
+        .kpi-label {
+            font-family: var(--mono);
+            font-size: .62rem;
+            color: var(--muted);
+            margin-bottom: 5px
+        }
+
+        .kpi-value {
+            font-family: var(--mono);
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--white);
+            line-height: 1
+        }
+
+        .kpi-value.cyan {
+            color: var(--cyan)
+        }
+
+        .kpi-value.green {
+            color: #3fb950
+        }
+
+        .kpi-value.warn {
+            color: #f59e0b
+        }
+
+        .kpi-sub {
+            font-size: .65rem;
+            color: var(--muted);
+            margin-top: 3px
+        }
+
+        .data-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 0
+        }
+
+        .dr {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 9px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, .05);
+            font-family: var(--mono);
+            font-size: .78rem
+        }
+
+        .dr:last-child {
+            border-bottom: none
+        }
+
+        .dr-k {
+            color: var(--muted)
+        }
+
+        .dr-v {
+            color: var(--white)
+        }
+
+        .dr-v.g {
+            color: #3fb950
+        }
+
+        .dr-v.c {
+            color: var(--cyan)
+        }
+
+        .dr-v.w {
+            color: #f59e0b
+        }
+
+        /* ── FEATURE GRID ── */
+        .feat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 10px;
+            overflow: hidden
+        }
+
+        .fc {
+            background: var(--bg2);
+            padding: 36px 32px;
+            position: relative;
+            overflow: hidden;
+            transition: background var(--tr)
+        }
+
+        .fc::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(8, 145, 178, .05), transparent);
+            opacity: 0;
+            transition: opacity var(--tr)
+        }
+
+        .fc:hover {
+            background: #0c1420
+        }
+
+        .fc:hover::before {
+            opacity: 1
+        }
+
+        .fc-wide {
+            grid-column: span 2
+        }
+
+        .fc-num {
+            font-family: var(--mono);
+            font-size: .65rem;
+            color: rgba(255, 255, 255, .12);
+            margin-bottom: 18px
+        }
+
+        .fc-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 10px
+        }
+
+        .fc-body {
+            font-size: .875rem;
+            color: var(--muted);
+            line-height: 1.75
+        }
+
+        .fc-tag {
+            display: inline-block;
+            margin-top: 14px;
+            font-family: var(--mono);
+            font-size: .65rem;
+            color: var(--cyan-d);
+            border: 1px solid rgba(8, 145, 178, .2);
+            padding: 2px 8px;
+            border-radius: 3px
+        }
+
+        code.ic {
+            font-family: var(--mono);
+            font-size: .8em;
+            color: var(--cyan);
+            background: rgba(34, 211, 238, .08);
+            padding: 1px 5px;
+            border-radius: 3px
+        }
+
+        /* ── HARDWARE ── */
+        .hw-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 10px;
+            overflow: hidden
+        }
+
+        .hw-item {
+            background: var(--bg2);
+            padding: 22px 12px;
+            text-align: center;
+            transition: background var(--tr), transform var(--tr)
+        }
+
+        .hw-item:hover {
+            background: #0f1825;
+            transform: scale(1.03);
+            z-index: 1
+        }
+
+        .hw-name {
+            font-size: .78rem;
+            color: var(--muted);
+            margin-bottom: 6px
+        }
+
+        .hw-proto {
+            font-family: var(--mono);
+            font-size: .65rem;
+            color: rgba(110, 118, 129, .5)
+        }
+
+        .hw-badge {
+            display: inline-block;
+            margin-top: 8px;
+            font-family: var(--mono);
+            font-size: .6rem;
+            padding: 2px 6px;
+            border-radius: 2px
+        }
+
+        .stable {
+            background: rgba(63, 185, 80, .1);
+            color: #3fb950
+        }
+
+        .beta {
+            background: rgba(210, 153, 34, .1);
+            color: #d29922
+        }
+
+        /* ── ROADMAP ── */
+        .roadmap-track {
+            position: relative;
+            padding-left: 28px
+        }
+
+        .roadmap-track::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 6px;
+            bottom: 6px;
+            width: 1px;
+            background: linear-gradient(to bottom, var(--cyan-d), rgba(255, 255, 255, .06))
+        }
+
+        .rm {
+            position: relative;
+            padding: 0 0 36px 28px
+        }
+
+        .rm::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 7px;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, .1);
+            background: var(--bg);
+            transition: all .3s
+        }
+
+        .rm.done::before {
+            background: var(--cyan-d);
+            border-color: var(--cyan-d)
+        }
+
+        .rm.now::before {
+            background: var(--bg);
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 4px rgba(34, 211, 238, .12);
+            animation: pring 2s ease-in-out infinite
+        }
+
+        @keyframes pring {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 4px rgba(34, 211, 238, .12)
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(34, 211, 238, .04)
+            }
+        }
+
+        .rm-date {
+            font-family: var(--mono);
+            font-size: .68rem;
+            color: var(--muted);
+            margin-bottom: 5px
+        }
+
+        .rm-title {
+            font-size: .9375rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 4px
+        }
+
+        .rm-body {
+            font-size: .875rem;
+            color: var(--muted);
+            line-height: 1.6
+        }
+
+        /* ── CI PANEL ── */
+        .ci-panel {
+            border: 1px solid rgba(255, 255, 255, .07);
+            border-radius: var(--r);
+            overflow: hidden
+        }
+
+        .ci-head {
+            padding: 12px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, .06);
+            background: rgba(255, 255, 255, .02);
+            font-family: var(--mono);
+            font-size: .65rem;
+            color: var(--muted)
+        }
+
+        .ci-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 11px 18px;
+            border-top: 1px solid rgba(255, 255, 255, .05);
+            font-family: var(--mono);
+            font-size: .78rem;
+            transition: background var(--tr)
+        }
+
+        .ci-row:first-of-type {
+            border-top: none
+        }
+
+        .ci-row:hover {
+            background: rgba(255, 255, 255, .02)
+        }
+
+        .ci-k {
+            color: var(--muted)
+        }
+
+        .ci-v {
+            color: #3fb950
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 72px
+        }
+
+        /* ── CTA ── */
+        .cta-block {
+            position: relative;
+            border-radius: 14px;
+            padding: 64px 52px;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(8, 145, 178, .1), rgba(6, 182, 212, .05));
+            border: 1px solid rgba(8, 145, 178, .2)
+        }
+
+        .cta-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(34, 211, 238, .5), transparent)
+        }
+
+        .cta-inner {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 56px;
+            align-items: center
+        }
+
+        .cta-h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 12px;
+            letter-spacing: -.02em
+        }
+
+        .cta-p {
+            font-size: .9375rem;
+            color: var(--muted);
+            line-height: 1.7
+        }
+
+        .cta-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start
+        }
+
+        .cta-note {
+            font-family: var(--mono);
+            font-size: .65rem;
+            color: var(--muted);
+            margin-top: 4px
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            padding: 36px 0;
+            border-top: 1px solid rgba(255, 255, 255, .05)
+        }
+
+        .foot-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px
+        }
+
+        .foot-copy {
+            font-size: .8rem;
+            color: var(--muted)
+        }
+
+        .foot-links {
+            display: flex;
+            gap: 22px
+        }
+
+        .foot-links a {
+            font-size: .8rem;
+            color: var(--muted);
+            transition: color var(--tr)
+        }
+
+        .foot-links a:hover {
+            color: var(--cyan)
+        }
+
+        /* ── RESPONSIVE ── */
+        @media(max-width:900px) {
+            .nav-links {
+                display: none
+            }
+
+            .hero-stats {
+                grid-template-columns: 1fr 1fr
+            }
+
+            .hs:nth-child(2) {
+                border-right: none
+            }
+
+            .hs:nth-child(3),
+            .hs:nth-child(4) {
+                border-top: 1px solid rgba(255, 255, 255, .06)
+            }
+
+            .dash-grid,
+            .feat-grid,
+            .two-col {
+                grid-template-columns: 1fr
+            }
+
+            .fc-wide {
+                grid-column: span 1
+            }
+
+            .hw-grid {
+                grid-template-columns: repeat(3, 1fr)
+            }
+
+            .cta-inner {
+                grid-template-columns: 1fr;
+                gap: 32px
+            }
+
+            .cta-block {
+                padding: 40px 28px
+            }
+        }
+
+        @media(max-width:540px) {
+            .wrap {
+                padding: 0 18px
+            }
+
+            .hero-stats {
+                grid-template-columns: 1fr 1fr
+            }
+
+            .hw-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .climate-src {
+                display: none
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-    <!-- ═══════════════════════════════ NAV ═══════════════════════════════════ -->
+    <!-- NAV -->
     <nav class="nav" id="nav">
         <div class="nav-inner">
             <a href="#" class="nav-logo">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                    <rect width="32" height="32" rx="8" fill="#0891b2" />
-                    <path d="M8 20L14 12L19 17L23 12" stroke="white" stroke-width="2.5" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                    <circle cx="24" cy="10" r="2.5" fill="#22d3ee" />
-                </svg>
-                <span class="logo-text">BESS <span class="logo-accent">Solutions</span></span>
+                <div class="logo-icon">
+                    <svg viewBox="0 0 16 16" fill="none">
+                        <path d="M2 11L6 6L9.5 9.5L13 5" stroke="white" stroke-width="1.8" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </div>
+                BESS Solutions
             </a>
             <ul class="nav-links">
-                <li><a href="#producto">Producto</a></li>
-                <li><a href="#metricas">Métricas</a></li>
+                <li><a href="#sistema">Sistema</a></li>
+                <li><a href="#dashboard">Telemetría</a></li>
                 <li><a href="#hardware">Hardware</a></li>
-                <li><a href="#precios">Precios</a></li>
-                <li><a href="#contacto">Contacto</a></li>
+                <li><a href="#roadmap">Roadmap</a></li>
             </ul>
-            <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank" class="btn btn-outline nav-cta">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path
-                        d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                </svg>
-                GitHub
-            </a>
+            <div class="nav-end">
+                <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank" class="btn-ghost">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"
+                        style="display:inline;vertical-align:middle;margin-right:4px">
+                        <path
+                            d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                    </svg>
+                    GitHub
+                </a>
+                <a href="#contacto" class="btn-cta">Solicitar demo</a>
+            </div>
         </div>
     </nav>
 
-    <!-- ═══════════════════════════════ HERO ════════════════════════════════════ -->
+    <!-- NASA CLIMATE CHANGE BAND -->
+    <div class="climate-band">
+        <div class="climate-band-inner">
+            <span class="climate-label">Alerta Climática Global · NASA</span>
+            <div class="climate-stats">
+                <div class="cs"><span class="cs-v">424 ppm</span><span class="cs-l">CO₂ atmosférico</span></div>
+                <div class="cs"><span class="cs-v">+1.2°C</span><span class="cs-l">anomalía temp. global</span></div>
+                <div class="cs"><span class="cs-v">3.7 mm/año</span><span class="cs-l">nivel del mar</span></div>
+                <div class="cs"><span class="cs-v">-13%/década</span><span class="cs-l">hielo ártico</span></div>
+            </div>
+            <span class="climate-src"><a href="https://science.nasa.gov/climate-change/" target="_blank"
+                    rel="noopener">science.nasa.gov/climate-change ↗</a></span>
+        </div>
+    </div>
+
+    <!-- HERO -->
     <section class="hero" id="inicio">
-        <div class="hero-bg">
-            <div class="hero-grid"></div>
-            <div class="hero-glow"></div>
-        </div>
-        <div class="container">
-            <div class="hero-badge">
-                <span class="badge-dot"></span>
-                Open Source · IEC 62443 SL-2 Ready · v2.10.0
-            </div>
-            <h1 class="hero-title">
-                Gestión autónoma de BESS<br>
-                <span class="gradient-text">con inteligencia real</span>
-            </h1>
-            <p class="hero-subtitle">
-                BESSAI Edge conecta tu batería al mercado eléctrico chileno. Optimización MILP + DRL entrenado con datos
-                CMg reales del CEN/SEN, autoprotección con watchdog autónomo y cumplimiento IEEE 2030.5 — todo en el
-                edge, sin depender de la nube.
-            </p>
-            <div class="hero-actions">
-                <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank" class="btn btn-primary">
-                    Comenzar gratis
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                </a>
-                <a href="#producto" class="btn btn-ghost">Ver cómo funciona</a>
-            </div>
-            <div class="hero-stats">
-                <div class="stat">
-                    <span class="stat-number" data-target="613">0</span>
-                    <span class="stat-label">Tests verdes</span>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat">
-                    <span class="stat-number" data-target="7">0</span>
-                    <span class="stat-label">Marcas compatibles</span>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat">
-                    <span class="stat-number" data-suffix="ms" data-target="5">0</span>
-                    <span class="stat-label">Latencia ciclo</span>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat">
-                    <span class="stat-number" data-suffix="%" data-target="98">0</span>
-                    <span class="stat-label">IEC 62443 SL-2</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ═══════════════════════════════ FEATURES ════════════════════════════════ -->
-    <section class="section" id="producto">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Producto</span>
-                <h2>Todo lo que necesita un BESS moderno</h2>
-                <p>Desde la adquisición de datos hasta la ejecución de estrategias de arbitraje optimizadas con IA — en
-                    un solo sistema open source.</p>
-            </div>
-            <div class="features-grid">
-
-                <div class="feature-card feature-card--large">
-                    <div class="feature-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.8">
-                            <path
-                                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
-                    </div>
-                    <h3>Optimizador MILP + DRL</h3>
-                    <p>Planificación de despacho por Programación Lineal Entera Mixta con fallback a agente DRL
-                        entrenado con datos CMg reales del nodo Maitencillo 220 kV (CEN/SEN Chile). Maximiza arbitraje
-                        respetando degradación de batería.</p>
-                    <ul class="feature-list">
-                        <li>Solver HiGHS/CBC integrado</li>
-                        <li>48+ días de datos CMg históricos reales</li>
-                        <li>Modelo de degradación semi-empírico (LFP, NMC, NCA)</li>
-                        <li>Exportación ONNX para deploy edge (RPi 5)</li>
-                    </ul>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.8">
-                            <path
-                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                    </div>
-                    <h3>Seguridad IEC 62443 SL-2</h3>
-                    <p>mTLS mutual auth, TOTP 2FA, rate limiting SR 7.1, bandit SAST, Trivy container scan y OpenSSF
-                        Scorecard en CI/CD. ~98% de cumplimiento.</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.8">
-                            <path
-                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                    </div>
-                    <h3>WatchdogManager Autónomo</h3>
-                    <p>Autorecuperación sin intervención humana. Detecta desconexiones del driver y reconecta con
-                        backoff exponencial (1s → 30s). Métricas Prometheus integradas.</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.8">
-                            <path
-                                d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <h3>IEEE 2030.5 / SEP 2.0</h3>
-                    <p>Adaptador IEEE 2030.5 completo para cumplimiento CPUC Rule 21 y AEMO AS/NZS 4777.2. Compatible
-                        con aggregadores VPP y demand response.</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.8">
-                            <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                    </div>
-                    <h3>Publicación Dual-Canal</h3>
-                    <p>GCP Pub/Sub + MQTT simultáneamente. Observabilidad con OpenTelemetry, métricas Prometheus en
-                        <code>/metrics</code> y health check en <code>/health</code>.</p>
-                </div>
-
-                <div class="feature-card feature-card--highlight">
-                    <div class="feature-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.8">
-                            <circle cx="12" cy="12" r="3" />
-                            <path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14" />
-                        </svg>
-                    </div>
-                    <h3>100% Open Source</h3>
-                    <p>Apache 2.0. Sin vendor lock-in. Certificación BESSAI disponible. Comunidad activa en GitHub con
-                        roadmap público y BEPs formales.</p>
-                    <a href="https://github.com/bess-solutions/open-bess-edge" class="feature-link" target="_blank">Ver
-                        en GitHub →</a>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ═══════════════════════════════ MÉTRICAS ════════════════════════════════ -->
-    <section class="section section--alt" id="metricas">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Calidad verificada</span>
-                <h2>Números que hablan por sí solos</h2>
-            </div>
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-number">613</div>
-                    <div class="metric-label">Tests automatizados</div>
-                    <div class="metric-sub">0 failures · CI verde cada commit</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-number">~98%</div>
-                    <div class="metric-label">IEC 62443 SL-2</div>
-                    <div class="metric-sub">OpenSSF Scorecard passing</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-number">&lt;5ms</div>
-                    <div class="metric-label">Latencia ciclo edge</div>
-                    <div class="metric-sub">En Raspberry Pi 5 · 8GB RAM</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-number">48+</div>
-                    <div class="metric-label">Días CMg reales CEN</div>
-                    <div class="metric-sub">Nodo Maitencillo 220 kV</div>
-                </div>
-            </div>
-            <div class="ci-badge-row">
-                <div class="ci-badge">
-                    <span class="badge-label">pytest</span>
-                    <span class="badge-status badge-status--green">613 passing</span>
-                </div>
-                <div class="ci-badge">
-                    <span class="badge-label">ruff</span>
-                    <span class="badge-status badge-status--green">passing</span>
-                </div>
-                <div class="ci-badge">
-                    <span class="badge-label">mypy</span>
-                    <span class="badge-status badge-status--green">passing</span>
-                </div>
-                <div class="ci-badge">
-                    <span class="badge-label">trivy</span>
-                    <span class="badge-status badge-status--green">0 critical</span>
-                </div>
-                <div class="ci-badge">
-                    <span class="badge-label">bandit</span>
-                    <span class="badge-status badge-status--green">clean</span>
-                </div>
-                <div class="ci-badge">
-                    <span class="badge-label">docker</span>
-                    <span class="badge-status badge-status--green">linux/amd64 · arm64</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ═══════════════════════════════ HARDWARE ════════════════════════════════ -->
-    <section class="section" id="hardware">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Compatibilidad</span>
-                <h2>7 marcas. Un solo sistema.</h2>
-                <p>Conecta tu inversor real vía Modbus TCP con perfiles YAML pre-validados. Nuevo perfil en &lt;1 hora.
+        <canvas id="bess-canvas"></canvas>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-inner">
+                <div class="hero-tag"><span class="tag-dot"></span>Apache 2.0 · v2.10.0 · IEC 62443 SL-2</div>
+                <h1 class="hero-h1">
+                    La transición energética<br>necesita
+                    <span class="typewriter" id="typewriter"></span>
+                </h1>
+                <p class="hero-sub">
+                    Sistema operativo open-source para baterías industriales. Optimización MILP, agente DRL entrenado
+                    con datos CMg reales del CEN/SEN, y recuperación autónoma — ejecutando en el borde, sin nube.
                 </p>
+                <div class="hero-actions">
+                    <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank" class="btn-primary">
+                        Ver repositorio
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <path d="M7 17L17 7M7 7h10v10" />
+                        </svg>
+                    </a>
+                    <a href="#dashboard" class="btn-secondary">Ver telemetría en vivo</a>
+                </div>
+
+                <!-- Terminal animada -->
+                <div class="terminal">
+                    <div class="term-bar">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <span class="term-path">bessai-edge · cycle 4821 · Maitencillo-220kV</span>
+                    </div>
+                    <div class="term-body">
+                        <span class="tl"><span class="tc"># Ciclo de adquisición en curso</span></span>
+                        <span class="tl"><span class="tk">cycle</span>=<span class="tn">4821</span> <span
+                                class="tk">soc</span>=<span class="tn">72.4%</span> <span
+                                class="tk">power_kw</span>=<span class="tn">−148.2</span> <span
+                                class="tk">safety</span>=<span class="ts">ok</span></span>
+                        <span class="tl"><span class="tk">milp.schedule</span>=<span class="ts">discharge</span> <span
+                                class="tk">cmg_now</span>=<span class="tn">62.4</span> <span class="tc">USD/MWh</span>
+                            <span class="tk">cmg_4h</span>=<span class="tn">41.1</span></span>
+                        <span class="tl"><span class="tk">p_setpoint_pu</span>=<span class="tn">0.82</span> <span
+                                class="tk">deg_cost</span>=<span class="tn">0.031</span> <span
+                                class="tk">src</span>=<span class="ts">milp_optimizer</span></span>
+                        <span class="tl"><span class="tk">latency_ms</span>=<span class="tn">3.7</span> <span
+                                class="tk">watchdog</span>=<span class="ts">ok</span> <span class="tk">mqtt</span>=<span
+                                class="ts">true</span> <span class="tk">pubsub</span>=<span
+                                class="ts">true</span></span>
+                        <span class="tl">&nbsp;</span>
+                        <span class="tl"><span style="color:#374151">$</span> <span class="cursor"></span></span>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="hero-stats">
+                    <div class="hs">
+                        <div class="hs-v" data-count="613" data-suffix="">0</div>
+                        <div class="hs-l">Tests · 0 failures</div>
+                    </div>
+                    <div class="hs">
+                        <div class="hs-v">&lt;5ms</div>
+                        <div class="hs-l">Latencia ciclo · RPi 5</div>
+                    </div>
+                    <div class="hs">
+                        <div class="hs-v" data-count="98" data-suffix="%">0%</div>
+                        <div class="hs-l">IEC 62443 SL-2</div>
+                    </div>
+                    <div class="hs">
+                        <div class="hs-v" data-count="48" data-suffix="d+">0d+</div>
+                        <div class="hs-l">Datos CMg reales CEN</div>
+                    </div>
+                </div>
             </div>
-            <div class="hw-grid">
-                <div class="hw-card">
-                    <div class="hw-logo">🔆</div>
+        </div>
+    </section>
+
+    <hr class="rule" />
+
+    <!-- LIVE DASHBOARD -->
+    <section id="dashboard" class="dash-section">
+        <div class="wrap">
+            <div class="sec-head reveal">
+                <div class="eyebrow">Telemetría en tiempo real</div>
+                <h2 class="sec-h2">Lo que el sistema ve. Lo que decide.</h2>
+                <p class="sec-p">Datos simulativos representativos del nodo Maitencillo 220 kV · CEN Chile.</p>
+            </div>
+            <div class="dash-grid reveal">
+                <!-- Chart panel -->
+                <div class="dash-panel">
+                    <div class="dash-header">
+                        <span class="dash-title">SoC & Potencia · últimos 20 ciclos</span>
+                        <span class="live-badge">LIVE</span>
+                    </div>
+                    <div class="dash-body">
+                        <div class="chart-wrap"><canvas id="chart-main"></canvas></div>
+                        <div class="kpi-grid">
+                            <div class="kpi">
+                                <div class="kpi-label">SoC actual</div>
+                                <div class="kpi-value cyan" id="kpi-soc">72.4%</div>
+                                <div class="kpi-sub">State of Charge</div>
+                            </div>
+                            <div class="kpi">
+                                <div class="kpi-label">Potencia</div>
+                                <div class="kpi-value warn" id="kpi-pw">−148.2 kW</div>
+                                <div class="kpi-sub">descargando</div>
+                            </div>
+                            <div class="kpi">
+                                <div class="kpi-label">CMg ahora</div>
+                                <div class="kpi-value green" id="kpi-cmg">62.4 USD/MWh</div>
+                                <div class="kpi-sub">Maitencillo 220kV</div>
+                            </div>
+                            <div class="kpi">
+                                <div class="kpi-label">Latencia</div>
+                                <div class="kpi-value" id="kpi-lat">3.7 ms</div>
+                                <div class="kpi-sub">ciclo edge</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Data rows panel -->
+                <div class="dash-panel">
+                    <div class="dash-header">
+                        <span class="dash-title">Estado del sistema</span>
+                        <span class="live-badge">LIVE</span>
+                    </div>
+                    <div class="dash-body">
+                        <div class="data-rows">
+                            <div class="dr"><span class="dr-k">driver.connected</span><span class="dr-v g"
+                                    id="dr-conn">true</span></div>
+                            <div class="dr"><span class="dr-k">safety_status</span><span class="dr-v g">ok</span></div>
+                            <div class="dr"><span class="dr-k">schedule</span><span class="dr-v g"
+                                    id="dr-sched">discharge</span></div>
+                            <div class="dr"><span class="dr-k">p_setpoint_pu</span><span class="dr-v c"
+                                    id="dr-sp">0.82</span></div>
+                            <div class="dr"><span class="dr-k">deg_cost_usd_kwh</span><span class="dr-v">0.031</span>
+                            </div>
+                            <div class="dr"><span class="dr-k">watchdog.heals_total</span><span class="dr-v">0</span>
+                            </div>
+                            <div class="dr"><span class="dr-k">mqtt.connected</span><span class="dr-v g">true</span>
+                            </div>
+                            <div class="dr"><span class="dr-k">pubsub.connected</span><span class="dr-v g">true</span>
+                            </div>
+                            <div class="dr"><span class="dr-k">temp_c</span><span class="dr-v c"
+                                    id="dr-temp">31.2</span></div>
+                            <div class="dr"><span class="dr-k">cycle</span><span class="dr-v" id="dr-cycle">4821</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="rule" />
+
+    <!-- SISTEMA / ARQUITECTURA -->
+    <section id="sistema">
+        <div class="wrap">
+            <div class="sec-head reveal">
+                <div class="eyebrow">Arquitectura</div>
+                <h2 class="sec-h2">Cada componente tiene una responsabilidad definida.</h2>
+            </div>
+            <div class="feat-grid reveal">
+                <div class="fc">
+                    <div class="fc-num">01</div>
+                    <div class="fc-title">Capa de adquisición</div>
+                    <p class="fc-body">Driver universal Modbus TCP con perfiles YAML por fabricante. Lee SoC, potencia
+                        activa y temperatura en cada ciclo. Reconexión autónoma con backoff exponencial.</p>
+                    <span class="fc-tag">modbus-tcp · yaml-profile</span>
+                </div>
+                <div class="fc">
+                    <div class="fc-num">02</div>
+                    <div class="fc-title">SafetyGuard</div>
+                    <p class="fc-body">Validación de rangos antes de cualquier despacho. Si el telemetro sale de banda,
+                        la publicación se bloquea y se emite alerta inmediata. Sin datos validados, no hay lógica.</p>
+                    <span class="fc-tag">pre-dispatch · range-check</span>
+                </div>
+                <div class="fc">
+                    <div class="fc-num">03</div>
+                    <div class="fc-title">MILP Optimizer</div>
+                    <p class="fc-body">Programación Lineal Entera Mixta (HiGHS/CBC) planifica el perfil de despacho de
+                        las próximas 24h considerando precios CMg reales del nodo Maitencillo 220 kV, degradación
+                        semi-empírica y SoC.</p>
+                    <span class="fc-tag">HiGHS · CBC · Maitencillo-220kV</span>
+                </div>
+                <div class="fc">
+                    <div class="fc-num">04</div>
+                    <div class="fc-title">Agente DRL (BEP-0200)</div>
+                    <p class="fc-body">Agente PPO entrenado sobre 48+ días de datos CMg reales. Exportado a ONNX para
+                        inferencia en Raspberry Pi 5. Fallback determinístico si el modelo no está disponible.</p>
+                    <span class="fc-tag">PPO · ONNX · gymnasium</span>
+                </div>
+                <div class="fc fc-wide">
+                    <div class="fc-num">05</div>
+                    <div class="fc-title">WatchdogManager + Publicación dual</div>
+                    <p class="fc-body">Loop autónomo de detección y recuperación de conectividad del driver — corre como
+                        tarea asyncio independiente. Telemetría publicada simultáneamente a GCP Pub/Sub y MQTT. Métricas
+                        Prometheus en <code class="ic">/metrics</code>, health check en <code class="ic">/health</code>.
+                    </p>
+                    <span class="fc-tag">asyncio · pub/sub · mqtt · prometheus · otel</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="rule" />
+
+    <!-- HARDWARE -->
+    <section id="hardware">
+        <div class="wrap">
+            <div class="sec-head reveal">
+                <div class="eyebrow">Compatibilidad de hardware</div>
+                <h2 class="sec-h2">Perfiles YAML validados en field.</h2>
+            </div>
+            <div class="hw-grid reveal">
+                <div class="hw-item">
                     <div class="hw-name">Huawei SUN2000</div>
-                    <div class="hw-status hw-status--stable">Estable</div>
+                    <div class="hw-proto">Modbus TCP</div>
+                    <div><span class="hw-badge stable">estable</span></div>
                 </div>
-                <div class="hw-card">
-                    <div class="hw-logo">⚡</div>
+                <div class="hw-item">
                     <div class="hw-name">Fronius Primo</div>
-                    <div class="hw-status hw-status--stable">Estable</div>
+                    <div class="hw-proto">Modbus TCP</div>
+                    <div><span class="hw-badge stable">estable</span></div>
                 </div>
-                <div class="hw-card">
-                    <div class="hw-logo">☀️</div>
+                <div class="hw-item">
                     <div class="hw-name">SMA Sunny Boy</div>
-                    <div class="hw-status hw-status--stable">Estable</div>
+                    <div class="hw-proto">Modbus TCP</div>
+                    <div><span class="hw-badge stable">estable</span></div>
                 </div>
-                <div class="hw-card">
-                    <div class="hw-logo">🔋</div>
+                <div class="hw-item">
                     <div class="hw-name">Victron MultiPlus</div>
-                    <div class="hw-status hw-status--stable">Estable</div>
+                    <div class="hw-proto">VE.Bus</div>
+                    <div><span class="hw-badge stable">estable</span></div>
                 </div>
-                <div class="hw-card">
-                    <div class="hw-logo">🌞</div>
+                <div class="hw-item">
                     <div class="hw-name">SolarEdge</div>
-                    <div class="hw-status hw-status--beta">Beta</div>
+                    <div class="hw-proto">SunSpec</div>
+                    <div><span class="hw-badge beta">beta</span></div>
                 </div>
-                <div class="hw-card">
-                    <div class="hw-logo">🔋</div>
+                <div class="hw-item">
                     <div class="hw-name">BYD Battery-Box</div>
-                    <div class="hw-status hw-status--beta">Beta</div>
+                    <div class="hw-proto">Modbus TCP</div>
+                    <div><span class="hw-badge beta">beta</span></div>
                 </div>
-                <div class="hw-card">
-                    <div class="hw-logo">⚡</div>
+                <div class="hw-item">
                     <div class="hw-name">Tesla Powerwall</div>
-                    <div class="hw-status hw-status--beta">Beta</div>
+                    <div class="hw-proto">REST</div>
+                    <div><span class="hw-badge beta">beta</span></div>
                 </div>
             </div>
+            <p style="margin-top:16px;font-size:.78rem;color:var(--muted)">Nuevo perfil de hardware en menos de 2 horas.
+                Ver <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/docs/DRIVER_PROFILES.md"
+                    target="_blank"
+                    style="color:var(--cyan-d);text-decoration:underline;text-underline-offset:3px">DRIVER_PROFILES.md</a>.
+            </p>
         </div>
     </section>
 
-    <!-- ═══════════════════════════════ HOW IT WORKS ════════════════════════════ -->
-    <section class="section section--alt">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Arquitectura</span>
-                <h2>Del dato al despacho en 5 pasos</h2>
-            </div>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-num">01</div>
-                    <div class="step-content">
-                        <h3>Adquisición</h3>
-                        <p>Driver Modbus TCP lee SoC, potencia activa y temperatura cada 5 segundos desde el inversor
-                            real.</p>
-                    </div>
-                </div>
-                <div class="step-arrow">→</div>
-                <div class="step">
-                    <div class="step-num">02</div>
-                    <div class="step-content">
-                        <h3>Seguridad</h3>
-                        <p>SafetyGuard valida rangos. Si algo sale del límite, bloquea la publicación y activa alertas
-                            inmediatas.</p>
-                    </div>
-                </div>
-                <div class="step-arrow">→</div>
-                <div class="step">
-                    <div class="step-num">03</div>
-                    <div class="step-content">
-                        <h3>Optimización</h3>
-                        <p>MILP calcula el plan de despacho óptimo. DRL PPO lo refina usando precios CMg en tiempo real
-                            del CEN.</p>
-                    </div>
-                </div>
-                <div class="step-arrow">→</div>
-                <div class="step">
-                    <div class="step-num">04</div>
-                    <div class="step-content">
-                        <h3>Publicación</h3>
-                        <p>Telemetría segura a GCP Pub/Sub + MQTT. Métricas Prometheus. Dashboard actualizado al
-                            instante.</p>
-                    </div>
-                </div>
-                <div class="step-arrow">→</div>
-                <div class="step">
-                    <div class="step-num">05</div>
-                    <div class="step-content">
-                        <h3>Auto-sanación</h3>
-                        <p>WatchdogManager detecta fallos y reconecta sin intervención humana. El sistema sigue
-                            operando.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <hr class="rule" />
 
-    <!-- ═══════════════════════════════ PRICING ════════════════════════════════ -->
-    <section class="section" id="precios">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Precios</span>
-                <h2>Empieza gratis. Escala cuando lo necesites.</h2>
-            </div>
-            <div class="pricing-grid">
-
-                <div class="pricing-card">
-                    <div class="pricing-header">
-                        <div class="pricing-name">Open Source</div>
-                        <div class="pricing-price">Gratis</div>
-                        <div class="pricing-period">Para siempre · Apache 2.0</div>
+    <!-- ROADMAP + CI -->
+    <section id="roadmap">
+        <div class="wrap">
+            <div class="two-col reveal">
+                <div>
+                    <div class="sec-head">
+                        <div class="eyebrow">Roadmap</div>
+                        <h2 class="sec-h2">Estado del proyecto.</h2>
                     </div>
-                    <ul class="pricing-features">
-                        <li>✓ Código completo en GitHub</li>
-                        <li>✓ 7 perfiles de hardware</li>
-                        <li>✓ Optimizador MILP</li>
-                        <li>✓ Datos CMg históricos CEN</li>
-                        <li>✓ Docker + Helm charts</li>
-                        <li>✓ Documentación completa</li>
-                    </ul>
-                    <a href="https://github.com/bess-solutions/open-bess-edge" class="btn btn-outline"
-                        target="_blank">Clonar repositorio</a>
-                </div>
-
-                <div class="pricing-card pricing-card--featured">
-                    <div class="pricing-badge">Early Adopter</div>
-                    <div class="pricing-header">
-                        <div class="pricing-name">BESSAI Pro</div>
-                        <div class="pricing-price">A convenir</div>
-                        <div class="pricing-period">Proyecto piloto · Precio especial 2026</div>
-                    </div>
-                    <ul class="pricing-features">
-                        <li>✓ Todo lo de Open Source</li>
-                        <li>✓ Integración llave en mano</li>
-                        <li>✓ Soporte dedicado 24/7</li>
-                        <li>✓ Dashboard personalizado</li>
-                        <li>✓ Certificación BESSAI</li>
-                        <li>✓ CMg feed en tiempo real</li>
-                        <li>✓ SLA garantizado</li>
-                    </ul>
-                    <a href="#contacto" class="btn btn-primary">Solicitar demo</a>
-                </div>
-
-                <div class="pricing-card">
-                    <div class="pricing-header">
-                        <div class="pricing-name">Enterprise</div>
-                        <div class="pricing-price">Personalizado</div>
-                        <div class="pricing-period">Multi-sitio · OEM · Utilities</div>
-                    </div>
-                    <ul class="pricing-features">
-                        <li>✓ Despliegue multi-sitio</li>
-                        <li>✓ Integración ERP/SCADA</li>
-                        <li>✓ Perfil Modbus custom</li>
-                        <li>✓ Compliance regulatorio</li>
-                        <li>✓ Training equipo técnico</li>
-                        <li>✓ IP privada disponible</li>
-                    </ul>
-                    <a href="#contacto" class="btn btn-outline">Contactar</a>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ═══════════════════════════════ ROADMAP ════════════════════════════════ -->
-    <section class="section section--alt">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Roadmap 2026</span>
-                <h2>El futuro de BESSAI</h2>
-            </div>
-            <div class="roadmap">
-                <div class="roadmap-item roadmap-item--done">
-                    <div class="roadmap-dot"></div>
-                    <div class="roadmap-content">
-                        <div class="roadmap-date">Q4 2025</div>
-                        <h3>Núcleo Edge v1</h3>
-                        <p>Modbus TCP, GCP Pub/Sub, SafetyGuard, MQTT, OpenTelemetry, IEEE 2030.5</p>
+                    <div class="roadmap-track">
+                        <div class="rm done">
+                            <div class="rm-date">Q4 2025</div>
+                            <div class="rm-title">Núcleo Edge v1</div>
+                            <p class="rm-body">Modbus TCP, GCP Pub/Sub, SafetyGuard, MQTT, OpenTelemetry, IEEE 2030.5
+                                SEP 2.0</p>
+                        </div>
+                        <div class="rm done">
+                            <div class="rm-date">Ene – Feb 2026</div>
+                            <div class="rm-title">IA y Seguridad</div>
+                            <p class="rm-body">MILP optimizer, DRL PPO con datos CEN reales (BEP-0200 F3),
+                                WatchdogManager, IEC 62443 SL-2 ~98%, OpenSSF Scorecard</p>
+                        </div>
+                        <div class="rm now">
+                            <div class="rm-date">Q1 2026 — en curso</div>
+                            <div class="rm-title">Plataforma y Comunidad</div>
+                            <p class="rm-body">Certificación BESSAI, dashboard multi-sitio, primeros early adopters</p>
+                        </div>
+                        <div class="rm">
+                            <div class="rm-date">Q2 2026</div>
+                            <div class="rm-title">Control de Despacho</div>
+                            <p class="rm-body">write_tag activo, OpenADR 2.0, agregación de flota MARL</p>
+                        </div>
+                        <div class="rm">
+                            <div class="rm-date">Q3 – Q4 2026</div>
+                            <div class="rm-title">Expansión LatAm</div>
+                            <p class="rm-body">Colombia, Perú, Brasil · ONS / CAMMESA · pt-BR</p>
+                        </div>
                     </div>
                 </div>
-                <div class="roadmap-item roadmap-item--done">
-                    <div class="roadmap-dot"></div>
-                    <div class="roadmap-content">
-                        <div class="roadmap-date">Ene–Feb 2026</div>
-                        <h3>IA y Seguridad</h3>
-                        <p>MILP optimizer, DRL PPO con datos CEN reales, WatchdogManager, IEC 62443 SL-2 ~98%, OpenSSF
-                            Scorecard</p>
+                <div>
+                    <div class="sec-head">
+                        <div class="eyebrow">CI/CD · main</div>
+                        <h2 class="sec-h2">Cada commit verificado.</h2>
                     </div>
-                </div>
-                <div class="roadmap-item roadmap-item--active">
-                    <div class="roadmap-dot"></div>
-                    <div class="roadmap-content">
-                        <div class="roadmap-date">Q1 2026</div>
-                        <h3>Plataforma & Comunidad</h3>
-                        <p>Certificación BESSAI pública, multisite dashboard, Discord community, primeros early adopters
-                        </p>
-                    </div>
-                </div>
-                <div class="roadmap-item">
-                    <div class="roadmap-dot"></div>
-                    <div class="roadmap-content">
-                        <div class="roadmap-date">Q2 2026</div>
-                        <h3>Integración VPP</h3>
-                        <p>write_tag control, OpenADR 2.0, aggregación de flota MARL, API pública CMg predictor</p>
-                    </div>
-                </div>
-                <div class="roadmap-item">
-                    <div class="roadmap-dot"></div>
-                    <div class="roadmap-content">
-                        <div class="roadmap-date">Q3–Q4 2026</div>
-                        <h3>Expansión LatAm</h3>
-                        <p>Colombia, Perú, Brasil; traducción pt-BR, regulación ONS/CAMMESA, alianzas con fabricantes
-                        </p>
+                    <div class="ci-panel">
+                        <div class="ci-head">Pipeline automático · GitHub Actions</div>
+                        <div class="ci-row"><span class="ci-k">pytest</span><span class="ci-v">613 passed · 0
+                                failed</span></div>
+                        <div class="ci-row"><span class="ci-k">ruff + mypy</span><span class="ci-v">clean</span></div>
+                        <div class="ci-row"><span class="ci-k">bandit SAST</span><span class="ci-v">0 high / 0
+                                critical</span></div>
+                        <div class="ci-row"><span class="ci-k">trivy container</span><span class="ci-v">0 critical
+                                CVEs</span></div>
+                        <div class="ci-row"><span class="ci-k">docker build</span><span class="ci-v">linux/amd64 ·
+                                arm64</span></div>
+                        <div class="ci-row"><span class="ci-k">helm lint</span><span class="ci-v">passing</span></div>
+                        <div class="ci-row"><span class="ci-k">OpenSSF Scorecard</span><span
+                                class="ci-v">hardened</span></div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ═══════════════════════════════ CONTACTO ════════════════════════════════ -->
-    <section class="section" id="contacto">
-        <div class="container">
-            <div class="contact-box">
-                <div class="contact-content">
-                    <span class="section-tag">Contacto</span>
-                    <h2>¿Tienes un BESS que optimizar?</h2>
-                    <p>Agenda una demo técnica gratuita. En 30 minutos te mostramos BESSAI corriendo en hardware real
-                        con tus condiciones de mercado.</p>
-                    <div class="contact-details">
-                        <a href="mailto:contacto@bess-solutions.cl" class="contact-link">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                                <polyline points="22,6 12,13 2,6" />
-                            </svg>
+    <hr class="rule" />
+
+    <!-- CTA -->
+    <section id="contacto">
+        <div class="wrap">
+            <div class="cta-block reveal">
+                <div class="cta-inner">
+                    <div>
+                        <div class="eyebrow">Contacto</div>
+                        <div class="cta-h2">¿Tienes un BESS que gestionar?</div>
+                        <p class="cta-p">Agendamos una sesión técnica de 30 minutos. Sin presentaciones comerciales —
+                            revisamos tu arquitectura actual y evaluamos el fit con BESSAI Edge.</p>
+                    </div>
+                    <div class="cta-actions">
+                        <a href="mailto:contacto@bess-solutions.cl?subject=BESSAI%20Edge%20%E2%80%94%20Sesi%C3%B3n%20t%C3%A9cnica"
+                            class="btn-primary">
                             contacto@bess-solutions.cl
-                        </a>
-                        <a href="https://github.com/bess-solutions/open-bess-edge" class="contact-link" target="_blank">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                <path
-                                    d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <path d="M7 17L17 7M7 7h10v10" />
                             </svg>
-                            github.com/bess-solutions/open-bess-edge
                         </a>
+                        <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank"
+                            class="btn-secondary">Explorar el repositorio</a>
+                        <span class="cta-note">// Santiago, Chile · Respuesta en &lt;24h</span>
                     </div>
-                </div>
-                <div class="contact-cta-box">
-                    <a href="mailto:contacto@bess-solutions.cl?subject=Demo%20BESSAI%20Edge&body=Hola%2C%20me%20interesa%20agendar%20una%20demo%20t%C3%A9cnica%20de%20BESSAI%20Edge."
-                        class="btn btn-primary btn-lg">
-                        Agendar demo gratuita
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M5 12h14M12 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                    <p class="contact-note">Sin compromiso · Respuesta en &lt;24h · Técnicos, no vendedores</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ═══════════════════════════════ FOOTER ══════════════════════════════════ -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-top">
-                <div class="footer-brand">
-                    <a href="#" class="nav-logo">
-                        <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-                            <rect width="32" height="32" rx="8" fill="#0891b2" />
-                            <path d="M8 20L14 12L19 17L23 12" stroke="white" stroke-width="2.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <circle cx="24" cy="10" r="2.5" fill="#22d3ee" />
-                        </svg>
-                        <span class="logo-text">BESS <span class="logo-accent">Solutions</span></span>
-                    </a>
-                    <p>Sistema de gestión de baterías con inteligencia artificial. Open source, edge-native,
-                        LatAm-ready.</p>
+    <!-- FOOTER -->
+    <footer>
+        <div class="wrap">
+            <div class="foot-inner">
+                <span class="foot-copy">© 2026 BESS Solutions SpA · Construyendo la transición energética de
+                    Chile</span>
+                <div class="foot-links">
+                    <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank">GitHub</a>
+                    <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/CHANGELOG.md"
+                        target="_blank">Changelog</a>
+                    <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/SECURITY.md"
+                        target="_blank">Security</a>
+                    <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/LICENSE" target="_blank">Apache
+                        2.0</a>
                 </div>
-                <div class="footer-links">
-                    <div class="footer-col">
-                        <h4>Producto</h4>
-                        <a href="#producto">Features</a>
-                        <a href="#hardware">Hardware</a>
-                        <a href="#precios">Precios</a>
-                        <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/CHANGELOG.md"
-                            target="_blank">Changelog</a>
-                    </div>
-                    <div class="footer-col">
-                        <h4>Documentación</h4>
-                        <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/docs/QUICKSTART.md"
-                            target="_blank">Quickstart</a>
-                        <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/docs/PLAN_INMORTALIDAD.md"
-                            target="_blank">Roadmap</a>
-                        <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/SECURITY.md"
-                            target="_blank">Security</a>
-                    </div>
-                    <div class="footer-col">
-                        <h4>Empresa</h4>
-                        <a href="#contacto">Contacto</a>
-                        <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank">GitHub</a>
-                        <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/LICENSE"
-                            target="_blank">Apache 2.0</a>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>© 2026 BESS Solutions SpA · Santiago, Chile</p>
-                <p>Hecho con ⚡ para el mercado eléctrico chileno</p>
             </div>
         </div>
     </footer>
 
-    <script src="app.js"></script>
+    <!-- THREE.JS -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
+    <!-- CHART.JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <script>
+        (function () {
+            'use strict';
+
+            // ── Three.js Univ ──
+            const canvas = document.getElementById('bess-canvas');
+            if (canvas && typeof THREE !== 'undefined') {
+                const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+                renderer.setClearColor(0x06080f, 1);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                const scene = new THREE.Scene();
+                scene.fog = new THREE.FogExp2(0x06080f, 0.016);
+                const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 300);
+                camera.position.set(0, 4, 38);
+                const root = new THREE.Group();
+                scene.add(root);
+
+                // Stars
+                const sp = new Float32Array(6000 * 3);
+                for (let i = 0; i < sp.length; i++)sp[i] = (Math.random() - .5) * 300;
+                const sg = new THREE.BufferGeometry();
+                sg.setAttribute('position', new THREE.BufferAttribute(sp, 3));
+                scene.add(new THREE.Points(sg, new THREE.PointsMaterial({ color: 0x8bb8cc, size: 0.09, transparent: true, opacity: 0.5 })));
+
+                // BESS nodes — more colorful
+                const NC = 40, npos = [], haloMats = [];
+                const colors = [0x22d3ee, 0x06b6d4, 0x0891b2, 0x67e8f9, 0x3b82f6];
+                for (let i = 0; i < NC; i++) {
+                    const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1), r = 6 + Math.random() * 18;
+                    const x = r * Math.sin(ph) * Math.cos(th), y = r * Math.sin(ph) * Math.sin(th) * .5, z = r * Math.cos(ph);
+                    npos.push(new THREE.Vector3(x, y, z));
+                    const c = colors[i % colors.length];
+                    const core = new THREE.Mesh(new THREE.SphereGeometry(.15, 8, 8), new THREE.MeshBasicMaterial({ color: c }));
+                    core.position.set(x, y, z); root.add(core);
+                    const hm = new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: .1 });
+                    haloMats.push(hm);
+                    const halo = new THREE.Mesh(new THREE.SphereGeometry(.6, 8, 8), hm);
+                    halo.position.set(x, y, z); root.add(halo);
+                }
+
+                // Connections
+                const DIST = 20, pairs = [];
+                for (let i = 0; i < NC; i++)for (let j = i + 1; j < NC; j++) {
+                    const d = npos[i].distanceTo(npos[j]);
+                    if (d < DIST) {
+                        pairs.push({ i, j });
+                        const geo = new THREE.BufferGeometry().setFromPoints([npos[i], npos[j]]);
+                        root.add(new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0x0c3d52, transparent: true, opacity: Math.max(.1, .5 - d / DIST * .35) })));
+                    }
+                }
+
+                // Packets
+                const pkts = [];
+                for (let k = 0; k < Math.min(28, pairs.length); k++) {
+                    const m = new THREE.Mesh(new THREE.SphereGeometry(.1, 6, 6), new THREE.MeshBasicMaterial({ color: 0x22d3ee }));
+                    root.add(m);
+                    pkts.push({ mesh: m, from: npos[pairs[k].i], to: npos[pairs[k].j], t: Math.random(), spd: .004 + Math.random() * .007, dir: Math.random() > .5 ? 1 : -1 });
+                }
+
+                // Mouse
+                let mx = 0, my = 0;
+                document.addEventListener('mousemove', e => { mx = (e.clientX / window.innerWidth - .5) * 2; my = (e.clientY / window.innerHeight - .5) * 2; });
+
+                function resize() {
+                    const w = window.innerWidth, h = window.innerHeight;
+                    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+                }
+                resize(); window.addEventListener('resize', resize);
+
+                let t = 0;
+                (function loop() {
+                    requestAnimationFrame(loop); t += .004;
+                    root.rotation.y = t * .16; root.rotation.x = Math.sin(t * .07) * .04;
+                    for (let i = 0; i < haloMats.length; i++)haloMats[i].opacity = .05 + .1 * Math.sin(t * 1.8 + i * .9);
+                    for (const p of pkts) {
+                        p.t += p.spd * p.dir;
+                        if (p.t >= 1) { p.t = 1; p.dir = -1; } if (p.t <= 0) { p.t = 0; p.dir = 1; }
+                        p.mesh.position.lerpVectors(p.from, p.to, p.t);
+                    }
+                    camera.position.x += (mx * 5 - camera.position.x) * .04;
+                    camera.position.y += (-my * 2.5 + 4 - camera.position.y) * .04;
+                    camera.lookAt(0, 0, 0);
+                    renderer.render(scene, camera);
+                })();
+            }
+
+            // ── Typewriter ──
+            const tw = document.getElementById('typewriter');
+            const words = ['inteligencia de borde.', 'optimización en tiempo real.', 'gestión autónoma BESS.', 'datos reales del CEN/SEN.'];
+            let wi = 0, ci = 0, del = false;
+            function type() {
+                const w = words[wi];
+                if (!del) { tw.textContent = w.slice(0, ++ci); }
+                else { tw.textContent = w.slice(0, --ci); }
+                if (!del && ci === w.length) { setTimeout(() => { del = true; }, 2000); setTimeout(type, 120); return; }
+                if (del && ci === 0) { del = false; wi = (wi + 1) % words.length; }
+                setTimeout(type, del ? 60 : 90);
+            }
+            tw && type();
+
+            // ── Chart.js live ──
+            if (typeof Chart !== 'undefined') {
+                const ctx = document.getElementById('chart-main');
+                if (ctx) {
+                    const labels = Array.from({ length: 20 }, (_, i) => `${i + 1}`);
+                    let socData = Array.from({ length: 20 }, () => 65 + Math.random() * 20);
+                    let pwData = Array.from({ length: 20 }, () => -200 + Math.random() * 250);
+                    const chart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels,
+                            datasets: [
+                                { label: 'SoC (%)', data: [...socData], borderColor: '#22d3ee', backgroundColor: 'rgba(34,211,238,.08)', borderWidth: 1.8, fill: true, tension: .4, pointRadius: 0 },
+                                { label: 'Potencia (kW/10)', data: pwData.map(v => v / 10), borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,.05)', borderWidth: 1.5, fill: false, tension: .4, pointRadius: 0 }
+                            ]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            animation: { duration: 300 },
+                            plugins: { legend: { labels: { color: '#6e7681', font: { size: 10, family: 'JetBrains Mono' } } } },
+                            scales: {
+                                x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6e7681', font: { size: 9 }, maxTicksLimit: 5 } },
+                                y: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6e7681', font: { size: 9 } } }
+                            }
+                        }
+                    });
+
+                    // Live update
+                    let cycle = 4821;
+                    setInterval(() => {
+                        const soc = Math.max(20, Math.min(95, socData[socData.length - 1] + (Math.random() - .45) * 3));
+                        const pw = -150 + Math.sin(Date.now() / 5000) * 120 + Math.random() * 40;
+                        const cmg = 55 + Math.random() * 20;
+                        const lat = (3 + Math.random() * 2).toFixed(1);
+                        const temp = (30 + Math.random() * 4).toFixed(1);
+                        socData.push(soc); socData.shift();
+                        pwData.push(pw); pwData.shift();
+                        chart.data.datasets[0].data = [...socData];
+                        chart.data.datasets[1].data = pwData.map(v => v / 10);
+                        chart.update('none');
+                        cycle++;
+                        const e = id => document.getElementById(id);
+                        if (e('kpi-soc')) e('kpi-soc').textContent = soc.toFixed(1) + '%';
+                        if (e('kpi-pw')) e('kpi-pw').textContent = (pw < 0 ? '' : '+') + (pw / 1000).toFixed(2) + ' MW';
+                        if (e('kpi-cmg')) e('kpi-cmg').textContent = cmg.toFixed(1) + ' USD/MWh';
+                        if (e('kpi-lat')) e('kpi-lat').textContent = lat + ' ms';
+                        if (e('dr-cycle')) e('dr-cycle').textContent = cycle;
+                        if (e('dr-temp')) e('dr-temp').textContent = temp;
+                        if (e('dr-sp')) e('dr-sp').textContent = (soc / 100 * .95 + .05).toFixed(2);
+                        if (e('dr-sched')) e('dr-sched').textContent = soc > 50 ? 'discharge' : 'charge';
+                    }, 2000);
+                }
+            }
+
+            // ── Scroll reveal ──
+            const obs = new IntersectionObserver(entries => {
+                entries.forEach((e, i) => { if (e.isIntersecting) { setTimeout(() => e.target.classList.add('visible'), i * 80); obs.unobserve(e.target); } });
+            }, { threshold: .07 });
+            document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+            // ── Counter animation ──
+            const countEls = document.querySelectorAll('[data-count]');
+            const countObs = new IntersectionObserver(entries => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) {
+                        const el = e.target, target = +el.dataset.count, suffix = el.dataset.suffix || '';
+                        let cur = 0; const step = target / 50;
+                        const iv = setInterval(() => { cur = Math.min(cur + step, target); el.textContent = Math.floor(cur) + suffix; if (cur >= target) clearInterval(iv); }, 30);
+                        countObs.unobserve(el);
+                    }
+                });
+            }, { threshold: .5 });
+            countEls.forEach(el => countObs.observe(el));
+
+            // ── Nav scroll ──
+            const nav = document.getElementById('nav');
+            window.addEventListener('scroll', () => { nav.style.background = window.scrollY > 50 ? 'rgba(6,8,15,.98)' : 'rgba(6,8,15,.85)'; }, { passive: true });
+        })();
+    </script>
 </body>
 
 </html>
