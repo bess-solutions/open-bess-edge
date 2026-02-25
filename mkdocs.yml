@@ -103,6 +103,7 @@ nav:
     - BEP-0300 — DRL Autonomous Control: bep/BEP-0300.md
     - BEP-0301 — XAI — Explainable AI: bep/BEP-0301.md
     - BEP-0302 — Market Integration CMg Live: bep/BEP-0302.md
+    - BEP-0303 — BESSAIEvolve (Self-Improvement): bep/BEP-0303.md
   - API Reference:
     - External Interface (API): API.md
     - API Reference (Legacy): api_reference.md
