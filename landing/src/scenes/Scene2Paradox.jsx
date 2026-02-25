@@ -73,7 +73,7 @@ export default function Scene2Paradox() {
 
     return (
         <section ref={ref} id="scene-2"
-            className="relative min-h-screen flex items-center justify-center overflow-hidden py-16">
+            className="relative min-h-[80vh] flex items-center justify-center overflow-hidden py-16">
             <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-amber-950/8 to-slate-950" />
 
             <motion.div className="relative z-10 w-full max-w-5xl mx-auto px-8" style={{ opacity }}>

@@ -71,7 +71,7 @@ export default function Scene5Sync() {
 
     return (
         <section ref={ref} id="scene-5"
-            className="relative min-h-screen flex items-center justify-center overflow-hidden py-16">
+            className="relative min-h-[80vh] flex items-center justify-center overflow-hidden py-16">
             <motion.div className="absolute inset-0"
                 style={{ background: 'radial-gradient(ellipse at 50% 100%, #020c1a 0%, #020617 60%)' }} />
 
