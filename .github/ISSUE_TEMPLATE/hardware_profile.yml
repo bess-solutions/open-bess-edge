@@ -1,0 +1,97 @@
+name: Hardware Profile Submission
+description: Submit support for a new inverter, BMS, or energy storage device
+title: "hardware: add [BRAND MODEL] profile"
+labels: ["hardware-profile", "community"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for contributing a hardware profile! This expands BESSAI's compatibility.
+        See [hardware_profile_contribution.md](https://github.com/bess-solutions/open-bess-edge/blob/main/docs/tutorials/hardware_profile_contribution.md) for the contribution guide.
+
+  - type: input
+    id: manufacturer
+    attributes:
+      label: Manufacturer
+      placeholder: "e.g. Huawei, SMA, Victron, BYD, ABB"
+    validations:
+      required: true
+
+  - type: input
+    id: model
+    attributes:
+      label: Model / Product Line
+      placeholder: "e.g. SUN2000-10KTL-M2, Sunny Tripower CORE1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: device_type
+    attributes:
+      label: Device Type
+      options:
+        - Grid-tied inverter (PV + BESS)
+        - Battery inverter / PCS
+        - BMS (Battery Management System)
+        - Hybrid inverter
+        - EV charger (OCPP)
+        - Smart meter / energy monitor
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: protocol
+    attributes:
+      label: Communication Protocol
+      multiple: true
+      options:
+        - Modbus TCP
+        - Modbus RTU (RS-485)
+        - IEC 61850 (MMS/GOOSE)
+        - IEEE 2030.5 / SEP 2.0
+        - SunSpec Modbus
+        - OCPP 1.6 / 2.0.1
+        - Proprietary TCP
+        - CAN bus
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: modbus_unit_id
+    attributes:
+      label: Modbus Unit ID (if applicable)
+      placeholder: "1"
+
+  - type: textarea
+    id: registers
+    attributes:
+      label: Key Register Map
+      description: List the most important Modbus registers (address, data type, unit, description)
+      render: markdown
+      placeholder: |
+        | Address | Type   | Unit | Description        |
+        |---------|--------|------|--------------------|
+        | 32000   | uint16 | W    | Active power output |
+        | 32064   | int16  | %    | State of Charge     |
+
+  - type: textarea
+    id: tested
+    attributes:
+      label: Test Environment
+      description: How did you test this? Firmware version, connection type, country / grid code.
+      placeholder: "Tested in Chile, firmware SPC312, 3-phase, 400V, connected via LAN"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Submission Checklist
+      options:
+        - label: I have a YAML profile file ready to attach or link
+        - label: I have run `make test` and the existing test suite passes
+        - label: I have added at least one unit test for the new profile
+        - label: I have read the [hardware CONTRIBUTING guide](https://github.com/bess-solutions/open-bess-edge/blob/main/docs/tutorials/hardware_profile_contribution.md)

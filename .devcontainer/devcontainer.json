@@ -1,0 +1,72 @@
+{
+    "name": "BESSAI Edge Gateway — Dev Container",
+    "image": "mcr.microsoft.com/devcontainers/python:3.12-bullseye",
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
+    "postCreateCommand": "pip install --upgrade pip && pip install -e '.[dev]' && pre-commit install",
+    "postStartCommand": "docker compose up -d --wait 2>/dev/null || true",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.mypy-type-checker",
+                "charliermarsh.ruff",
+                "ms-python.debugpy",
+                "eamodio.gitlens",
+                "mhutchie.git-graph",
+                "cschleiden.vscode-github-actions",
+                "redhat.vscode-yaml",
+                "yzhang.markdown-all-in-one",
+                "bierner.markdown-mermaid",
+                "ms-azuretools.vscode-docker",
+                "mtxr.sqltools",
+                "tamasfe.even-better-toml"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python",
+                "editor.formatOnSave": true,
+                "editor.codeActionsOnSave": {
+                    "source.fixAll.ruff": "explicit",
+                    "source.organizeImports.ruff": "explicit"
+                },
+                "[python]": {
+                    "editor.defaultFormatter": "charliermarsh.ruff"
+                },
+                "mypy-type-checker.args": [
+                    "--config-file=pyproject.toml"
+                ],
+                "files.watcherExclude": {
+                    "**/models/evolution/**": true,
+                    "**/__pycache__/**": true
+                }
+            }
+        }
+    },
+    "forwardPorts": [
+        8000,
+        3000,
+        9090,
+        1883
+    ],
+    "portsAttributes": {
+        "8000": {
+            "label": "BESSAI API (health + metrics)"
+        },
+        "3000": {
+            "label": "Grafana dashboard"
+        },
+        "9090": {
+            "label": "Prometheus"
+        },
+        "1883": {
+            "label": "MQTT broker"
+        }
+    },
+    "remoteEnv": {
+        "BESSAI_ENV": "development",
+        "BESSAI_LOG_LEVEL": "debug"
+    }
+}
