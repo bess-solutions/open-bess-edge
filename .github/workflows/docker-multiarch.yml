@@ -46,7 +46,7 @@ jobs:
 
       - name: Extract metadata
         id: meta
-        uses: docker/metadata-action@369eb591f4116096408f0d90cc3bbd9f92f57e20  # v5.6.1
+        uses: docker/metadata-action@369eb591f429131d6889c46b94e711f089e6ca96  # v5.6.1
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -92,7 +92,7 @@ jobs:
       - uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db  # v3.6.1
       - name: Extract metadata
         id: meta
-        uses: docker/metadata-action@369eb591f4116096408f0d90cc3bbd9f92f57e20  # v5.6.1
+        uses: docker/metadata-action@369eb591f429131d6889c46b94e711f089e6ca96  # v5.6.1
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
