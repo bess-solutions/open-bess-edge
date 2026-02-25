@@ -69,7 +69,7 @@ export default function Scene3BlackBox() {
 
     return (
         <section ref={ref} id="scene-3"
-            className="relative min-h-screen flex items-center justify-center overflow-hidden py-24">
+            className="relative min-h-screen flex items-center justify-center overflow-hidden py-16">
             <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900/30 to-slate-950" />
             <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-amber-950/15 to-transparent" />
 

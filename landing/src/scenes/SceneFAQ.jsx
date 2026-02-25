@@ -56,12 +56,12 @@ export default function SceneFAQ() {
     }
 
     return (
-        <section id="scene-faq" className="relative py-32 overflow-hidden">
+        <section id="scene-faq" className="relative py-20 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-blue-950/5 to-slate-950" />
 
             <div className="relative z-10 max-w-3xl mx-auto px-8">
                 {/* Header */}
-                <motion.div className="text-center mb-16"
+                <motion.div className="text-center mb-10"
                     initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }} transition={{ duration: 0.7 }}>
                     <p className="text-xs font-mono tracking-widest text-blue-400 mb-4 uppercase">{faq.eyebrow}</p>
@@ -87,7 +87,7 @@ export default function SceneFAQ() {
                 </div>
 
                 {/* CTA below */}
-                <motion.div className="text-center mt-14"
+                <motion.div className="text-center mt-10"
                     initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
                     viewport={{ once: true }} transition={{ delay: 0.4 }}>
                     <p className="text-slate-500 text-sm mb-4 font-mono">

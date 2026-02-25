@@ -91,7 +91,7 @@ export default function Scene4Activation() {
 
     return (
         <section ref={ref} id="scene-4"
-            className="relative min-h-screen flex items-center justify-center overflow-hidden py-24">
+            className="relative min-h-screen flex items-center justify-center overflow-hidden py-16">
             <motion.div className="absolute inset-0"
                 style={{ background: 'radial-gradient(ellipse at center, #020f08 0%, #020617 65%)' }} />
 

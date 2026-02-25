@@ -16,7 +16,7 @@ export default function Scene6CTA() {
     return (
         <section id="scene-6" className="relative overflow-hidden">
             {/* CTA block */}
-            <div className="relative py-32 px-8">
+            <div className="relative py-20 px-8">
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950 to-black" />
                 <div className="absolute inset-0 opacity-20"
                     style={{
@@ -91,7 +91,7 @@ export default function Scene6CTA() {
 
             {/* ── FOOTER ──────────────────────────────────── */}
             <footer className="relative bg-black border-t border-slate-900">
-                <div className="max-w-6xl mx-auto px-8 py-16">
+                <div className="max-w-6xl mx-auto px-8 py-12">
 
                     {/* Top: logo + nav columns */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">

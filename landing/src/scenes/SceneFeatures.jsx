@@ -32,7 +32,7 @@ export default function SceneFeatures() {
     const sf = t.sf
 
     return (
-        <section id="scene-features" className="relative py-32 overflow-hidden">
+        <section id="scene-features" className="relative py-20 overflow-hidden">
             {/* Background */}
             <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900/20 to-slate-950" />
             <div className="absolute inset-0 opacity-30"
@@ -43,7 +43,7 @@ export default function SceneFeatures() {
 
             <div className="relative z-10 max-w-6xl mx-auto px-8">
                 {/* Header */}
-                <motion.div className="text-center mb-16"
+                <motion.div className="text-center mb-10"
                     initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }} transition={{ duration: 0.7 }}>
                     <p className="text-xs font-mono tracking-widest text-emerald-500 mb-4 uppercase">{sf.eyebrow}</p>
@@ -56,7 +56,7 @@ export default function SceneFeatures() {
                 </motion.div>
 
                 {/* Features grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-20">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-14">
                     {sf.features.map((f, i) => (
                         <FeatureCard key={i} feature={f} index={i} />
                     ))}
