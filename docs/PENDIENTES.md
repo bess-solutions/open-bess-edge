@@ -1,6 +1,6 @@
 # 📋 PENDIENTES — BESSAI Edge Gateway v2.9.0-dev
 
-> **Actualizado:** 2026-02-24 · **Fuente:** CHANGELOG.md + PROJECT_STATUS.md  
+> **Actualizado:** 2026-02-25 · **Fuente:** CHANGELOG.md + PROJECT_STATUS.md  
 > Este archivo consolida todas las tareas pendientes, ordenadas por prioridad.  
 > Actualizar en cada sesión de trabajo junto con `CHANGELOG.md`.
 
@@ -10,12 +10,10 @@
 
 | # | Tarea | Archivo/Contexto | Tipo |
 |---|---|---|---|
-| 1 | Refactor `handle_der_control` (C901 complejidad 15) | `sep2_adapter.py:569` | Código |
-| 2 | Fix SSL test mock PEM inválido | `test_sep2_adapter.py:447` | Test |
-| 3 | **Branch-Protection en GitHub** (requiere Rodrigo) | GH Settings → Branches → main | Manual infra |
-| 4 | **cosign keypair** → `cosign generate-keypair` + Secrets GH | `release.yml` + GitHub Secrets | Manual infra |
-| 5 | mypy `modbus_driver.py:179` — `# type: ignore[arg-type]` + bug report pymodbus | `modbus_driver.py` | Type fix |
-| 6 | mypy `totp_auth.py:201` — guard `if self._totp is not None` | `totp_auth.py` | Type fix |
+| 1 | **Branch-Protection en GitHub** (requiere Rodrigo) | GH Settings → Branches → main | Manual infra |
+| 2 | **cosign keypair** → `cosign generate-keypair` + Secrets GH | `release.yml` + GitHub Secrets | Manual infra |
+| 3 | mypy `modbus_driver.py:179` — `# type: ignore[arg-type]` + bug report pymodbus | `modbus_driver.py` | Type fix |
+| 4 | mypy `totp_auth.py:201` — guard `if self._totp is not None` | `totp_auth.py` | Type fix |
 
 ---
 
@@ -72,3 +70,8 @@
 - [x] Dashboard DRL Optimizer con CMg Maitencillo 48 días
 - [x] MILP Optimizer + Degradation Model + Benchmark Suite
 - [x] Revisión 360°: ruff 35/36 + structlog migration
+- [x] Fix C901 `handle_der_control` refactored en 3 métodos privados async (v2.9.0)
+- [x] Fix SSL mTLS validation order en `_build_ssl_context()` (v2.9.0)
+- [x] **WatchdogManager** self-healing autónomo + 19 tests (v2.9.0)
+- [x] **Scrollytelling Landing** React + Vite, i18n ES/EN, Lucide icons (v2.10.0)
+- [x] **360° doc sync**: CITATION.cff, pyproject.toml, README.md, CHANGELOG, PROJECT_STATUS (v2.10.0)

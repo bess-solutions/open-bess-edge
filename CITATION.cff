@@ -7,11 +7,13 @@ title: "BESSAI Edge Gateway"
 abstract: >-
   Open-source industrial IoT gateway for Battery Energy Storage Systems (BESS).
   Acquires real-time telemetry via Modbus TCP from industrial inverters
-  (Huawei SUN2000, SMA, Victron, Fronius), validates safety constraints,
-  publishes telemetry to GCP Pub/Sub and MQTT brokers, and applies
-  edge AI (Isolation Forest anomaly detection, ONNX policy dispatch)
-  for optimal battery operation. Compliant with NTSyCS CEN Chile and
-  IEC 62443 SL-1.
+  (Huawei SUN2000, SMA, Victron, Fronius, SolarEdge, BYD, Tesla), validates
+  safety constraints, publishes telemetry to GCP Pub/Sub and MQTT brokers,
+  and applies edge AI (Isolation Forest anomaly detection, ONNX/DRL dispatch,
+  MILP optimizer, MARL multi-agent fleet, WatchdogManager self-healing) for
+  optimal battery operation. Includes IEEE 2030.5 SEP 2.0 adapter, federated
+  learning client/server, carbon LCA engine, and P2P energy trading stubs.
+  Compliant with NTSyCS CEN Chile and IEC 62443 SL-2 (readiness ~98%).
 authors:
   - family-names: "Briones"
     given-names: "Rodrigo"
@@ -21,8 +23,8 @@ authors:
 repository-code: "https://github.com/bess-solutions/open-bess-edge"
 url: "https://bess-solutions.cl"
 license: Apache-2.0
-version: "1.7.1"
-date-released: "2026-02-21"
+version: "2.10.0"
+date-released: "2026-02-25"
 keywords:
   - "BESS"
   - "battery energy storage"
@@ -38,7 +40,7 @@ keywords:
   - "open-source"
 references:
   - type: standard
-    title: "IEC 62443 — Industrial Automation and Control Systems Security"
+    title: "IEC 62443 — Industrial Automation and Control Systems Security (SL-2)"
     authors:
       - name: "International Electrotechnical Commission"
   - type: standard
