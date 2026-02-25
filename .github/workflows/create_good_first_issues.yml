@@ -1,0 +1,320 @@
+name: Create Good First Issues
+
+# BEP-0200 Community — Misión E del Plan de Inmortalidad
+# Ejecutar una vez para crear los 10 "good first issues" en GitHub
+# que sirven como puerta de entrada para nuevos contributors.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — print issues without creating them"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  create-issues:
+    name: Create Good First Issues
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create Issue 1 — Fronius Primo Modbus RTU Driver
+        if: inputs.dry_run == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "feat(drivers): Add Fronius Primo Modbus RTU driver" \
+            --body "## Context
+          Fronius Primo (3–15 kW) is one of the most common residential inverters in Chile and LatAm.
+          This driver would extend BESSAI to cover residential + C&I installations.
+
+          ## Expected Implementation
+          - New file: \`src/drivers/profiles/fronius_primo.yaml\`
+          - Map registers: active power, reactive power, SoC %, AC voltage, frequency
+          - Reference: [Fronius Modbus RTU register map (public PDF)](https://www.fronius.com/en/solar-energy/installers-partners/technical-data/all-products/system-monitoring/open-interfaces)
+
+          ## Skill Level
+          🟢 **Beginner** — YAML configuration only, no Python coding required.
+          Follow the pattern in \`src/drivers/profiles/huawei_sun2000.yaml\`.
+
+          ## Resources
+          - Fronius register map: See docs/BESSAI-SPEC-002.md §3
+          - Existing profile example: \`src/drivers/profiles/huawei_sun2000.yaml\`
+          - Test: \`tests/test_simulator_driver.py\` (add profile to parametrize list)
+
+          cc @bess-solutions/tsc" \
+            --label "good first issue,enhancement,drivers,documentation"
+          echo "✅ Issue 1 created"
+
+      - name: Create Issue 2 — Portuguese (pt-BR) docs translation
+        if: inputs.dry_run == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "docs: Add Portuguese (pt-BR) translation for README and QUICKSTART" \
+            --body "## Why
+          Brazil has 38 GW+ of solar installed and is BESSAI's largest potential market.
+          A pt-BR version of the core docs would unlock major community growth.
+
+          ## Scope
+          - \`docs/pt-BR/README-pt-BR.md\` — translate README.md
+          - \`docs/pt-BR/QUICKSTART-pt-BR.md\` — translate QUICKSTART.md
+          - Add badge in README.md linking to the Portuguese version
+
+          ## Skill Level
+          🟢 **Beginner** — No coding required. Technical translation with domain knowledge.
+
+          ## Notes
+          Use neutral pt-BR (not pt-PT). Technical terms like BESS, SoC, CMg can remain in English." \
+            --label "good first issue,documentation,internationalization"
+          echo "✅ Issue 2 created"
+
+      - name: Create Issue 3 — docker-compose for Victron Cerbo GX
+        if: inputs.dry_run == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "docs: Add docker-compose example for Victron Cerbo GX integration" \
+            --body "## Context
+          Victron Cerbo GX is widely deployed in Latin American BESS installations.
+          Many users want to run BESSAI alongside the Victron VRM stack.
+
+          ## Deliverable
+          - File: \`examples/docker-compose.victron-cerbo.yml\`
+          - Services: bessai-edge + Cerbo GX MQTT bridge
+          - Document in \`docs/INTEGRATION_GUIDE.md\`
+
+          ## Skill Level
+          🟡 **Intermediate** — Docker knowledge required. No Python.
+
+          ## References
+          - Victron Node-RED + MQTT: https://www.victronenergy.com/live/ccgx:modbustcp_faq
+          - Existing docker-compose: \`docker-compose.yml\`" \
+            --label "good first issue,documentation,integration"
+          echo "✅ Issue 3 created"
+
+      - name: Create Issue 4 — Dashboard dark mode toggle
+        if: inputs.dry_run == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "feat(dashboard): Add dark mode toggle to BESSAI Arbitrage Dashboard" \
+            --body "## Context
+          The BESSAI Arbitrage Dashboard (\`dashboard/\`) runs on RPi 5 with a local browser.
+          Operators prefer dark mode for night shifts in control rooms.
+
+          ## Implementation
+          - Add a CSS variable system for light/dark themes
+          - Toggle button in top-right corner with localStorage persistence
+          - Update \`dashboard/style.css\` and \`dashboard/index.html\`
+
+          ## Skill Level
+          🟢 **Beginner** — HTML/CSS only. No Python or JavaScript frameworks.
+
+          ## Design Spec
+          - Dark background: \`#1a1a2e\` (consistent with BESSAI brand)
+          - Accent: \`#7c3aed\` (purple — BESSAI primary)
+          - Icon: 🌙 / ☀️ toggle button" \
+            --label "good first issue,enhancement,dashboard,UI"
+          echo "✅ Issue 4 created"
+
+      - name: Create Issue 5 — SimulatorDriver is_connected property
+        if: inputs.dry_run == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "feat(drivers): Implement \`is_connected\` property for SimulatorDriver" \
+            --body "## Context
+          \`SimulatorDriver\` does not implement \`is_connected\` (returns \`NotImplementedError\`).
+          The new \`WatchdogManager\` (\`src/core/watchdog_manager.py\`) requires this property.
+
+          ## Implementation
+          - File: \`src/drivers/simulator_driver.py\`
+          - Add \`@property is_connected -> bool\`: return \`True\` always (simulator never disconnects)
+          - Add \`async reconnect() -> None\`: no-op (log a warning)
+          - Add 2–3 unit tests in \`tests/test_simulator_driver.py\`
+
+          ## Skill Level
+          🟢 **Beginner** — Python, 10–20 lines of code.
+
+          ## Reference
+          - \`ReconnectableDriver\` protocol: \`src/core/watchdog_manager.py:71\`" \
+            --label "good first issue,enhancement,drivers,testing"
+          echo "✅ Issue 5 created"
+
+      - name: Create Issue 6 — Grafana alert for SOC < 15%
+        if: inputs.dry_run == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "feat(observability): Add Grafana alert rule for SOC < 15%" \
+            --body "## Context
+          BESSAI exposes Prometheus metrics at \`/metrics\`. We need a Grafana alert
+          that fires when \`bess_soc_percent < 15\` for more than 5 minutes (risk of deep discharge).
+
+          ## Deliverable
+          - File: \`dashboard/grafana/alerts/soc_critical_low.json\`
+          - Alert rule: WHEN avg(bess_soc_percent) < 15 FOR 5m THEN CRITICAL
+          - Notification channel: Webhook (configurable via env var)
+          - Add to \`dashboard/grafana/README.md\`
+
+          ## Skill Level
+          🟢 **Beginner** — JSON configuration, no programming required.
+
+          ## Reference
+          - Grafana alert rule JSON format: https://grafana.com/docs/grafana/latest/alerting/
+          - Metric name: \`bess_soc_percent\` (see \`src/interfaces/metrics.py\`)" \
+            --label "good first issue,enhancement,observability,monitoring"
+          echo "✅ Issue 6 created"
+
+      - name: Create Issue 7 — Home Assistant integration tutorial
+        if: inputs.dry_run == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "docs: Write tutorial — BESSAI + Home Assistant MQTT integration" \
+            --body "## Context
+          Home Assistant (HA) is the most popular home automation platform in South America.
+          Showing how to visualize BESSAI data (SoC, power, safety status) in HA would
+          dramatically expand the residential user base.
+
+          ## Deliverable
+          - File: \`docs/tutorials/home-assistant-mqtt.md\`
+          - Content: step-by-step guide to add BESSAI as HA MQTT sensor
+          - Include: \`configuration.yaml\` snippet, Lovelace card example, screenshot
+
+          ## Skill Level
+          🟡 **Intermediate** — Home Assistant experience required. No Python coding.
+
+          ## MQTT Topics (published by BESSAI)
+          - \`bessai/{site_id}/telemetry\` — JSON: soc, power_kw, temp_c
+          - \`bessai/{site_id}/safety\` — JSON: is_safe, watchdog_status" \
+            --label "good first issue,documentation,integration,community"
+          echo "✅ Issue 7 created"
+
+      - name: Create Issue 8 — Unit tests for lca_engine.py edge cases
+        if: inputs.dry_run == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "test: Add edge case unit tests for \`lca_engine.py\`" \
+            --body "## Context
+          \`src/agents/lca_engine.py\` (Lifecycle Cost Analysis) has basic tests but
+          misses important edge cases that could affect financial calculations.
+
+          ## Missing Tests (add to \`tests/test_lca_engine.py\`)
+          - \`test_npv_zero_capex\` — NPV with capex=0 should return positive value
+          - \`test_lcoe_with_100pct_degradation\` — SoH=0 should return inf or very large LCOE
+          - \`test_payback_period_never_breaks_even\` — negative revenue should return None/inf
+          - \`test_revenue_with_flat_cmg\` — flat CMg = no arbitrage opportunity → revenue ≈ 0
+          - \`test_parametrize_chemistries\` — LFP/NMC/NCA should all produce valid results
+
+          ## Skill Level
+          🟡 **Intermediate** — Python + pytest knowledge required.
+
+          ## Run tests
+          \`\`\`bash
+          .venv/Scripts/python -m pytest tests/test_lca_engine.py -v
+          \`\`\`" \
+            --label "good first issue,testing,agents"
+          echo "✅ Issue 8 created"
+
+      - name: Create Issue 9 — dry-run flag for generate_dummy_onnx.py
+        if: inputs.dry_run == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "feat(scripts): Add \`--dry-run\` flag to \`generate_dummy_onnx.py\`" \
+            --body "## Context
+          \`scripts/generate_dummy_onnx.py\` generates a dummy ONNX model for CI testing.
+          A \`--dry-run\` flag would make it useful as a dependency check without actually
+          writing files (useful for container startup validation).
+
+          ## Implementation
+          - Add \`--dry-run\` argument to \`argparse\`
+          - In dry-run mode: validate \`onnx\` import, print model config, exit 0
+          - Add test: \`test_generate_dummy_onnx_dry_run_exits_zero\`
+
+          ## Skill Level
+          🟢 **Beginner** — Python argparse, 15 lines of code.
+
+          ## File to modify
+          \`scripts/generate_dummy_onnx.py\`" \
+            --label "good first issue,enhancement,tooling,CI"
+          echo "✅ Issue 9 created"
+
+      - name: Create Issue 10 — Raspberry Pi 4 memory profiling
+        if: inputs.dry_run == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "perf: Profile BESSAI Edge Gateway memory usage on Raspberry Pi 4 (1GB)" \
+            --body "## Context
+          RPi 4 (1GB RAM) is the minimum supported hardware. We need a benchmark
+          showing peak RSS during a 24h session to validate our memory budget.
+
+          ## Deliverable
+          - Script: \`scripts/profile_memory_rpi4.py\`
+          - Method: \`memory_profiler\` + \`tracemalloc\` over a 60-minute simulated session
+          - Report: peak RSS, top-10 allocations, recommendations
+          - PR should include: \`reports/memory_profile_rpi4.json\`
+
+          ## Hardware Required
+          Raspberry Pi 4 (1GB or 2GB) to run the profile.
+          If you don't have one, use the Docker ARM64 image:
+          \`\`\`bash
+          docker run --platform linux/arm64 --memory=1g bessai/edge:latest
+          \`\`\`
+
+          ## Skill Level
+          🟡 **Intermediate** — Python + Linux system monitoring.
+
+          ## Acceptance Criteria
+          - Peak RSS < 400 MB on RPi 4 1GB with 3 concurrent async tasks
+          - Document any memory leaks found (they may become separate issues)" \
+            --label "good first issue,performance,hardware,community"
+          echo "✅ Issue 10 created"
+
+      - name: Dry Run — Print Issues Summary
+        if: inputs.dry_run == 'true'
+        run: |
+          echo "🔍 DRY RUN — Issues that would be created:"
+          echo "  1. feat(drivers): Add Fronius Primo Modbus RTU driver [beginner, YAML]"
+          echo "  2. docs: Add Portuguese (pt-BR) translation [beginner, no-code]"
+          echo "  3. docs: docker-compose for Victron Cerbo GX [intermediate, Docker]"
+          echo "  4. feat(dashboard): Dark mode toggle [beginner, CSS/HTML]"
+          echo "  5. feat(drivers): SimulatorDriver is_connected property [beginner, 20 LOC]"
+          echo "  6. feat(observability): Grafana alert SOC < 15% [beginner, JSON]"
+          echo "  7. docs: Home Assistant MQTT tutorial [intermediate, docs]"
+          echo "  8. test: lca_engine.py edge cases [intermediate, pytest]"
+          echo "  9. feat(scripts): --dry-run for generate_dummy_onnx.py [beginner, 15 LOC]"
+          echo " 10. perf: Memory profiling on RPi4 [intermediate, hardware]"
+          echo ""
+          echo "Run with dry_run=false to create these issues."
+
+      - name: Summary
+        if: inputs.dry_run == 'false'
+        run: |
+          echo "✅ All 10 'good first issue' entries created successfully."
+          echo "Community onboarding is ready — BESSAI Plan de Inmortalidad Eje 3."
