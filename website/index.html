@@ -6,1256 +6,251 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>BESS Solutions — Edge Intelligence for Battery Systems</title>
     <meta name="description"
-        content="BESSAI Edge: software open-source para baterías industriales. MILP, DRL, IEC 62443 SL-2. La inteligencia de la transición energética." />
+        content="BESSAI Edge: software open-source de grado industrial para baterías. MILP, DRL, IEC 62443 SL-2. La inteligencia de la transición energética." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@600;700&display=swap"
         rel="stylesheet" />
-    <style>
-        :root {
-            --bg: #06080f;
-            --bg2: #0d1117;
-            --bg3: #111827;
-            --cyan: #22d3ee;
-            --cyan-d: #0891b2;
-            --green: #34d399;
-            --green-d: #059669;
-            --orange: #fb923c;
-            --red: #f87171;
-            --white: #f0f6fc;
-            --text: #c9d1d9;
-            --muted: #6e7681;
-            --mono: 'JetBrains Mono', monospace;
-            --r: 10px;
-            --maxw: 1100px;
-            --tr: .3s cubic-bezier(.4, 0, .2, 1);
-        }
-
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0
-        }
-
-        html {
-            scroll-behavior: smooth;
-            font-size: 16px
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            overflow-x: hidden
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit
-        }
-
-        ul {
-            list-style: none
-        }
-
-        ::-webkit-scrollbar {
-            width: 4px
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg)
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #1e2936;
-            border-radius: 2px
-        }
-
-        /* NAV */
-        .nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 500;
-            height: 56px;
-            background: rgba(6, 8, 15, .8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, .05);
-            transition: background var(--tr)
-        }
-
-        .nav-inner {
-            max-width: var(--maxw);
-            margin: 0 auto;
-            padding: 0 28px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            gap: 28px
-        }
-
-        .nav-logo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 700;
-            font-size: .9rem;
-            color: var(--white);
-            font-family: 'Space Grotesk', sans-serif
-        }
-
-        .logo-badge {
-            width: 26px;
-            height: 26px;
-            background: linear-gradient(135deg, var(--cyan-d), #0e7490);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 18px rgba(8, 145, 178, .4);
-            font-size: .7rem;
-            font-weight: 700;
-            color: #fff
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2px;
-            flex: 1
-        }
-
-        .nav-links a {
-            padding: 4px 11px;
-            border-radius: 6px;
-            font-size: .82rem;
-            color: var(--muted);
-            transition: color var(--tr), background var(--tr)
-        }
-
-        .nav-links a:hover {
-            color: var(--white);
-            background: rgba(255, 255, 255, .05)
-        }
-
-        .nav-end {
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-            gap: 8px
-        }
-
-        .btn-gh {
-            padding: 5px 12px;
-            border-radius: 6px;
-            font-size: .78rem;
-            color: var(--muted);
-            border: 1px solid rgba(255, 255, 255, .1);
-            transition: all var(--tr)
-        }
-
-        .btn-gh:hover {
-            color: var(--white);
-            border-color: rgba(255, 255, 255, .2)
-        }
-
-        .btn-demo {
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: .78rem;
-            font-weight: 500;
-            background: var(--cyan-d);
-            color: #fff;
-            border: 1px solid var(--cyan-d);
-            transition: all var(--tr)
-        }
-
-        .btn-demo:hover {
-            background: #0ea5c9;
-            box-shadow: 0 4px 18px rgba(8, 145, 178, .4);
-            transform: translateY(-1px)
-        }
-
-        /* ── CANVAS GLOBAL ── */
-        #universe {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none
-        }
-
-        /* ── CHAPTER BASE ── */
-        .chapter {
-            position: relative;
-            z-index: 10;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 100px 0 80px
-        }
-
-        .chapter-overlay {
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            pointer-events: none
-        }
-
-        .ch-inner {
-            position: relative;
-            z-index: 2;
-            max-width: var(--maxw);
-            margin: 0 auto;
-            padding: 0 40px;
-            width: 100%
-        }
-
-        /* ── CHAPTER 1 — CLIMA ── */
-        #ch1 .chapter-overlay {
-            background: linear-gradient(to right, rgba(6, 8, 15, .92) 55%, rgba(6, 8, 15, .2))
-        }
-
-        .ch-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-family: var(--mono);
-            font-size: .68rem;
-            letter-spacing: .12em;
-            text-transform: uppercase;
-            padding: 5px 14px;
-            border-radius: 999px;
-            margin-bottom: 28px;
-            opacity: 0;
-            transform: translateY(16px);
-            transition: opacity .7s, transform .7s
-        }
-
-        .ch-badge.in {
-            opacity: 1;
-            transform: translateY(0)
-        }
-
-        .badge-1 {
-            color: var(--orange);
-            background: rgba(251, 146, 60, .08);
-            border: 1px solid rgba(251, 146, 60, .2)
-        }
-
-        .badge-2 {
-            color: var(--cyan);
-            background: rgba(34, 211, 238, .08);
-            border: 1px solid rgba(34, 211, 238, .18)
-        }
-
-        .badge-3 {
-            color: var(--green);
-            background: rgba(52, 211, 153, .08);
-            border: 1px solid rgba(52, 211, 153, .2)
-        }
-
-        .ch-dot {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            animation: pulse-dot 2s ease-in-out infinite
-        }
-
-        .b1-dot {
-            background: var(--orange)
-        }
-
-        .b2-dot {
-            background: var(--cyan)
-        }
-
-        .b3-dot {
-            background: var(--green)
-        }
-
-        @keyframes pulse-dot {
-
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1)
-            }
-
-            50% {
-                opacity: .3;
-                transform: scale(1.6)
-            }
-        }
-
-        .ch-h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: clamp(2.4rem, 6vw, 4.2rem);
-            font-weight: 700;
-            line-height: 1.08;
-            letter-spacing: -.04em;
-            color: var(--white);
-            margin-bottom: 22px;
-            opacity: 0;
-            transform: translateY(24px);
-            transition: opacity .8s .1s, transform .8s .1s
-        }
-
-        .ch-h1.in {
-            opacity: 1;
-            transform: translateY(0)
-        }
-
-        .accent-orange {
-            color: var(--orange)
-        }
-
-        .accent-cyan {
-            color: var(--cyan)
-        }
-
-        .accent-green {
-            color: var(--green)
-        }
-
-        .ch-sub {
-            font-size: 1.05rem;
-            color: var(--muted);
-            line-height: 1.75;
-            max-width: 540px;
-            margin-bottom: 44px;
-            opacity: 0;
-            transform: translateY(18px);
-            transition: opacity .8s .25s, transform .8s .25s
-        }
-
-        .ch-sub.in {
-            opacity: 1;
-            transform: translateY(0)
-        }
-
-        .ch-sub em {
-            color: var(--white);
-            font-style: normal;
-            font-weight: 500
-        }
-
-        .ch-pills {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-            opacity: 0;
-            transform: translateY(14px);
-            transition: opacity .7s .4s, transform .7s .4s
-        }
-
-        .ch-pills.in {
-            opacity: 1;
-            transform: translateY(0)
-        }
-
-        .pill {
-            padding: 10px 18px;
-            border-radius: 10px;
-            backdrop-filter: blur(12px)
-        }
-
-        .pill-1 {
-            background: rgba(251, 146, 60, .07);
-            border: 1px solid rgba(251, 146, 60, .18)
-        }
-
-        .pill-2 {
-            background: rgba(34, 211, 238, .07);
-            border: 1px solid rgba(34, 211, 238, .15)
-        }
-
-        .pill-3 {
-            background: rgba(52, 211, 153, .07);
-            border: 1px solid rgba(52, 211, 153, .15)
-        }
-
-        .pill-v {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            display: block;
-            line-height: 1.1
-        }
-
-        .pill-1 .pill-v {
-            color: var(--orange)
-        }
-
-        .pill-2 .pill-v {
-            color: var(--cyan)
-        }
-
-        .pill-3 .pill-v {
-            color: var(--green)
-        }
-
-        .pill-l {
-            font-size: .7rem;
-            color: var(--muted);
-            font-family: var(--mono);
-            margin-top: 2px;
-            display: block
-        }
-
-        /* scroll indicator */
-        .scroll-ind {
-            position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            font-family: var(--mono);
-            font-size: .6rem;
-            letter-spacing: .12em;
-            text-transform: uppercase;
-            color: var(--muted);
-            opacity: 0;
-            animation: fade-ind 1s 2s forwards
-        }
-
-        @keyframes fade-ind {
-            to {
-                opacity: 1
-            }
-        }
-
-        .scroll-line {
-            width: 1px;
-            height: 40px;
-            background: linear-gradient(to bottom, var(--muted), transparent);
-            animation: scroll-anim 2s 2s ease-in-out infinite
-        }
-
-        @keyframes scroll-anim {
-
-            0%,
-            100% {
-                transform: scaleY(1);
-                opacity: 1
-            }
-
-            50% {
-                transform: scaleY(.4);
-                opacity: .4
-            }
-        }
-
-        /* chapter 2 */
-        #ch2 .chapter-overlay {
-            background: linear-gradient(to right, rgba(6, 8, 15, .9) 55%, rgba(6, 8, 15, .1))
-        }
-
-        /* chapter 3 */
-        #ch3 .chapter-overlay {
-            background: linear-gradient(to right, rgba(6, 8, 15, .92) 55%, rgba(6, 8, 15, .2))
-        }
-
-        /* ch3 features grid */
-        .feat-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 14px;
-            opacity: 0;
-            transform: translateY(16px);
-            transition: opacity .8s .4s, transform .8s .4s
-        }
-
-        .feat-grid.in {
-            opacity: 1;
-            transform: translateY(0)
-        }
-
-        .feat-card {
-            background: rgba(13, 17, 23, .85);
-            border: 1px solid rgba(52, 211, 153, .12);
-            border-radius: 12px;
-            padding: 20px;
-            backdrop-filter: blur(12px);
-            transition: border-color var(--tr)
-        }
-
-        .feat-card:hover {
-            border-color: rgba(52, 211, 153, .3)
-        }
-
-        .feat-icon {
-            font-size: 1.4rem;
-            margin-bottom: 10px;
-            display: block
-        }
-
-        .feat-title {
-            font-size: .875rem;
-            font-weight: 600;
-            color: var(--white);
-            margin-bottom: 4px
-        }
-
-        .feat-desc {
-            font-size: .78rem;
-            color: var(--muted);
-            line-height: 1.55
-        }
-
-        .feat-tag {
-            font-family: var(--mono);
-            font-size: .6rem;
-            color: var(--green);
-            margin-top: 8px;
-            display: block
-        }
-
-        /* ch3 actions */
-        .ch-actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 32px;
-            opacity: 0;
-            transform: translateY(12px);
-            transition: opacity .8s .55s, transform .8s .55s
-        }
-
-        .ch-actions.in {
-            opacity: 1;
-            transform: translateY(0)
-        }
-
-        .btn-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 11px 22px;
-            border-radius: 8px;
-            font-size: .875rem;
-            font-weight: 500;
-            background: var(--green-d);
-            color: #fff;
-            border: 1px solid var(--green-d);
-            transition: all var(--tr)
-        }
-
-        .btn-primary:hover {
-            background: #10b981;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(16, 185, 129, .35)
-        }
-
-        .btn-secondary {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 11px 22px;
-            border-radius: 8px;
-            font-size: .875rem;
-            color: var(--muted);
-            border: 1px solid rgba(255, 255, 255, .1);
-            transition: all var(--tr)
-        }
-
-        .btn-secondary:hover {
-            color: var(--white);
-            border-color: rgba(255, 255, 255, .2)
-        }
-
-        /* ── DIVIDER ── */
-        .rule {
-            position: relative;
-            z-index: 10;
-            border: none;
-            border-top: 1px solid rgba(255, 255, 255, .06);
-            margin: 0
-        }
-
-        /* ── SECTION GENERIC ── */
-        .sec {
-            position: relative;
-            z-index: 10;
-            padding: 96px 0;
-            background: rgba(6, 8, 15, .92)
-        }
-
-        .wrap {
-            max-width: var(--maxw);
-            margin: 0 auto;
-            padding: 0 40px
-        }
-
-        .sec-head {
-            margin-bottom: 56px
-        }
-
-        .eyebrow {
-            font-family: var(--mono);
-            font-size: .68rem;
-            letter-spacing: .12em;
-            text-transform: uppercase;
-            color: var(--cyan);
-            margin-bottom: 12px
-        }
-
-        .sec-h2 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-            font-weight: 700;
-            color: var(--white);
-            letter-spacing: -.03em;
-            margin-bottom: 12px
-        }
-
-        .sec-p {
-            color: var(--muted);
-            max-width: 520px;
-            line-height: 1.75
-        }
-
-        /* reveal */
-        .reveal {
-            opacity: 0;
-            transform: translateY(24px);
-            transition: opacity .7s, transform .7s
-        }
-
-        .reveal.in {
-            opacity: 1;
-            transform: translateY(0)
-        }
-
-        /* ── DASHBOARD ── */
-        .dash-bg {
-            background: var(--bg2)
-        }
-
-        .dash-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 24px;
-            margin-bottom: 24px
-        }
-
-        .kpi-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 14px
-        }
-
-        .kpi {
-            background: rgba(13, 17, 23, .9);
-            border: 1px solid rgba(255, 255, 255, .07);
-            border-radius: 10px;
-            padding: 20px 18px;
-            backdrop-filter: blur(10px)
-        }
-
-        .kpi-val {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.7rem;
-            font-weight: 700;
-            color: var(--white);
-            line-height: 1;
-            margin-bottom: 4px
-        }
-
-        .kpi-label {
-            font-size: .7rem;
-            color: var(--muted);
-            font-family: var(--mono);
-            letter-spacing: .05em
-        }
-
-        .kpi-delta {
-            font-size: .68rem;
-            margin-top: 5px;
-            display: inline-block;
-            padding: 1px 6px;
-            border-radius: 3px
-        }
-
-        .up {
-            background: rgba(52, 211, 153, .1);
-            color: var(--green)
-        }
-
-        .dn {
-            background: rgba(248, 113, 113, .1);
-            color: var(--red)
-        }
-
-        .chart-wrap {
-            background: rgba(13, 17, 23, .9);
-            border: 1px solid rgba(255, 255, 255, .07);
-            border-radius: 10px;
-            padding: 22px;
-            backdrop-filter: blur(10px)
-        }
-
-        .chart-title {
-            font-family: var(--mono);
-            font-size: .65rem;
-            color: var(--muted);
-            margin-bottom: 16px;
-            letter-spacing: .06em;
-            text-transform: uppercase
-        }
-
-        .status-panel {
-            background: rgba(13, 17, 23, .9);
-            border: 1px solid rgba(255, 255, 255, .07);
-            border-radius: 10px;
-            padding: 20px;
-            backdrop-filter: blur(10px)
-        }
-
-        .status-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 9px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, .05);
-            font-family: var(--mono);
-            font-size: .75rem
-        }
-
-        .status-row:last-child {
-            border-bottom: none
-        }
-
-        .sk {
-            color: var(--muted)
-        }
-
-        .sv {
-            color: #3fb950
-        }
-
-        /* ── ROADMAP ── */
-        .two-col {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 72px
-        }
-
-        .rm-track {
-            position: relative;
-            padding-left: 24px
-        }
-
-        .rm-track::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 6px;
-            bottom: 6px;
-            width: 1px;
-            background: linear-gradient(to bottom, var(--cyan-d), rgba(255, 255, 255, .04))
-        }
-
-        .rm {
-            position: relative;
-            padding: 0 0 32px 24px
-        }
-
-        .rm::before {
-            content: '';
-            position: absolute;
-            left: -20px;
-            top: 7px;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            border: 1.5px solid rgba(255, 255, 255, .1);
-            background: var(--bg);
-            transition: all .3s
-        }
-
-        .rm.done::before {
-            background: var(--cyan-d);
-            border-color: var(--cyan-d)
-        }
-
-        .rm.now::before {
-            background: var(--bg);
-            border-color: var(--cyan);
-            box-shadow: 0 0 0 4px rgba(34, 211, 238, .1);
-            animation: pring 2s ease-in-out infinite
-        }
-
-        @keyframes pring {
-
-            0%,
-            100% {
-                box-shadow: 0 0 0 4px rgba(34, 211, 238, .1)
-            }
-
-            50% {
-                box-shadow: 0 0 0 8px rgba(34, 211, 238, .03)
-            }
-        }
-
-        .rm-date {
-            font-family: var(--mono);
-            font-size: .65rem;
-            color: var(--muted);
-            margin-bottom: 4px
-        }
-
-        .rm-title {
-            font-size: .9rem;
-            font-weight: 600;
-            color: var(--white);
-            margin-bottom: 3px
-        }
-
-        .rm-body {
-            font-size: .82rem;
-            color: var(--muted);
-            line-height: 1.55
-        }
-
-        /* CI panel */
-        .ci-panel {
-            border: 1px solid rgba(255, 255, 255, .07);
-            border-radius: 8px;
-            overflow: hidden
-        }
-
-        .ci-head {
-            padding: 10px 16px;
-            background: rgba(255, 255, 255, .02);
-            font-family: var(--mono);
-            font-size: .62rem;
-            color: var(--muted);
-            border-bottom: 1px solid rgba(255, 255, 255, .06)
-        }
-
-        .ci-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 16px;
-            border-top: 1px solid rgba(255, 255, 255, .05);
-            font-family: var(--mono);
-            font-size: .75rem;
-            transition: background var(--tr)
-        }
-
-        .ci-row:first-of-type {
-            border-top: none
-        }
-
-        .ci-row:hover {
-            background: rgba(255, 255, 255, .02)
-        }
-
-        .ci-k {
-            color: var(--muted)
-        }
-
-        .ci-v {
-            color: #3fb950
-        }
-
-        /* ── CTA ── */
-        .cta-block {
-            border-radius: 14px;
-            padding: 60px 48px;
-            overflow: hidden;
-            background: linear-gradient(135deg, rgba(5, 150, 105, .08), rgba(6, 182, 212, .05));
-            border: 1px solid rgba(16, 185, 129, .15);
-            position: relative
-        }
-
-        .cta-block::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(52, 211, 153, .5), transparent)
-        }
-
-        .cta-h2 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: clamp(1.4rem, 3vw, 2rem);
-            font-weight: 700;
-            color: var(--white);
-            margin-bottom: 10px;
-            letter-spacing: -.03em
-        }
-
-        .cta-sub {
-            color: var(--muted);
-            margin-bottom: 28px;
-            max-width: 500px
-        }
-
-        .cta-btns {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap
-        }
-
-        /* FOOTER */
-        footer {
-            position: relative;
-            z-index: 10;
-            padding: 32px 0;
-            background: rgba(6, 8, 15, .95);
-            border-top: 1px solid rgba(255, 255, 255, .05)
-        }
-
-        .foot-inner {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 14px
-        }
-
-        .foot-copy {
-            font-size: .78rem;
-            color: var(--muted)
-        }
-
-        .foot-links {
-            display: flex;
-            gap: 20px
-        }
-
-        .foot-links a {
-            font-size: .78rem;
-            color: var(--muted);
-            transition: color var(--tr)
-        }
-
-        .foot-links a:hover {
-            color: var(--cyan)
-        }
-
-        /* RESPONSIVE */
-        @media(max-width:900px) {
-            .nav-links {
-                display: none
-            }
-
-            .dash-grid {
-                grid-template-columns: 1fr
-            }
-
-            .two-col {
-                grid-template-columns: 1fr;
-                gap: 40px
-            }
-
-            .feat-grid {
-                grid-template-columns: 1fr
-            }
-
-            .kpi-row {
-                grid-template-columns: repeat(2, 1fr)
-            }
-        }
-
-        @media(max-width:520px) {
-            .ch-inner {
-                padding: 0 20px
-            }
-
-            .wrap {
-                padding: 0 20px
-            }
-
-            .kpi-row {
-                grid-template-columns: 1fr 1fr
-            }
-
-            .ch-pills {
-                flex-direction: column
-            }
-        }
-
-        /* ── LANG SWITCHER ── */
-        .lang-sw {
-            display: flex;
-            gap: 3px;
-            margin-right: 6px
-        }
-
-        .lang-btn {
-            padding: 3px 8px;
-            border-radius: 5px;
-            font-size: .72rem;
-            font-family: var(--mono);
-            letter-spacing: .06em;
-            color: var(--muted);
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, .08);
-            cursor: pointer;
-            transition: all var(--tr)
-        }
-
-        .lang-btn:hover {
-            color: var(--white);
-            border-color: rgba(255, 255, 255, .2)
-        }
-
-        .lang-btn.active {
-            color: var(--cyan);
-            border-color: rgba(34, 211, 238, .4);
-            background: rgba(34, 211, 238, .06)
-        }
-
-        /* ── GEOPOLITICAL BANNER ── */
-        .geo-banner {
-            position: relative;
-            z-index: 10;
-            background: linear-gradient(90deg, rgba(5, 150, 105, .06), rgba(8, 145, 178, .05), rgba(5, 150, 105, .06));
-            border-bottom: 1px solid rgba(52, 211, 153, .15);
-            padding: 7px 0;
-            overflow: hidden
-        }
-
-        .geo-inner {
-            max-width: var(--maxw);
-            margin: 0 auto;
-            padding: 0 28px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap
-        }
-
-        .geo-tag {
-            font-family: var(--mono);
-            font-size: .63rem;
-            letter-spacing: .1em;
-            text-transform: uppercase;
-            color: var(--green);
-            flex-shrink: 0
-        }
-
-        .geo-text {
-            font-family: var(--mono);
-            font-size: .7rem;
-            color: var(--muted);
-            flex: 1
-        }
-
-        .geo-text strong {
-            color: var(--green)
-        }
-    </style>
+    <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
-    <!-- FIXED 3D CANVAS -->
+    <!-- THREE.JS CANVAS -->
     <canvas id="universe"></canvas>
 
     <!-- NAV -->
     <nav class="nav" id="nav">
         <div class="nav-inner">
-            <a class="nav-logo" href="#ch1">
-                <div class="logo-badge">&#x26A1;</div>BESS Solutions
+            <a class="nav-logo" href="#act1">
+                <div class="logo-mark">&#x26A1;</div>BESS Solutions
             </a>
             <div class="nav-links">
-                <a href="#ch1" data-i18n="nav.why">El Porqu&#233;</a>
-                <a href="#ch2" data-i18n="nav.opp">La Oportunidad</a>
-                <a href="#ch3" data-i18n="nav.sol">La Soluci&#243;n</a>
+                <a href="#act1" data-i18n="nav.1">Origen</a>
+                <a href="#act2" data-i18n="nav.2">El Giro</a>
+                <a href="#act3" data-i18n="nav.3">La Red</a>
+                <a href="#act4" data-i18n="nav.4">BESSAI</a>
                 <a href="#dashboard">Dashboard</a>
                 <a href="#roadmap">Roadmap</a>
             </div>
             <div class="nav-end">
                 <div class="lang-sw" role="group" aria-label="Language">
-                    <button class="lang-btn active" onclick="setLang('es')" aria-label="Espa&#241;ol">ES</button>
-                    <button class="lang-btn" onclick="setLang('en')" aria-label="English">EN</button>
-                    <button class="lang-btn" onclick="setLang('pt')" aria-label="Portugu&#234;s">PT</button>
+                    <button class="lang-btn active" onclick="setLang('es')">ES</button>
+                    <button class="lang-btn" onclick="setLang('en')">EN</button>
+                    <button class="lang-btn" onclick="setLang('pt')">PT</button>
                 </div>
                 <a class="btn-gh" href="https://github.com/bess-solutions/open-bess-edge" target="_blank">GitHub</a>
-                <a class="btn-demo" href="#contacto" data-i18n="nav.demo">Solicitar demo</a>
+                <a class="btn-cta" href="#early-adopters" data-i18n="nav.cta">Solicitar demo</a>
             </div>
         </div>
     </nav>
 
-    <!-- GEOPOLITICAL CONTEXT BANNER -->
+    <!-- GEO BANNER -->
     <div class="geo-banner">
         <div class="geo-inner">
             <span class="geo-tag">&#x1F30D; Contexto Global</span>
-            <span class="geo-text" data-i18n="geo.text">Mientras algunos dan marcha atr&#225;s, <strong>Am&#233;rica
-                    Latina lidera</strong> la transici&#243;n energ&#233;tica con el mejor recurso solar y e&#243;lico
-                del mundo. Chile, Colombia, Per&#250;, Brasil.</span>
+            <span class="geo-text" data-i18n="geo">Mientras algunos dan marcha atr&#225;s, <strong>Am&#233;rica Latina
+                    lidera</strong> la transici&#243;n energ&#233;tica con el mejor recurso solar y e&#243;lico del
+                mundo.</span>
         </div>
     </div>
 
-    <!-- ═════════════════════════════════════════
-     CAPÍTULO 1 — LA CRISIS CLIMÁTICA
-     ════════════════════════════════════════ -->
-    <section class="chapter" id="ch1">
-        <div class="chapter-overlay"></div>
-        <div class="ch-inner">
-            <div class="ch-badge badge-1" data-i18n="ch1.badge"><span class="ch-dot b1-dot"></span>01 &middot; El
-                Contexto</div>
-            <h1 class="ch-h1" data-i18n="ch1.h1">El planeta<br>est&#225; <span class="accent-orange">en
-                    transici&#243;n.</span><br>&#161;Y LatAm lidera.</h1>
-            <p class="ch-sub" data-i18n="ch1.sub">
-                Mientras potencias tradicionales vuelven al carbon, <em>Chile tiene el mejor recurso solar del
-                    mundo</em> (Atacama), Colombia el mejor e&#243;lico de LatAm, y todo un continente eligiendo la
-                transici&#243;n energ&#233;tica limpia.
-            </p>
-            <div class="ch-pills">
-                <div class="pill pill-1"><span class="pill-v">424 ppm</span><span class="pill-l"
-                        data-i18n="ch1.p1">CO&#x2082; atm. &mdash; NASA 2024</span></div>
-                <div class="pill pill-2"><span class="pill-v">+1.2 &#176;C</span><span class="pill-l"
-                        data-i18n="ch1.p2">Anomal&#237;a temp. global &middot; NASA</span></div>
-                <div class="pill pill-3"><span class="pill-v">195</span><span class="pill-l"
-                        data-i18n="ch1.p3">pa&#237;ses &middot; Acuerdo de Par&#237;s</span></div>
+    <!-- ════════════════════════════════════════════
+     ACT I — ORIGEN
+     ════════════════════════════════════════════ -->
+    <section class="act" id="act1" style="height:200vh">
+        <div class="act-sticky">
+            <div class="act-overlay"></div>
+            <div class="act-content">
+                <div class="act-badge badge-i act-line" data-i18n="a1.badge"><span
+                        class="badge-dot badge-dot-i"></span>ACTO I &#183; Origen</div>
+                <h1 class="act-h1 act-line" data-i18n="a1.h1">424 partes<br>por mill&#243;n.</h1>
+                <h2 class="act-h2 act-line" style="margin-top:14px" data-i18n="a1.h2">El CO&#x2082; m&#225;s alto<br>en
+                    <span style="color:var(--amber)">800.000 a&#241;os.</span></h2>
+                <p class="act-sub act-line" style="margin-top:24px" data-i18n="a1.sub">Y en lugar de paralizarse, el
+                    mundo eligi&#243; <em>acelerar la transformaci&#243;n energ&#233;tica</em> m&#225;s grande de la
+                    historia.</p>
+                <div class="pills act-line" style="margin-top:32px">
+                    <div class="pill pill-i"><span class="pill-val" data-count="424" data-suffix=" ppm">0
+                            ppm</span><span class="pill-lbl">CO&#x2082; atm. &#8212; NASA 2024</span></div>
+                    <div class="pill pill-i"><span class="pill-val" data-count="1.2" data-prefix="+"
+                            data-suffix=" &#176;C">+0 &#176;C</span><span class="pill-lbl">Anomal&#237;a temp.
+                            global</span></div>
+                    <div class="pill pill-i"><span class="pill-val" data-count="195">0</span><span
+                            class="pill-lbl">pa&#237;ses &#183; Acuerdo de Par&#237;s</span></div>
+                </div>
             </div>
-        </div>
-        <div class="scroll-ind"><span class="scroll-line"></span>scroll</div>
-    </section>
-
-    <!-- ═════════════════════════════════════════
-     CAPÍTULO 2 — LA RED ELÉCTRICA
-     ════════════════════════════════════════ -->
-    <section class="chapter" id="ch2">
-        <div class="chapter-overlay"></div>
-        <div class="ch-inner">
-            <div class="ch-badge badge-2"><span class="ch-dot b2-dot"></span>02 · La Oportunidad</div>
-            <h1 class="ch-h1">Solar y eólica<br>ya son las más baratas<br><span class="accent-cyan">de la
-                    historia.</span></h1>
-            <p class="ch-sub">
-                En 2023 se instalaron <em>300 GW de renovables</em> en el mundo. Chile tiene como meta 60% de matriz
-                renovable al 2030.
-                El desafío ya no es generarla — es <em>almacenarla y gestionarla</em> de forma inteligente.
-            </p>
-            <div class="ch-pills">
-                <div class="pill pill-1"><span class="pill-v">10×</span><span class="pill-l">reducción de costos solar
-                        desde 2010 · IEA</span></div>
-                <div class="pill pill-2"><span class="pill-v">300 GW</span><span class="pill-l">renovables instalados en
-                        2023 · IRENA</span></div>
-                <div class="pill pill-3"><span class="pill-v">60%</span><span class="pill-l">objetivo renovable Chile
-                        2030 · CNE</span></div>
-            </div>
+            <div class="scroll-hint"><span class="scroll-bar"></span>scroll</div>
         </div>
     </section>
 
-    <!-- ═════════════════════════════════════════
-     CAPÍTULO 3 — BESSAI EDGE
-     ════════════════════════════════════════ -->
-    <section class="chapter" id="ch3">
-        <div class="chapter-overlay"></div>
-        <div class="ch-inner">
-            <div class="ch-badge badge-3"><span class="ch-dot b3-dot"></span>03 · La Solución</div>
-            <h1 class="ch-h1">Las baterías son<br>el músculo.<br><span class="accent-green">BESSAI Edge, el
-                    cerebro.</span></h1>
-            <p class="ch-sub">
-                Software open-source de grado industrial que convierte cualquier BESS en un nodo inteligente de la red:
-                optimiza, predice, protege. <em>Sin nube. En el borde.</em>
-            </p>
-            <div class="feat-grid">
-                <div class="feat-card">
-                    <span class="feat-icon">🧠</span>
-                    <div class="feat-title">MILP + DRL Optimizer</div>
-                    <p class="feat-desc">Maximiza arbitraje con precio CMg real del CEN/SEN. Agente DRL PPO entrenado en
-                        datos históricos.</p>
-                    <span class="feat-tag">Apache 2.0 · Open Source</span>
-                </div>
-                <div class="feat-card">
-                    <span class="feat-icon">⚡</span>
-                    <div class="feat-title">Edge-Native &lt;5ms</div>
-                    <p class="feat-desc">Ciclo completo en Raspberry Pi 5. Watchdog autónomo, failsafe y recuperación
-                        sin intervención humana.</p>
-                    <span class="feat-tag">Modbus TCP · MQTT · SEP 2.0</span>
-                </div>
-                <div class="feat-card">
-                    <span class="feat-icon">🛡️</span>
-                    <div class="feat-title">IEC 62443 SL-2 ~98%</div>
-                    <p class="feat-desc">Cumplimiento de seguridad industrial verificado. OpenSSF Scorecard, 613 tests
-                        automatizados.</p>
-                    <span class="feat-tag">OpenTelemetry · GCP Pub/Sub</span>
-                </div>
-                <div class="feat-card">
-                    <span class="feat-icon">🌱</span>
-                    <div class="feat-title">Interoperable</div>
-                    <p class="feat-desc">Perfil de hardware nuevo en &lt;2h. Soporta +14 fabricantes. Expansión LatAm:
-                        Colombia, Perú, Brasil.</p>
-                    <span class="feat-tag">BESSAI-SPEC-001 · BEP-0200</span>
+    <!-- ════════════════════════════════════════════
+     ACT II — EL GIRO
+     ════════════════════════════════════════════ -->
+    <section class="act" id="act2" style="height:200vh">
+        <div class="act-sticky">
+            <div class="act-overlay"></div>
+            <div class="act-content">
+                <div class="act-badge badge-ii act-line" data-i18n="a2.badge"><span
+                        class="badge-dot badge-dot-ii"></span>ACTO II &#183; El Giro</div>
+                <h1 class="act-h1 act-line" data-i18n="a2.h1">Mientras Washington<br>vuelve al carb&#243;n&#8230;</h1>
+                <h2 class="act-h2 act-line" style="margin-top:14px" data-i18n="a2.h2">Santiago construye<br><span
+                        style="color:var(--gold)">el futuro.</span></h2>
+                <p class="act-sub act-line" style="margin-top:24px" data-i18n="a2.sub">Chile tiene el <em>mejor recurso
+                        solar del planeta</em> (Atacama). Colombia el mejor e&#243;lico de LatAm. Un continente entero
+                    eligiendo la transici&#243;n limpia.</p>
+                <div class="pills act-line" style="margin-top:32px">
+                    <div class="pill pill-ii"><span class="pill-val">4.000+</span><span
+                            class="pill-lbl">kWh/m&#178;/a&#241;o &#183; Atacama</span></div>
+                    <div class="pill pill-ii"><span class="pill-val">$16/MWh</span><span class="pill-lbl">r&#233;cord
+                            solar Chile &#183; LCOE</span></div>
+                    <div class="pill pill-ii"><span class="pill-val">70%</span><span class="pill-lbl">meta renovable
+                            2030 &#183; Chile</span></div>
                 </div>
             </div>
-            <div class="ch-actions">
-                <a class="btn-primary" href="https://github.com/bess-solutions/open-bess-edge" target="_blank">Ver
-                    repositorio →</a>
-                <a class="btn-secondary" href="#dashboard">Ver dashboard en vivo</a>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+     ACT III — LA RED
+     ════════════════════════════════════════════ -->
+    <section class="act" id="act3" style="height:200vh">
+        <div class="act-sticky">
+            <div class="act-overlay"></div>
+            <div class="act-content">
+                <div class="act-badge badge-iii act-line" data-i18n="a3.badge"><span
+                        class="badge-dot badge-dot-iii"></span>ACTO III &#183; La Red</div>
+                <h1 class="act-h1 act-line" data-i18n="a3.h1">300 GW renovables<br>instalados en 2023.</h1>
+                <h2 class="act-h2 act-line" style="margin-top:14px" data-i18n="a3.h2">El desaf&#237;o ya no es
+                    generarla.<br><span style="color:var(--cyan)">Es gestionarla.</span></h2>
+                <p class="act-sub act-line" style="margin-top:24px" data-i18n="a3.sub">La solar es <em>10 veces m&#225;s
+                        barata</em> que en 2010. Chile apunta a 60% renovable al 2030. El cuello de botella ahora es
+                    almacenamiento + inteligencia.</p>
+                <div class="pills act-line" style="margin-top:32px">
+                    <div class="pill pill-iii"><span class="pill-val" data-count="300" data-suffix=" GW">0
+                            GW</span><span class="pill-lbl">renovables instalados &#183; IEA</span></div>
+                    <div class="pill pill-iii"><span class="pill-val">10&times;</span><span class="pill-lbl">m&#225;s
+                            barata la solar vs 2010</span></div>
+                    <div class="pill pill-iii"><span class="pill-val" data-count="60" data-suffix="%">0%</span><span
+                            class="pill-lbl">meta renovable Chile 2030</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+     ACT IV — LA SOLUCIÓN (BESSAI)
+     ════════════════════════════════════════════ -->
+    <section class="act" id="act4" style="height:200vh">
+        <div class="act-sticky">
+            <div class="act-overlay"></div>
+            <div class="act-content">
+                <div class="act-badge badge-iv act-line" data-i18n="a4.badge"><span
+                        class="badge-dot badge-dot-iv"></span>ACTO IV &#183; La Soluci&#243;n</div>
+                <h1 class="act-h1 act-line" data-i18n="a4.h1">Las bater&#237;as son<br>el m&#250;sculo.</h1>
+                <h2 class="act-h2 act-line" style="margin-top:14px" data-i18n="a4.h2">BESSAI Edge,<br><span
+                        style="color:var(--green)">el cerebro.</span></h2>
+                <p class="act-sub act-line" style="margin-top:24px" data-i18n="a4.sub">Software open-source de grado
+                    industrial que convierte cualquier BESS en un nodo inteligente: optimiza, predice, protege. <em>Sin
+                        nube. En el borde.</em></p>
+                <div class="feat-grid act-line" style="margin-top:32px">
+                    <div class="feat-card">
+                        <div class="feat-icon">&#x1F9E0;</div>
+                        <div class="feat-title">MILP + DRL Optimizer</div>
+                        <div class="feat-desc">Optimizaci&#243;n mixta-entera + Deep RL entrenado con datos reales del
+                            SEN chileno. Latencia &lt;5ms.</div>
+                        <div class="feat-tag">arbitrage_engine.py</div>
+                    </div>
+                    <div class="feat-card">
+                        <div class="feat-icon">&#x1F50C;</div>
+                        <div class="feat-title">Modbus/TCP Native</div>
+                        <div class="feat-desc">Drivers BMS/inversor hot-swappable. Huawei SUN2000, CATL, BYD. Registro
+                            din&#225;mico en JSON.</div>
+                        <div class="feat-tag">modbus_driver.py</div>
+                    </div>
+                    <div class="feat-card">
+                        <div class="feat-icon">&#x1F512;</div>
+                        <div class="feat-title">IEC 62443 SL-2</div>
+                        <div class="feat-desc">Security Level 2 de f&#225;brica. Auditor&#237;a integrada, logs
+                            inmutables, watchdog de 3 capas.</div>
+                        <div class="feat-tag">security_auditor.py</div>
+                    </div>
+                    <div class="feat-card">
+                        <div class="feat-icon">&#x1F4E1;</div>
+                        <div class="feat-title">Edge-First / IEEE 2030.5</div>
+                        <div class="feat-desc">Todo corre local. Pub/Sub a GCP opcional. Interop con SEP2 para utilities
+                            y demand response.</div>
+                        <div class="feat-tag">sep2_adapter.py</div>
+                    </div>
+                </div>
+                <div class="terminal act-line">
+                    <div><span class="term-prompt">bessai@edge:~$ </span><span class="term-cmd">python -m
+                            bessai.optimize --site CL-001</span></div>
+                    <div class="term-out">[INFO] Loading driver: huawei_sun2000.json</div>
+                    <div class="term-out">[INFO] SoC: 72.3% | CMg: $87/MWh | Mode: DISCHARGE</div>
+                    <div class="term-out">[MILP] Optimal dispatch: +280kW for 3.2h</div>
+                    <div class="term-ok">[OK] Latency: 3.1ms | Revenue delta: +$142/day</div>
+                </div>
             </div>
         </div>
     </section>
 
     <hr class="rule" />
 
-    <!-- ═════════════════════════════════════════
-     DASHBOARD EN VIVO
-     ════════════════════════════════════════ -->
+    <!-- ════════════════════════════════════════════
+     DASHBOARD LIVE
+     ════════════════════════════════════════════ -->
     <section class="sec dash-bg" id="dashboard">
         <div class="wrap">
             <div class="sec-head reveal">
-                <div class="eyebrow">Telemetría en tiempo real</div>
-                <h2 class="sec-h2">Lo que el sistema ve. Lo que decide.</h2>
-                <p class="sec-p">Datos representativos del nodo Maitencillo 220 kV · CEN Chile. Actualización cada 2
-                    segundos.</p>
+                <div class="eyebrow">Telemetr&#237;a en tiempo real</div>
+                <h2 class="sec-h2">Dashboard BESSAI Edge</h2>
+                <p class="sec-p">Datos simulados que reflejan la operaci&#243;n real de un BESS industrial optimizado
+                    con MILP+DRL.</p>
             </div>
-            <div class="kpi-row reveal" style="margin-bottom:20px">
+            <div class="kpi-row reveal">
                 <div class="kpi">
-                    <div class="kpi-val" id="kpi-soc">78.4%</div>
-                    <div class="kpi-label">SoC Actual</div><span class="kpi-delta up" id="kpi-soc-d">↑ cargando</span>
+                    <div class="kpi-val" id="kpi-soc">72.3%</div>
+                    <div class="kpi-label">State of Charge</div>
+                    <div class="kpi-delta up" id="kpi-soc-d">&#x2191; cargando</div>
                 </div>
                 <div class="kpi">
-                    <div class="kpi-val" id="kpi-pw">+342 kW</div>
-                    <div class="kpi-label">Potencia</div><span class="kpi-delta up" id="kpi-pw-d">↑ inyectando</span>
+                    <div class="kpi-val" id="kpi-pw">+180 kW</div>
+                    <div class="kpi-label">Potencia Activa</div>
+                    <div class="kpi-delta up" id="kpi-pw-d">&#x2191; inyectando</div>
                 </div>
                 <div class="kpi">
-                    <div class="kpi-val" id="kpi-cmg">$87</div>
-                    <div class="kpi-label">CMg USD/MWh</div><span class="kpi-delta" id="kpi-cmg-d"
-                        style="color:var(--cyan)">CEN real</span>
+                    <div class="kpi-val" id="kpi-cmg">$92</div>
+                    <div class="kpi-label">CMg Live</div>
                 </div>
                 <div class="kpi">
-                    <div class="kpi-val" id="kpi-lat">3.2ms</div>
-                    <div class="kpi-label">Latencia ciclo</div><span class="kpi-delta up">↑ nominal</span>
+                    <div class="kpi-val" id="kpi-lat">3.1ms</div>
+                    <div class="kpi-label">Latencia Edge</div>
                 </div>
             </div>
             <div class="dash-grid reveal">
                 <div class="chart-wrap">
-                    <div class="chart-title">SoC (%) · Potencia (kW/10) — últimos 20 ciclos</div>
-                    <canvas id="chart-main" height="180"></canvas>
+                    <div class="chart-title">SoC &amp; Potencia &#183; &#250;ltimos 20 ciclos</div><canvas
+                        id="chart-main" height="200"></canvas>
                 </div>
                 <div class="status-panel">
-                    <div class="ci-head">ESTADO DEL SISTEMA</div>
-                    <div class="status-row"><span class="sk">SafetyGuard</span><span class="sv" id="st1">● ACTIVE</span>
+                    <div class="ci-head">&#x2699;&#xFE0F; Sistema Status</div>
+                    <div class="status-row"><span class="sk">Edge Gateway</span><span class="sv">running &#x2713;</span>
                     </div>
-                    <div class="status-row"><span class="sk">MILP Optimizer</span><span class="sv" id="st2">●
-                            RUNNING</span></div>
-                    <div class="status-row"><span class="sk">DRL Agent</span><span class="sv" id="st3">● ONLINE</span>
+                    <div class="status-row"><span class="sk">MILP Engine</span><span class="sv">optimal &#x2713;</span>
                     </div>
-                    <div class="status-row"><span class="sk">Watchdog</span><span class="sv" id="st4">● OK</span></div>
-                    <div class="status-row"><span class="sk">CEN CMg feed</span><span class="sv" id="st5">● LIVE</span>
+                    <div class="status-row"><span class="sk">DRL Agent</span><span class="sv">inference &#x2713;</span>
                     </div>
-                    <div class="status-row"><span class="sk">GCP Pub/Sub</span><span class="sv" id="st6">●
-                            SYNCING</span></div>
+                    <div class="status-row"><span class="sk">BMS Link</span><span class="sv">connected &#x2713;</span>
+                    </div>
+                    <div class="status-row"><span class="sk">Watchdog</span><span class="sv">healthy &#x2713;</span>
+                    </div>
+                    <div class="status-row"><span class="sk">IEC 62443</span><span class="sv">SL-2 passed
+                            &#x2713;</span></div>
+                    <div class="status-row"><span class="sk">GCP Pub/Sub</span><span class="sv">streaming
+                            &#x2713;</span></div>
+                    <div class="status-row"><span class="sk">OpenSSF</span><span class="sv">~8/10 &#x2713;</span></div>
                 </div>
             </div>
         </div>
@@ -1263,76 +258,58 @@
 
     <hr class="rule" />
 
-    <!-- ROADMAP + CI -->
+    <!-- ════════════════════════════════════════════
+     ROADMAP + CI
+     ════════════════════════════════════════════ -->
     <section class="sec" id="roadmap">
         <div class="wrap">
+            <div class="sec-head reveal">
+                <div class="eyebrow">Roadmap p&#250;blico</div>
+                <h2 class="sec-h2">Construcci&#243;n abierta y transparente</h2>
+            </div>
             <div class="two-col reveal">
-                <div>
-                    <div class="sec-head">
-                        <div class="eyebrow">Roadmap</div>
-                        <h2 class="sec-h2">Estado del proyecto.</h2>
+                <div class="rm-track">
+                    <div class="rm done">
+                        <div class="rm-date">Q4 2025</div>
+                        <div class="rm-title">v1.0 &#183; Core Gateway</div>
+                        <div class="rm-body">Modbus driver, MILP b&#225;sico, watchdog, IEC 62443 SL-2</div>
                     </div>
-                    <div class="rm-track">
-                        <div class="rm done">
-                            <div class="rm-date">Q4 2025</div>
-                            <div class="rm-title">Núcleo Edge v1</div>
-                            <p class="rm-body">Modbus TCP, GCP Pub/Sub, SafetyGuard, MQTT, OpenTelemetry, IEEE 2030.5
-                                SEP 2.0</p>
-                        </div>
-                        <div class="rm done">
-                            <div class="rm-date">Ene–Feb 2026</div>
-                            <div class="rm-title">IA y Seguridad</div>
-                            <p class="rm-body">MILP optimizer, DRL PPO datos CEN reales, WatchdogManager, IEC 62443 SL-2
-                                ~98%, OpenSSF Scorecard</p>
-                        </div>
-                        <div class="rm now">
-                            <div class="rm-date">Q1 2026 — en curso</div>
-                            <div class="rm-title">Plataforma y Comunidad</div>
-                            <p class="rm-body">Certificación BESSAI, dashboard multi-sitio, primeros early adopters</p>
-                        </div>
-                        <div class="rm">
-                            <div class="rm-date">Q2 2026</div>
-                            <div class="rm-title">Control de Despacho</div>
-                            <p class="rm-body">write_tag activo, OpenADR 2.0, agregación de flota MARL</p>
-                        </div>
-                        <div class="rm">
-                            <div class="rm-date">Q3–Q4 2026</div>
-                            <div class="rm-title">Expansión LatAm</div>
-                            <p class="rm-body">Colombia, Perú, Brasil · ONS / CAMMESA · pt-BR</p>
-                        </div>
+                    <div class="rm done">
+                        <div class="rm-date">Q1 2026</div>
+                        <div class="rm-title">v2.0 &#183; AI Stack</div>
+                        <div class="rm-body">DRL agent, CMg predictor, real-time telemetry, arbitrage engine v2</div>
+                    </div>
+                    <div class="rm now">
+                        <div class="rm-date">Q2 2026</div>
+                        <div class="rm-title">v3.0 &#183; Fleet + SEP2</div>
+                        <div class="rm-body">Multi-site orchestration, IEEE 2030.5 (SEP2), demand response nativo</div>
+                    </div>
+                    <div class="rm">
+                        <div class="rm-date">Q3 2026</div>
+                        <div class="rm-title">v4.0 &#183; Marketplace</div>
+                        <div class="rm-body">Marketplace de algoritmos, hardware registry abierto, certificaci&#243;n
+                            BESSAI</div>
                     </div>
                 </div>
                 <div>
-                    <div class="sec-head">
-                        <div class="eyebrow">CI/CD</div>
-                        <h2 class="sec-h2">Salud del repositorio.</h2>
-                    </div>
                     <div class="ci-panel">
-                        <div class="ci-head">GITHUB ACTIONS — main</div>
-                        <div class="ci-row"><span class="ci-k">Tests (pytest)</span><span class="ci-v">613 / 0 fail
-                                ✓</span></div>
-                        <div class="ci-row"><span class="ci-k">Cobertura</span><span class="ci-v">&gt;80% ✓</span></div>
-                        <div class="ci-row"><span class="ci-k">Lint (ruff)</span><span class="ci-v">0 errors ✓</span>
+                        <div class="ci-head">GitHub Actions &#183; CI Pipeline</div>
+                        <div class="ci-row"><span class="ci-k">pytest</span><span class="ci-v">passing &#x2713;</span>
                         </div>
-                        <div class="ci-row"><span class="ci-k">Type (mypy)</span><span class="ci-v">0 errors ✓</span>
+                        <div class="ci-row"><span class="ci-k">mypy strict</span><span class="ci-v">clean
+                                &#x2713;</span></div>
+                        <div class="ci-row"><span class="ci-k">ruff</span><span class="ci-v">0 issues &#x2713;</span>
                         </div>
-                        <div class="ci-row"><span class="ci-k">Bandit SAST</span><span class="ci-v">0 HIGH ✓</span>
+                        <div class="ci-row"><span class="ci-k">bandit SAST</span><span class="ci-v">pass &#x2713;</span>
                         </div>
-                        <div class="ci-row"><span class="ci-k">pip-audit</span><span class="ci-v">clean ✓</span></div>
+                        <div class="ci-row"><span class="ci-k">pip-audit</span><span class="ci-v">clean &#x2713;</span>
+                        </div>
+                        <div class="ci-row"><span class="ci-k">Trivy scan</span><span class="ci-v">0 CVE &#x2713;</span>
+                        </div>
                         <div class="ci-row"><span class="ci-k">Docker build</span><span class="ci-v">amd64/arm64
-                                ✓</span></div>
-                        <div class="ci-row"><span class="ci-k">OpenSSF Score</span><span class="ci-v">~8/10 ✓</span>
-                        </div>
-                    </div>
-                    <div class="cta-block" style="margin-top:24px">
-                        <div class="cta-h2">¿Tiene un proyecto BESS?</div>
-                        <p class="cta-sub" id="contacto">Conversemos sobre cómo BESSAI Edge puede optimizar su sistema
-                            de almacenamiento.</p>
-                        <div class="cta-btns">
-                            <a class="btn-primary" href="mailto:contacto@bess-solutions.cl">Contactar →</a>
-                            <a class="btn-secondary" href="https://github.com/bess-solutions/open-bess-edge"
-                                target="_blank">Explorar código</a>
-                        </div>
+                                &#x2713;</span></div>
+                        <div class="ci-row"><span class="ci-k">OpenSSF Score</span><span class="ci-v">~8/10
+                                &#x2713;</span></div>
                     </div>
                 </div>
             </div>
@@ -1341,69 +318,63 @@
 
     <hr class="rule" />
 
-    <!-- ═══ EARLY ADOPTER PROGRAM ═══ -->
-    <section class="sec ea-section" id="early-adopters">
+    <!-- ════════════════════════════════════════════
+     EARLY ADOPTER PROGRAM
+     ════════════════════════════════════════════ -->
+    <section class="sec ea-bg" id="early-adopters">
         <div class="wrap">
             <div class="sec-head reveal">
                 <div class="eyebrow">Programa Early Adopter 2026</div>
                 <h2 class="sec-h2">Sea parte de los primeros.<br>Las condiciones no se repiten.</h2>
-                <p class="sec-p">Cupos limitados para proyectos BESS en Chile y LatAm que quieran implementar BESSAI
-                    Edge en condiciones preferenciales durante 2026. A cambio: datos reales, feedback t&#233;cnico, y
-                    co-autoria en papers.</p>
+                <p class="sec-p">Cupos limitados para proyectos BESS en Chile y LatAm. A cambio: datos reales, feedback
+                    t&#233;cnico, y co-autor&#237;a en papers.</p>
             </div>
             <div class="ea-counter reveal">
-                <div class="ea-count-item"><span class="ea-count-val">8</span><span class="ea-count-label">Cupos Pioneer
-                        disponibles</span></div>
-                <div class="ea-divider"></div>
-                <div class="ea-count-item"><span class="ea-count-val">3</span><span class="ea-count-label">Cupos Partner
-                        disponibles</span></div>
-                <div class="ea-divider"></div>
-                <div class="ea-count-item"><span class="ea-count-val">Q2</span><span class="ea-count-label">Inicio
-                        despliegues</span></div>
-                <div class="ea-divider"></div>
-                <div class="ea-count-item"><span class="ea-count-val">4</span><span class="ea-count-label">Pa&#237;ses
-                        activos (LATAM)</span></div>
+                <div><span class="ea-count-v">8</span><span class="ea-count-l">Cupos Pioneer</span></div>
+                <div class="ea-div"></div>
+                <div><span class="ea-count-v">3</span><span class="ea-count-l">Cupos Partner</span></div>
+                <div class="ea-div"></div>
+                <div><span class="ea-count-v">Q2</span><span class="ea-count-l">Inicio despliegues</span></div>
+                <div class="ea-div"></div>
+                <div><span class="ea-count-v">4</span><span class="ea-count-l">Pa&#237;ses activos</span></div>
             </div>
-            <div class="ea-grid reveal" style="margin-top:24px">
+            <div class="ea-grid reveal">
                 <div class="ea-card">
-                    <div class="ea-tier tier-pioneer">&#x1F9E0; Tier 1 &mdash; Pioneer</div>
+                    <div class="ea-tier tier-p">&#x1F9E0; Tier 1 &#8212; Pioneer</div>
                     <div class="ea-name">BESSAI Pioneer</div>
-                    <div class="ea-price">Implementaci&#243;n <strong>sin costo</strong> &middot; +soporte t&#233;cnico
+                    <div class="ea-price">Implementaci&#243;n <strong>sin costo</strong> &#183; soporte t&#233;cnico
                         dedicado</div>
                     <ul class="ea-benefits">
-                        <li>Licencia Apache 2.0 &mdash; sin royalties, para siempre</li>
+                        <li>Licencia Apache 2.0 &#8212; sin royalties, para siempre</li>
                         <li>Instalaci&#243;n asistida en sitio (Chile) o remota (LatAm)</li>
-                        <li>Co-autoria en paper t&#233;cnico IEEE/CIGRE con datos del proyecto</li>
-                        <li>Acceso anticipado a nuevas funcionalidades (90 d&#237;as antes del release)</li>
+                        <li>Co-autor&#237;a en paper t&#233;cnico IEEE/CIGRE</li>
+                        <li>Acceso anticipado a funcionalidades (90 d&#237;as antes del release)</li>
                         <li>Integraci&#243;n prioritaria: nuevo hardware en &lt;48h</li>
                         <li>Reporte mensual de performance y ahorro estimado</li>
                         <li>Canal privado en Discord con el equipo core</li>
                     </ul>
-                    <div class="ea-tier tier-pioneer" style="font-size:.6rem;margin-bottom:14px">Requisito: BESS de 100
-                        kWh+ en operaci&#243;n o comisionamiento 2026</div>
-                    <a class="ea-cta"
-                        href="mailto:pioneer@bess-solutions.cl?subject=Aplicaci%C3%B3n%20Pioneer%20BESSAI">Aplicar al
-                        programa Pioneer &rarr;</a>
+                    <div class="ea-req">Requisito: BESS de 100 kWh+ en operaci&#243;n o comisionamiento 2026</div>
+                    <a class="ea-btn"
+                        href="mailto:contacto@bess-solutions.cl?subject=Aplicaci%C3%B3n%20Pioneer%20BESSAI">Aplicar al
+                        programa Pioneer &#8594;</a>
                 </div>
                 <div class="ea-card featured">
-                    <div class="ea-tier tier-partner">&#x26A1; Tier 2 &mdash; Strategic Partner</div>
+                    <div class="ea-tier tier-s">&#x26A1; Tier 2 &#8212; Strategic Partner</div>
                     <div class="ea-name">BESSAI Partner</div>
-                    <div class="ea-price">Acuerdo de co-desarrollo &middot; <strong>equity opcional</strong></div>
+                    <div class="ea-price">Co-desarrollo &#183; <strong>equity opcional</strong></div>
                     <ul class="ea-benefits">
                         <li>Todo lo del tier Pioneer, m&#225;s:</li>
-                        <li>Desarrollo de funcionalidades espec&#237;ficas con tu equipo t&#233;cnico</li>
-                        <li>White-label del stack (marca propia en el dashboard)</li>
-                        <li>Acceso al c&#243;digo de los m&#243;dulos IA (MILP + DRL) con documentaci&#243;n interna
-                        </li>
-                        <li>Acuerdo comercial preferente para LatAm (exclusividad regional por pa&#237;s)</li>
+                        <li>Desarrollo de funcionalidades espec&#237;ficas con tu equipo</li>
+                        <li>White-label del stack (marca propia en dashboard)</li>
+                        <li>Acceso al c&#243;digo IA (MILP + DRL) con docs internas</li>
+                        <li>Exclusividad regional por pa&#237;s en LatAm</li>
                         <li>Representaci&#243;n conjunta en reguladores (CNE, CREG, ANEEL)</li>
                         <li>Opci&#243;n de participaci&#243;n accionaria en BESS Solutions SpA</li>
                     </ul>
-                    <div class="ea-tier tier-partner" style="font-size:.6rem;margin-bottom:14px">Requisito: proyecto
-                        BESS &gt;1 MWh o fleet de +3 sitios</div>
-                    <a class="ea-cta"
-                        href="mailto:partner@bess-solutions.cl?subject=Propuesta%20Strategic%20Partner">Hablar con el
-                        equipo fundador &rarr;</a>
+                    <div class="ea-req">Requisito: proyecto BESS &gt;1 MWh o fleet de +3 sitios</div>
+                    <a class="ea-btn"
+                        href="mailto:contacto@bess-solutions.cl?subject=Propuesta%20Strategic%20Partner">Hablar con el
+                        equipo fundador &#8594;</a>
                 </div>
             </div>
         </div>
@@ -1411,34 +382,32 @@
 
     <hr class="rule" />
 
-    <!-- ═══ CONTRIBUTORS ═══ -->
-    <section class="sec" id="comunidad" style="background:var(--bg)">
+    <!-- ════════════════════════════════════════════
+     CONTRIBUTORS
+     ════════════════════════════════════════════ -->
+    <section class="sec" id="comunidad">
         <div class="wrap">
             <div class="sec-head reveal">
                 <div class="eyebrow">Open Source Community</div>
                 <h2 class="sec-h2">Construido por ingenieros,<br>para ingenieros.</h2>
-                <p class="sec-p">BESSAI Edge es un proyecto open-source de la comunidad. Cualquier ingeniero
-                    el&#233;ctrico, desarrollador o investigador con inter&#233;s en BESS puede contribuir.</p>
+                <p class="sec-p">BESSAI Edge es un proyecto open-source. Cualquier ingeniero el&#233;ctrico,
+                    desarrollador o investigador puede contribuir.</p>
             </div>
             <div class="contrib-grid reveal">
                 <div class="contrib-card">
                     <div class="contrib-avatar">TG</div>
                     <div class="contrib-name">TCI-GECOMP</div>
-                    <div class="contrib-role">Founder &middot; Core Architect</div>
-                    <div class="contrib-badges">
-                        <span class="badge-sm">MILP</span><span class="badge-sm">DRL</span>
-                        <span class="badge-sm">Edge</span><span class="badge-sm">IEC 62443</span>
-                    </div>
+                    <div class="contrib-role">Founder &#183; Core Architect</div>
+                    <div class="contrib-badges"><span class="badge-sm">MILP</span><span class="badge-sm">DRL</span><span
+                            class="badge-sm">Edge</span><span class="badge-sm">IEC 62443</span></div>
                 </div>
                 <div class="contrib-card">
                     <div class="contrib-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
                         &#x1F9D1;&#x200D;&#x1F4BB;</div>
                     <div class="contrib-name">T&#250; podr&#237;as ser aqu&#237;</div>
                     <div class="contrib-role">Primer colaborador externo</div>
-                    <div class="contrib-badges">
-                        <span class="badge-sm">&#x1F9E0; IA</span><span class="badge-sm">&#x26A1; Grid</span>
-                        <span class="badge-sm">&#x1F527; HW</span>
-                    </div>
+                    <div class="contrib-badges"><span class="badge-sm">&#x1F9E0; IA</span><span
+                            class="badge-sm">&#x26A1; Grid</span><span class="badge-sm">&#x1F527; HW</span></div>
                 </div>
                 <div class="contrib-card" style="border-style:dashed;opacity:.5">
                     <div class="contrib-avatar" style="background:rgba(255,255,255,.05)">+</div>
@@ -1446,51 +415,46 @@
                     <div class="contrib-role">Cupo abierto</div>
                 </div>
             </div>
-            <div class="contrib-ways reveal" style="margin-top:48px">
+            <div class="ways-grid reveal">
                 <div class="way-card">
                     <div class="way-icon">&#x1F4BB;</div>
-                    <div class="way-title">Desarrollo de Software</div>
-                    <p class="way-desc">Python 3.11+, pytest, mypy, ruff. Algoritmos de optimizaci&#243;n, drivers
-                        Modbus, integraciones cloud. El stack es completamente open y bien documentado.</p>
+                    <div class="way-title">Software</div>
+                    <p class="way-desc">Python 3.11+, pytest, mypy, ruff. Optimizaci&#243;n, drivers Modbus, cloud.</p>
                     <a class="way-link"
                         href="https://github.com/bess-solutions/open-bess-edge/blob/main/CONTRIBUTING.md"
-                        target="_blank">Ver CONTRIBUTING.md &rarr;</a>
+                        target="_blank">CONTRIBUTING.md &#8594;</a>
                 </div>
                 <div class="way-card">
                     <div class="way-icon">&#x26A1;</div>
-                    <div class="way-title">Hardware &amp; Electrical Engineering</div>
-                    <p class="way-desc">Validaci&#243;n de drivers BMS, integraci&#243;n con nuevos inversores (Huawei,
-                        SMA, ABB), perfiles de hardware para distintas qu&#237;micas (LFP, NMC, NaS).</p>
-                    <a class="way-link"
+                    <div class="way-title">Hardware &amp; EE</div>
+                    <p class="way-desc">Drivers BMS, integraci&#243;n inversores (Huawei, SMA, ABB), perfiles LFP/NMC.
+                    </p><a class="way-link"
                         href="https://github.com/bess-solutions/open-bess-edge/issues?q=label%3Ahardware"
-                        target="_blank">Issues etiquetados hardware &rarr;</a>
+                        target="_blank">Issues hardware &#8594;</a>
                 </div>
                 <div class="way-card">
                     <div class="way-icon">&#x1F4CA;</div>
-                    <div class="way-title">Datos y Modelos IA</div>
-                    <p class="way-desc">Datos de precios spot (CMg), entrenamiento de agentes DRL con datos reales
-                        LatAm, validaci&#243;n del MILP en distintos mercados (SEN, CAMMESA, ONS, CND).</p>
+                    <div class="way-title">Datos &amp; IA</div>
+                    <p class="way-desc">CMg spot, DRL training con datos LatAm, validaci&#243;n MILP multi-mercado.</p>
                     <a class="way-link" href="https://github.com/bess-solutions/open-bess-edge/tree/main/src/ai"
-                        target="_blank">M&#243;dulo IA en GitHub &rarr;</a>
+                        target="_blank">M&#243;dulo IA &#8594;</a>
                 </div>
                 <div class="way-card">
                     <div class="way-icon">&#x1F310;</div>
-                    <div class="way-title">Traducci&#243;n y Documentaci&#243;n</div>
-                    <p class="way-desc">La documentaci&#243;n t&#233;cnica est&#225; en espa&#241;ol e ingl&#233;s.
-                        Buscamos revisores t&#233;cnicos en portugu&#233;s para Brasil, y traductores especializados en
-                        energ&#237;a el&#233;ctrica.</p>
-                    <a class="way-link" href="https://bess-solutions.github.io/open-bess-edge/"
-                        target="_blank">Documentaci&#243;n MkDocs &rarr;</a>
+                    <div class="way-title">Docs &amp; i18n</div>
+                    <p class="way-desc">Docs en ES/EN. Buscamos revisores t&#233;cnicos en PT para Brasil.</p><a
+                        class="way-link" href="https://bess-solutions.github.io/open-bess-edge/" target="_blank">MkDocs
+                        &#8594;</a>
                 </div>
             </div>
             <div class="cta-block reveal" style="margin-top:48px">
                 <div class="cta-h2">&#x1F91D; &#218;nase al ecosistema BESSAI</div>
-                <p class="cta-sub">Discord de la comunidad, issues en GitHub, o escribenos directo. Toda
-                    contribuci&#243;n tiene credito &mdash; en el c&#243;digo, en los papers, y en el changelog.</p>
+                <p class="cta-sub">Discord, GitHub issues, o contacto directo. Toda contribuci&#243;n tiene cr&#233;dito
+                    en el c&#243;digo, los papers, y el changelog.</p>
                 <div class="cta-btns">
-                    <a class="btn-primary" href="https://github.com/bess-solutions/open-bess-edge" target="_blank">⭐
-                        Star en GitHub</a>
-                    <a class="btn-secondary" href="mailto:comunidad@bess-solutions.cl">Contactar al equipo</a>
+                    <a class="btn-primary" href="https://github.com/bess-solutions/open-bess-edge"
+                        target="_blank">&#x2B50; Star en GitHub</a>
+                    <a class="btn-secondary" href="mailto:contacto@bess-solutions.cl">Contactar al equipo</a>
                 </div>
             </div>
         </div>
@@ -1498,11 +462,12 @@
 
     <hr class="rule" />
 
+    <!-- FOOTER -->
     <footer>
         <div class="wrap">
             <div class="foot-inner">
-                <span class="foot-copy">© 2026 BESS Solutions SpA · Construyendo la transición energética de
-                    Chile</span>
+                <span class="foot-copy">&#169; 2026 BESS Solutions SpA &#183; Construyendo la transici&#243;n
+                    energ&#233;tica de Chile</span>
                 <div class="foot-links">
                     <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank">GitHub</a>
                     <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/CHANGELOG.md"
@@ -1516,337 +481,10 @@
         </div>
     </footer>
 
+    <!-- CDN Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script>
-        (function () {
-            'use strict';
-
-            // ── THREE.JS MULTI-MODE UNIVERSE ──────────────────────────────────────
-            const canvas = document.getElementById('universe');
-            let W = window.innerWidth, H = window.innerHeight;
-            const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-            renderer.setSize(W, H);
-            renderer.setClearColor(0x06080f, 1);
-
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(60, W / H, .1, 200);
-            camera.position.set(0, 0, 30);
-
-            let currentMode = 'earth';
-            let targetMode = 'earth';
-            let mx = 0, my = 0;
-            document.addEventListener('mousemove', e => { mx = e.clientX / W - .5; my = e.clientY / H - .5; });
-            window.addEventListener('resize', () => {
-                W = window.innerWidth; H = window.innerHeight;
-                renderer.setSize(W, H); camera.aspect = W / H; camera.updateProjectionMatrix();
-            });
-
-            // ── EARTH MODE: warm sphere of particles ──
-            const earthGeo = new THREE.BufferGeometry();
-            const earthCount = 2000;
-            const earthPos = new Float32Array(earthCount * 3);
-            const earthCol = new Float32Array(earthCount * 3);
-            for (let i = 0; i < earthCount; i++) {
-                const phi = Math.acos(-1 + 2 * Math.random());
-                const theta = Math.random() * Math.PI * 2;
-                const r = 12 + Math.random() * 0.8;
-                earthPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-                earthPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-                earthPos[i * 3 + 2] = r * Math.cos(phi);
-                // warm gradient: orange at poles, amber at equator
-                const lat = Math.abs(earthPos[i * 3 + 1]) / r;
-                earthCol[i * 3] = 0.7 + lat * .3;    // R
-                earthCol[i * 3 + 1] = 0.2 + lat * .2;  // G
-                earthCol[i * 3 + 2] = 0.05;        // B
-            }
-            earthGeo.setAttribute('position', new THREE.BufferAttribute(earthPos, 3));
-            earthGeo.setAttribute('color', new THREE.BufferAttribute(earthCol, 3));
-            const earthMat = new THREE.PointsMaterial({ size: .18, vertexColors: true, transparent: true, opacity: .9 });
-            const earthMesh = new THREE.Points(earthGeo, earthMat);
-            scene.add(earthMesh);
-
-            // ── GRID MODE: power grid network ──
-            const gridGroup = new THREE.Group();
-            const gridNodes = [];
-            const N_GRID = 28;
-            const gPositions = new Float32Array(N_GRID * 3);
-            const gColors = new Float32Array(N_GRID * 3);
-            for (let i = 0; i < N_GRID; i++) {
-                const x = (Math.random() - .5) * 34;
-                const y = (Math.random() - .5) * 18;
-                const z = (Math.random() - .5) * 6;
-                gPositions[i * 3] = x; gPositions[i * 3 + 1] = y; gPositions[i * 3 + 2] = z;
-                gridNodes.push([x, y, z]);
-                gColors[i * 3] = .1; gColors[i * 3 + 1] = .8; gColors[i * 3 + 2] = .95;
-            }
-            const gGeo = new THREE.BufferGeometry();
-            gGeo.setAttribute('position', new THREE.BufferAttribute(gPositions, 3));
-            gGeo.setAttribute('color', new THREE.BufferAttribute(gColors, 3));
-            const gMat = new THREE.PointsMaterial({ size: .35, vertexColors: true, transparent: true, opacity: .0 });
-            const gPoints = new THREE.Points(gGeo, gMat);
-            gridGroup.add(gPoints);
-
-            // grid lines
-            const linesGeo = new THREE.BufferGeometry();
-            const lineVerts = [];
-            for (let i = 0; i < N_GRID; i++) {
-                for (let j = i + 1; j < N_GRID; j++) {
-                    const dx = gridNodes[i][0] - gridNodes[j][0];
-                    const dy = gridNodes[i][1] - gridNodes[j][1];
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 13) {
-                        lineVerts.push(...gridNodes[i], ...gridNodes[j]);
-                    }
-                }
-            }
-            linesGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(lineVerts), 3));
-            const lineMat = new THREE.LineBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: .0 });
-            const lines = new THREE.LineSegments(linesGeo, lineMat);
-            gridGroup.add(lines);
-            scene.add(gridGroup);
-
-            // ── NEURAL MODE: brain network (BESS) ──
-            const neuralGroup = new THREE.Group();
-            const N_NEURAL = 40;
-            const neuralNodes = [];
-            const nGeo = new THREE.BufferGeometry();
-            const nPos = new Float32Array(N_NEURAL * 3);
-            const nCol = new Float32Array(N_NEURAL * 3);
-            const colors3 = [[.13, .85, .6], [.05, .7, .9], [.3, .4, .95]];
-            for (let i = 0; i < N_NEURAL; i++) {
-                const x = (Math.random() - .5) * 36;
-                const y = (Math.random() - .5) * 20;
-                const z = (Math.random() - .5) * 8;
-                nPos[i * 3] = x; nPos[i * 3 + 1] = y; nPos[i * 3 + 2] = z;
-                neuralNodes.push([x, y, z]);
-                const c = colors3[i % 3];
-                nCol[i * 3] = c[0]; nCol[i * 3 + 1] = c[1]; nCol[i * 3 + 2] = c[2];
-            }
-            nGeo.setAttribute('position', new THREE.BufferAttribute(nPos, 3));
-            nGeo.setAttribute('color', new THREE.BufferAttribute(nCol, 3));
-            const nMat = new THREE.PointsMaterial({ size: .3, vertexColors: true, transparent: true, opacity: .0 });
-            const nPoints = new THREE.Points(nGeo, nMat);
-            neuralGroup.add(nPoints);
-
-            const nLinesGeo = new THREE.BufferGeometry();
-            const nLineVerts = [];
-            for (let i = 0; i < N_NEURAL; i++) {
-                for (let j = i + 1; j < N_NEURAL; j++) {
-                    const dx = neuralNodes[i][0] - neuralNodes[j][0];
-                    const dy = neuralNodes[i][1] - neuralNodes[j][1];
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 11) { nLineVerts.push(...neuralNodes[i], ...neuralNodes[j]); }
-                }
-            }
-            nLinesGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(nLineVerts), 3));
-            const nLineMat = new THREE.LineBasicMaterial({ color: 0x34d399, transparent: true, opacity: .0 });
-            const nLines = new THREE.LineSegments(nLinesGeo, nLineMat);
-            neuralGroup.add(nLines);
-            scene.add(neuralGroup);
-
-            // ── Mode transition ──
-            function setMode(mode) {
-                if (mode === currentMode) return;
-                currentMode = mode;
-                const dur = 600;
-                function lerp(a, b, t) { return a + (b - a) * t; }
-                function fade(matArr_out, matArr_in) {
-                    let t = 0;
-                    const step = () => {
-                        t += 16 / dur;
-                        if (t > 1) t = 1;
-                        matArr_out.forEach(m => { m.opacity = lerp(m.opacity, 0, t); });
-                        matArr_in.forEach(m => { m.opacity = lerp(m.opacity, mode === 'earth' ? 0.9 : 0.85, t); });
-                        if (t < 1) requestAnimationFrame(step);
-                    };
-                    step();
-                }
-                if (mode === 'earth') {
-                    earthMesh.visible = true;
-                    fade([gMat, lineMat, nMat, nLineMat], [earthMat]);
-                } else if (mode === 'grid') {
-                    fade([earthMat, nMat, nLineMat], [gMat, lineMat]);
-                    gMat.opacity = 0; lineMat.opacity = 0;
-                } else {
-                    fade([earthMat, gMat, lineMat], [nMat, nLineMat]);
-                    nMat.opacity = 0; nLineMat.opacity = 0;
-                }
-            }
-
-            // start with earth visible
-            earthMat.opacity = .9;
-            gMat.opacity = 0; lineMat.opacity = 0;
-            nMat.opacity = 0; nLineMat.opacity = 0;
-
-            let t = 0;
-            (function animate() {
-                requestAnimationFrame(animate);
-                t += .008;
-                // earth rotation
-                earthMesh.rotation.y = t * .15;
-                earthMesh.rotation.x = Math.sin(t * .1) * .05;
-                // grid gentle float
-                gridGroup.rotation.y = Math.sin(t * .2) * .15;
-                neuralGroup.rotation.y = t * .08;
-                // camera mouse parallax
-                camera.position.x += (mx * 5 - camera.position.x) * .04;
-                camera.position.y += (-my * 2.5 + 2 - camera.position.y) * .04;
-                camera.lookAt(0, 0, 0);
-                renderer.render(scene, camera);
-            })();
-
-            // ── INTERSECTION OBSERVER — switch scenes per chapter ──
-            const chapterMap = { ch1: 'earth', ch2: 'grid', ch3: 'neural' };
-            const chapObs = new IntersectionObserver(entries => {
-                entries.forEach(e => {
-                    if (e.isIntersecting) {
-                        const mode = chapterMap[e.target.id];
-                        if (mode) setMode(mode);
-                    }
-                });
-            }, { threshold: .3 });
-            ['ch1', 'ch2', 'ch3'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) chapObs.observe(el);
-            });
-
-            // ── ANIMATE CHAPTER ELEMENTS ON SCROLL ──
-            const animObs = new IntersectionObserver(entries => {
-                entries.forEach(e => {
-                    if (e.isIntersecting) {
-                        e.target.querySelectorAll('.ch-badge,.ch-h1,.ch-sub,.ch-pills,.feat-grid,.ch-actions').forEach((el, i) => {
-                            setTimeout(() => el.classList.add('in'), i * 80);
-                        });
-                        animObs.unobserve(e.target);
-                    }
-                });
-            }, { threshold: .15 });
-            document.querySelectorAll('.chapter').forEach(ch => animObs.observe(ch));
-
-            // ── REVEAL GENERIC ──
-            const revObs = new IntersectionObserver(entries => {
-                entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); revObs.unobserve(e.target); } });
-            }, { threshold: .1 });
-            document.querySelectorAll('.reveal').forEach(el => revObs.observe(el));
-
-            // ── CHART.JS LIVE ──
-            if (typeof Chart !== 'undefined') {
-                const ctx = document.getElementById('chart-main');
-                if (ctx) {
-                    const labels = Array.from({ length: 20 }, (_, i) => `${i + 1}`);
-                    let socData = Array.from({ length: 20 }, () => 65 + Math.random() * 20);
-                    let pwData = Array.from({ length: 20 }, () => -200 + Math.random() * 300);
-                    const chart = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels, datasets: [
-                                { label: 'SoC (%)', data: [...socData], borderColor: '#22d3ee', backgroundColor: 'rgba(34,211,238,.07)', borderWidth: 1.8, fill: true, tension: .4, pointRadius: 0 },
-                                { label: 'Potencia (kW/10)', data: pwData.map(v => v / 10), borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,.04)', borderWidth: 1.5, fill: false, tension: .4, pointRadius: 0 }
-                            ]
-                        },
-                        options: {
-                            responsive: true, animation: { duration: 400 }, plugins: { legend: { labels: { color: '#6e7681', font: { size: 11 } } } },
-                            scales: {
-                                x: { ticks: { color: '#6e7681', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' } },
-                                y: { ticks: { color: '#6e7681', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' } }
-                            }
-                        }
-                    });
-                    setInterval(() => {
-                        socData.shift(); socData.push(Math.max(20, Math.min(100, socData[socData.length - 1] + (Math.random() - .45) * 4)));
-                        pwData.shift(); pwData.push(Math.max(-500, Math.min(500, pwData[pwData.length - 1] + (Math.random() - .5) * 60)));
-                        chart.data.datasets[0].data = [...socData];
-                        chart.data.datasets[1].data = pwData.map(v => v / 10);
-                        chart.update('none');
-                        // update KPIs
-                        const soc = socData[socData.length - 1];
-                        const pw = pwData[pwData.length - 1];
-                        const cmg = 70 + Math.random() * 60;
-                        document.getElementById('kpi-soc').textContent = soc.toFixed(1) + '%';
-                        document.getElementById('kpi-soc-d').textContent = soc > 70 ? '↑ cargando' : '↓ descargando';
-                        document.getElementById('kpi-soc-d').className = 'kpi-delta ' + (soc > 70 ? 'up' : 'dn');
-                        document.getElementById('kpi-pw').textContent = (pw >= 0 ? '+' : '') + Math.round(pw) + ' kW';
-                        document.getElementById('kpi-pw-d').textContent = pw > 0 ? '↑ inyectando' : '↓ cargando';
-                        document.getElementById('kpi-pw-d').className = 'kpi-delta ' + (pw > 0 ? 'up' : 'dn');
-                        document.getElementById('kpi-cmg').textContent = '$' + Math.round(cmg);
-                        document.getElementById('kpi-lat').textContent = (2 + Math.random() * 3).toFixed(1) + 'ms';
-                    }, 2000);
-                }
-            }
-
-            // ── NAV SCROLL ──
-            window.addEventListener('scroll', () => {
-                document.getElementById('nav').style.background = scrollY > 60 ? 'rgba(6,8,15,.97)' : 'rgba(6,8,15,.8)';
-            });
-
-        })();
-
-        // ── i18n ENGINE ──────────────────────────────────────────
-        const T = {
-            es: {
-                'nav.why': 'El Porqu&#233;',
-                'nav.opp': 'La Oportunidad',
-                'nav.sol': 'La Soluci&#243;n',
-                'nav.demo': 'Solicitar demo',
-                'geo.text': 'Mientras algunos dan marcha atr&#225;s, <strong>Am&#233;rica Latina lidera</strong> la transici&#243;n energ&#233;tica con el mejor recurso solar y e&#243;lico del mundo.',
-                'ch1.badge': '<span class="ch-dot b1-dot"></span>01 &middot; El Contexto',
-                'ch1.h1': 'El planeta<br>est&#225; <span class="accent-orange">en transici&#243;n.</span><br>&#161;Y LatAm lidera.',
-                'ch1.sub': 'Mientras potencias tradicionales vuelven al carb&#243;n, <em>Chile tiene el mejor recurso solar del mundo</em> (Atacama), Colombia el mejor e&#243;lico de LatAm, y todo un continente eligiendo la transici&#243;n energ&#233;tica limpia.',
-                'ch1.p1': 'CO&#x2082; atm. &mdash; NASA 2024',
-                'ch1.p2': 'Anomal&#237;a temp. global &middot; NASA',
-                'ch1.p3': 'pa&#237;ses &middot; Acuerdo de Par&#237;s'
-            },
-            en: {
-                'nav.why': 'Why Now',
-                'nav.opp': 'The Opportunity',
-                'nav.sol': 'The Solution',
-                'nav.demo': 'Request demo',
-                'geo.text': 'While some step back, <strong>Latin America leads</strong> the energy transition with the world\'s best solar &amp; wind resources. Chile, Colombia, Peru, Brazil.',
-                'ch1.badge': '<span class="ch-dot b1-dot"></span>01 &middot; The Context',
-                'ch1.h1': 'The planet<br>is <span class="accent-orange">in transition.</span><br>And LatAm leads.',
-                'ch1.sub': 'While traditional powers return to coal, <em>Chile has the world\'s best solar resource</em> (Atacama), Colombia the best wind in LatAm, and an entire continent choosing the clean energy transition.',
-                'ch1.p1': 'Atm. CO&#x2082; &mdash; NASA 2024',
-                'ch1.p2': 'Global temp. anomaly &middot; NASA',
-                'ch1.p3': 'countries &middot; Paris Agreement'
-            },
-            pt: {
-                'nav.why': 'Por Qu&#234;',
-                'nav.opp': 'A Oportunidade',
-                'nav.sol': 'A Solu&#231;&#227;o',
-                'nav.demo': 'Solicitar demo',
-                'geo.text': 'Enquanto alguns recuam, <strong>a Am&#233;rica Latina lidera</strong> a transi&#231;&#227;o energ&#233;tica com os melhores recursos solar e e&#243;lico do mundo.',
-                'ch1.badge': '<span class="ch-dot b1-dot"></span>01 &middot; O Contexto',
-                'ch1.h1': 'O planeta<br>est&#225; <span class="accent-orange">em transi&#231;&#227;o.</span><br>E a LatAm lidera.',
-                'ch1.sub': 'Enquanto pot&#234;ncias tradicionais voltam ao carv&#227;o, <em>o Chile tem o melhor recurso solar do mundo</em> (Atacama), Col&#244;mbia o melhor e&#243;lico da LatAm, e um continente inteiro escolhendo a transi&#231;&#227;o energ&#233;tica.',
-                'ch1.p1': 'CO&#x2082; atm. &mdash; NASA 2024',
-                'ch1.p2': 'Anomalia temp. global &middot; NASA',
-                'ch1.p3': 'pa&#237;ses &middot; Acordo de Paris'
-            }
-        };
-
-        function setLang(lang) {
-            document.documentElement.lang = lang === 'pt' ? 'pt-BR' : lang;
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                const val = T[lang] && T[lang][key];
-                if (val !== undefined) el.innerHTML = val;
-            });
-            document.querySelectorAll('.lang-btn').forEach(b => {
-                b.classList.toggle('active', b.textContent.trim().toLowerCase() === lang);
-            });
-            localStorage.setItem('bessai_lang', lang);
-        }
-
-        // auto-detect language on load
-        (function () {
-            const saved = localStorage.getItem('bessai_lang');
-            const browser = (navigator.language || '').toLowerCase();
-            const lang = saved || (browser.startsWith('pt') ? 'pt' : browser.startsWith('en') ? 'en' : 'es');
-            if (lang !== 'es') setLang(lang);
-        })();
-    </script>
+    <script src="main.js"></script>
 </body>
 
 </html>
