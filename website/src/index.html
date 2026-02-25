@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>BESS Solutions — Inteligencia para el almacenamiento de energía</title>
+    <meta name="description"
+        content="BESSAI Edge: gateway open-source industrial-grade para BESS. Optimización IA, IEC 62443, NTSyCS Chile. Apache 2.0." />
+    <meta property="og:title" content="BESS Solutions — Edge AI para BESS" />
+    <meta property="og:description"
+        content="Gateway open-source industrial-grade para sistemas de almacenamiento de energía en baterías." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="assets/logo-bess.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet" />
+    <!-- BUILD:CSS -->
+</head>
+
+<body>
+
+    <!-- ── NAV ── -->
+    <nav id="main-nav">
+        <a class="nav-logo" href="#">
+            <img src="assets/logo-bess.png" alt="BESS Solutions" />
+            <span>BESSAI</span>
+        </a>
+        <div id="nav-menu">
+            <a href="#problema" data-i18n="nav.problema">El Problema</a>
+            <a href="#features" data-i18n="nav.features">Funciones</a>
+            <a href="#stack" data-i18n="nav.solucion">Solución</a>
+            <a href="#comunidad" data-i18n="nav.comunidad">Comunidad</a>
+            <a href="#roadmap" data-i18n="nav.roadmap">Roadmap</a>
+            <a href="#early-adopter" data-i18n="nav.contacto">Contacto</a>
+            <div class="nav-lang">
+                <button data-lang-btn="es" onclick="I18N.switchTo('es')">ES</button>
+                <button data-lang-btn="en" onclick="I18N.switchTo('en')">EN</button>
+            </div>
+        </div>
+        <button id="nav-burger" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <!-- ── HERO ── -->
+    <section id="hero">
+        <div class="hero-badge">
+            <span class="badge" data-i18n="hero.badge">Open Source · Apache 2.0 · IEC 62443</span>
+        </div>
+        <h1 class="hero-headline">
+            <span id="hero-l1">El cerebro de tu</span>
+            <span id="hero-l2">batería es <em>open-source.</em></span>
+        </h1>
+        <p class="hero-sub" data-i18n-html="hero.sub">Gateway industrial open-source para sistemas de almacenamiento de
+            energía en baterías.</p>
+        <div class="hero-ctas">
+            <a href="https://github.com/bess-solutions/open-bess-edge" class="btn-primary" target="_blank"
+                rel="noopener">
+                <span data-i18n="hero.cta_primary">Ver en GitHub</span> →
+            </a>
+            <a href="#early-adopter" class="btn-secondary">
+                <span data-i18n="hero.cta_secondary">Unirme al programa Early Adopter</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- ── LIVE METRICS STRIP ── -->
+    <div id="live-strip">
+        <div class="container">
+            <div class="live-inner">
+                <div class="live-metric">
+                    <div class="live-tag" data-i18n="live.live_tag">EN VIVO</div>
+                    <div class="live-value"><span id="lm-savings">13248</span></div>
+                    <div class="live-unit" data-i18n="live.unit_savings">$/día</div>
+                    <div class="live-label" data-i18n="live.label_savings">Ahorro energético</div>
+                </div>
+                <div class="live-metric">
+                    <div class="live-tag" data-i18n="live.live_tag">EN VIVO</div>
+                    <div class="live-value"><span id="lm-latency">38.4</span></div>
+                    <div class="live-unit" data-i18n="live.unit_latency">ms</div>
+                    <div class="live-label" data-i18n="live.label_latency">Latencia edge</div>
+                </div>
+                <div class="live-metric">
+                    <div class="live-tag" data-i18n="live.live_tag">EN VIVO</div>
+                    <div class="live-value"><span id="lm-soc">84.2</span></div>
+                    <div class="live-unit" data-i18n="live.unit_soc">% promedio</div>
+                    <div class="live-label" data-i18n="live.label_soc">SoC activo</div>
+                </div>
+                <div class="live-metric">
+                    <div class="live-tag" data-i18n="live.live_tag">EN VIVO</div>
+                    <div class="live-value"><span id="lm-cycles">5</span></div>
+                    <div class="live-unit" data-i18n="live.unit_cycles">instancias</div>
+                    <div class="live-label" data-i18n="live.label_cycles">Ciclos protegidos</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── AUDIENCES ── -->
+    <section id="audiencias" class="section">
+        <div class="container">
+            <h2 class="section-title reveal" data-i18n="audiences.title">¿Por qué BESSAI es para ti?</h2>
+            <div class="aud-tabs-wrap" id="aud-tabs"></div>
+            <div id="aud-content"></div>
+        </div>
+    </section>
+
+    <!-- ── PROBLEMA ── -->
+    <section id="problema" class="section"
+        style="background:var(--bg2); border-top:1px solid var(--line); border-bottom:1px solid var(--line)">
+        <div class="container">
+            <h2 class="section-title reveal" data-i18n="problem.title">El problema que resolvemos</h2>
+            <p class="section-sub reveal reveal-delay-1" data-i18n="problem.subtitle">Los sistemas BESS industriales
+                dependen de software propietario opaco, costoso y no certificable.</p>
+            <div class="stats-grid reveal reveal-delay-2">
+                <div class="stat-card">
+                    <div class="stat-value"><span data-count="38">0</span>%</div>
+                    <div class="stat-label" data-i18n="problem.stats.0.label">Crecimiento anual BESS en LatAm</div>
+                    <div class="stat-detail" data-i18n="problem.stats.0.detail">CAGR 2024–2027</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">$2.4B</div>
+                    <div class="stat-label" data-i18n="problem.stats.1.label">Mercado addressable 2027</div>
+                    <div class="stat-detail" data-i18n="problem.stats.1.detail">BNEF Research</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value"><span data-count="4.2">0</span>%</div>
+                    <div class="stat-label" data-i18n="problem.stats.2.label">MAPE predicción de precio CMg</div>
+                    <div class="stat-detail" data-i18n="problem.stats.2.detail">vs 8-12% competencia</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value"><span data-count="490">0</span>+</div>
+                    <div class="stat-label" data-i18n="problem.stats.3.label">Tests automatizados</div>
+                    <div class="stat-detail" data-i18n="problem.stats.3.detail">cobertura >85%</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── FEATURES ── -->
+    <section id="features" class="section">
+        <div class="container">
+            <h2 class="section-title reveal" data-i18n="features.title">Todo lo que necesitas, nada que no necesitas
+            </h2>
+            <div class="features-grid reveal reveal-delay-1">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-title" data-i18n="features.items.0.title">IA en el Edge</div>
+                    <div class="feature-desc" data-i18n="features.items.0.desc">DRL, MILP y modelos ONNX corriendo
+                        localmente. Sin latencia cloud, sin dependencias externas.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔌</div>
+                    <div class="feature-title" data-i18n="features.items.1.title">Conectividad Industrial</div>
+                    <div class="feature-desc" data-i18n="features.items.1.desc">Modbus TCP, IEC 61850, MQTT, DNP3, REST
+                        y OPC-UA listos para usar.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <div class="feature-title" data-i18n="features.items.2.title">Seguridad IEC 62443</div>
+                    <div class="feature-desc" data-i18n="features.items.2.desc">Certificación SL-2, gestión de
+                        certificados x.509, logs auditables firmados digitalmente.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-title" data-i18n="features.items.3.title">Observabilidad Total</div>
+                    <div class="feature-desc" data-i18n="features.items.3.desc">Prometheus + Grafana embebidos,
+                        dashboard web en tiempo real, alertas configurables.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌎</div>
+                    <div class="feature-title" data-i18n="features.items.4.title">NTSyCS Chile</div>
+                    <div class="feature-desc" data-i18n="features.items.4.desc">Cumplimiento nativo con la normativa
+                        técnica de sistemas de coordinación eléctrica chilena.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🐳</div>
+                    <div class="feature-title" data-i18n="features.items.5.title">Deploy Anywhere</div>
+                    <div class="feature-desc" data-i18n="features.items.5.desc">Docker multi-arch ARM64/AMD64. Corre en
+                        Raspberry Pi, PLCs, servidores edge y cloud.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── TERMINAL ── -->
+    <section id="stack" class="section"
+        style="background:var(--bg2); border-top:1px solid var(--line); border-bottom:1px solid var(--line)">
+        <div class="container">
+            <h2 class="section-title reveal" data-i18n="stack.title">Especificaciones técnicas</h2>
+            <div class="terminal-wrap reveal reveal-delay-1">
+                <div class="term-bar">
+                    <div class="term-dot"></div>
+                    <div class="term-dot"></div>
+                    <div class="term-dot"></div>
+                    <span class="term-title">bessai-edge — bash</span>
+                </div>
+                <div id="term-output"></div>
+            </div>
+            <div class="spec-grid" style="margin-top:2rem">
+                <!-- Conectividad -->
+                <div class="spec-section reveal reveal-delay-1">
+                    <div class="spec-heading" data-i18n="stack.sections.0.heading">Conectividad</div>
+                    <table class="spec-table">
+                        <tr>
+                            <td data-i18n="stack.sections.0.rows.0.0">Protocolos OT</td>
+                            <td data-i18n="stack.sections.0.rows.0.1">Modbus TCP, IEC 61850, DNP3, OPC-UA</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.0.rows.1.0">Protocolos IT</td>
+                            <td data-i18n="stack.sections.0.rows.1.1">MQTT 5, REST/HTTP, gRPC, WebSocket</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.0.rows.2.0">Seguridad red</td>
+                            <td data-i18n="stack.sections.0.rows.2.1">mTLS, VPN WireGuard, firewall integrado</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.0.rows.3.0">Latencia edge</td>
+                            <td data-i18n="stack.sections.0.rows.3.1">&lt; 50 ms ciclo de control</td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- IA -->
+                <div class="spec-section reveal reveal-delay-2">
+                    <div class="spec-heading" data-i18n="stack.sections.1.heading">Inteligencia Artificial</div>
+                    <table class="spec-table">
+                        <tr>
+                            <td data-i18n="stack.sections.1.rows.0.0">Algoritmos</td>
+                            <td data-i18n="stack.sections.1.rows.0.1">Deep Reinforcement Learning (DRL), MILP</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.1.rows.1.0">Inferencia</td>
+                            <td data-i18n="stack.sections.1.rows.1.1">ONNX Runtime, TensorRT (opcional)</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.1.rows.2.0">Predicción CMg</td>
+                            <td data-i18n="stack.sections.1.rows.2.1">MAPE 4.2% · histórico CEN Chile</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.1.rows.3.0">Entrenamiento</td>
+                            <td data-i18n="stack.sections.1.rows.3.1">Incremental online + batch offline</td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- Observabilidad -->
+                <div class="spec-section reveal reveal-delay-1">
+                    <div class="spec-heading" data-i18n="stack.sections.2.heading">Observabilidad</div>
+                    <table class="spec-table">
+                        <tr>
+                            <td data-i18n="stack.sections.2.rows.0.0">Métricas</td>
+                            <td data-i18n="stack.sections.2.rows.0.1">Prometheus + Grafana embebidos</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.2.rows.1.0">Logs</td>
+                            <td data-i18n="stack.sections.2.rows.1.1">Structured JSON · firma digital SHA-256</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.2.rows.2.0">Dashboard</td>
+                            <td data-i18n="stack.sections.2.rows.2.1">Web UI tiempo real · WebSocket</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.2.rows.3.0">Alertas</td>
+                            <td data-i18n="stack.sections.2.rows.3.1">PagerDuty, Slack, Email, Webhook</td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- Compliance -->
+                <div class="spec-section reveal reveal-delay-2">
+                    <div class="spec-heading" data-i18n="stack.sections.3.heading">Compliance</div>
+                    <table class="spec-table">
+                        <tr>
+                            <td data-i18n="stack.sections.3.rows.0.0">Ciberseguridad</td>
+                            <td data-i18n="stack.sections.3.rows.0.1">IEC 62443 SL-2 certificable</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.3.rows.1.0">Chile</td>
+                            <td data-i18n="stack.sections.3.rows.1.1">NTSyCS coordinación eléctrica</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.3.rows.2.0">PKI</td>
+                            <td data-i18n="stack.sections.3.rows.2.1">Gestión certificados x.509 integrada</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.3.rows.3.0">Auditoría</td>
+                            <td data-i18n="stack.sections.3.rows.3.1">Logs inmutables · trazabilidad completa</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── COMUNIDAD ── -->
+    <section id="comunidad" class="section">
+        <div class="container">
+            <h2 class="section-title reveal" data-i18n="community.title">Únete a la comunidad</h2>
+            <p class="section-sub reveal reveal-delay-1" data-i18n="community.subtitle">Somos un proyecto open-source
+                impulsado por la comunidad de energía de América Latina.</p>
+            <div class="community-grid">
+                <div class="comm-card reveal reveal-delay-1">
+                    <div class="comm-icon">💬</div>
+                    <div class="comm-title" data-i18n="community.cards.0.title">Discord</div>
+                    <div class="comm-desc" data-i18n="community.cards.0.desc">Discusión técnica, soporte y newsletter
+                        semanal.</div>
+                    <a href="https://discord.gg/bessai" class="btn-secondary" target="_blank" rel="noopener"
+                        data-i18n="community.cards.0.cta">Unirse al servidor</a>
+                </div>
+                <div class="comm-card reveal reveal-delay-2">
+                    <div class="comm-icon">🐙</div>
+                    <div class="comm-title" data-i18n="community.cards.1.title">GitHub</div>
+                    <div class="comm-desc" data-i18n="community.cards.1.desc">Código abierto, issues, PRs y roadmap
+                        público.</div>
+                    <a href="https://github.com/bess-solutions/open-bess-edge" class="btn-secondary" target="_blank"
+                        rel="noopener" data-i18n="community.cards.1.cta">Ver repositorio</a>
+                </div>
+                <div class="comm-card reveal reveal-delay-3">
+                    <div class="comm-icon">📄</div>
+                    <div class="comm-title" data-i18n="community.cards.2.title">Documentación</div>
+                    <div class="comm-desc" data-i18n="community.cards.2.desc">Guías, API reference y tutoriales.</div>
+                    <a href="https://bess-solutions.github.io/open-bess-edge" class="btn-secondary" target="_blank"
+                        rel="noopener" data-i18n="community.cards.2.cta">Leer docs</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── ROADMAP ── -->
+    <section id="roadmap" class="section"
+        style="background:var(--bg2); border-top:1px solid var(--line); border-bottom:1px solid var(--line)">
+        <div class="container">
+            <h2 class="section-title reveal" data-i18n="roadmap.title">Roadmap público</h2>
+            <p class="section-sub reveal reveal-delay-1" data-i18n="roadmap.subtitle">Desarrollo transparente con fechas
+                reales.</p>
+            <div class="roadmap-grid reveal reveal-delay-2">
+                <div class="roadmap-phase">
+                    <div class="phase-tag released" data-i18n="roadmap.phases.0.tag">LANZADO</div>
+                    <div class="phase-date" data-i18n="roadmap.phases.0.date">Q4 2024</div>
+                    <div class="phase-title" data-i18n="roadmap.phases.0.title">v1.0 — Foundation</div>
+                    <ul class="phase-items">
+                        <li data-i18n="roadmap.phases.0.items.0">490+ tests · cobertura >85%</li>
+                        <li data-i18n="roadmap.phases.0.items.1">Docker multi-arch ARM64/AMD64</li>
+                        <li data-i18n="roadmap.phases.0.items.2">Modbus + MQTT + REST</li>
+                        <li data-i18n="roadmap.phases.0.items.3">Dashboard web básico</li>
+                    </ul>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="phase-tag progress" data-i18n="roadmap.phases.1.tag">EN PROGRESO</div>
+                    <div class="phase-date" data-i18n="roadmap.phases.1.date">Q1 2025</div>
+                    <div class="phase-title" data-i18n="roadmap.phases.1.title">v1.5 — Intelligence</div>
+                    <ul class="phase-items">
+                        <li data-i18n="roadmap.phases.1.items.0">Motor DRL producción</li>
+                        <li data-i18n="roadmap.phases.1.items.1">Predictor CMg v2 (MAPE 4.2%)</li>
+                        <li data-i18n="roadmap.phases.1.items.2">Arbitraje de precio autónomo</li>
+                        <li data-i18n="roadmap.phases.1.items.3">API pública documentada</li>
+                    </ul>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="phase-tag next" data-i18n="roadmap.phases.2.tag">PRÓXIMO</div>
+                    <div class="phase-date" data-i18n="roadmap.phases.2.date">Q2 2025</div>
+                    <div class="phase-title" data-i18n="roadmap.phases.2.title">v2.0 — Compliance</div>
+                    <ul class="phase-items">
+                        <li data-i18n="roadmap.phases.2.items.0">Certificación IEC 62443 SL-2</li>
+                        <li data-i18n="roadmap.phases.2.items.1">Reporte NTSyCS automático</li>
+                        <li data-i18n="roadmap.phases.2.items.2">Logs con firma digital</li>
+                        <li data-i18n="roadmap.phases.2.items.3">Multi-tenant enterprise</li>
+                    </ul>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="phase-tag planned" data-i18n="roadmap.phases.3.tag">PLANIFICADO</div>
+                    <div class="phase-date" data-i18n="roadmap.phases.3.date">Q3 2025</div>
+                    <div class="phase-title" data-i18n="roadmap.phases.3.title">v2.5 — Ecosystem</div>
+                    <ul class="phase-items">
+                        <li data-i18n="roadmap.phases.3.items.0">Marketplace de algoritmos</li>
+                        <li data-i18n="roadmap.phases.3.items.1">SDK TypeScript</li>
+                        <li data-i18n="roadmap.phases.3.items.2">Certificación LatAm regional</li>
+                        <li data-i18n="roadmap.phases.3.items.3">Programa partner integrador</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── EARLY ADOPTER ── -->
+    <section id="early-adopter" class="section">
+        <div class="container">
+            <h2 class="section-title reveal" data-i18n="early_adopter.title">Programa Early Adopter</h2>
+            <p class="section-sub reveal reveal-delay-1" data-i18n="early_adopter.subtitle">Cupos limitados. Sin
+                segundas rondas.</p>
+            <div class="ea-grid">
+                <div class="ea-card reveal reveal-delay-1">
+                    <div class="ea-tier" data-i18n="early_adopter.cards.0.tier">Pioneer</div>
+                    <div class="ea-price" data-i18n="early_adopter.cards.0.price">Gratis</div>
+                    <div class="ea-slots" data-i18n="early_adopter.cards.0.slots">5 cupos</div>
+                    <ul class="ea-benefits">
+                        <li data-i18n="early_adopter.cards.0.benefits.0">Acceso prioritario a v2.0</li>
+                        <li data-i18n="early_adopter.cards.0.benefits.1">Soporte directo del equipo core</li>
+                        <li data-i18n="early_adopter.cards.0.benefits.2">Co-autoría en BESSAI-SPEC</li>
+                        <li data-i18n="early_adopter.cards.0.benefits.3">Badge 'BESSAI Pioneer' verificado</li>
+                        <li data-i18n="early_adopter.cards.0.benefits.4">Discord canal privado</li>
+                    </ul>
+                    <a href="mailto:hello@bess-solutions.cl?subject=Early Adopter Pioneer" class="btn-primary"
+                        data-i18n="early_adopter.cards.0.cta">Solicitar cupo Pioneer</a>
+                </div>
+                <div class="ea-card featured reveal reveal-delay-2">
+                    <div class="ea-tier" data-i18n="early_adopter.cards.1.tier">Strategic Partner</div>
+                    <div class="ea-price" data-i18n="early_adopter.cards.1.price">A convenir</div>
+                    <div class="ea-slots" data-i18n="early_adopter.cards.1.slots">3 cupos</div>
+                    <ul class="ea-benefits">
+                        <li data-i18n="early_adopter.cards.1.benefits.0">Todo lo de Pioneer</li>
+                        <li data-i18n="early_adopter.cards.1.benefits.1">Roadmap co-diseñado</li>
+                        <li data-i18n="early_adopter.cards.1.benefits.2">Integración personalizada</li>
+                        <li data-i18n="early_adopter.cards.1.benefits.3">SLA enterprise 99.9%</li>
+                        <li data-i18n="early_adopter.cards.1.benefits.4">Mención en documentación oficial</li>
+                    </ul>
+                    <a href="mailto:hello@bess-solutions.cl?subject=Strategic Partner" class="btn-primary"
+                        data-i18n="early_adopter.cards.1.cta">Hablar con el equipo</a>
+                </div>
+            </div>
+            <div class="ea-urgency" data-i18n="early_adopter.urgency">⚠️ Solo 8 cupos en total. Disponibles hasta
+                llenar.</div>
+        </div>
+    </section>
+
+    <!-- ── FOOTER ── -->
+    <footer>
+        <div class="container">
+            <div class="foot-grid">
+                <div class="foot-brand">
+                    <img src="assets/logo-bess.png" alt="BESS Solutions" />
+                    <p class="foot-tagline" data-i18n="footer.tagline">Gestión inteligente de energía, open-source.</p>
+                </div>
+                <div class="foot-col">
+                    <h4>Proyecto</h4>
+                    <ul>
+                        <li><a href="https://github.com/bess-solutions/open-bess-edge">GitHub</a></li>
+                        <li><a href="https://bess-solutions.github.io/open-bess-edge">Docs</a></li>
+                        <li><a
+                                href="https://github.com/bess-solutions/open-bess-edge/blob/main/CHANGELOG.md">CHANGELOG</a>
+                        </li>
+                        <li><a href="https://github.com/bess-solutions/open-bess-edge/blob/main/LICENSE">Apache 2.0</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="foot-col">
+                    <h4>Comunidad</h4>
+                    <ul>
+                        <li><a href="https://discord.gg/bessai">Discord</a></li>
+                        <li><a href="https://github.com/bess-solutions/open-bess-edge/issues">Reportar bug</a></li>
+                        <li><a
+                                href="https://github.com/bess-solutions/open-bess-edge/blob/main/CONTRIBUTING.md">Contribuir</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="foot-col">
+                    <h4>Empresa</h4>
+                    <ul>
+                        <li><a href="mailto:hello@bess-solutions.cl">Contacto</a></li>
+                        <li><a href="#early-adopter">Early Adopter</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="foot-bottom">
+                <span data-i18n="footer.copy">© 2025 BESS Solutions SpA · Santiago, Chile</span>
+                <span data-i18n="footer.license">Software libre bajo Apache License 2.0</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ── FLOATING MUSIC PLAYER ── -->
+    <div id="music-player">
+        <img class="mp-cover" src="https://cdn2.suno.ai/edbd3009-1ef6-4a49-9c09-937395b6a4db_dc1e96bf.jpeg"
+            alt="BESS Anthem" />
+        <div class="mp-info">
+            <div class="mp-title" data-i18n="player.title">BESS Solutions in the House</div>
+            <div class="mp-sub" data-i18n="player.subtitle">Phonk Chilean · Suno AI</div>
+            <div id="mp-progress-wrap">
+                <div id="mp-bar"></div>
+            </div>
+        </div>
+        <button id="mp-btn" onclick="toggleMusic()">▶</button>
+        <button id="mp-close" onclick="this.closest('#music-player').style.display='none'">✕</button>
+        <a class="mp-suno-link" href="https://suno.com/s/3fl7sTP1M0Oitou3" target="_blank" rel="noopener"
+            data-i18n="player.suno_link">suno ↗</a>
+    </div>
+    <audio id="bess-audio" crossorigin="anonymous" src="https://cdn1.suno.ai/edbd3009-1ef6-4a49-9c09-937395b6a4db.mp3"
+        preload="none"></audio>
+
+    <!-- BUILD:JS -->
+</body>
+
+</html>
