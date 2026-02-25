@@ -363,27 +363,31 @@ function initNav() {
     onScroll();
 }
 
-/* ── REVEAL OBSERVER ──────────────────────────────── */
+/* ── REVEAL OBSERVER ──────────────────────────────────────── */
 function initReveal() {
     const io = new IntersectionObserver(entries => {
-        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
-    }, { threshold: .12 });
-    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-
-    // Stat items (Act II)
-    const statIo = new IntersectionObserver(entries => {
         entries.forEach(e => {
             if (e.isIntersecting) {
-                const items = e.target.querySelectorAll('.stat-item');
-                items.forEach((item, i) => setTimeout(() => item.classList.add('visible'), i * 160));
-                statIo.unobserve(e.target);
+                e.target.classList.add('visible');
+                io.unobserve(e.target);
             }
         });
-    }, { threshold: .2 });
-    document.querySelectorAll('.stat-stack').forEach(el => statIo.observe(el));
+    }, { threshold: .1 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // Stat items — each observed individually with stagger via delay
+    const statIo = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (!e.isIntersecting) return;
+            const idx = [...document.querySelectorAll('.stat-item')].indexOf(e.target);
+            setTimeout(() => e.target.classList.add('visible'), idx * 180);
+            statIo.unobserve(e.target);
+        });
+    }, { threshold: .15 });
+    document.querySelectorAll('.stat-item').forEach(el => statIo.observe(el));
 }
 
-/* ── COUNTERS ─────────────────────────────────────── */
+/* ── COUNTERS ─────────────────────────────────────────────── */
 function initCounters() {
     const io = new IntersectionObserver(entries => {
         entries.forEach(e => {
@@ -391,18 +395,20 @@ function initCounters() {
             const el = e.target;
             const target = +el.dataset.count;
             const suffix = el.dataset.suffix || '';
-            const dur = 1600;
+            const dur = 1800;
             const start = performance.now();
             const tick = (now) => {
                 const p = Math.min((now - start) / dur, 1);
-                const ease = p < .5 ? 2 * p * p : -1 + (4 - 2 * p) * p;
+                // Ease out cubic
+                const ease = 1 - Math.pow(1 - p, 3);
                 el.textContent = Math.round(target * ease) + suffix;
                 if (p < 1) requestAnimationFrame(tick);
+                else el.textContent = target + suffix;
             };
             requestAnimationFrame(tick);
             io.unobserve(el);
         });
-    }, { threshold: .4 });
+    }, { threshold: .25 });
     document.querySelectorAll('[data-count]').forEach(el => io.observe(el));
 }
 
@@ -652,17 +658,20 @@ function initGSAP() {
         });
     }
 
-    // Scene switching per act
+    // Scene switching per act — broader triggers for reliability
     const sceneMap = { act1: 'earth', act2: 'earth', act3: 'grid', act4: 'neural' };
     Object.entries(sceneMap).forEach(([id, scene]) => {
         ScrollTrigger.create({
             trigger: '#' + id,
-            start: 'top 60%',
-            end: 'bottom 40%',
+            start: 'top 70%',
+            end: 'bottom 30%',
             onEnter: () => window._bessaiSwitchScene?.(scene),
             onEnterBack: () => window._bessaiSwitchScene?.(scene),
         });
     });
+
+    // Initial scene
+    window._bessaiSwitchScene?.('earth');
 
     // Text reveals in acts
     document.querySelectorAll('.split-text').forEach(el => {
