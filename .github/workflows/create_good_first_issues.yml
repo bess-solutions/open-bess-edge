@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Create Issue 1 — Fronius Primo Modbus RTU Driver
         if: inputs.dry_run == 'false'
