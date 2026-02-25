@@ -2062,8 +2062,9 @@ window.BESSAI = (() => {
 document.addEventListener('DOMContentLoaded', () => BESSAI.init());
 
 
+/* i18n inline bootstrap */
 (function(){
-  var ES = {
+  var ES_STRINGS = {
   "lang": "es",
   "nav": {
     "problema": "El Problema",
@@ -2254,7 +2255,8 @@ document.addEventListener('DOMContentLoaded', () => BESSAI.init());
 }
 ;
   document.addEventListener('DOMContentLoaded', function(){
-    I18N.init(ES);
+    I18N.init(ES_STRINGS);
+    BESSAI.init();
   });
 })();
 </script>
