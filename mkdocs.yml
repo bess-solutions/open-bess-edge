@@ -81,6 +81,7 @@ nav:
     - Overview: architecture.md
     - Sim-First Strategy: simulation_registry.md
     - Roadmap v2.7–3.0: ROADMAP.md
+    - 🧬 BESSAIEvolve — AlphaEvolve: BESSAI_EVOLVE.md
     - Decision Records (ADRs):
       - Overview: adr/README.md
       - ADR-001 Pydantic Settings: adr/0001-pydantic-settings-config.md
