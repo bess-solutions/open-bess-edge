@@ -3,28 +3,40 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>BESS Solutions — Edge Intelligence for Battery Systems</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BESS Solutions — Inteligencia para el Almacenamiento de Energía</title>
     <meta name="description"
-        content="BESSAI Edge: software open-source de grado industrial para baterías. MILP, DRL, IEC 62443 SL-2. La inteligencia de la transición energética." />
+        content="BESSAI Edge: el sistema open-source de gestión inteligente de baterías para la transición energética en Latinoamérica." />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
         rel="stylesheet" />
+
+    <!-- Clash Display (premium display font) -->
+    <style>
+        @import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap');
+    </style>
+
+    <!-- CDN deps -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
     <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
-    <!-- THREE.JS CANVAS -->
-    <canvas id="universe"></canvas>
-
-    <!-- NAV -->
+    <!-- ══════════════════════════════════════════════════
+     NAVIGATION
+══════════════════════════════════════════════════ -->
     <nav class="nav" id="nav">
         <div class="nav-inner">
             <a class="nav-logo" href="#act1">
-                <img class="logo-img" src="logo-bess.png" alt="BESS Solutions" height="28" />
+                <img class="logo-img" src="logo-bess.png" alt="BESS Solutions" height="26" />
             </a>
             <div class="nav-links">
                 <a href="#act1" data-i18n="nav.1">Origen</a>
@@ -36,267 +48,240 @@
                 <a href="#dashboard" data-i18n="nav.6">Dashboard</a>
                 <a href="#roadmap" data-i18n="nav.7">Roadmap</a>
             </div>
-            <div class="nav-end">
-                <div class="lang-sw" role="group" aria-label="Language">
-                    <button class="lang-btn active" onclick="setLang('es')">ES</button>
-                    <button class="lang-btn" onclick="setLang('en')">EN</button>
-                    <button class="lang-btn" onclick="setLang('pt')">PT</button>
+            <div class="nav-right">
+                <div class="lang-sw">
+                    <button class="lang-btn active" id="lang-es" onclick="setLang('es')">ES</button>
+                    <button class="lang-btn" id="lang-en" onclick="setLang('en')">EN</button>
+                    <button class="lang-btn" id="lang-pt" onclick="setLang('pt')">PT</button>
                 </div>
-                <a class="btn-gh" href="https://github.com/bess-solutions/open-bess-edge" target="_blank">GitHub</a>
-                <a class="btn-cta" href="#early-adopters" data-i18n="nav.cta">Solicitar demo</a>
+                <a class="nav-cta" href="mailto:contacto@bess-solutions.cl" data-i18n="nav.cta">Solicitar demo</a>
             </div>
         </div>
     </nav>
 
-    <!-- GEO BANNER -->
-    <div class="geo-banner">
-        <div class="geo-inner">
-            <span class="geo-tag" data-i18n="geo.tag">Contexto Global</span>
-            <span class="geo-text" data-i18n="geo.text">Mientras algunos dan marcha atr&#225;s, <strong>Am&#233;rica
-                    Latina
-                    lidera</strong> la transici&#243;n energ&#233;tica con el mejor recurso solar y e&#243;lico del
-                mundo.</span>
-        </div>
+    <!-- ══════════════════════════════════════════════════
+     CANVAS — Three.js (full-screen, fixed)
+══════════════════════════════════════════════════ -->
+    <canvas id="gl" aria-hidden="true"></canvas>
+
+    <!-- ══════════════════════════════════════════════════
+     GEO-POLITICAL BANNER
+══════════════════════════════════════════════════ -->
+    <div class="geo-banner" id="geo-banner">
+        <span class="geo-tag" data-i18n="geo.tag">Contexto Global</span>
+        <span data-i18n="geo.text">Mientras algunos dan marcha atrás, <strong>América Latina lidera</strong> la
+            transición energética con el mejor recurso solar y eólico del mundo.</span>
+        <button class="geo-close" onclick="this.parentElement.style.display='none'" aria-label="Cerrar">✕</button>
     </div>
 
-    <!-- ════════════════════════════════════════════
+    <!-- ══════════════════════════════════════════════════
      ACT I — ORIGEN
-     ════════════════════════════════════════════ -->
-    <section class="act" id="act1" style="height:200vh">
+══════════════════════════════════════════════════ -->
+    <section class="act" id="act1" data-scene="earth">
         <div class="act-sticky">
-            <div class="act-overlay"></div>
-            <div class="act-content">
-                <div class="act-badge badge-i act-line" data-i18n="a1.badge"><span
-                        class="badge-dot badge-dot-i"></span>ACTO I &#183; Origen</div>
-                <h1 class="act-h1 act-line" data-i18n="a1.h1">424 partes<br>por mill&#243;n.</h1>
-                <h2 class="act-h2 act-line" style="margin-top:14px" data-i18n="a1.h2">El CO&#x2082; m&#225;s alto<br>en
-                    <span style="color:var(--amber)">800.000 a&#241;os.</span>
-                </h2>
-                <p class="act-sub act-line" style="margin-top:24px" data-i18n="a1.sub">Y en lugar de paralizarse, el
-                    mundo eligi&#243; <em>acelerar la transformaci&#243;n energ&#233;tica</em> m&#225;s grande de la
-                    historia.</p>
-                <div class="pills act-line" style="margin-top:32px">
-                    <div class="pill pill-i"><span class="pill-val" data-count="424" data-suffix=" ppm">0
-                            ppm</span><span class="pill-lbl">CO&#x2082; atm. &#8212; NASA 2024</span></div>
-                    <div class="pill pill-i"><span class="pill-val" data-count="1.2" data-prefix="+"
-                            data-suffix=" &#176;C">+0 &#176;C</span><span class="pill-lbl">Anomal&#237;a temp.
-                            global</span></div>
-                    <div class="pill pill-i"><span class="pill-val" data-count="195">0</span><span
-                            class="pill-lbl">pa&#237;ses &#183; Acuerdo de Par&#237;s</span></div>
+            <div class="act-content ac1">
+                <div class="act-badge" data-i18n="a1.badge"><span class="badge-dot badge-dot-i"></span>ACT I · Origen
+                </div>
+                <h1 class="act-h1 split-text" data-i18n="a1.h1">424 partes<br>por millón.</h1>
+                <h2 class="act-h2 split-text" data-i18n="a1.h2">El CO₂ más alto<br>en <span class="amber">800.000
+                        años.</span></h2>
+                <p class="act-sub split-text" data-i18n="a1.sub">Y en lugar de paralizarse, el mundo eligió <em>acelerar
+                        la mayor transformación energética</em> de la historia.</p>
+                <div class="ppm-counter" aria-live="polite">
+                    <span class="ppm-val" id="ppm-val">0</span>
+                    <span class="ppm-unit">ppm CO₂</span>
                 </div>
             </div>
-            <div class="scroll-hint"><span class="scroll-bar"></span>scroll</div>
         </div>
     </section>
 
-    <!-- ════════════════════════════════════════════
+    <!-- ══════════════════════════════════════════════════
      ACT II — EL GIRO
-     ════════════════════════════════════════════ -->
-    <section class="act" id="act2" style="height:200vh">
+══════════════════════════════════════════════════ -->
+    <section class="act" id="act2" data-scene="earth">
         <div class="act-sticky">
-            <div class="act-overlay"></div>
-            <div class="act-content">
-                <div class="act-badge badge-ii act-line" data-i18n="a2.badge"><span
-                        class="badge-dot badge-dot-ii"></span>ACTO II &#183; El Giro</div>
-                <h1 class="act-h1 act-line" data-i18n="a2.h1">Mientras Washington<br>vuelve al carb&#243;n&#8230;</h1>
-                <h2 class="act-h2 act-line" style="margin-top:14px" data-i18n="a2.h2">Santiago construye<br><span
-                        style="color:var(--gold)">el futuro.</span></h2>
-                <p class="act-sub act-line" style="margin-top:24px" data-i18n="a2.sub">Chile tiene el <em>mejor recurso
-                        solar del planeta</em> (Atacama). Colombia el mejor e&#243;lico de LatAm. Un continente entero
-                    eligiendo la transici&#243;n limpia.</p>
-                <div class="pills act-line" style="margin-top:32px">
-                    <div class="pill pill-ii"><span class="pill-val">4.000+</span><span
-                            class="pill-lbl">kWh/m&#178;/a&#241;o &#183; Atacama</span></div>
-                    <div class="pill pill-ii"><span class="pill-val">$16/MWh</span><span class="pill-lbl">r&#233;cord
-                            solar Chile &#183; LCOE</span></div>
-                    <div class="pill pill-ii"><span class="pill-val">70%</span><span class="pill-lbl">meta renovable
-                            2030 &#183; Chile</span></div>
+            <div class="act-content ac2">
+                <div class="act-badge" data-i18n="a2.badge"><span class="badge-dot badge-dot-ii"></span>ACT II · El Giro
+                </div>
+                <h1 class="act-h1 split-text" data-i18n="a2.h1">Mientras Washington<br>vuelve al carbón…</h1>
+                <h2 class="act-h2 split-text" data-i18n="a2.h2"><span class="gold">Santiago construye<br>el
+                        futuro.</span></h2>
+                <div class="stat-stack">
+                    <div class="stat-item reveal-stat">
+                        <span class="stat-val" data-count="10" data-suffix="×">0×</span>
+                        <span class="stat-lbl" data-i18n="a2.s1">Solar más barata que en 2010</span>
+                    </div>
+                    <div class="stat-item reveal-stat">
+                        <span class="stat-val" data-count="300" data-suffix=" GW">0 GW</span>
+                        <span class="stat-lbl" data-i18n="a2.s2">Renovables en LatAm 2023</span>
+                    </div>
+                    <div class="stat-item reveal-stat">
+                        <span class="stat-val">N°1</span>
+                        <span class="stat-lbl" data-i18n="a2.s3">Chile: mejor irradiación solar del mundo</span>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ════════════════════════════════════════════
+    <!-- ══════════════════════════════════════════════════
      ACT III — LA RED
-     ════════════════════════════════════════════ -->
-    <section class="act" id="act3" style="height:200vh">
+══════════════════════════════════════════════════ -->
+    <section class="act" id="act3" data-scene="grid">
         <div class="act-sticky">
-            <div class="act-overlay"></div>
-            <div class="act-content">
-                <div class="act-badge badge-iii act-line" data-i18n="a3.badge"><span
-                        class="badge-dot badge-dot-iii"></span>ACTO III &#183; La Red</div>
-                <h1 class="act-h1 act-line" data-i18n="a3.h1">300 GW renovables<br>instalados en 2023.</h1>
-                <h2 class="act-h2 act-line" style="margin-top:14px" data-i18n="a3.h2">El desaf&#237;o ya no es
-                    generarla.<br><span style="color:var(--cyan)">Es gestionarla.</span></h2>
-                <p class="act-sub act-line" style="margin-top:24px" data-i18n="a3.sub">La solar es <em>10 veces m&#225;s
-                        barata</em> que en 2010. Chile apunta a 60% renovable al 2030. El cuello de botella ahora es
-                    almacenamiento + inteligencia.</p>
-                <div class="pills act-line" style="margin-top:32px">
-                    <div class="pill pill-iii"><span class="pill-val" data-count="300" data-suffix=" GW">0
-                            GW</span><span class="pill-lbl">renovables instalados &#183; IEA</span></div>
-                    <div class="pill pill-iii"><span class="pill-val">10&times;</span><span class="pill-lbl">m&#225;s
-                            barata la solar vs 2010</span></div>
-                    <div class="pill pill-iii"><span class="pill-val" data-count="60" data-suffix="%">0%</span><span
-                            class="pill-lbl">meta renovable Chile 2030</span></div>
+            <div class="act-content ac3">
+                <div class="act-badge" data-i18n="a3.badge"><span class="badge-dot badge-dot-iii"></span>ACT III · La
+                    Red</div>
+                <h1 class="act-h1 split-text" data-i18n="a3.h1">El desafío ya no<br>es generarla.</h1>
+                <h2 class="act-h2 split-text" data-i18n="a3.h2">Es <span class="cyan">almacenarla<br>e
+                        inteligentizarla.</span></h2>
+                <p class="act-sub split-text" data-i18n="a3.sub">Las baterías industriales están aquí. El software para
+                    gestionarlas — hasta ahora — no.</p>
+                <div class="grid-visual" aria-hidden="true">
+                    <div class="grid-node active" style="--x:20%;--y:15%"></div>
+                    <div class="grid-node active" style="--x:45%;--y:40%"></div>
+                    <div class="grid-node" style="--x:70%;--y:20%"></div>
+                    <div class="grid-node active" style="--x:30%;--y:70%"></div>
+                    <div class="grid-node" style="--x:80%;--y:65%"></div>
+                    <div class="grid-pulse" style="--x:45%;--y:40%"></div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ════════════════════════════════════════════
-     ACT IV — LA SOLUCIÓN (BESSAI)
-     ════════════════════════════════════════════ -->
-    <section class="act" id="act4" style="height:200vh">
+    <!-- ══════════════════════════════════════════════════
+     ACT IV — EL CEREBRO (BESSAI)
+══════════════════════════════════════════════════ -->
+    <section class="act" id="act4" data-scene="neural">
         <div class="act-sticky">
-            <div class="act-overlay"></div>
-            <div class="act-content">
-                <div class="act-badge badge-iv act-line" data-i18n="a4.badge"><span
-                        class="badge-dot badge-dot-iv"></span>ACTO IV &#183; La Soluci&#243;n</div>
-                <h1 class="act-h1 act-line" data-i18n="a4.h1">Las bater&#237;as son<br>el m&#250;sculo.</h1>
-                <h2 class="act-h2 act-line" style="margin-top:14px" data-i18n="a4.h2">BESSAI Edge,<br><span
-                        style="color:var(--green)">el cerebro.</span></h2>
-                <p class="act-sub act-line" style="margin-top:24px" data-i18n="a4.sub">Software open-source de grado
-                    industrial que convierte cualquier BESS en un nodo inteligente: optimiza, predice, protege. <em>Sin
-                        nube. En el borde.</em></p>
-                <div class="feat-grid act-line" style="margin-top:32px">
-                    <div class="feat-card">
-                        <div class="feat-title" data-i18n="f1.t">Optimizaci&#243;n inteligente</div>
-                        <div class="feat-desc" data-i18n="f1.d">Algoritmos avanzados de IA que aprenden del mercado
-                            el&#233;ctrico en tiempo real y calculan el despacho &#243;ptimo de carga y descarga en
-                            milisegundos.</div>
+            <div class="act-content ac4">
+                <div class="act-badge" data-i18n="a4.badge"><span class="badge-dot badge-dot-iv"></span>ACT IV · El
+                    Cerebro</div>
+                <h1 class="act-h1 split-text" data-i18n="a4.h1">Las baterías<br>son el músculo.</h1>
+                <h2 class="act-h2 split-text" data-i18n="a4.h2"><span class="green">BESSAI Edge<br>es el cerebro.</span>
+                </h2>
+                <!-- Terminal simulada -->
+                <div class="terminal" id="terminal" aria-label="Terminal BESSAI Edge">
+                    <div class="term-bar">
+                        <span class="term-dot" style="background:#ff5f57"></span>
+                        <span class="term-dot" style="background:#febc2e"></span>
+                        <span class="term-dot" style="background:#28c840"></span>
+                        <span class="term-title">bessai-edge · optimizer v2.1</span>
                     </div>
-                    <div class="feat-card">
-                        <div class="feat-title" data-i18n="f2.t">Cualquier hardware</div>
-                        <div class="feat-desc" data-i18n="f2.d">Arquitectura modular dise&#241;ada para adaptarse a
-                            cualquier fabricante de bater&#237;as e inversores. Plug and play industrial.</div>
-                    </div>
-                    <div class="feat-card">
-                        <div class="feat-title" data-i18n="f3.t">Ciberseguridad industrial</div>
-                        <div class="feat-desc" data-i18n="f3.d">Dise&#241;ado bajo los est&#225;ndares m&#225;s
-                            exigentes de ciberseguridad para infraestructura energ&#233;tica cr&#237;tica. Sin
-                            compromisos.</div>
-                    </div>
-                    <div class="feat-card">
-                        <div class="feat-title" data-i18n="f4.t">100% Edge. Sin nube.</div>
-                        <div class="feat-desc" data-i18n="f4.d">Todo corre localmente en el sitio. Cero dependencia de
-                            internet. Latencia m&#237;nima. M&#225;xima autonom&#237;a y resiliencia operativa.</div>
+                    <div class="term-body" id="term-body">
+                        <div class="term-line"><span class="term-p">$</span> <span class="term-cmd">bessai start
+                                --mode=optimize</span></div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <hr class="rule" />
-
-    <!-- ════════════════════════════════════════════
-     ACT V — LA CONSTRUCCIÓN
-     ════════════════════════════════════════════ -->
-    <section class="sec dash-bg" id="build">
+    <!-- ══════════════════════════════════════════════════
+     ACT V — LA CONSTRUCCIÓN (STACK)
+══════════════════════════════════════════════════ -->
+    <section class="sec" id="build">
         <div class="wrap">
             <div class="sec-head reveal">
-                <div class="act-badge badge-v" style="margin-bottom:20px" data-i18n="a5.badge"><span class="badge-dot"
-                        style="background:#a78bfa"></span>ACTO V &#183; La Construcci&#243;n</div>
-                <h2 class="sec-h2" style="font-size:clamp(1.6rem,4vw,2.6rem)" data-i18n="a5.h1">Un trabajo de
-                    titanes.<br>Y ahora es <span style="color:var(--green)">de todos.</span></h2>
-                <p class="sec-p" style="max-width:620px" data-i18n="a5.sub">M&#225;s de un a&#241;o de
-                    ingenier&#237;a. Miles de l&#237;neas de c&#243;digo. Modelos de lenguaje entrenados.
-                    Est&#225;ndares industriales cumplidos. Todo liberado bajo licencia Apache 2.0. Porque la
-                    transici&#243;n energ&#233;tica no puede depender de software privativo.</p>
+                <div class="act-badge" data-i18n="a5.badge"><span class="badge-dot"
+                        style="background:var(--cyan)"></span>ACT V · La Construcción</div>
+                <h2 class="sec-h2" data-i18n="a5.h2">Open-source.<br>Industrial-grade.<br><span class="cyan">Hecho en
+                        LatAm.</span></h2>
+                <p class="sec-p" data-i18n="a5.sub">Software diseñado para las condiciones reales de la red eléctrica
+                    latinoamericana.</p>
             </div>
 
-            <!-- Dev metrics -->
-            <div class="kpi-row reveal">
-                <div class="kpi">
-                    <div class="kpi-val" style="color:#a78bfa" data-count="14" data-suffix=" meses">0 meses</div>
-                    <div class="kpi-label" data-i18n="a5.k1">Tiempo de desarrollo</div>
-                </div>
-                <div class="kpi">
-                    <div class="kpi-val" style="color:var(--cyan)" data-count="42000" data-suffix="+">0+</div>
-                    <div class="kpi-label" data-i18n="a5.k2">L&#237;neas de c&#243;digo</div>
-                </div>
-                <div class="kpi">
-                    <div class="kpi-val" style="color:var(--green)" data-count="380" data-suffix="+">0+</div>
-                    <div class="kpi-label" data-i18n="a5.k3">Tests autom&#225;ticos</div>
-                </div>
-                <div class="kpi">
-                    <div class="kpi-val" style="color:var(--gold)" data-count="12">0</div>
-                    <div class="kpi-label" data-i18n="a5.k4">Modelos IA entrenados</div>
-                </div>
-            </div>
-
-            <!-- Tech stack narrative -->
-            <div class="two-col reveal" style="margin-top:36px">
-                <div>
-                    <div class="eyebrow" style="margin-bottom:16px" data-i18n="a5.stack">Stack tecnol&#243;gico</div>
+            <div class="build-grid reveal">
+                <!-- Connectivity -->
+                <div class="build-col">
+                    <div class="eyebrow" data-i18n="a5.conn">Conectividad Industrial</div>
                     <div class="ci-panel">
-                        <div class="ci-head" data-i18n="a5.stackH">Lenguajes y frameworks</div>
-                        <div class="ci-row"><span class="ci-k">Core</span><span class="ci-v">Python 3.11</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.s2">Optimizaci&#243;n</span><span
-                                class="ci-v">MILP + Deep RL</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.s3">Protocolos</span><span
-                                class="ci-v">Modbus/TCP &#183; IEEE 2030.5</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.s4">Seguridad</span><span class="ci-v">IEC
-                                62443 SL-2</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.s5">Infraestructura</span><span
-                                class="ci-v">Docker &#183; K8s &#183; Edge</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.s6">Telemetr&#237;a</span><span
-                                class="ci-v">Pub/Sub &#183; Real-time</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.s7">Licencia</span><span
-                                class="ci-v">Apache 2.0</span></div>
+                        <div class="ci-head" data-i18n="a5.connH">Protocolos soportados</div>
+                        <div class="ci-row"><span class="ci-k">Modbus RTU/TCP</span><span class="ci-v ci-ok">✓
+                                Nativo</span></div>
+                        <div class="ci-row"><span class="ci-k">IEC 61850</span><span class="ci-v ci-ok">✓ Nativo</span>
+                        </div>
+                        <div class="ci-row"><span class="ci-k">DNP3</span><span class="ci-v ci-ok">✓ Nativo</span></div>
+                        <div class="ci-row"><span class="ci-k">CAN Bus</span><span class="ci-v ci-ok">✓ Nativo</span>
+                        </div>
+                        <div class="ci-row"><span class="ci-k">MQTT IoT</span><span class="ci-v ci-ok">✓ Nativo</span>
+                        </div>
+                        <div class="ci-row"><span class="ci-k">REST/gRPC API</span><span class="ci-v ci-ok">✓
+                                Nativo</span></div>
                     </div>
                 </div>
-                <div>
-                    <div class="eyebrow" style="margin-bottom:16px" data-i18n="a5.ai">Inteligencia artificial</div>
+
+                <!-- Optimization -->
+                <div class="build-col">
+                    <div class="eyebrow" data-i18n="a5.opt">Motor de Optimización</div>
+                    <div class="ci-panel">
+                        <div class="ci-head" data-i18n="a5.optH">Estrategias de despacho</div>
+                        <div class="ci-row"><span class="ci-k" data-i18n="a5.o1">Arbitraje precio</span><span
+                                class="ci-v ci-ok">MILP</span></div>
+                        <div class="ci-row"><span class="ci-k" data-i18n="a5.o2">Peak-shaving</span><span
+                                class="ci-v ci-ok">DRL</span></div>
+                        <div class="ci-row"><span class="ci-k" data-i18n="a5.o3">Freq. regulation</span><span
+                                class="ci-v ci-ok">MPC</span></div>
+                        <div class="ci-row"><span class="ci-k" data-i18n="a5.o4">Degradación</span><span
+                                class="ci-v ci-ok">SOH-aware</span></div>
+                        <div class="ci-row"><span class="ci-k" data-i18n="a5.o5">Multi-mercado</span><span
+                                class="ci-v ci-beta">Beta</span></div>
+                        <div class="ci-row"><span class="ci-k" data-i18n="a5.o6">V2G</span><span
+                                class="ci-v ci-soon">2025</span></div>
+                    </div>
+                </div>
+
+                <!-- AI -->
+                <div class="build-col">
+                    <div class="eyebrow" data-i18n="a5.ai">Inteligencia Artificial</div>
                     <div class="ci-panel">
                         <div class="ci-head" data-i18n="a5.aiH">Modelos y capacidades</div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m1">Predicci&#243;n</span><span
-                                class="ci-v" data-i18n="a5.m1v">Costo marginal 24h</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m2">Optimizaci&#243;n</span><span
-                                class="ci-v" data-i18n="a5.m2v">Despacho &#243;ptimo MILP</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m3">Adaptaci&#243;n</span><span
-                                class="ci-v" data-i18n="a5.m3v">DRL con datos SEN Chile</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m4">Anomal&#237;as</span><span class="ci-v"
-                                data-i18n="a5.m4v">Detecci&#243;n en tiempo real</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m5">Degradaci&#243;n</span><span
-                                class="ci-v" data-i18n="a5.m5v">Predicci&#243;n de vida &#250;til</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m6">Latencia</span><span class="ci-v"
-                                data-i18n="a5.m6v">&lt;5ms inference local</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m7">Training data</span><span class="ci-v"
-                                data-i18n="a5.m7v">+2 a&#241;os mercado LatAm</span></div>
+                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m1">Predicción</span><span class="ci-v"
+                                data-i18n="a5.m1v">CMg 24h-ahead</span></div>
+                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m2">Optimización</span><span class="ci-v"
+                                data-i18n="a5.m2v">Despacho MILP</span></div>
+                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m3">Adaptación</span><span class="ci-v"
+                                data-i18n="a5.m3v">DRL con datos SEN</span></div>
+                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m4">Anomalías</span><span class="ci-v"
+                                data-i18n="a5.m4v">Detección en tiempo real</span></div>
+                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m5">Degradación</span><span class="ci-v"
+                                data-i18n="a5.m5v">Vida útil predictiva</span></div>
+                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m6">Latencia</span><span
+                                class="ci-v">&lt;5ms local</span></div>
                     </div>
                 </div>
             </div>
 
-            <p class="reveal"
-                style="margin-top:32px;color:var(--muted);font-size:.85rem;max-width:680px;line-height:1.7"
-                data-i18n="a5.close">Este software fue dise&#241;ado, arquitecturado y construido desde cero con una
-                premisa simple: <span style="color:var(--white)">que ning&#250;n equipo de ingenier&#237;a en
-                    Latinoam&#233;rica tenga que volver a construir esto.</span> El problema ya est&#225; resuelto. El
-                c&#243;digo ya existe. Es open source. &#218;senlo.</p>
+            <p class="reveal a5-close" data-i18n="a5.close">
+                Este software fue diseñado, arquitecturado y construido desde cero con una premisa simple:
+                <span style="color:var(--white)">que ningún equipo de ingeniería en Latinoamérica tenga que volver a
+                    construir esto.</span>
+                El problema ya está resuelto. El código ya existe. Es open source. Úsenlo.
+            </p>
         </div>
     </section>
 
     <hr class="rule" />
 
-    <!-- ════════════════════════════════════════════
-     IMPACTO — Lo que lograremos y cómo lo medimos
-     ════════════════════════════════════════════ -->
+    <!-- ══════════════════════════════════════════════════
+     IMPACT — 5 Dimensiones medibles
+══════════════════════════════════════════════════ -->
     <section class="sec" id="impact">
         <div class="wrap">
             <div class="sec-head reveal">
-                <div class="act-badge badge-vi" style="margin-bottom:20px" data-i18n="imp.badge"><span class="badge-dot"
-                        style="background:var(--gold)"></span>VISIÓN · Impacto</div>
-                <h2 class="sec-h2" style="font-size:clamp(1.5rem,4vw,2.4rem)" data-i18n="imp.h1">Esto no es un
-                    proyecto.<br>Es una <span style="color:var(--gold)">misión medible.</span></h2>
-                <p class="sec-p" style="max-width:640px" data-i18n="imp.sub">Cada línea de código tiene un propósito.
-                    Cada modelo un objetivo. Y cada objetivo una métrica. Así mediremos nuestro éxito — y así rendiremos
-                    cuentas.</p>
+                <div class="act-badge badge-vi" style="margin-bottom:20px" data-i18n="imp.badge">
+                    <span class="badge-dot" style="background:var(--gold)"></span>VISIÓN · Impacto
+                </div>
+                <h2 class="sec-h2" style="font-size:clamp(1.6rem,4vw,2.6rem)" data-i18n="imp.h1">
+                    Esto no es un proyecto.<br>Es una <span class="gold">misión medible.</span>
+                </h2>
+                <p class="sec-p" style="max-width:640px" data-i18n="imp.sub">
+                    Cada línea de código tiene un propósito. Cada modelo un objetivo. Y cada objetivo una métrica. Así
+                    mediremos nuestro éxito — y así rendiremos cuentas.
+                </p>
             </div>
 
-            <!-- 5 Impact dimensions -->
             <div class="impact-grid reveal">
-
-                <!-- 1. Energy -->
                 <div class="impact-card">
                     <div class="impact-icon" style="background:rgba(34,211,238,.1);color:var(--cyan)">⚡</div>
                     <div class="impact-dim" data-i18n="imp.e.dim">Energía</div>
@@ -309,7 +294,7 @@
                         </div>
                         <div class="impact-kpi">
                             <span class="impact-kpi-val" data-count="15" data-suffix="%">0%</span>
-                            <span class="impact-kpi-lbl" data-i18n="imp.e.k2">Mejora eficiencia despacho</span>
+                            <span class="impact-kpi-lbl" data-i18n="imp.e.k2">Mejora eficiencia</span>
                         </div>
                     </div>
                     <div class="impact-bar-wrap">
@@ -318,13 +303,11 @@
                     <div class="impact-bar-label" data-i18n="imp.e.prog">Año 1 meta · operación piloto</div>
                 </div>
 
-                <!-- 2. Economic -->
                 <div class="impact-card">
                     <div class="impact-icon" style="background:rgba(251,191,36,.1);color:var(--gold)">$</div>
                     <div class="impact-dim" data-i18n="imp.$.dim">Económico</div>
                     <div class="impact-goal" data-i18n="imp.$.goal">Demostrar un ahorro operativo documentado de USD
-                        $200K+
-                        anuales por operador, vía arbitraje y peak-shaving optimizado por IA.</div>
+                        $200K+ anuales por operador via arbitraje e IA.</div>
                     <div class="impact-kpi-row">
                         <div class="impact-kpi">
                             <span class="impact-kpi-val">$200K+</span>
@@ -332,22 +315,20 @@
                         </div>
                         <div class="impact-kpi">
                             <span class="impact-kpi-val" data-count="30" data-suffix="%">0%</span>
-                            <span class="impact-kpi-lbl" data-i18n="imp.$.k2">Incremento revenue arbitraje</span>
+                            <span class="impact-kpi-lbl" data-i18n="imp.$.k2">Revenue arbitraje</span>
                         </div>
                     </div>
                     <div class="impact-bar-wrap">
                         <div class="impact-bar" style="--bar-w:8%;--bar-color:var(--gold)"></div>
                     </div>
-                    <div class="impact-bar-label" data-i18n="imp.$.prog">Validación en curso con early adopters</div>
+                    <div class="impact-bar-label" data-i18n="imp.$.prog">Validación con early adopters</div>
                 </div>
 
-                <!-- 3. Environmental -->
                 <div class="impact-card">
                     <div class="impact-icon" style="background:rgba(52,211,153,.1);color:var(--green)">🌱</div>
                     <div class="impact-dim" data-i18n="imp.env.dim">Ambiental</div>
                     <div class="impact-goal" data-i18n="imp.env.goal">Contribuir a evitar 10.000+ toneladas de CO₂
-                        anuales
-                        al optimizar el uso de baterías e integrar renovables de forma inteligente.</div>
+                        anuales al optimizar el uso de baterías e integrar renovables.</div>
                     <div class="impact-kpi-row">
                         <div class="impact-kpi">
                             <span class="impact-kpi-val">10K+</span>
@@ -361,19 +342,18 @@
                     <div class="impact-bar-wrap">
                         <div class="impact-bar" style="--bar-w:5%;--bar-color:var(--green)"></div>
                     </div>
-                    <div class="impact-bar-label" data-i18n="imp.env.prog">Metodología de medición en desarrollo</div>
+                    <div class="impact-bar-label" data-i18n="imp.env.prog">Metodología en desarrollo</div>
                 </div>
 
-                <!-- 4. Community -->
                 <div class="impact-card">
                     <div class="impact-icon" style="background:rgba(167,139,250,.1);color:#a78bfa">🌐</div>
                     <div class="impact-dim" data-i18n="imp.com.dim">Comunidad</div>
-                    <div class="impact-goal" data-i18n="imp.com.goal">Construir la comunidad open-source de referencia
-                        para BESS en Latinoamérica. 500+ ingenieros, 10+ universidades, 4+ países colaborando.</div>
+                    <div class="impact-goal" data-i18n="imp.com.goal">La comunidad open-source de referencia para BESS
+                        en LatAm. 500+ ingenieros, 10+ universidades, 4+ países.</div>
                     <div class="impact-kpi-row">
                         <div class="impact-kpi">
                             <span class="impact-kpi-val" data-count="500" data-suffix="+">0+</span>
-                            <span class="impact-kpi-lbl" data-i18n="imp.com.k1">Ingenieros en la comunidad</span>
+                            <span class="impact-kpi-lbl" data-i18n="imp.com.k1">Ingenieros</span>
                         </div>
                         <div class="impact-kpi">
                             <span class="impact-kpi-val" data-count="4" data-suffix=" países">0 países</span>
@@ -386,13 +366,11 @@
                     <div class="impact-bar-label" data-i18n="imp.com.prog">Discord abierto · GitHub activo</div>
                 </div>
 
-                <!-- 5. Technical -->
                 <div class="impact-card">
                     <div class="impact-icon" style="background:rgba(0,212,255,.1);color:var(--cyan)">⚙</div>
                     <div class="impact-dim" data-i18n="imp.tec.dim">Técnico</div>
-                    <div class="impact-goal" data-i18n="imp.tec.goal">Alcanzar 99.9% uptime en despliegues edge,
-                        latencia
-                        &lt;5ms en inferencia local, y precisión &gt;92% en predicción de costos marginales.</div>
+                    <div class="impact-goal" data-i18n="imp.tec.goal">99.9% uptime en despliegues edge, latencia &lt;5ms
+                        en inferencia local, precisión &gt;92% predicción CMg.</div>
                     <div class="impact-kpi-row">
                         <div class="impact-kpi">
                             <span class="impact-kpi-val">99.9%</span>
@@ -410,12 +388,10 @@
                 </div>
             </div>
 
-            <!-- Accountability statement -->
             <div class="impact-pledge reveal">
                 <div class="impact-pledge-icon">📊</div>
                 <p data-i18n="imp.pledge">Publicaremos un <strong>reporte de impacto trimestral</strong> con datos
-                    reales
-                    verificables. Sin marketing. Sin inflación. Métricas honestas de un proyecto que cree en la
+                    reales verificables. Sin marketing. Sin inflación. Métricas honestas de un proyecto que cree en la
                     transparencia radical.</p>
             </div>
         </div>
@@ -423,54 +399,57 @@
 
     <hr class="rule" />
 
-    <!-- ════════════════════════════════════════════
+    <!-- ══════════════════════════════════════════════════
      DASHBOARD LIVE
-     ════════════════════════════════════════════ -->
+══════════════════════════════════════════════════ -->
     <section class="sec" id="dashboard">
         <div class="wrap">
             <div class="sec-head reveal">
-                <div class="eyebrow" data-i18n="dash.eye">Telemetr&#237;a en tiempo real</div>
+                <div class="eyebrow" data-i18n="dash.eye">Telemetría en tiempo real</div>
                 <h2 class="sec-h2" data-i18n="dash.h2">Lo que ve el operador</h2>
-                <p class="sec-p" data-i18n="dash.sub">Simulaci&#243;n de la interfaz operativa de BESSAI Edge. Datos
+                <p class="sec-p" data-i18n="dash.sub">Simulación de la interfaz operativa de BESSAI Edge. Datos
                     actualizados cada 2 segundos.</p>
             </div>
-            <div class="kpi-row reveal">
-                <div class="kpi">
-                    <div class="kpi-val" id="kpi-soc">72.3%</div>
-                    <div class="kpi-label">State of Charge</div>
-                    <div class="kpi-delta up" id="kpi-soc-d">&#x2191; cargando</div>
+
+            <div class="dash-shell reveal">
+                <div class="dash-topbar">
+                    <div class="dash-site">
+                        <span class="site-dot"></span>
+                        <span data-i18n="dash.site">Sitio: Atacama Solar Storage · 2 MWh</span>
+                    </div>
+                    <div class="dash-statuses">
+                        <span class="dash-status ok" data-i18n="dash.opt">Optimizador</span>
+                        <span class="dash-status ok" data-i18n="dash.bms">BMS Link</span>
+                        <span class="dash-status ok" data-i18n="dash.sec">Seguridad</span>
+                    </div>
                 </div>
-                <div class="kpi">
-                    <div class="kpi-val" id="kpi-pw">+180 kW</div>
-                    <div class="kpi-label" data-i18n="dash.pw">Potencia Activa</div>
-                    <div class="kpi-delta up" id="kpi-pw-d">&#x2191; inyectando</div>
+
+                <div class="kpi-row">
+                    <div class="kpi-card">
+                        <div class="kpi-label">SoC</div>
+                        <div class="kpi-val" id="kpi-soc">—</div>
+                        <div class="kpi-delta" id="kpi-soc-d">—</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label" data-i18n="dash.pw">Potencia Activa</div>
+                        <div class="kpi-val" id="kpi-pw">—</div>
+                        <div class="kpi-delta" id="kpi-pw-d">—</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label" data-i18n="dash.cmg">Costo Marginal</div>
+                        <div class="kpi-val" id="kpi-cmg">—</div>
+                        <div class="kpi-delta kpi-delta-sub">CLP/MWh</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label" data-i18n="dash.lat">Latencia Edge</div>
+                        <div class="kpi-val" id="kpi-lat">—</div>
+                        <div class="kpi-delta kpi-delta-sub" data-i18n="dash.latK">Latencia</div>
+                    </div>
                 </div>
-                <div class="kpi">
-                    <div class="kpi-val" id="kpi-cmg">$92</div>
-                    <div class="kpi-label" data-i18n="dash.cmg">Costo Marginal</div>
-                </div>
-                <div class="kpi">
-                    <div class="kpi-val" id="kpi-lat">3.1ms</div>
-                    <div class="kpi-label" data-i18n="dash.lat">Latencia Edge</div>
-                </div>
-            </div>
-            <div class="dash-grid reveal">
+
                 <div class="chart-wrap">
-                    <div class="chart-title" data-i18n="dash.chart">SoC y Potencia &#183; &#250;ltimos 20 ciclos</div>
-                    <canvas id="chart-main" height="200"></canvas>
-                </div>
-                <div class="status-panel">
-                    <div class="ci-head" data-i18n="dash.status">Estado del sistema</div>
-                    <div class="status-row"><span class="sk">Gateway</span><span class="sv"
-                            data-i18n="dash.op">operativo &#x2713;</span></div>
-                    <div class="status-row"><span class="sk" data-i18n="dash.opt">Optimizador</span><span class="sv"
-                            data-i18n="dash.act">activo &#x2713;</span></div>
-                    <div class="status-row"><span class="sk" data-i18n="dash.bms">Enlace BMS</span><span class="sv"
-                            data-i18n="dash.conn">conectado &#x2713;</span></div>
-                    <div class="status-row"><span class="sk" data-i18n="dash.sec">Seguridad</span><span class="sv"
-                            data-i18n="dash.cert">certificado &#x2713;</span></div>
-                    <div class="status-row"><span class="sk" data-i18n="dash.latK">Latencia</span><span
-                            class="sv">&lt;5ms &#x2713;</span></div>
+                    <div class="chart-label" data-i18n="dash.chart">SoC y Potencia · últimos 20 ciclos</div>
+                    <canvas id="dash-chart" height="120" aria-label="Gráfico SoC y Potencia"></canvas>
                 </div>
             </div>
         </div>
@@ -478,39 +457,51 @@
 
     <hr class="rule" />
 
-    <!-- ════════════════════════════════════════════
-     ROADMAP
-     ════════════════════════════════════════════ -->
-    <section class="sec dash-bg" id="roadmap">
+    <!-- ══════════════════════════════════════════════════
+     FEATURE CARDS
+══════════════════════════════════════════════════ -->
+    <section class="sec" id="features">
         <div class="wrap">
             <div class="sec-head reveal">
-                <div class="eyebrow">Roadmap</div>
-                <h2 class="sec-h2" data-i18n="rm.h2">Construcci&#243;n abierta y transparente</h2>
+                <div class="eyebrow" data-i18n="feat.eye">Por qué BESSAI</div>
+                <h2 class="sec-h2" data-i18n="feat.h2">Lo que otros no tienen</h2>
             </div>
-            <div class="rm-track reveal">
-                <div class="rm done">
-                    <div class="rm-date">Q4 2025</div>
-                    <div class="rm-title" data-i18n="rm.p1t">Fase 1 &#183; Fundaci&#243;n</div>
-                    <div class="rm-body" data-i18n="rm.p1b">Conectividad industrial, motor de optimizaci&#243;n base,
-                        seguridad certificada, arquitectura edge</div>
+            <div class="feat-grid reveal">
+                <div class="feat-card">
+                    <div class="feat-num">01</div>
+                    <div class="feat-title" data-i18n="feat.1t">Edge-First</div>
+                    <div class="feat-desc" data-i18n="feat.1d">Corre en hardware embebido. Sin cloud obligatorio. Sin
+                        latencia de red. Sin single point of failure.</div>
                 </div>
-                <div class="rm done">
-                    <div class="rm-date">Q1 2026</div>
-                    <div class="rm-title" data-i18n="rm.p2t">Fase 2 &#183; Inteligencia</div>
-                    <div class="rm-body" data-i18n="rm.p2b">Stack de IA completo, predicci&#243;n de costos marginales,
-                        telemetr&#237;a en tiempo real, entrenamiento con datos SEN</div>
+                <div class="feat-card">
+                    <div class="feat-num">02</div>
+                    <div class="feat-title" data-i18n="feat.2t">IA Local</div>
+                    <div class="feat-desc" data-i18n="feat.2d">Predicción de costos marginales, optimización MILP y DRL
+                        entrenados con datos reales del SEN chileno.</div>
                 </div>
-                <div class="rm now">
-                    <div class="rm-date">Q2 2026</div>
-                    <div class="rm-title" data-i18n="rm.p3t">Fase 3 &#183; Flota</div>
-                    <div class="rm-body" data-i18n="rm.p3b">Orquestaci&#243;n multi-sitio, respuesta a demanda,
-                        interoperabilidad, primeros early adopters en terreno</div>
+                <div class="feat-card">
+                    <div class="feat-num">03</div>
+                    <div class="feat-title" data-i18n="feat.3t">Open Source</div>
+                    <div class="feat-desc" data-i18n="feat.3d">Apache 2.0. Sin royalties, sin lock-in, sin black boxes.
+                        El código que gestiona tu batería es tuyo para auditar.</div>
                 </div>
-                <div class="rm">
-                    <div class="rm-date">Q3 2026</div>
-                    <div class="rm-title" data-i18n="rm.p4t">Fase 4 &#183; Ecosistema</div>
-                    <div class="rm-body" data-i18n="rm.p4b">Marketplace de soluciones, programa de certificaci&#243;n,
-                        expansi&#243;n continental</div>
+                <div class="feat-card">
+                    <div class="feat-num">04</div>
+                    <div class="feat-title" data-i18n="feat.4t">Industrial-Grade</div>
+                    <div class="feat-desc" data-i18n="feat.4d">IEC 62443 security baseline. Comunicación cifrada.
+                        Watchdog de hardware. Diseñado para 24/7 sin supervisión.</div>
+                </div>
+                <div class="feat-card">
+                    <div class="feat-num">05</div>
+                    <div class="feat-title" data-i18n="feat.5t">Multi-Química</div>
+                    <div class="feat-desc" data-i18n="feat.5d">LFP, NMC, NCA, VRLA. Si tiene Modbus o CAN, BESSAI lo
+                        habla. Agnóstico de hardware por diseño.</div>
+                </div>
+                <div class="feat-card">
+                    <div class="feat-num">06</div>
+                    <div class="feat-title" data-i18n="feat.6t">LatAm-Native</div>
+                    <div class="feat-desc" data-i18n="feat.6d">Integración nativa con CEN, ANDES, API Coordinador Chile.
+                        Entiende los mercados donde opera.</div>
                 </div>
             </div>
         </div>
@@ -518,70 +509,118 @@
 
     <hr class="rule" />
 
-    <!-- ════════════════════════════════════════════
-     EARLY ADOPTER PROGRAM
-     ════════════════════════════════════════════ -->
-    <section class="sec" id="early-adopters">
+    <!-- ══════════════════════════════════════════════════
+     ROADMAP
+══════════════════════════════════════════════════ -->
+    <section class="sec" id="roadmap">
+        <div class="wrap">
+            <div class="sec-head reveal">
+                <div class="eyebrow" data-i18n="rm.eye">Roadmap</div>
+                <h2 class="sec-h2" data-i18n="rm.h2">Construcción abierta y transparente</h2>
+            </div>
+            <div class="road-track reveal">
+                <div class="road-phase done">
+                    <div class="road-marker done-m"><span>✓</span></div>
+                    <div class="road-body">
+                        <div class="road-phase-name" data-i18n="rm.p1t">Fase 1 · Fundación</div>
+                        <div class="road-phase-desc" data-i18n="rm.p1b">Conectividad industrial, motor de optimización
+                            base, seguridad certificada, arquitectura edge</div>
+                    </div>
+                </div>
+                <div class="road-phase active">
+                    <div class="road-marker active-m"><span class="pulse-ring"></span></div>
+                    <div class="road-body">
+                        <div class="road-phase-name" data-i18n="rm.p2t">Fase 2 · Inteligencia</div>
+                        <div class="road-phase-desc" data-i18n="rm.p2b">Stack IA completo, predicción CMg, telemetría en
+                            tiempo real, entrenamiento datos SEN</div>
+                    </div>
+                </div>
+                <div class="road-phase">
+                    <div class="road-marker"></div>
+                    <div class="road-body">
+                        <div class="road-phase-name" data-i18n="rm.p3t">Fase 3 · Flota</div>
+                        <div class="road-phase-desc" data-i18n="rm.p3b">Orquestación multi-sitio, respuesta demanda,
+                            interoperabilidad, early adopters en terreno</div>
+                    </div>
+                </div>
+                <div class="road-phase">
+                    <div class="road-marker"></div>
+                    <div class="road-body">
+                        <div class="road-phase-name" data-i18n="rm.p4t">Fase 4 · Ecosistema</div>
+                        <div class="road-phase-desc" data-i18n="rm.p4b">Marketplace soluciones, programa certificación,
+                            expansión continental</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="rule" />
+
+    <!-- ══════════════════════════════════════════════════
+     EARLY ADOPTER
+══════════════════════════════════════════════════ -->
+    <section class="sec" id="early-adopter">
         <div class="wrap">
             <div class="sec-head reveal">
                 <div class="eyebrow" data-i18n="ea.eye">Programa Early Adopter 2026</div>
                 <h2 class="sec-h2" data-i18n="ea.h2">Sea parte de los primeros.<br>Las condiciones no se repiten.</h2>
-                <p class="sec-p" data-i18n="ea.sub">Cupos limitados para proyectos BESS en Chile y
-                    Latinoam&#233;rica. A cambio: datos reales, feedback t&#233;cnico, y co-autor&#237;a en
-                    publicaciones.</p>
+                <p class="sec-p" data-i18n="ea.sub">Cupos limitados para proyectos BESS en Chile y Latinoamérica. A
+                    cambio: datos reales, feedback técnico, y co-autoría en publicaciones.</p>
             </div>
+
             <div class="ea-counter reveal">
-                <div><span class="ea-count-v">8</span><span class="ea-count-l" data-i18n="ea.c1">Cupos Pioneer</span>
+                <div class="ea-count-item">
+                    <span class="ea-count-val" data-i18n="ea.c1">5 cupos Pioneer</span>
+                    <span class="ea-count-sub">Implementación sin costo</span>
                 </div>
-                <div class="ea-div"></div>
-                <div><span class="ea-count-v">3</span><span class="ea-count-l" data-i18n="ea.c2">Cupos Partner</span>
+                <div class="ea-count-sep"></div>
+                <div class="ea-count-item">
+                    <span class="ea-count-val" data-i18n="ea.c2">3 cupos Partner</span>
+                    <span class="ea-count-sub">Co-desarrollo técnico</span>
                 </div>
-                <div class="ea-div"></div>
-                <div><span class="ea-count-v">Q2 2026</span><span class="ea-count-l" data-i18n="ea.c3">Inicio
-                        despliegues</span></div>
-                <div class="ea-div"></div>
-                <div><span class="ea-count-v">4</span><span class="ea-count-l" data-i18n="ea.c4">Pa&#237;ses
-                        objetivo</span></div>
+                <div class="ea-count-sep"></div>
+                <div class="ea-count-item">
+                    <span class="ea-count-val" data-i18n="ea.c3">Q2 2026</span>
+                    <span class="ea-count-sub">Inicio despliegues</span>
+                </div>
             </div>
-            <div class="ea-grid reveal">
-                <div class="ea-card">
-                    <div class="ea-tier tier-p">Tier 1 &#8212; Pioneer</div>
-                    <div class="ea-name">BESSAI Pioneer</div>
-                    <div class="ea-price" data-i18n="ea.p1price">Implementaci&#243;n <strong>sin costo</strong> &#183;
-                        soporte t&#233;cnico dedicado</div>
-                    <ul class="ea-benefits">
-                        <li data-i18n="ea.p1b1">Licencia Apache 2.0 &#8212; sin royalties, para siempre</li>
-                        <li data-i18n="ea.p1b2">Instalaci&#243;n asistida en sitio o remota</li>
-                        <li data-i18n="ea.p1b3">Co-autor&#237;a en publicaciones t&#233;cnicas</li>
+
+            <div class="ea-plans reveal">
+                <div class="ea-plan">
+                    <div class="ea-plan-badge" data-i18n="ea.p1name">Pioneer</div>
+                    <div class="ea-plan-price" data-i18n="ea.p1price">Sin costo · soporte técnico dedicado</div>
+                    <ul class="ea-plan-list">
+                        <li data-i18n="ea.p1b1">Licencia Apache 2.0 — sin royalties, para siempre</li>
+                        <li data-i18n="ea.p1b2">Instalación asistida en sitio o remota</li>
+                        <li data-i18n="ea.p1b3">Co-autoría en publicaciones técnicas</li>
                         <li data-i18n="ea.p1b4">Acceso anticipado a nuevas funcionalidades</li>
-                        <li data-i18n="ea.p1b5">Integraci&#243;n prioritaria de nuevo hardware</li>
-                        <li data-i18n="ea.p1b6">Reporte mensual de performance y ahorro estimado</li>
-                        <li data-i18n="ea.p1b7">Canal directo con el equipo de ingenier&#237;a</li>
+                        <li data-i18n="ea.p1b5">Integración prioritaria de nuevo hardware</li>
+                        <li data-i18n="ea.p1b6">Reporte mensual performance y ahorro estimado</li>
+                        <li data-i18n="ea.p1b7">Canal directo con equipo de ingeniería</li>
                     </ul>
-                    <div class="ea-req" data-i18n="ea.p1req">Requisito: BESS de 100 kWh+ operativo o en comisionamiento
+                    <div class="ea-req" data-i18n="ea.p1req">Requisito: BESS 100 kWh+ operativo o en comisionamiento
                         2026</div>
-                    <a class="ea-btn"
-                        href="mailto:contacto@bess-solutions.cl?subject=Aplicaci%C3%B3n%20Pioneer%20BESSAI"
-                        data-i18n="ea.p1btn">Aplicar al programa Pioneer &#8594;</a>
+                    <a class="ea-cta" href="mailto:pioneer@bess-solutions.cl?subject=Aplicaci%C3%B3n%20Pioneer%20BESSAI"
+                        data-i18n="ea.p1cta">Aplicar al programa Pioneer &rarr;</a>
                 </div>
-                <div class="ea-card featured">
-                    <div class="ea-tier tier-s">Tier 2 &#8212; Strategic Partner</div>
-                    <div class="ea-name">BESSAI Partner</div>
-                    <div class="ea-price" data-i18n="ea.p2price">Co-desarrollo &#183; <strong>condiciones
-                            exclusivas</strong></div>
-                    <ul class="ea-benefits">
-                        <li data-i18n="ea.p2b1">Todo lo del tier Pioneer, m&#225;s:</li>
-                        <li data-i18n="ea.p2b2">Desarrollo conjunto de funcionalidades</li>
-                        <li data-i18n="ea.p2b3">Marca propia sobre la plataforma (white-label)</li>
-                        <li data-i18n="ea.p2b4">Exclusividad regional por pa&#237;s</li>
-                        <li data-i18n="ea.p2b5">Representaci&#243;n conjunta ante reguladores energ&#233;ticos</li>
-                        <li data-i18n="ea.p2b6">Participaci&#243;n en la gobernanza del proyecto</li>
-                        <li data-i18n="ea.p2b7">T&#233;rminos preferenciales de largo plazo</li>
+
+                <div class="ea-plan ea-plan-hi">
+                    <div class="ea-plan-badge hi" data-i18n="ea.p2name">Strategic Partner</div>
+                    <div class="ea-plan-price" data-i18n="ea.p2price">Co-inversión · revenue sharing</div>
+                    <ul class="ea-plan-list">
+                        <li data-i18n="ea.p2b1">Todo lo de Pioneer incluido</li>
+                        <li data-i18n="ea.p2b2">Co-desarrollo de funcionalidades propias</li>
+                        <li data-i18n="ea.p2b3">Integración con sistemas SCADA existentes</li>
+                        <li data-i18n="ea.p2b4">Modelo de revenue sharing en ahorros</li>
+                        <li data-i18n="ea.p2b5">SLA de respuesta &lt;4h 24/7</li>
+                        <li data-i18n="ea.p2b6">Presencia en roadmap público</li>
+                        <li data-i18n="ea.p2b7">Board advisor seat opcional</li>
                     </ul>
-                    <div class="ea-req" data-i18n="ea.p2req">Requisito: proyecto BESS &gt;1 MWh o flota de +3 sitios
-                    </div>
-                    <a class="ea-btn" href="mailto:contacto@bess-solutions.cl?subject=Propuesta%20Strategic%20Partner"
-                        data-i18n="ea.p2btn">Hablar con el equipo fundador &#8594;</a>
+                    <div class="ea-req" data-i18n="ea.p2req">Requisito: BESS 500 kWh+ o flota de proyectos</div>
+                    <a class="ea-cta ea-cta-hi"
+                        href="mailto:partner@bess-solutions.cl?subject=Propuesta%20Strategic%20Partner"
+                        data-i18n="ea.p2cta">Hablar con el equipo fundador &rarr;</a>
                 </div>
             </div>
         </div>
@@ -589,65 +628,83 @@
 
     <hr class="rule" />
 
-    <!-- ════════════════════════════════════════════
+    <!-- ══════════════════════════════════════════════════
      FINAL CTA
-     ════════════════════════════════════════════ -->
-    <section class="sec dash-bg" id="final">
+══════════════════════════════════════════════════ -->
+    <section class="sec" id="cta-final">
         <div class="wrap">
             <div class="cta-block reveal">
-                <h2 class="sec-h2" style="font-size:clamp(1.4rem,3.5vw,2.2rem);margin-bottom:12px" data-i18n="cta.h2">El
-                    software que la transici&#243;n<br>energ&#233;tica necesitaba.</h2>
-                <p class="cta-sub" style="max-width:580px" data-i18n="cta.sub">Open source. Grado industrial. Construido
-                    en Latinoam&#233;rica, para Latinoam&#233;rica. No hace falta que nadie m&#225;s lo construya. Ya
-                    existe.</p>
+                <div class="cta-glow" aria-hidden="true"></div>
+                <div class="eyebrow" data-i18n="cta.eye">Open Source · Gratis · Para siempre</div>
+                <h2 class="cta-h2" data-i18n="cta.h2">El futuro energético de<br>Latinoamérica se construye<br><span
+                        class="cyan">en código abierto.</span></h2>
+                <p class="cta-sub" data-i18n="cta.sub">Únete a la comunidad que está construyendo el software de gestión
+                    de baterías más avanzado de la región.</p>
                 <div class="cta-btns">
                     <a class="btn-primary" href="https://github.com/bess-solutions/open-bess-edge" target="_blank"
-                        data-i18n="cta.gh">Ver en GitHub</a>
-                    <a class="btn-secondary" href="mailto:contacto@bess-solutions.cl" data-i18n="cta.contact">Contactar
+                        rel="noopener" data-i18n="cta.gh">Ver en GitHub</a>
+                    <a class="btn-secondary" href="mailto:comunidad@bess-solutions.cl" data-i18n="cta.contact">Contactar
                         al equipo</a>
                 </div>
                 <div class="social-row">
-                    <a href="https://github.com/bess-solutions" target="_blank" title="GitHub"
-                        class="social-link">GitHub</a>
-                    <a href="https://www.linkedin.com/company/bess-solutions" target="_blank" title="LinkedIn"
-                        class="social-link">LinkedIn</a>
-                    <a href="https://discord.gg/bess-solutions" target="_blank" title="Discord"
-                        class="social-link">Discord</a>
-                    <a href="https://x.com/besssolutions" target="_blank" title="X" class="social-link">X</a>
-                    <a href="https://www.youtube.com/@besssolutions" target="_blank" title="YouTube"
-                        class="social-link">YouTube</a>
+                    <a class="social-link" href="https://github.com/bess-solutions" target="_blank"
+                        rel="noopener">GitHub</a>
+                    <a class="social-link" href="https://linkedin.com/company/bess-solutions" target="_blank"
+                        rel="noopener">LinkedIn</a>
+                    <a class="social-link" href="https://discord.gg/bess-solutions" target="_blank"
+                        rel="noopener">Discord</a>
+                    <a class="social-link" href="https://x.com/bess_solutions" target="_blank" rel="noopener">X /
+                        Twitter</a>
+                    <a class="social-link" href="https://youtube.com/@bess-solutions" target="_blank"
+                        rel="noopener">YouTube</a>
                 </div>
             </div>
         </div>
     </section>
 
-    <hr class="rule" />
-
-    <!-- FOOTER -->
-    <footer>
+    <!-- ══════════════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════════════ -->
+    <footer class="footer">
         <div class="wrap">
-            <div class="foot-inner">
-                <span class="foot-copy" data-i18n="foot.copy">&#169; 2026 BESS Solutions SpA &#183; Santiago,
-                    Chile</span>
-                <div class="foot-links">
-                    <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank">GitHub</a>
-                    <a href="https://www.linkedin.com/company/bess-solutions" target="_blank">LinkedIn</a>
-                    <a href="https://discord.gg/bess-solutions" target="_blank">Discord</a>
-                    <a href="https://x.com/besssolutions" target="_blank">X</a>
-                    <a href="https://www.youtube.com/@besssolutions" target="_blank">YouTube</a>
-                    <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/CHANGELOG.md"
-                        target="_blank">Changelog</a>
-                    <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/LICENSE" target="_blank">Apache
-                        2.0</a>
+            <div class="foot-top">
+                <div class="foot-brand">
+                    <img class="logo-img" src="logo-bess.png" alt="BESS Solutions" height="22" />
+                    <p class="foot-tagline" data-i18n="foot.tag">Inteligencia para el almacenamiento de energía.</p>
                 </div>
+                <div class="foot-links-group">
+                    <div class="foot-col">
+                        <div class="foot-col-title" data-i18n="foot.proj">Proyecto</div>
+                        <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank"
+                            rel="noopener">GitHub</a>
+                        <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/CHANGELOG.md"
+                            target="_blank" rel="noopener" data-i18n="foot.ch">Changelog</a>
+                        <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/LICENSE" target="_blank"
+                            rel="noopener" data-i18n="foot.lic">Licencia</a>
+                    </div>
+                    <div class="foot-col">
+                        <div class="foot-col-title" data-i18n="foot.comm">Comunidad</div>
+                        <a href="https://discord.gg/bess-solutions" target="_blank" rel="noopener">Discord</a>
+                        <a href="https://linkedin.com/company/bess-solutions" target="_blank"
+                            rel="noopener">LinkedIn</a>
+                        <a href="https://x.com/bess_solutions" target="_blank" rel="noopener">X / Twitter</a>
+                        <a href="https://youtube.com/@bess-solutions" target="_blank" rel="noopener">YouTube</a>
+                    </div>
+                    <div class="foot-col">
+                        <div class="foot-col-title" data-i18n="foot.contact">Contacto</div>
+                        <a href="mailto:contacto@bess-solutions.cl">contacto@bess-solutions.cl</a>
+                        <a href="mailto:pioneer@bess-solutions.cl">pioneer@bess-solutions.cl</a>
+                    </div>
+                </div>
+            </div>
+            <div class="foot-bottom">
+                <span>&copy; 2025 BESS Solutions SpA · Chile</span>
+                <span data-i18n="foot.oss">Software libre bajo Apache 2.0</span>
             </div>
         </div>
     </footer>
 
-    <!-- CDN Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="main.js"></script>
+    <script src="main.js" defer></script>
 </body>
 
 </html>
