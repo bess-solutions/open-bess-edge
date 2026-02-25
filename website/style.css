@@ -1113,10 +1113,164 @@ button {
   color: var(--cyan)
 }
 
+/* Roadmap period + tags */
+.road-phase-period {
+  font: 600 .58rem var(--mono);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted-2);
+  margin-bottom: 6px;
+}
+
+.road-phase-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.road-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font: 600 .58rem var(--mono);
+  color: var(--muted);
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid rgba(255, 255, 255, .07);
+}
+
+.road-tag-done {
+  color: var(--green);
+  background: rgba(52, 211, 153, .08);
+  border-color: rgba(52, 211, 153, .2);
+}
+
+.road-tag-active {
+  color: var(--cyan);
+  background: rgba(0, 212, 255, .08);
+  border-color: rgba(0, 212, 255, .2);
+}
+
+.road-tag-future {
+  color: var(--muted-2);
+  opacity: .7;
+}
+
+/* ── HAMBURGER MENU ──────────────────────────────────────── */
+.nav-burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  padding: 6px;
+  cursor: pointer;
+  transition: background .2s;
+}
+
+.nav-burger span {
+  display: block;
+  width: 18px;
+  height: 1.5px;
+  background: var(--muted);
+  border-radius: 2px;
+  transition: all .3s;
+}
+
+.nav-burger:hover {
+  background: rgba(255, 255, 255, .06);
+}
+
+.nav-burger:hover span {
+  background: var(--white);
+}
+
+/* Mobile Menu Overlay */
+.mob-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 8999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s;
+  background: rgba(4, 5, 10, .97);
+  backdrop-filter: blur(20px);
+}
+
+.mob-menu.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.mob-menu-inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  gap: 48px;
+  padding: 80px 32px 48px;
+}
+
+.mob-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.mob-links a {
+  font: 600 1.4rem var(--display);
+  letter-spacing: -.02em;
+  color: var(--muted);
+  padding: 10px 24px;
+  border-radius: 10px;
+  transition: color .2s, background .2s;
+  text-align: center;
+}
+
+.mob-links a:hover {
+  color: var(--white);
+  background: rgba(255, 255, 255, .04);
+}
+
+.mob-cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 32px;
+  border-radius: 10px;
+  font: 600 .85rem var(--mono);
+  background: var(--green-d);
+  color: #fff;
+  transition: all .25s;
+}
+
+.mob-cta:hover {
+  background: #10b981;
+  box-shadow: 0 0 28px rgba(16, 185, 129, .35);
+}
+
+@media (max-width: 600px) {
+  .nav-burger {
+    display: flex;
+  }
+
+  .nav-cta {
+    display: none;
+  }
+}
+
+
 /* ── EARLY ADOPTER ──────────────────────────────────────── */
 .ea-counter {
   display: flex;
   align-items: center;
+
   gap: 32px;
   padding: 28px 36px;
   background: rgba(8, 11, 20, .8);
