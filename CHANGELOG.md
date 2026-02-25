@@ -7,10 +7,10 @@
 
 ---
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-25T02:00 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-25T13:43 -03:00)
 
 > [!IMPORTANT]
-> **v2.10.0-dev — Plan de Inmortalidad Full Execution** (2026-02-25)
+> **v2.10.0-dev — Plan de Inmortalidad + Scrollytelling Landing** (2026-02-25)
 >
 > IEC 62443 SL-2 readiness: **~98%** | Tests: **613 passed ✅ · 0 failed · 6 skipped** | Commit: **`HEAD`**
 
@@ -59,7 +59,7 @@
 > 2. **LF Energy Landscape** → Fork + PR con YAML (`docs/lf_energy_proposal.md`)
 > 3. **cosign keypair** → `cosign generate-keypair` → Secrets `COSIGN_PRIVATE_KEY` + `COSIGN_PASSWORD` en GH Settings
 > 4. **Early Adopters** → Publicar `docs/early_adopters.md` en Discord/LinkedIn
-
+> 5. **Scrollytelling Landing build** → `cd landing && npm install && npm run build` → desplegar en GitHub Pages
 
 
 ### Contexto del sistema
@@ -181,6 +181,35 @@ docker ps  # Verificar 4 contenedores: healthy/running
 
 All notable changes to this project are documented here.  
 Format: [Semantic Versioning](https://semver.org/) · [Conventional Commits](https://www.conventionalcommits.org/)
+
+---
+
+## [v2.10.0-dev] — 2026-02-25
+
+> **Hito:** Scrollytelling Landing Page (React) + Diseño profesional + 360° doc sync
+
+### Added — Scrollytelling Landing Page
+- `landing/` — Aplicación React + Vite completamente nueva:
+  - Arquitectura en escenas: `HeroScene`, `MetricsScene`, `FeaturesScene`, `FAQScene`, `CTAScene`, `FooterScene`
+  - i18n ES/EN con JSON separados en `src/i18n/`
+  - Iconos Lucide SVG (no dependencia de emojis) en Features y FAQ
+  - Diseño scrollytelling con animaciones progresivas
+  - Hook `useScrollAnimation` para activación de secciones al hacer scroll
+  - FAQ acordeon y Features grid con iconos alineados a la línea top
+  - Footer con columnas: Producto, Recursos, Contacto
+- `landing/README.md` — instrucciones de instalación + build + deploy
+
+### Changed
+- `README.md` — Badge tests *490 → 613*, versión *v2.7.1 → v2.10.0-dev*, hardware 4 → 7 profiles
+- `CITATION.cff` — versión *1.7.1 → 2.10.0*, abstract ampliado con nuevas capacidades
+- `pyproject.toml` — versión *2.7.0 → 2.10.0*
+- `docs/PENDIENTES.md` — sincronizado: tareas 1-2 completadas marcadas, landing añadida
+- `PROJECT_STATUS.md` — fila `landing/` en módulos, entrada historial v2.10.0-dev
+
+### Tests
+```
+613 passed ✅ · 0 failed · 6 skipped · 43.21s
+```
 
 ---
 
