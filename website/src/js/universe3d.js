@@ -22,9 +22,9 @@ import { GammaCorrectionShader } from 'three/addons/shaders/GammaCorrectionShade
    ────────────────────────────────────────────────────────── */
 const CONFIG = {
     // ── Bloom ─────────────────────────────────────────────
-    bloomStrength: 1.6,    // intensidad del glow (0 = ninguno, 3 = máximo)
-    bloomRadius: 0.55,   // radio de dispersión del bloom
-    bloomThreshold: 0.0,    // umbral de luminancia para activar bloom
+    bloomStrength: 0.55,    // was 1.6 — much more subtle
+    bloomRadius: 0.35,       // was 0.55
+    bloomThreshold: 0.18,    // was 0.0 — only very bright elements glow
 
     // ── Stars ──────────────────────────────────────────────
     starCount: 7000,
@@ -34,18 +34,18 @@ const CONFIG = {
     starColor: 0x8bb8cc,
 
     // ── Energy Field A (verde — energía principal) ─────────
-    energyACount: 4000,   // partículas
-    energyARadius: 1.6,    // radio de la nube esférica (unidades scene)
-    energyAColor: 0x10b981, // Emerald
-    energyASize: 0.018,
-    energyARotX: -0.07,  // velocidad rot X
-    energyARotY: -0.05,  // velocidad rot Y
+    energyACount: 2800,   // was 4000
+    energyARadius: 1.6,
+    energyAColor: 0x10b981,
+    energyASize: 0.010,   // was 0.018
+    energyARotX: -0.07,
+    energyARotY: -0.05,
 
     // ── Energy Field B (azul — datos / red) ───────────────
-    energyBCount: 1500,
-    energyBRadius: 2.8,    // nube más dispersa
-    energyBColor: 0x3b82f6, // Blue
-    energyBSize: 0.012,
+    energyBCount: 1200,   // was 1500
+    energyBRadius: 2.8,
+    energyBColor: 0x3b82f6,
+    energyBSize: 0.007,   // was 0.012
     energyBRotX: 0.04,
     energyBRotY: 0.025,
 

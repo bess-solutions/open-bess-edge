@@ -169,6 +169,42 @@
     revealEls.forEach(el => revealObs.observe(el));
 
     /* ──────────────────────────────────────────────────────────
+       NASA Climate Counters — count-up on enter viewport
+       ────────────────────────────────────────────────────────── */
+    function countUp(el, target, decimals, duration, suffix, prefix) {
+        const start = performance.now();
+        const from = parseFloat(el.getAttribute('data-from') || '0');
+        function frame(now) {
+            const pct = Math.min((now - start) / duration, 1);
+            const ease = 1 - Math.pow(1 - pct, 4); // easeOutQuart
+            const val = from + (target - from) * ease;
+            const unitSpan = el.querySelector('.cs-unit');
+            const unitHTML = unitSpan ? unitSpan.outerHTML : '';
+            el.innerHTML = (prefix || '') + (decimals ? val.toFixed(decimals) : Math.round(val)) + unitHTML;
+            if (pct < 1) requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+    }
+
+    const climateStats = document.getElementById('cs-co2');
+    if (climateStats) {
+        const statsObs = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting) {
+                statsObs.disconnect();
+                const co2El = document.getElementById('cs-co2');
+                if (co2El) { co2El.setAttribute('data-from', '315'); countUp(co2El, 427, 0, 2200, ' ppm'); }
+                const tempEl = document.getElementById('cs-temp');
+                if (tempEl) { tempEl.setAttribute('data-from', '0'); countUp(tempEl, 1.19, 2, 2400, ' °C', '+'); }
+                const yearEl = document.getElementById('cs-year');
+                if (yearEl) { yearEl.setAttribute('data-from', '2002'); countUp(yearEl, 2024, 0, 2800); }
+                const bar = document.getElementById('co2-bar');
+                if (bar) requestAnimationFrame(() => bar.classList.add('animated'));
+            }
+        }, { threshold: 0.3 });
+        statsObs.observe(climateStats);
+    }
+
+    /* ──────────────────────────────────────────────────────────
        Nav — background on scroll
        ────────────────────────────────────────────────────────── */
     const nav = document.getElementById('nav');
