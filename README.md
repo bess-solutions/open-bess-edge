@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/Tests-490%2F490%20%E2%9C%85-success)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-613%2F613%20%E2%9C%85-success)](tests/)
 [![Docker](https://img.shields.io/badge/Docker-amd64%20%7C%20arm64-2496ED?logo=docker&logoColor=white)](https://ghcr.io/bess-solutions/open-bess-edge)
 [![CI](https://github.com/bess-solutions/open-bess-edge/actions/workflows/ci.yml/badge.svg)](https://github.com/bess-solutions/open-bess-edge/actions)
 [![Multi-Arch](https://github.com/bess-solutions/open-bess-edge/actions/workflows/docker-multiarch.yml/badge.svg)](https://github.com/bess-solutions/open-bess-edge/actions)
@@ -22,7 +22,7 @@
 
 ---
 
-## 🚀 Estado del Proyecto — v2.7.1
+## 🚀 Estado del Proyecto — v2.10.0-dev
 
 | Componente | Estado |
 |---|---|
@@ -38,13 +38,13 @@
 | **IEEE 2030.5 / SEP 2.0** | ✅ **BEP-0100 Active** — 10 endpoints, TLS 1.2+, mTLS, DERControl |
 | **DRL Arbitrage Agent** | ✅ **BEP-0200 Fase 2** — ONNXArbitrageAgent (observe-only) |
 | OpenTelemetry + Cloud Trace | ✅ Implementado |
-| Suite de tests | ✅ **490/490 tests pasan** (+32 DRL, +26 SEP2) |
+| Suite de tests | ✅ **613/613 tests pasan** (+23 BEP-0200 F3, +19 WatchdogManager) |
 | Docker Compose (+ Simulador) | ✅ Operativo — perfil `monitoring` |
 | **Multi-Arch Docker** (amd64 + arm64) | ✅ Buildx CI → ghcr.io — Raspberry Pi 4/5 |
 | Prometheus + Grafana + Alerting | ✅ `--profile monitoring` + alert rules |
 | Terraform GCP | ✅ 18 recursos en GCP |
 | GitHub Actions CI/CD | ✅ 10 jobs: lint+typecheck+test+interop+security+terraform+helm+docker+trivy+push |
-| **Hardware Registry** | ✅ 4 perfiles: Huawei, SMA, Victron, Fronius |
+| **Hardware Registry** | ✅ 7 perfiles: Huawei, SMA, Victron, Fronius, SolarEdge, BYD, Tesla |
 | **Gobernanza OSS** | ✅ SECURITY+COC+GOVERNANCE+CONTRIBUTING + **BOA Charter** |
 | **IEC 62443 Compliance** | ✅ SL-1 mapeado · SL-2 certification path en `docs/compliance/` |
 | **IEEE 2030.5** | ✅ **Implementado** (BEP-0100) + gap analysis en `docs/compliance/` |
@@ -52,7 +52,8 @@
 | **OpenSSF Best Practices** | ✅ Passing badge — bestpractices.dev |
 | **Spec Formales (BESSAI-SPEC)** | ✅ 4 specs: driver, safety, telemetry, **BMS data model (IEEE P2686)** |
 | **Gobernanza TSC + BEP** | ✅ BEP-0001 · `GOVERNANCE.md` · **BESSAI Open Alliance Charter** |
-| **Interoperabilidad** | ✅ Suite tests `tests/interop/` · BESSAI Certified · 7 dispositivos open |
+| **WatchdogManager** (Plan Inmortalidad) | ✅ Self-healing autónomo · backoff · Prometheus · AlertDispatcher |
+| **Scrollytelling Landing** (`landing/`) | ✅ React + Vite · i18n ES/EN · Lucide icons · FAQ/Features refactored |
 
 ---
 
@@ -209,8 +210,7 @@ pytest tests/ --cov=src --cov-report=html
 
 **Resultado actual:**
 ```
-490 passed in ~17s  ✅
-1 failed (SSL mock pre-existente — no regresión documentada)
+613 passed in ~43s  ✅  (6 skipped)
 Python 3.10+ · pytest-asyncio · numpy · scikit-learn · onnxruntime · structlog
 ```
 

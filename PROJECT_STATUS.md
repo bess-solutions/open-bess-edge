@@ -1,6 +1,6 @@
 ﻿# 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-25T02:00 v2.10.0-dev · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-25T13:43 v2.10.0-dev · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -24,9 +24,10 @@ Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivad
 Nuevo: test_bess_rl_env_cen.py — 23/23 BEP-0200 F3 (env CMg real CEN) ✅
 Nuevo: test_milp_optimizer.py — 14/14 MILP optimizer ✅
 Nuevo: test_degradation_model.py — 15/15 DegradationModel ✅
-Anterior: test_watchdog_manager.py — 19/19 WatchdogManager ✅
+Nuevo: test_watchdog_manager.py — 19/19 WatchdogManager ✅
 Registry: 7 perfiles hardware (Fronius, Huawei, SMA, Victron + SolarEdge, BYD, Tesla)
 CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · helm ✅
+Landing: React scrollytelling v1.0 ✅ (i18n ES/EN, Lucide icons)
 ```
 
 ### 🔍 Audit 360° — Gaps Conocidos y Plan de Acción
@@ -117,7 +118,8 @@ Prometheus v2.51.2                          OK      ← localhost:9090
 | **CMg Data CEN** | `dashboard/data/cmg_maitencillo.json` | **v1.0** | ✅ **NUEVO v2.9** — 48 días × 288 puntos 5-min, Nodo Maitencillo 220 kV |
 | **CMg Exporter** | `scripts/export_cmg_json.py` | **v1.0** | ✅ **NUEVO v2.9** — Generador reproducible con física real SEN |
 | **Dashboard DRL** | `dashboard/optimizer.js` + `index.html` | **v2.0** | ✅ **NUEVO v2.9** — Tab DRL Optimizer, SOC trajectory, CMg selector 48 días |
-| **WatchdogManager** | `src/core/watchdog_manager.py` | **v1.0** | ✅ **NUEVO v2.9-dev** — Self-healing autónomo, exponential backoff, Prometheus, AlertDispatcher |
+| **WatchdogManager** | `src/core/watchdog_manager.py` | **v1.0** | ✅ **NUEVO v2.9** — Self-healing autónomo, exponential backoff, Prometheus, AlertDispatcher |
+| **Scrollytelling Landing** | `landing/` (React + Vite) | **v1.0** | ✅ **NUEVO v2.10** — i18n ES/EN, Lucide icons, FAQ/Features, scrollytelling animations |
 
 ### 🐳 Stack Docker — ✅ COMPLETAMENTE OPERATIVO (v1.0.1)
 
@@ -375,3 +377,4 @@ pytest tests/ -v --tb=short
 | 2026-02-24 | **v2.7.1** | **490/490** | Lint 360°: ruff 35/36 auto-fix · drl_agent→structlog · 20 archivos reformateados |
 | 2026-02-24 | **v2.8.0-dev** | **541/547** | **Superset 6 Waves**: BENCHMARK-004/005 · 3 perfiles HW (SolarEdge/BYD/Tesla) · `lightweight_mode.py` · `alert_dispatcher.py` · 51 tests registry · early_adopters/research_topics/academic_collaboration |
 | 2026-02-24 | **v2.9.0-dev** | **590/590** | **AI Environment Devoration**: Fix MARL `rewards[__all__]` · Fix C901 `handle_der_control` refactor · Fix SSL mTLS validation order · **WatchdogManager** self-healing autónomo · 19 tests nuevos |
+| 2026-02-25 | **v2.10.0-dev** | **613/613** | **Scrollytelling Landing** (React + Vite): i18n ES/EN, Lucide icons, FAQ/Features refactored, scrollytelling animations · **360° doc sync**: CITATION.cff, pyproject.toml, README.md, CHANGELOG, PENDIENTES actualizados |
