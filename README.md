@@ -22,7 +22,7 @@
 
 ---
 
-## 🚀 Estado del Proyecto — v2.10.0-dev
+## 🚀 Estado del Proyecto — v2.10.0
 
 | Componente | Estado |
 |---|---|
