@@ -90,7 +90,7 @@ Prometheus v2.51.2                          OK      ← localhost:9090
 | BESS Physics Model | `src/simulation/bess_model.py` | v0.7 | ✅ Producción |
 | ONNX modelo dummy | `models/dispatch_policy.onnx` | v0.6 | ✅ Producción |
 | DRL training script | `scripts/train_drl_policy.py` | v0.7 | ✅ Producción |
-| Helm chart | `infrastructure/helm/bessai-edge/` | **0.9.0** | ✅ appVersion 2.6.0 |
+| Helm chart | `infrastructure/helm/bessai-edge/` | **0.10.0** | ✅ appVersion 2.10.0 |
 | Grafana Dashboard | `infrastructure/grafana/dashboards/bessai_main.json` | **v1.0** | ✅ 13 paneles |
 | Terraform GCP | `infrastructure/terraform/` | v0.5 | ✅ 18 recursos |
 | Registro Modbus | `registry/huawei_sun2000.json` | **v2.0** | ✅ 28 registros reales |
