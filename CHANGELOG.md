@@ -159,7 +159,7 @@ open-bess-edge/
 ```powershell
 # Tests
 pytest tests/ -v --tb=short
-# Esperado: 54 passed ✅
+# Esperado: 613 passed ✅ (v2.10.0)
 
 # Health endpoint (requiere Docker)
 Invoke-RestMethod http://localhost:8000/health | ConvertTo-Json
@@ -168,7 +168,7 @@ Invoke-RestMethod http://localhost:8000/health | ConvertTo-Json
 Invoke-WebRequest http://localhost:8000/metrics | Select-Object -Exp Content
 .venv\Scripts\Activate.ps1
 pytest tests/ -v --tb=short
-# Expected: 45 passed in ~6.5s ✅
+# Expected: 613 passed in ~43s ✅
 ```
 
 ### Comando Docker completo (con simulador)
