@@ -10,7 +10,7 @@
         es: {
             /* Nav */
             'nav.1': 'Origen', 'nav.2': 'El Giro', 'nav.3': 'La Red', 'nav.4': 'BESSAI',
-            'nav.5': 'Stack', 'nav.6': 'Dashboard', 'nav.7': 'Roadmap',
+            'nav.5': 'Stack', 'nav.6': 'Dashboard', 'nav.7': 'Roadmap', 'nav.8': 'Impacto',
             'nav.cta': 'Solicitar demo',
             /* Geo banner */
             'geo.tag': 'Contexto Global',
@@ -61,6 +61,21 @@
             'a5.m6': 'Latencia', 'a5.m6v': '<5ms inference local',
             'a5.m7': 'Training data', 'a5.m7v': '+2 años mercado LatAm',
             'a5.close': 'Este software fue diseñado, arquitecturado y construido desde cero con una premisa simple: <span style="color:var(--white)">que ningún equipo de ingeniería en Latinoamérica tenga que volver a construir esto.</span> El problema ya está resuelto. El código ya existe. Es open source. Úsenlo.',
+            /* Impact */
+            'imp.badge': '<span class="badge-dot" style="background:var(--gold)"></span>VISIÓN · Impacto',
+            'imp.h1': 'Esto no es un proyecto.<br>Es una <span style="color:var(--gold)">misión medible.</span>',
+            'imp.sub': 'Cada línea de código tiene un propósito. Cada modelo un objetivo. Y cada objetivo una métrica. Así mediremos nuestro éxito — y así rendiremos cuentas.',
+            'imp.e.dim': 'Energía', 'imp.e.goal': 'Optimizar el despacho de al menos 50 MWh gestionados por BESSAI en los primeros 12 meses de operación real.',
+            'imp.e.k1': 'Capacidad gestionada', 'imp.e.k2': 'Mejora eficiencia despacho', 'imp.e.prog': 'Año 1 meta · operación piloto',
+            'imp.$.dim': 'Económico', 'imp.$.goal': 'Demostrar un ahorro operativo documentado de USD $200K+ anuales por operador, vía arbitraje y peak-shaving optimizado por IA.',
+            'imp.$.k1': 'Ahorro anual/operador', 'imp.$.k2': 'Incremento revenue arbitraje', 'imp.$.prog': 'Validación en curso con early adopters',
+            'imp.env.dim': 'Ambiental', 'imp.env.goal': 'Contribuir a evitar 10.000+ toneladas de CO₂ anuales al optimizar el uso de baterías e integrar renovables de forma inteligente.',
+            'imp.env.k1': 'Ton CO₂ evitadas/año', 'imp.env.k2': 'Integración renovable', 'imp.env.prog': 'Metodología de medición en desarrollo',
+            'imp.com.dim': 'Comunidad', 'imp.com.goal': 'Construir la comunidad open-source de referencia para BESS en Latinoamérica. 500+ ingenieros, 10+ universidades, 4+ países colaborando.',
+            'imp.com.k1': 'Ingenieros en la comunidad', 'imp.com.k2': 'Presencia activa', 'imp.com.prog': 'Discord abierto · GitHub activo',
+            'imp.tec.dim': 'Técnico', 'imp.tec.goal': 'Alcanzar 99.9% uptime en despliegues edge, latencia <5ms en inferencia local, y precisión >92% en predicción de costos marginales.',
+            'imp.tec.k1': 'Uptime objetivo', 'imp.tec.k2': 'Latencia inferencia', 'imp.tec.prog': 'Benchmarks internos completados',
+            'imp.pledge': 'Publicaremos un <strong>reporte de impacto trimestral</strong> con datos reales verificables. Sin marketing. Sin inflación. Métricas honestas de un proyecto que cree en la transparencia radical.',
             /* Dashboard */
             'dash.eye': 'Telemetría en tiempo real', 'dash.h2': 'Lo que ve el operador',
             'dash.sub': 'Simulación de la interfaz operativa de BESSAI Edge. Datos actualizados cada 2 segundos.',
@@ -114,7 +129,7 @@
         en: {
             /* Nav */
             'nav.1': 'Origin', 'nav.2': 'The Shift', 'nav.3': 'The Grid', 'nav.4': 'BESSAI',
-            'nav.5': 'Stack', 'nav.6': 'Dashboard', 'nav.7': 'Roadmap',
+            'nav.5': 'Stack', 'nav.6': 'Dashboard', 'nav.7': 'Roadmap', 'nav.8': 'Impact',
             'nav.cta': 'Request demo',
             /* Geo banner */
             'geo.tag': 'Global Context',
@@ -165,6 +180,21 @@
             'a5.m6': 'Latency', 'a5.m6v': '<5ms local inference',
             'a5.m7': 'Training data', 'a5.m7v': '+2 years LatAm market',
             'a5.close': 'This software was designed, architected, and built from scratch with one simple premise: <span style="color:var(--white)">no engineering team in Latin America should ever have to build this again.</span> The problem is solved. The code exists. It\'s open source. Use it.',
+            /* Impact */
+            'imp.badge': '<span class="badge-dot" style="background:var(--gold)"></span>VISION · Impact',
+            'imp.h1': 'This is not a project.<br>It\'s a <span style="color:var(--gold)">measurable mission.</span>',
+            'imp.sub': 'Every line of code has a purpose. Every model an objective. And every objective a metric. This is how we\'ll measure our success — and how we\'ll be held accountable.',
+            'imp.e.dim': 'Energy', 'imp.e.goal': 'Optimize the dispatch of at least 50 MWh managed by BESSAI in the first 12 months of real operation.',
+            'imp.e.k1': 'Managed capacity', 'imp.e.k2': 'Dispatch efficiency improvement', 'imp.e.prog': 'Year 1 target · pilot operation',
+            'imp.$.dim': 'Economic', 'imp.$.goal': 'Demonstrate documented operational savings of USD $200K+ per operator per year, via AI-optimized arbitrage and peak-shaving.',
+            'imp.$.k1': 'Annual savings/operator', 'imp.$.k2': 'Arbitrage revenue increase', 'imp.$.prog': 'Validation underway with early adopters',
+            'imp.env.dim': 'Environmental', 'imp.env.goal': 'Contribute to avoiding 10,000+ tons of CO₂ annually by optimizing battery usage and intelligently integrating renewables.',
+            'imp.env.k1': 'Tons CO₂ avoided/year', 'imp.env.k2': 'Renewable integration', 'imp.env.prog': 'Measurement methodology in development',
+            'imp.com.dim': 'Community', 'imp.com.goal': 'Build the reference open-source community for BESS in Latin America. 500+ engineers, 10+ universities, 4+ countries collaborating.',
+            'imp.com.k1': 'Engineers in the community', 'imp.com.k2': 'Active presence', 'imp.com.prog': 'Discord open · GitHub active',
+            'imp.tec.dim': 'Technical', 'imp.tec.goal': 'Achieve 99.9% uptime in edge deployments, <5ms local inference latency, and >92% accuracy in marginal cost prediction.',
+            'imp.tec.k1': 'Target uptime', 'imp.tec.k2': 'Inference latency', 'imp.tec.prog': 'Internal benchmarks completed',
+            'imp.pledge': 'We will publish a <strong>quarterly impact report</strong> with verifiable real data. No marketing. No inflation. Honest metrics from a project that believes in radical transparency.',
             /* Dashboard */
             'dash.eye': 'Real-time telemetry', 'dash.h2': 'What the operator sees',
             'dash.sub': 'Simulation of the BESSAI Edge operational interface. Data updated every 2 seconds.',
@@ -218,7 +248,7 @@
         pt: {
             /* Nav */
             'nav.1': 'Origem', 'nav.2': 'A Virada', 'nav.3': 'A Rede', 'nav.4': 'BESSAI',
-            'nav.5': 'Stack', 'nav.6': 'Dashboard', 'nav.7': 'Roadmap',
+            'nav.5': 'Stack', 'nav.6': 'Dashboard', 'nav.7': 'Roadmap', 'nav.8': 'Impacto',
             'nav.cta': 'Solicitar demo',
             /* Geo banner */
             'geo.tag': 'Contexto Global',
@@ -269,6 +299,21 @@
             'a5.m6': 'Latência', 'a5.m6v': '<5ms inferência local',
             'a5.m7': 'Training data', 'a5.m7v': '+2 anos mercado LatAm',
             'a5.close': 'Este software foi projetado, arquitetado e construído do zero com uma premissa simples: <span style="color:var(--white)">nenhuma equipe de engenharia na América Latina precise construir isso novamente.</span> O problema está resolvido. O código existe. É open source. Use-o.',
+            /* Impact */
+            'imp.badge': '<span class="badge-dot" style="background:var(--gold)"></span>VISÃO · Impacto',
+            'imp.h1': 'Isso não é um projeto.<br>É uma <span style="color:var(--gold)">missão mensurável.</span>',
+            'imp.sub': 'Cada linha de código tem um propósito. Cada modelo um objetivo. E cada objetivo uma métrica. Assim mediremos nosso sucesso — e assim prestaremos contas.',
+            'imp.e.dim': 'Energia', 'imp.e.goal': 'Otimizar o despacho de pelo menos 50 MWh gerenciados pelo BESSAI nos primeiros 12 meses de operação real.',
+            'imp.e.k1': 'Capacidade gerenciada', 'imp.e.k2': 'Melhoria eficiência despacho', 'imp.e.prog': 'Ano 1 meta · operação piloto',
+            'imp.$.dim': 'Econômico', 'imp.$.goal': 'Demonstrar uma economia operacional documentada de USD $200K+ anuais por operador, via arbitragem e peak-shaving otimizado por IA.',
+            'imp.$.k1': 'Economia anual/operador', 'imp.$.k2': 'Aumento receita arbitragem', 'imp.$.prog': 'Validação em curso com early adopters',
+            'imp.env.dim': 'Ambiental', 'imp.env.goal': 'Contribuir para evitar 10.000+ toneladas de CO₂ anuais ao otimizar o uso de baterias e integrar renováveis de forma inteligente.',
+            'imp.env.k1': 'Ton CO₂ evitadas/ano', 'imp.env.k2': 'Integração renovável', 'imp.env.prog': 'Metodologia de medição em desenvolvimento',
+            'imp.com.dim': 'Comunidade', 'imp.com.goal': 'Construir a comunidade open-source de referência para BESS na América Latina. 500+ engenheiros, 10+ universidades, 4+ países colaborando.',
+            'imp.com.k1': 'Engenheiros na comunidade', 'imp.com.k2': 'Presença ativa', 'imp.com.prog': 'Discord aberto · GitHub ativo',
+            'imp.tec.dim': 'Técnico', 'imp.tec.goal': 'Alcançar 99.9% uptime em implantações edge, latência <5ms em inferência local e precisão >92% na predição de custos marginais.',
+            'imp.tec.k1': 'Uptime alvo', 'imp.tec.k2': 'Latência inferência', 'imp.tec.prog': 'Benchmarks internos concluídos',
+            'imp.pledge': 'Publicaremos um <strong>relatório de impacto trimestral</strong> com dados reais verificáveis. Sem marketing. Sem inflação. Métricas honestas de um projeto que acredita na transparência radical.',
             /* Dashboard */
             'dash.eye': 'Telemetria em tempo real', 'dash.h2': 'O que o operador vê',
             'dash.sub': 'Simulação da interface operacional do BESSAI Edge. Dados atualizados a cada 2 segundos.',
