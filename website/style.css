@@ -1042,9 +1042,33 @@ img {
 }
 
 /* ═══════════════════════════════════════
-   CONTRIBUTORS
+   SOCIAL LINKS
    ═══════════════════════════════════════ */
+.social-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 24px
+}
 
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font: .75rem var(--mono);
+  color: var(--muted);
+  border: 1px solid rgba(255, 255, 255, .08);
+  transition: all .25s
+}
+
+.social-link:hover {
+  color: var(--white);
+  border-color: rgba(0, 212, 255, .3);
+  background: rgba(0, 212, 255, .04);
+  transform: translateY(-1px)
+}
 
 /* ═══════════════════════════════════════
    CTA + FOOTER
