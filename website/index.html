@@ -52,6 +52,9 @@
                     <button class="lang-btn" id="lang-pt" onclick="setLang('pt')">PT</button>
                 </div>
                 <a class="nav-cta" href="mailto:contacto@bess-solutions.cl" data-i18n="nav.cta">Solicitar demo</a>
+                <button class="nav-burger" id="nav-burger" aria-label="Menu" onclick="toggleMobileMenu()">
+                    <span></span><span></span><span></span>
+                </button>
             </div>
         </div>
     </nav>
@@ -60,6 +63,25 @@
      CANVAS — Three.js (full-screen, fixed)
 ══════════════════════════════════════════════════ -->
     <canvas id="gl" aria-hidden="true"></canvas>
+
+    <!-- ══════════════════════════════════════════════════
+     MOBILE NAV OVERLAY
+══════════════════════════════════════════════════ -->
+    <div class="mob-menu" id="mob-menu" aria-hidden="true">
+        <div class="mob-menu-inner">
+            <nav class="mob-links">
+                <a href="#act1" onclick="closeMobileMenu()" data-i18n="nav.1">Origen</a>
+                <a href="#act2" onclick="closeMobileMenu()" data-i18n="nav.2">El Giro</a>
+                <a href="#act3" onclick="closeMobileMenu()" data-i18n="nav.3">La Red</a>
+                <a href="#act4" onclick="closeMobileMenu()" data-i18n="nav.4">BESSAI</a>
+                <a href="#build" onclick="closeMobileMenu()" data-i18n="nav.5">Stack</a>
+                <a href="#impact" onclick="closeMobileMenu()" data-i18n="nav.8">Impacto</a>
+                <a href="#dashboard" onclick="closeMobileMenu()" data-i18n="nav.6">Dashboard</a>
+                <a href="#roadmap" onclick="closeMobileMenu()" data-i18n="nav.7">Roadmap</a>
+            </nav>
+            <a class="mob-cta" href="mailto:contacto@bess-solutions.cl" data-i18n="nav.cta">Solicitar demo</a>
+        </div>
+    </div>
 
 
 
@@ -548,33 +570,59 @@
                 <div class="road-phase done">
                     <div class="road-marker done-m"><span>✓</span></div>
                     <div class="road-body">
+                        <div class="road-phase-period">Q1 2024 – Q4 2024</div>
                         <div class="road-phase-name" data-i18n="rm.p1t">Fase 1 · Fundación</div>
                         <div class="road-phase-desc" data-i18n="rm.p1b">Conectividad industrial, motor de optimización
                             base, seguridad certificada, arquitectura edge</div>
+                        <div class="road-phase-tags">
+                            <span class="road-tag">Modbus/DNP3</span>
+                            <span class="road-tag">IEC 62443</span>
+                            <span class="road-tag">613 tests</span>
+                            <span class="road-tag road-tag-done">✓ Completado</span>
+                        </div>
                     </div>
                 </div>
                 <div class="road-phase active">
                     <div class="road-marker active-m"><span class="pulse-ring"></span></div>
                     <div class="road-body">
+                        <div class="road-phase-period">Q1 2025 – Q3 2025</div>
                         <div class="road-phase-name" data-i18n="rm.p2t">Fase 2 · Inteligencia</div>
                         <div class="road-phase-desc" data-i18n="rm.p2b">Stack IA completo, predicción CMg, telemetría en
                             tiempo real, entrenamiento datos SEN</div>
+                        <div class="road-phase-tags">
+                            <span class="road-tag">MILP Optimizer</span>
+                            <span class="road-tag">DRL PPO</span>
+                            <span class="road-tag">CMg 24h-ahead</span>
+                            <span class="road-tag road-tag-active">◉ En progreso</span>
+                        </div>
                     </div>
                 </div>
                 <div class="road-phase">
                     <div class="road-marker"></div>
                     <div class="road-body">
+                        <div class="road-phase-period">Q4 2025 – Q2 2026</div>
                         <div class="road-phase-name" data-i18n="rm.p3t">Fase 3 · Flota</div>
                         <div class="road-phase-desc" data-i18n="rm.p3b">Orquestación multi-sitio, respuesta demanda,
                             interoperabilidad, early adopters en terreno</div>
+                        <div class="road-phase-tags">
+                            <span class="road-tag road-tag-future">Multi-site</span>
+                            <span class="road-tag road-tag-future">Early Adopters</span>
+                            <span class="road-tag road-tag-future">V2G</span>
+                        </div>
                     </div>
                 </div>
                 <div class="road-phase">
                     <div class="road-marker"></div>
                     <div class="road-body">
+                        <div class="road-phase-period">Q3 2026 →</div>
                         <div class="road-phase-name" data-i18n="rm.p4t">Fase 4 · Ecosistema</div>
                         <div class="road-phase-desc" data-i18n="rm.p4b">Marketplace soluciones, programa certificación,
                             expansión continental</div>
+                        <div class="road-phase-tags">
+                            <span class="road-tag road-tag-future">Marketplace</span>
+                            <span class="road-tag road-tag-future">Certificación</span>
+                            <span class="road-tag road-tag-future">LatAm</span>
+                        </div>
                     </div>
                 </div>
             </div>
