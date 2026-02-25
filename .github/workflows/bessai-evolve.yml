@@ -52,8 +52,32 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          # BESSAIEvolve only needs gymnasium + numpy (no Ray, no ONNX)
-          pip install gymnasium numpy structlog
+          # BESSAIEvolve core + CMg data fetcher deps
+          pip install gymnasium numpy structlog pandas requests openpyxl pyarrow
+
+      - name: Fetch real CMg data from CEN Chile
+        id: fetch_cmg
+        run: |
+          echo "📡 Fetching CMg price data for evolution evaluation..."
+          EVAL_DAYS="${{ github.event.inputs.eval_days || '30' }}"
+
+          python scripts/fetch_cmg_evolution.py --days "$EVAL_DAYS"
+          EXIT_CODE=$?
+
+          if [ $EXIT_CODE -eq 0 ] && [ -f data/cmg_historico.parquet ]; then
+            RECORDS=$(python -c "import pandas as pd; df=pd.read_parquet('data/cmg_historico.parquet'); print(len(df))" 2>/dev/null || echo '?')
+            SOURCE=$(python -c "import pandas as pd; df=pd.read_parquet('data/cmg_historico.parquet'); print(df['source'].iloc[0] if 'source' in df.columns else 'unknown')" 2>/dev/null || echo '?')
+            echo "✅ CMg data ready: $RECORDS records (source: $SOURCE)"
+            echo "cmg_source=$SOURCE" >> "$GITHUB_OUTPUT"
+            echo "cmg_records=$RECORDS" >> "$GITHUB_OUTPUT"
+          else
+            echo "⚠️  CMg fetch returned error or no file — evolution will use synthetic fallback"
+            echo "cmg_source=synthetic_fallback" >> "$GITHUB_OUTPUT"
+            echo "cmg_records=0" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Never fail the job here — synthetic fallback handles missing data
+          exit 0
 
       - name: Run BESSAIEvolve
         id: evolve
