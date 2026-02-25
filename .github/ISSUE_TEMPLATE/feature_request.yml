@@ -1,41 +1,21 @@
-name: ✨ Feature Request
-description: Suggest a new feature or enhancement for BESSAI Edge Gateway
-title: "[FEAT] "
-labels: ["enhancement", "needs-triage"]
+name: Feature Request / BEP Draft
+description: Propose a new feature or enhancement. Significant changes can become a BEP.
+title: "feat: "
+labels: ["enhancement", "needs-discussion"]
 assignees: []
-
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for suggesting a feature! BESSAI Edge Gateway aims to be the reference 
-        implementation for industrial BESS management. Great ideas from the community 
-        shape the roadmap.
-
-  - type: dropdown
-    id: area
-    attributes:
-      label: Feature Area
-      options:
-        - New Device Driver (inverter/battery)
-        - New Communication Protocol (Modbus RTU, IEC 61850, OCPP, etc.)
-        - AI / Machine Learning  
-        - Energy Market Integration (CMg, OpenADR, P2P)
-        - Observability / Metrics / Alerting
-        - Security / Compliance
-        - API / Integration
-        - Infrastructure / Deployment
-        - Documentation
-        - Other
-    validations:
-      required: true
+        Thanks for the proposal! Please describe the feature clearly.
+        For **architectural changes or new protocols**, consider opening a [BEP (BESSAI Enhancement Proposal)](https://github.com/bess-solutions/open-bess-edge/blob/main/docs/bep/BEP-0001.md) via GitHub Discussions.
 
   - type: textarea
     id: problem
     attributes:
-      label: Problem / Motivation
-      description: What problem does this feature solve? What use case does it enable?
-      placeholder: "As a BESS operator, I need to... because..."
+      label: Problem Statement
+      description: What problem does this feature solve? Who is impacted?
+      placeholder: "As a BESS operator, I need X because currently Y is not possible without Z."
     validations:
       required: true
 
@@ -43,7 +23,7 @@ body:
     id: solution
     attributes:
       label: Proposed Solution
-      description: Describe the solution you'd like. Be as specific as possible.
+      description: Describe your proposed implementation or approach.
     validations:
       required: true
 
@@ -51,43 +31,43 @@ body:
     id: alternatives
     attributes:
       label: Alternatives Considered
-      description: Have you considered any alternative approaches or workarounds?
+      description: What other approaches did you consider and why did you reject them?
 
   - type: dropdown
-    id: priority
+    id: area
     attributes:
-      label: Priority (from your perspective)
+      label: Feature Area
+      multiple: true
       options:
-        - 🔴 Critical — blocking production use
-        - 🟡 High — significant impact on my use case
-        - 🟢 Medium — would be nice to have
-        - ⚪ Low — minor improvement
+        - New protocol driver (Modbus / DNP3 / IEC 61850 / OCPP / others)
+        - New hardware profile
+        - AI / ML (DRL training, BESSAIEvolve, XAI)
+        - Compliance / Standards (IEC 62443, IEEE 2030.5, VPP)
+        - Telemetry / Observability
+        - Security
+        - Performance / Scalability
+        - Developer experience (CLI, Makefile, docs)
+        - Other
     validations:
       required: true
 
   - type: dropdown
-    id: contribution
+    id: bep
     attributes:
-      label: Would you be willing to contribute this feature?
+      label: Does this require a BEP?
+      description: Significant protocol changes, new AI modules, or governance changes need a BEP.
       options:
-        - "Yes — I can implement this and submit a PR"
-        - "Partial — I can help with design/testing but not full implementation"
-        - "No — I'm requesting the maintainers implement this"
+        - "No — small enhancement"
+        - "Maybe — happy to discuss"
+        - "Yes — I will draft a BEP"
     validations:
       required: true
-
-  - type: textarea
-    id: references
-    attributes:
-      label: References / Prior Art
-      description: Links to standards, papers, similar implementations, or related issues.
 
   - type: checkboxes
-    id: checklist
+    id: contribution
     attributes:
-      label: Checklist
+      label: Contribution Interest
       options:
-        - label: I have searched existing issues and this is not a duplicate
-          required: true
-        - label: This feature aligns with the project's industrial/energy focus
-          required: false
+        - label: I am willing to implement this feature and open a PR
+        - label: I need help with the implementation
+        - label: I can provide testing / review only
