@@ -35,6 +35,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 68px;
   overflow-x: hidden
 }
 
@@ -228,6 +229,7 @@ button {
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100svh;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -301,24 +303,24 @@ button {
 
 /* Act Typography */
 .act-h1 {
-  font: 700 clamp(3.2rem, 8vw, 6.5rem) var(--display);
+  font: 700 clamp(3rem, 7.5vw, 6rem)/1 var(--display);
   letter-spacing: -.04em;
-  line-height: .95;
   color: var(--white);
-  margin-bottom: 20px;
+  margin-bottom: 22px;
+  text-wrap: balance;
 }
 
 .act-h2 {
-  font: 600 clamp(1.8rem, 4vw, 3rem) var(--display);
+  font: 600 clamp(1.8rem, 3.8vw, 2.8rem)/1.12 var(--display);
   letter-spacing: -.03em;
-  line-height: 1.1;
-  color: var(--muted);
+  color: rgba(200, 210, 240, .55);
   margin-bottom: 28px;
+  text-wrap: balance;
 }
 
 .act-sub {
-  font: 400 1rem/1.7 var(--body);
-  color: var(--muted);
+  font: 400 1rem/1.75 var(--body);
+  color: rgba(160, 175, 210, .6);
   max-width: 500px;
   margin-bottom: 36px;
 }
@@ -543,15 +545,16 @@ button {
 }
 
 .sec-h2 {
-  font: 700 clamp(1.8rem, 4vw, 3rem) var(--display);
+  font: 700 clamp(1.8rem, 4vw, 3rem)/1.1 var(--display);
   letter-spacing: -.04em;
-  line-height: 1.1;
+  color: var(--white);
   margin-bottom: 16px;
+  text-wrap: balance;
 }
 
 .sec-p {
-  font: .9rem/1.7 var(--body);
-  color: var(--muted);
+  font: .92rem/1.75 var(--body);
+  color: rgba(160, 175, 210, .6);
   max-width: 560px;
 }
 
@@ -646,18 +649,18 @@ button {
 .impact-card {
   background: rgba(4, 5, 10, .9);
   border: 1px solid rgba(255, 255, 255, .06);
-  border-radius: 14px;
-  padding: 32px;
+  border-radius: 16px;
+  padding: 28px;
   backdrop-filter: blur(12px);
-  transition: border-color .3s, transform .3s;
+  transition: border-color .3s, transform .3s, box-shadow .3s;
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
 .impact-card:hover {
-  border-color: rgba(251, 191, 36, .2);
-  transform: translateY(-3px)
+  border-color: rgba(251, 191, 36, .25);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, .3);
 }
 
 .impact-icon {
@@ -745,10 +748,10 @@ button {
 }
 
 .impact-kpi-val {
-  font: 700 1.3rem var(--display);
+  font: 700 1.5rem/1 var(--display);
   color: var(--white);
-  letter-spacing: -.02em;
-  line-height: 1
+  letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums;
 }
 
 .impact-kpi-lbl {
@@ -917,6 +920,10 @@ button {
   padding: 20px 24px
 }
 
+.chart-wrap canvas {
+  max-height: 180px !important
+}
+
 .chart-label {
   font: .62rem var(--mono);
   color: var(--muted);
@@ -937,11 +944,27 @@ button {
 .feat-card {
   background: var(--bg);
   padding: 32px;
-  transition: background .25s;
+  transition: background .25s, transform .25s;
+  position: relative;
+  overflow: hidden;
+}
+
+.feat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0, rgba(0, 212, 255, .04) 0, transparent 70%);
+  opacity: 0;
+  transition: opacity .3s;
 }
 
 .feat-card:hover {
-  background: rgba(8, 11, 20, .9)
+  background: rgba(8, 11, 20, .95);
+  transform: translateY(-2px);
+}
+
+.feat-card:hover::before {
+  opacity: 1
 }
 
 .feat-num {
@@ -974,13 +997,16 @@ button {
   display: flex;
   align-items: flex-start;
   gap: 20px;
-  padding: 24px 0;
+  padding: 28px 0 28px 28px;
   border-left: 2px solid rgba(255, 255, 255, .06);
-  padding-left: 28px;
   margin-left: 10px;
   position: relative;
-  opacity: .5;
-  transition: opacity .4s;
+  opacity: .45;
+  transition: opacity .4s, border-color .4s;
+}
+
+.road-phase:hover {
+  opacity: .7
 }
 
 .road-phase.done,
@@ -1191,7 +1217,8 @@ button {
 
 .ea-cta-hi:hover {
   background: #10b981;
-  box-shadow: 0 0 20px rgba(16, 185, 129, .25)
+  box-shadow: 0 0 28px rgba(16, 185, 129, .35);
+  transform: translateY(-2px)
 }
 
 /* ── CTA FINAL ──────────────────────────────────────────── */
@@ -1257,7 +1284,8 @@ button {
 .btn-primary:hover {
   background: #10b981;
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(16, 185, 129, .3)
+  box-shadow: 0 8px 28px rgba(16, 185, 129, .4),
+    0 0 0 1px rgba(16, 185, 129, .2)
 }
 
 .btn-secondary {
@@ -1300,9 +1328,10 @@ button {
 
 .social-link:hover {
   color: var(--white);
-  border-color: rgba(0, 212, 255, .3);
-  background: rgba(0, 212, 255, .04);
-  transform: translateY(-1px)
+  border-color: rgba(0, 212, 255, .35);
+  background: rgba(0, 212, 255, .06);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 212, 255, .08)
 }
 
 /* ── FOOTER ─────────────────────────────────────────────── */
@@ -1421,7 +1450,7 @@ button {
   }
 
   .impact-grid {
-    grid-template-columns: 1fr
+    grid-template-columns: 1fr 1fr
   }
 
   .impact-pledge {
@@ -1474,5 +1503,37 @@ button {
 
   .foot-links-group {
     gap: 28px
+  }
+
+  .act-content {
+    padding: 0 20px
+  }
+
+  .ac2 {
+    padding: 0 20px
+  }
+
+  .ac4 {
+    padding: 0 20px
+  }
+
+  .cta-block {
+    padding: 40px 20px
+  }
+
+  .kpi-val {
+    font-size: 1.2rem
+  }
+
+  .ppm-val {
+    font-size: 2rem
+  }
+
+  .impact-card {
+    padding: 20px
+  }
+
+  .impact-grid {
+    grid-template-columns: 1fr
   }
 }
