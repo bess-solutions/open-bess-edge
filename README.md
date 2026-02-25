@@ -238,17 +238,18 @@ terraform output
 
 ---
 
-## 🗺️ Roadmap v2.0
+## 🗺️ Roadmap — v2.10.0
 
-Ver el documento completo: [BESSAI v2.0 Technical Roadmap](docs/bessai_v2_roadmap.md)
+Ver el documento completo: [BESSAI Roadmap](docs/ROADMAP.md)
 
-| Fase | Área | Prioridad |
+| Estado | Área | Versión |
 |---|---|---|
-| ✅ Q1 2026 | Health/Metrics HTTP + Prometheus + Terraform GCP | 🔴 **Completado** |
-| 🟡 Q3 2026 | Edge AI: ONNX ✅ + AI-IDS ✅ + DRL Training (Ray RLlib) | 🔴 **En progreso** |
-| Q4 2026 | Federated Orchestration + VPP | 🟡 Media |
-| Q1 2027 | Data Lakehouse + P2P Trading | 🟡 Media |
-| Q2 2027 | LCA Engine + Carbon Dashboard | 🟢 Estratégica |
+| ✅ Completado | IEC 62443 SL-2 · OpenSSF Scorecard · BEPs 0100/0200/0300/0301/0302/0303 | v2.10.0 |
+| ✅ Completado | AI-IDS · WatchdogManager · MILP Optimizer · Alert Dispatcher | v2.9.0 |
+| ✅ Completado | DRL Agent (PPO ONNX) · 7 Hardware Profiles · CMg CEN Live Feed | v2.8.0 |
+| 🟡 En progreso | BESSAIEvolve (BEP-0303) · DRL Write Authority (BEP-0300) · XAI SHAP (BEP-0301) | v2.11.0 |
+| 🔵 Planificado | Federated Learning · MILP integration tests · DNP3 Driver (BEP-0202) | v2.12.0 |
+| 🔵 Planificado | VPP · P2P Energy Trading · LCA Engine · Carbon Dashboard | 2027 |
 
 ---
 
