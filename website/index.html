@@ -755,6 +755,95 @@
         </div>
     </footer>
 
+    <!-- ── FLOATING MUSIC PLAYER ── -->
+    <div id="music-player" style="
+        position:fixed;bottom:24px;right:24px;z-index:990;
+        background:rgba(11,13,24,.95);backdrop-filter:blur(20px);
+        border:1px solid rgba(255,255,255,.1);border-radius:16px;
+        padding:14px 16px;display:flex;align-items:center;gap:12px;
+        width:280px;box-shadow:0 8px 40px rgba(0,0,0,.5);
+        transform:translateY(80px);opacity:0;
+        transition:transform .5s cubic-bezier(.22,1,.36,1),opacity .5s ease;
+    ">
+        <img src="https://cdn2.suno.ai/edbd3009-1ef6-4a49-9c09-937395b6a4db_dc1e96bf.jpeg" alt="BESS Anthem"
+            style="width:42px;height:42px;border-radius:8px;flex-shrink:0;object-fit:cover;" />
+        <div style="flex:1;min-width:0">
+            <div
+                style="font:600 .72rem 'Inter',sans-serif;color:#edf0ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                BESS Solutions in the House</div>
+            <div style="font:.6rem 'JetBrains Mono',monospace;color:#60697a;margin:2px 0 6px">Phonk Chilean · Suno AI
+            </div>
+            <div id="mp-progress-wrap"
+                style="height:3px;background:rgba(255,255,255,.08);border-radius:2px;cursor:pointer;position:relative">
+                <div id="mp-bar"
+                    style="height:100%;width:0%;background:linear-gradient(90deg,#22d3ee,#34d399);border-radius:2px;transition:width .3s linear">
+                </div>
+            </div>
+        </div>
+        <button id="mp-btn" onclick="toggleMusic()" style="
+            width:34px;height:34px;border-radius:50%;border:none;
+            background:linear-gradient(135deg,#22d3ee,#34d399);
+            color:#070810;font-size:.85rem;cursor:pointer;flex-shrink:0;
+            display:flex;align-items:center;justify-content:center;
+            transition:transform .2s;
+        ">▶</button>
+        <button onclick="document.getElementById('music-player').style.display='none'" style="
+            position:absolute;top:6px;right:8px;background:none;border:none;
+            color:#3a4052;cursor:pointer;font-size:.65rem;line-height:1;padding:2px;
+        ">✕</button>
+        <a href="https://suno.com/s/3fl7sTP1M0Oitou3" target="_blank" rel="noopener" style="
+            position:absolute;bottom:7px;right:12px;
+            font:.52rem 'JetBrains Mono',monospace;color:#3a4052;
+            text-decoration:none;transition:color .2s;
+        " onmouseover="this.style.color='#60697a'" onmouseout="this.style.color='#3a4052'">suno ↗</a>
+    </div>
+    <audio id="bess-audio" crossorigin="anonymous" src="https://cdn1.suno.ai/edbd3009-1ef6-4a49-9c09-937395b6a4db.mp3"
+        preload="none"></audio>
+
+    <script>
+        (function () {
+            const audio = document.getElementById('bess-audio');
+            const btn = document.getElementById('mp-btn');
+            const bar = document.getElementById('mp-bar');
+            const wrap = document.getElementById('mp-progress-wrap');
+            const player = document.getElementById('music-player');
+
+            // Show player after 2s
+            setTimeout(() => {
+                player.style.transform = 'translateY(0)';
+                player.style.opacity = '1';
+            }, 2000);
+
+            window.toggleMusic = function () {
+                if (audio.paused) {
+                    audio.play();
+                    btn.textContent = '⏸';
+                    btn.style.transform = 'scale(.92)';
+                } else {
+                    audio.pause();
+                    btn.textContent = '▶';
+                    btn.style.transform = '';
+                }
+            };
+
+            audio.addEventListener('timeupdate', () => {
+                if (audio.duration) bar.style.width = (audio.currentTime / audio.duration * 100) + '%';
+            });
+
+            wrap.addEventListener('click', e => {
+                const r = wrap.getBoundingClientRect();
+                const pct = (e.clientX - r.left) / r.width;
+                audio.currentTime = pct * audio.duration;
+            });
+
+            audio.addEventListener('ended', () => {
+                btn.textContent = '▶';
+                btn.style.transform = '';
+                bar.style.width = '0%';
+            });
+        })();
+    </script>
+
     <script src="main.js"></script>
 </body>
 
