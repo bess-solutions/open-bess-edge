@@ -1,11 +1,11 @@
-# BESSAI Edge Gateway — Roadmap Oficial v2.7–3.0
+# BESSAI Edge Gateway — Roadmap Oficial v2.10–3.0
 
 > **Versión:** 2026-02-25 · **Estado:** Activo  
 > **Sustituye:** `docs/bessai_v2_roadmap.md` (archivado — era pre-v2.6)
 
 ---
 
-## Estado actual — v2.7.1 (completado 2026-02-24)
+## ✅ Estado actual — v2.10.0 (2026-02-25)
 
 | Área | Entregable | BEP |
 |---|---|---|
@@ -13,8 +13,10 @@
 | Canal dual | MQTT Publisher integrado en `main.py` | — ✅ |
 | Seguridad OT | TLS 1.2 min + mTLS para endpoints DERMS | BEP-0100 ✅ |
 | **DRL Agent (Fase 2)** | `ONNXArbitrageAgent` integrado como Step 5e en `main.py` (observe-only) | **BEP-0200 ✅ Fase 2** |
-| **Global Standard** | BOA Charter, UL9540 roadmap, SPEC-004, Hackathon 2026, IEEE Abstract | — ✅ |
-| **Code quality** | Revisión 360°: ruff auto-fix (35/36), drl_agent → structlog, 20 archivos reformateados | — ✅ |
+| **Scrollytelling Landing** | React + Vite + i18n ES/EN + Lucide icons (`landing/`) | — ✅ |
+| **OpenSSF Compliance** | `docs/API.md`, test policy, tag `v2.10.0`, badge en progreso | — ✅ |
+| **3 BEPs nuevos** | BEP-0300 (DRL auto), BEP-0301 (XAI), BEP-0302 (Market live) | ✅ Draft |
+| **360° Audit** | 13 inconsistencias corregidas · archivos propietarios eliminados del repo | — ✅ |
 
 **Suite de tests**: 613 passed · 0 failed · 6 skipped · CI: ruff ✅ mypy ✅ bandit ✅ trivy ✅
 
@@ -207,7 +209,7 @@ Modelo híbrido física + IA que simula en tiempo real la degradación, temperat
 |---|---|---|---|
 | [BEP-0100](bep/BEP-0100.md) | IEEE 2030.5 / SEP 2.0 Adapter | ✅ **Active** | v2.6.0 |
 | **BEP-0101** | SEP 2.0 XML/EXI Normativo (reemplaza JSON profile) | 📝 Draft | v2.11.0 |
-| **BEP-0200** | DRL Arbitrage Agent (Ray RLlib PPO/SAC + ONNX) | ✅ **Fase 2 Activa** (observe-only) | v2.7.1 |
+| **BEP-0200** | DRL Arbitrage Agent (Ray RLlib PPO/SAC + ONNX) | ✅ **Fase 2 Activa** (observe-only) | v2.10.0 |
 | **BEP-0201** | Digital Twin PINN — RUL < 2 % error | 💡 Propuesto | v2.11.0 |
 | **BEP-0202** | Protocol Registry unificado (IEC 61850, DNP3, OPC-UA) | 💡 Propuesto | v2.11.0 |
 | **[BEP-0300](bep/BEP-0300.md)** | DRL Autonomous Control — Write Mode + Safety Protocol | 📝 **Draft** (nuevo) | v2.10.0 |
