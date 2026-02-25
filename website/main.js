@@ -326,6 +326,41 @@ function setLang(lang) {
 
 window.setLang = setLang;
 
+/* ── MOBILE MENU ──────────────────────────────────────── */
+function toggleMobileMenu() {
+    const menu = document.getElementById('mob-menu');
+    const isOpen = menu.classList.contains('open');
+    if (isOpen) {
+        closeMobileMenu();
+    } else {
+        menu.classList.add('open');
+        menu.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        // Update i18n inside mobile menu
+        const lang = localStorage.getItem('lang') || 'es';
+        menu.querySelectorAll('[data-i18n]').forEach(el => {
+            const v = T[lang]?.[el.dataset.i18n];
+            if (v !== undefined) el.innerHTML = v;
+        });
+    }
+}
+
+function closeMobileMenu() {
+    const menu = document.getElementById('mob-menu');
+    menu.classList.remove('open');
+    menu.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+}
+
+// Close mobile menu on scroll
+window.addEventListener('scroll', () => {
+    const menu = document.getElementById('mob-menu');
+    if (menu?.classList.contains('open')) closeMobileMenu();
+}, { passive: true });
+
+window.toggleMobileMenu = toggleMobileMenu;
+window.closeMobileMenu = closeMobileMenu;
+
 /* ── BOOT ─────────────────────────────────────────── */
 window.addEventListener('DOMContentLoaded', () => {
     const saved = localStorage.getItem('lang') ||
@@ -418,7 +453,10 @@ function initImpactBars() {
         entries.forEach(e => {
             if (!e.isIntersecting) return;
             e.target.querySelectorAll('.impact-bar').forEach(b => {
-                b.style.width = b.style.getPropertyValue('--bar-w');
+                // Read --bar-w from inline style attribute (works for CSS custom props declared inline)
+                const barW = b.style.getPropertyValue('--bar-w') ||
+                    getComputedStyle(b).getPropertyValue('--bar-w').trim();
+                if (barW) b.style.width = barW;
             });
             io.unobserve(e.target);
         });
