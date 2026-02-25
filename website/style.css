@@ -140,7 +140,7 @@ button {
 }
 
 .logo-img {
-  height: 26px;
+  height: 36px;
   width: auto;
   object-fit: contain
 }
@@ -692,9 +692,12 @@ button {
   background: rgba(4, 5, 10, .9);
   border: 1px solid rgba(255, 255, 255, .06);
   border-radius: 14px;
-  padding: 28px;
+  padding: 32px;
   backdrop-filter: blur(12px);
   transition: border-color .3s, transform .3s;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .impact-card:hover {
@@ -722,14 +725,61 @@ button {
 }
 
 .impact-goal {
-  font: .8rem/1.6 var(--body);
-  color: var(--muted);
+  font: .82rem/1.65 var(--body);
+  color: rgba(200, 210, 240, .55);
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, .05);
+}
+
+.impact-source {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  background: rgba(255, 255, 255, .025);
+  border-left: 2px solid rgba(255, 255, 255, .1);
+  border-radius: 0 6px 6px 0;
+  padding: 8px 12px;
   margin-bottom: 18px;
+  font: .72rem/1.55 var(--mono);
+  color: var(--muted);
+}
+
+.src-label {
+  font: 700 .55rem var(--mono);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted-2);
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid rgba(255, 255, 255, .06);
+  border-radius: 3px;
+  padding: 1px 6px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.src-link {
+  color: var(--cyan);
+  text-decoration: none;
+  opacity: .7;
+  transition: opacity .2s;
+}
+
+.src-link:hover {
+  opacity: 1
+}
+
+.impact-context {
+  font: 600 .58rem var(--mono);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--muted);
+  margin-bottom: 6px;
 }
 
 .impact-kpi-row {
   display: flex;
-  gap: 16px;
+  gap: 24px;
   margin-bottom: 14px
 }
 
