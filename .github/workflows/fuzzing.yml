@@ -69,7 +69,7 @@ jobs:
           grep -q "FAILED\|ERROR" hypothesis_output.txt && echo "FOUND_FAILURE=true" >> "$GITHUB_OUTPUT" || echo "FOUND_FAILURE=false" >> "$GITHUB_OUTPUT"
 
       - name: Upload hypothesis output
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
         if: always()
         with:
           name: hypothesis-output-${{ github.run_id }}
@@ -247,7 +247,7 @@ jobs:
           fi
 
       - name: Upload fuzz corpus and coverage
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
         if: always()
         with:
           name: fuzz-results-${{ github.run_id }}
