@@ -3,625 +3,1198 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BESS Solutions — Inteligencia para el Almacenamiento de Energía</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>BESS Solutions — Gestión inteligente de baterías industriales</title>
     <meta name="description"
-        content="BESSAI Edge: el sistema open-source de gestión inteligente de baterías para la transición energética en Latinoamérica." />
-
-    <!-- Fonts: Inter + JetBrains Mono -->
+        content="BESSAI Edge: gateway open-source industrial-grade para BESS. IEC 62443 · NTSyCS Chile · Apache 2.0." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet" />
-    <!-- Clash Display via Fontshare -->
-    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
 
-    <!-- CDN deps -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
-    <link rel="stylesheet" href="style.css" />
+        :root {
+            --bg: #08090d;
+            --bg2: #0d0f16;
+            --bg3: #12141e;
+            --line: rgba(255, 255, 255, .07);
+            --muted: #60697a;
+            --muted2: #3a4052;
+            --white: #eef0f7;
+            --cyan: #22d3ee;
+            --green: #34d399;
+            --amber: #f59e0b;
+            --body: 'Inter', sans-serif;
+            --mono: 'JetBrains Mono', monospace;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 64px;
+            overflow-x: hidden
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--white);
+            font: 400 15px/1.65 var(--body);
+            overflow-x: hidden
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none
+        }
+
+        ul {
+            list-style: none
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 900;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid transparent;
+            transition: border-color .3s, background .3s, backdrop-filter .3s;
+        }
+
+        nav.scrolled {
+            background: rgba(8, 9, 13, .88);
+            backdrop-filter: blur(16px);
+            border-color: var(--line)
+        }
+
+        .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 28px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 24px
+        }
+
+        .nav-logo {
+            font: 600 .82rem var(--mono);
+            color: var(--white);
+            letter-spacing: .06em;
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .nav-logo img {
+            height: 28px;
+            width: auto;
+            object-fit: contain
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2px;
+            flex: 1
+        }
+
+        .nav-links a {
+            padding: 5px 10px;
+            border-radius: 6px;
+            font: 500 .72rem var(--body);
+            color: var(--muted);
+            transition: color .2s, background .2s
+        }
+
+        .nav-links a:hover {
+            color: var(--white);
+            background: rgba(255, 255, 255, .05)
+        }
+
+        .nav-cta {
+            padding: 7px 16px;
+            border-radius: 7px;
+            font: 600 .75rem var(--mono);
+            background: var(--green);
+            color: #050a06;
+            transition: all .2s;
+            flex-shrink: 0
+        }
+
+        .nav-cta:hover {
+            background: #4ade80;
+            transform: translateY(-1px)
+        }
+
+        .nav-burger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 8px 9px;
+            cursor: pointer
+        }
+
+        .nav-burger span {
+            display: block;
+            width: 16px;
+            height: 1.5px;
+            background: var(--muted);
+            border-radius: 2px;
+            transition: .3s
+        }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 120px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(ellipse, rgba(34, 211, 238, .06) 0, transparent 65%);
+            pointer-events: none;
+        }
+
+        .hero-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 28px
+        }
+
+        .hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font: 500 .68rem var(--mono);
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: .14em;
+            border: 1px solid rgba(34, 211, 238, .2);
+            background: rgba(34, 211, 238, .05);
+            padding: 5px 14px;
+            border-radius: 100px;
+            margin-bottom: 36px;
+        }
+
+        .hero-tag::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--cyan);
+            animation: blink 1.4s ease-in-out infinite
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .25
+            }
+        }
+
+        .hero h1 {
+            font: 700 clamp(2.8rem, 6vw, 5.2rem)/1.05 var(--body);
+            letter-spacing: -.04em;
+            color: var(--white);
+            max-width: 760px;
+            margin-bottom: 22px;
+        }
+
+        .hero h1 em {
+            font-style: normal;
+            color: var(--cyan)
+        }
+
+        .hero p {
+            font: 400 1.05rem/1.75 var(--body);
+            color: var(--muted);
+            max-width: 520px;
+            margin-bottom: 44px;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap
+        }
+
+        .btn-p {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 9px;
+            font: 600 .82rem var(--mono);
+            background: var(--green);
+            color: #050a06;
+            transition: all .25s;
+        }
+
+        .btn-p:hover {
+            background: #4ade80;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(52, 211, 153, .3)
+        }
+
+        .btn-s {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 9px;
+            font: 600 .82rem var(--mono);
+            border: 1px solid var(--line);
+            color: var(--white);
+            transition: all .25s;
+        }
+
+        .btn-s:hover {
+            border-color: rgba(255, 255, 255, .2);
+            background: rgba(255, 255, 255, .04)
+        }
+
+        .hero-metrics {
+            display: flex;
+            gap: 44px;
+            margin-top: 68px;
+            padding-top: 36px;
+            border-top: 1px solid var(--line);
+            flex-wrap: wrap;
+        }
+
+        .metric {
+            display: flex;
+            flex-direction: column;
+            gap: 4px
+        }
+
+        .metric-val {
+            font: 700 1.6rem/1 var(--mono);
+            color: var(--white);
+            letter-spacing: -.03em
+        }
+
+        .metric-lbl {
+            font: .65rem var(--mono);
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .1em
+        }
+
+        /* ── SECTION BASE ── */
+        .sec {
+            padding: 100px 0;
+            border-top: 1px solid var(--line)
+        }
+
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 28px
+        }
+
+        .sec-label {
+            font: 600 .62rem var(--mono);
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: .14em;
+            margin-bottom: 16px
+        }
+
+        .sec-h2 {
+            font: 700 clamp(1.7rem, 3.5vw, 2.6rem)/1.1 var(--body);
+            letter-spacing: -.04em;
+            margin-bottom: 14px
+        }
+
+        .sec-sub {
+            font: .9rem/1.75 var(--body);
+            color: var(--muted);
+            max-width: 540px;
+            margin-bottom: 52px
+        }
+
+        /* ── TERMINAL HERO ── */
+        .term-wrap {
+            margin-top: 60px;
+            background: var(--bg2);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+            max-width: 640px;
+        }
+
+        .term-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(255, 255, 255, .02)
+        }
+
+        .term-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%
+        }
+
+        .term-title {
+            margin-left: 8px;
+            font: .6rem var(--mono);
+            color: var(--muted)
+        }
+
+        .term-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px
+        }
+
+        .t-l {
+            font: .72rem var(--mono);
+            line-height: 1.6;
+            display: flex;
+            gap: 8px
+        }
+
+        .t-p {
+            color: var(--green)
+        }
+
+        .t-cmd {
+            color: var(--white)
+        }
+
+        .t-ok {
+            color: var(--green)
+        }
+
+        .t-info {
+            color: var(--cyan)
+        }
+
+        .t-warn {
+            color: var(--amber)
+        }
+
+        .t-cursor {
+            display: inline-block;
+            width: 6px;
+            height: 12px;
+            background: var(--green);
+            animation: blink .9s infinite;
+            vertical-align: bottom;
+            margin-left: 2px
+        }
+
+        /* ── FEATURES GRID ── */
+        .feat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--line);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            overflow: hidden
+        }
+
+        .feat-card {
+            background: var(--bg);
+            padding: 32px 28px;
+            transition: background .25s
+        }
+
+        .feat-card:hover {
+            background: var(--bg2)
+        }
+
+        .feat-num {
+            font: 600 .6rem var(--mono);
+            color: var(--muted2);
+            letter-spacing: .1em;
+            margin-bottom: 18px
+        }
+
+        .feat-icon {
+            font-size: 1.4rem;
+            margin-bottom: 14px
+        }
+
+        .feat-title {
+            font: 600 .95rem var(--body);
+            color: var(--white);
+            letter-spacing: -.01em;
+            margin-bottom: 8px
+        }
+
+        .feat-desc {
+            font: .8rem/1.65 var(--body);
+            color: var(--muted)
+        }
+
+        /* ── STACK / SPEC TABLE ── */
+        .spec-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px
+        }
+
+        .spec-block {
+            background: var(--bg2);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden
+        }
+
+        .spec-head {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--line);
+            font: 600 .65rem var(--mono);
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .1em
+        }
+
+        .spec-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, .03);
+            gap: 12px
+        }
+
+        .spec-row:last-child {
+            border-bottom: 0
+        }
+
+        .spec-k {
+            font: .73rem var(--mono);
+            color: var(--muted)
+        }
+
+        .spec-v {
+            font: 600 .72rem var(--mono);
+            color: var(--cyan)
+        }
+
+        .spec-ok {
+            color: var(--green)
+        }
+
+        .spec-b {
+            color: var(--amber)
+        }
+
+        .spec-m {
+            color: var(--muted)
+        }
+
+        /* ── ROADMAP ── */
+        .road-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0
+        }
+
+        .road-item {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 28px;
+            padding: 28px 0;
+            border-bottom: 1px solid var(--line);
+            align-items: start
+        }
+
+        .road-item:last-child {
+            border-bottom: 0
+        }
+
+        .road-period {
+            font: .65rem var(--mono);
+            color: var(--muted2);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            padding-top: 3px
+        }
+
+        .road-content {}
+
+        .road-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font: 600 .58rem var(--mono);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            padding: 2px 10px;
+            border-radius: 100px;
+            margin-bottom: 10px
+        }
+
+        .road-status.done {
+            color: var(--green);
+            background: rgba(52, 211, 153, .1);
+            border: 1px solid rgba(52, 211, 153, .2)
+        }
+
+        .road-status.active {
+            color: var(--cyan);
+            background: rgba(34, 211, 238, .1);
+            border: 1px solid rgba(34, 211, 238, .2)
+        }
+
+        .road-status.next {
+            color: var(--muted);
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid var(--line)
+        }
+
+        .road-title {
+            font: 600 .95rem var(--body);
+            color: var(--white);
+            letter-spacing: -.01em;
+            margin-bottom: 6px
+        }
+
+        .road-desc {
+            font: .8rem/1.6 var(--body);
+            color: var(--muted);
+            margin-bottom: 12px
+        }
+
+        .road-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px
+        }
+
+        .rtag {
+            font: .58rem var(--mono);
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid var(--line);
+            color: var(--muted)
+        }
+
+        /* ── EARLY ADOPTER ── */
+        .ea-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px
+        }
+
+        .ea-card {
+            background: var(--bg2);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 36px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transition: border-color .25s
+        }
+
+        .ea-card:hover {
+            border-color: rgba(255, 255, 255, .14)
+        }
+
+        .ea-card.hi {
+            border-color: rgba(52, 211, 153, .25);
+            background: rgba(52, 211, 153, .03)
+        }
+
+        .ea-tier {
+            font: 600 .6rem var(--mono);
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .14em
+        }
+
+        .ea-name {
+            font: 700 1.5rem/1 var(--body);
+            letter-spacing: -.04em
+        }
+
+        .ea-price {
+            font: .8rem var(--body);
+            color: var(--muted)
+        }
+
+        .ea-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1
+        }
+
+        .ea-list li {
+            font: .78rem/1.5 var(--body);
+            color: var(--muted);
+            padding-left: 16px;
+            position: relative
+        }
+
+        .ea-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--cyan);
+            font: .7rem var(--mono)
+        }
+
+        .ea-req {
+            font: .65rem var(--mono);
+            color: var(--muted2);
+            padding-top: 16px;
+            border-top: 1px solid var(--line)
+        }
+
+        .ea-cta {
+            display: inline-flex;
+            align-items: center;
+            padding: 11px 22px;
+            border-radius: 8px;
+            font: 600 .78rem var(--mono);
+            border: 1px solid var(--line);
+            color: var(--white);
+            transition: all .25s;
+            align-self: flex-start
+        }
+
+        .ea-cta:hover {
+            border-color: rgba(255, 255, 255, .2);
+            background: rgba(255, 255, 255, .05)
+        }
+
+        .ea-cta.hi {
+            background: var(--green);
+            color: #050a06;
+            border-color: var(--green)
+        }
+
+        .ea-cta.hi:hover {
+            background: #4ade80;
+            box-shadow: 0 0 28px rgba(52, 211, 153, .3)
+        }
+
+        /* ── CTA ── */
+        .cta-block {
+            text-align: center;
+            padding: 80px 0;
+        }
+
+        .cta-block h2 {
+            font: 700 clamp(1.8rem, 4vw, 3rem)/1.1 var(--body);
+            letter-spacing: -.04em;
+            margin-bottom: 14px
+        }
+
+        .cta-block p {
+            font: .95rem/1.7 var(--body);
+            color: var(--muted);
+            max-width: 480px;
+            margin: 0 auto 36px
+        }
+
+        .cta-btns {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap
+        }
+
+        .social-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 24px;
+            flex-wrap: wrap
+        }
+
+        .slink {
+            font: .7rem var(--mono);
+            color: var(--muted);
+            padding: 5px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--line);
+            transition: all .2s
+        }
+
+        .slink:hover {
+            color: var(--white);
+            border-color: rgba(255, 255, 255, .2)
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--line);
+            padding: 48px 0 32px
+        }
+
+        .foot-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 32px
+        }
+
+        .foot-brand p {
+            font: .78rem var(--body);
+            color: var(--muted);
+            margin-top: 8px
+        }
+
+        .foot-logo {
+            font: 600 .82rem var(--mono);
+            letter-spacing: .06em;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .foot-logo img {
+            height: 22px;
+            width: auto
+        }
+
+        .foot-links {
+            display: flex;
+            gap: 48px;
+            flex-wrap: wrap
+        }
+
+        .foot-col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px
+        }
+
+        .foot-col-title {
+            font: 600 .58rem var(--mono);
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            color: var(--muted2);
+            margin-bottom: 2px
+        }
+
+        .foot-col a {
+            font: .78rem var(--body);
+            color: var(--muted);
+            transition: color .2s
+        }
+
+        .foot-col a:hover {
+            color: var(--white)
+        }
+
+        .foot-bottom {
+            max-width: 1100px;
+            margin: 32px auto 0;
+            padding: 20px 28px 0;
+            border-top: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            font: .68rem var(--mono);
+            color: var(--muted);
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        /* ── MOBILE MENU ── */
+        .mob-menu {
+            position: fixed;
+            inset: 0;
+            z-index: 850;
+            background: rgba(8, 9, 13, .97);
+            backdrop-filter: blur(16px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s;
+        }
+
+        .mob-menu.open {
+            opacity: 1;
+            pointer-events: all
+        }
+
+        .mob-menu a {
+            font: 600 1.35rem var(--body);
+            color: var(--muted);
+            padding: 10px 32px;
+            border-radius: 10px;
+            transition: color .2s, background .2s
+        }
+
+        .mob-menu a:hover {
+            color: var(--white);
+            background: rgba(255, 255, 255, .04)
+        }
+
+        .mob-cta {
+            margin-top: 16px;
+            background: var(--green) !important;
+            color: #050a06 !important;
+            border-radius: 9px !important
+        }
+
+        /* ── REVEAL ── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity .7s cubic-bezier(.22, 1, .36, 1), transform .7s cubic-bezier(.22, 1, .36, 1)
+        }
+
+        .reveal.vis {
+            opacity: 1;
+            transform: none
+        }
+
+        /* ── RESPONSIVE ── */
+        @media(max-width:900px) {
+            .feat-grid {
+                grid-template-columns: 1fr 1fr
+            }
+
+            .spec-grid {
+                grid-template-columns: 1fr
+            }
+
+            .ea-grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        @media(max-width:600px) {
+
+            .nav-links,
+            .nav-cta {
+                display: none
+            }
+
+            .nav-burger {
+                display: flex
+            }
+
+            .feat-grid {
+                grid-template-columns: 1fr
+            }
+
+            .road-item {
+                grid-template-columns: 1fr;
+                gap: 8px
+            }
+
+            .road-period {
+                padding-top: 0
+            }
+
+            .hero-metrics {
+                gap: 28px
+            }
+
+            .wrap {
+                padding: 0 20px
+            }
+
+            .sec {
+                padding: 72px 0
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-    <!-- ══════════════════════════════════════════════════
-     NAVIGATION
-══════════════════════════════════════════════════ -->
-    <nav class="nav" id="nav">
+    <nav id="nav">
         <div class="nav-inner">
-            <a class="nav-logo" href="#act1">
-                <img class="logo-img" src="logo-bess.png" alt="BESS Solutions" height="36" />
+            <a class="nav-logo" href="#hero">
+                <img src="logo-bess.png" alt="BESS Solutions" onerror="this.style.display='none'" />
+                BESS Solutions
             </a>
             <div class="nav-links">
-                <a href="#act1" data-i18n="nav.1">Origen</a>
-                <a href="#act2" data-i18n="nav.2">El Giro</a>
-                <a href="#act3" data-i18n="nav.3">La Red</a>
-                <a href="#act4" data-i18n="nav.4">BESSAI</a>
-                <a href="#build" data-i18n="nav.5">Stack</a>
-                <a href="#impact" data-i18n="nav.8">Impacto</a>
-                <a href="#dashboard" data-i18n="nav.6">Dashboard</a>
-                <a href="#roadmap" data-i18n="nav.7">Roadmap</a>
+                <a href="#producto">Producto</a>
+                <a href="#stack">Stack</a>
+                <a href="#roadmap">Roadmap</a>
+                <a href="#early-adopter">Early Adopter</a>
             </div>
-            <div class="nav-right">
-                <div class="lang-sw">
-                    <button class="lang-btn active" id="lang-es" onclick="setLang('es')">ES</button>
-                    <button class="lang-btn" id="lang-en" onclick="setLang('en')">EN</button>
-                    <button class="lang-btn" id="lang-pt" onclick="setLang('pt')">PT</button>
-                </div>
-                <a class="nav-cta" href="mailto:contacto@bess-solutions.cl" data-i18n="nav.cta">Solicitar demo</a>
-                <button class="nav-burger" id="nav-burger" aria-label="Menu" onclick="toggleMobileMenu()">
-                    <span></span><span></span><span></span>
-                </button>
-            </div>
+            <a class="nav-cta" href="mailto:contacto@bess-solutions.cl">Solicitar demo</a>
+            <button class="nav-burger" id="burger" aria-label="Menú" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </button>
         </div>
     </nav>
 
-    <!-- ══════════════════════════════════════════════════
-     CANVAS — Three.js (full-screen, fixed)
-══════════════════════════════════════════════════ -->
-    <canvas id="gl" aria-hidden="true"></canvas>
-
-    <!-- ══════════════════════════════════════════════════
-     MOBILE NAV OVERLAY
-══════════════════════════════════════════════════ -->
-    <div class="mob-menu" id="mob-menu" aria-hidden="true">
-        <div class="mob-menu-inner">
-            <nav class="mob-links">
-                <a href="#act1" onclick="closeMobileMenu()" data-i18n="nav.1">Origen</a>
-                <a href="#act2" onclick="closeMobileMenu()" data-i18n="nav.2">El Giro</a>
-                <a href="#act3" onclick="closeMobileMenu()" data-i18n="nav.3">La Red</a>
-                <a href="#act4" onclick="closeMobileMenu()" data-i18n="nav.4">BESSAI</a>
-                <a href="#build" onclick="closeMobileMenu()" data-i18n="nav.5">Stack</a>
-                <a href="#impact" onclick="closeMobileMenu()" data-i18n="nav.8">Impacto</a>
-                <a href="#dashboard" onclick="closeMobileMenu()" data-i18n="nav.6">Dashboard</a>
-                <a href="#roadmap" onclick="closeMobileMenu()" data-i18n="nav.7">Roadmap</a>
-            </nav>
-            <a class="mob-cta" href="mailto:contacto@bess-solutions.cl" data-i18n="nav.cta">Solicitar demo</a>
-        </div>
+    <div class="mob-menu" id="mob-menu">
+        <a href="#producto" onclick="closeMenu()">Producto</a>
+        <a href="#stack" onclick="closeMenu()">Stack técnico</a>
+        <a href="#roadmap" onclick="closeMenu()">Roadmap</a>
+        <a href="#early-adopter" onclick="closeMenu()">Early Adopter</a>
+        <a class="mob-cta" href="mailto:contacto@bess-solutions.cl" onclick="closeMenu()">Solicitar demo</a>
     </div>
 
+    <!-- ── HERO ── -->
+    <section class="hero" id="hero">
+        <div class="hero-inner">
+            <div class="hero-tag">Gateway BESS · Open Source · IEC 62443</div>
+            <h1>El cerebro<br />de tu batería<br />es <em>open‑source.</em></h1>
+            <p>BESSAI Edge — gateway industrial de código abierto para gestión, optimización y monitoreo de sistemas
+                BESS. Hecho para la red eléctrica latinoamericana.</p>
+            <div class="hero-btns">
+                <a class="btn-p" href="https://github.com/bess-solutions/open-bess-edge" target="_blank"
+                    rel="noopener">Ver en GitHub →</a>
+                <a class="btn-s" href="mailto:contacto@bess-solutions.cl">Hablar con el equipo</a>
+            </div>
 
+            <div class="term-wrap">
+                <div class="term-bar">
+                    <span class="term-dot" style="background:#ff5f57"></span>
+                    <span class="term-dot" style="background:#febc2e"></span>
+                    <span class="term-dot" style="background:#28c840"></span>
+                    <span class="term-title">bessai-edge · v2.10 · optimizer</span>
+                </div>
+                <div class="term-body" id="term-body">
+                    <div class="t-l"><span class="t-p">$</span><span class="t-cmd">bessai start --mode=optimize
+                            --site=atacama</span></div>
+                </div>
+            </div>
 
-    <!-- ══════════════════════════════════════════════════
-     ACT I — ORIGEN
-══════════════════════════════════════════════════ -->
-    <section class="act" id="act1" data-scene="earth">
-        <div class="act-sticky">
-            <div class="act-content ac1">
-                <div class="act-badge" data-i18n="a1.badge"><span class="badge-dot badge-dot-i"></span>ACT I · Origen
+            <div class="hero-metrics">
+                <div class="metric"><span class="metric-val">613</span><span class="metric-lbl">Tests · 0 failed</span>
                 </div>
-                <h1 class="act-h1 split-text" data-i18n="a1.h1">424 partes<br>por millón.</h1>
-                <h2 class="act-h2 split-text" data-i18n="a1.h2">El CO₂ más alto<br>en <span class="amber">800.000
-                        años.</span></h2>
-                <p class="act-sub split-text" data-i18n="a1.sub">Y en lugar de paralizarse, el mundo eligió <em>acelerar
-                        la mayor transformación energética</em> de la historia.</p>
-                <div class="ppm-counter" aria-live="polite">
-                    <span class="ppm-val" id="ppm-val">0</span>
-                    <span class="ppm-unit">ppm CO₂</span>
+                <div class="metric"><span class="metric-val">&lt;5ms</span><span class="metric-lbl">Latencia edge</span>
                 </div>
+                <div class="metric"><span class="metric-val">99.9%</span><span class="metric-lbl">Uptime objetivo</span>
+                </div>
+                <div class="metric"><span class="metric-val">Apache 2.0</span><span class="metric-lbl">Licencia
+                        libre</span></div>
             </div>
         </div>
     </section>
 
-    <!-- ══════════════════════════════════════════════════
-     ACT II — EL GIRO
-══════════════════════════════════════════════════ -->
-    <section class="act" id="act2" data-scene="earth">
-        <div class="act-sticky">
-            <div class="act-content ac2">
-                <div class="act-badge" data-i18n="a2.badge"><span class="badge-dot badge-dot-ii"></span>ACT II · El Giro
-                </div>
-                <h1 class="act-h1 split-text" data-i18n="a2.h1">Mientras Washington<br>vuelve al carbón…</h1>
-                <h2 class="act-h2 split-text" data-i18n="a2.h2"><span class="gold">Santiago construye<br>el
-                        futuro.</span></h2>
-                <div class="stat-stack">
-                    <div class="stat-item">
-                        <span class="stat-val" data-count="10" data-suffix="×">0×</span>
-                        <span class="stat-lbl" data-i18n="a2.s1">Solar más barata que en 2010</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-val" data-count="300" data-suffix=" GW">0 GW</span>
-                        <span class="stat-lbl" data-i18n="a2.s2">Renovables en LatAm 2023</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-val">N°1</span>
-                        <span class="stat-lbl" data-i18n="a2.s3">Chile: mejor irradiación solar del mundo</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ══════════════════════════════════════════════════
-     ACT III — LA RED
-══════════════════════════════════════════════════ -->
-    <section class="act" id="act3" data-scene="grid">
-        <div class="act-sticky">
-            <div class="act-content ac3">
-                <div class="act-badge" data-i18n="a3.badge"><span class="badge-dot badge-dot-iii"></span>ACT III · La
-                    Red</div>
-                <h1 class="act-h1 split-text" data-i18n="a3.h1">El desafío ya no<br>es generarla.</h1>
-                <h2 class="act-h2 split-text" data-i18n="a3.h2">Es <span class="cyan">almacenarla<br>e
-                        inteligentizarla.</span></h2>
-                <p class="act-sub split-text" data-i18n="a3.sub">Las baterías industriales están aquí. El software para
-                    gestionarlas — hasta ahora — no.</p>
-                <div class="grid-visual" aria-hidden="true">
-                    <div class="grid-node active" style="--x:20%;--y:15%"></div>
-                    <div class="grid-node active" style="--x:45%;--y:40%"></div>
-                    <div class="grid-node" style="--x:70%;--y:20%"></div>
-                    <div class="grid-node active" style="--x:30%;--y:70%"></div>
-                    <div class="grid-node" style="--x:80%;--y:65%"></div>
-                    <div class="grid-pulse" style="--x:45%;--y:40%"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ══════════════════════════════════════════════════
-     ACT IV — EL CEREBRO (BESSAI)
-══════════════════════════════════════════════════ -->
-    <section class="act" id="act4" data-scene="neural">
-        <div class="act-sticky">
-            <div class="act-content ac4">
-                <div class="act-badge" data-i18n="a4.badge"><span class="badge-dot badge-dot-iv"></span>ACT IV · El
-                    Cerebro</div>
-                <h1 class="act-h1 split-text" data-i18n="a4.h1">Las baterías<br>son el músculo.</h1>
-                <h2 class="act-h2 split-text" data-i18n="a4.h2"><span class="green">BESSAI Edge<br>es el cerebro.</span>
-                </h2>
-                <!-- Terminal simulada -->
-                <div class="terminal" id="terminal" aria-label="Terminal BESSAI Edge">
-                    <div class="term-bar">
-                        <span class="term-dot" style="background:#ff5f57"></span>
-                        <span class="term-dot" style="background:#febc2e"></span>
-                        <span class="term-dot" style="background:#28c840"></span>
-                        <span class="term-title">bessai-edge · optimizer v2.1</span>
-                    </div>
-                    <div class="term-body" id="term-body">
-                        <div class="term-line"><span class="term-p">$</span> <span class="term-cmd">bessai start
-                                --mode=optimize</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ══════════════════════════════════════════════════
-     ACT V — LA CONSTRUCCIÓN (STACK)
-══════════════════════════════════════════════════ -->
-    <section class="sec" id="build">
+    <!-- ── PRODUCTO ── -->
+    <section class="sec" id="producto">
         <div class="wrap">
-            <div class="sec-head reveal">
-                <div class="act-badge" data-i18n="a5.badge"><span class="badge-dot"
-                        style="background:var(--cyan)"></span>ACT V · La Construcción</div>
-                <h2 class="sec-h2" data-i18n="a5.h2">Open-source.<br>Industrial-grade.<br><span class="cyan">Hecho en
-                        LatAm.</span></h2>
-                <p class="sec-p" data-i18n="a5.sub">Software diseñado para las condiciones reales de la red eléctrica
-                    latinoamericana.</p>
-            </div>
+            <p class="sec-label">Producto</p>
+            <h2 class="sec-h2 reveal">Lo que otros no tienen.</h2>
+            <p class="sec-sub reveal">Software diseñado para las condiciones reales de la red eléctrica latinoamericana.
+                Sin compromisos.</p>
 
-            <div class="build-grid reveal">
-                <!-- Connectivity -->
-                <div class="build-col">
-                    <div class="eyebrow" data-i18n="a5.conn">Conectividad Industrial</div>
-                    <div class="ci-panel">
-                        <div class="ci-head" data-i18n="a5.connH">Protocolos soportados</div>
-                        <div class="ci-row"><span class="ci-k">Modbus RTU/TCP</span><span class="ci-v ci-ok">✓
-                                Nativo</span></div>
-                        <div class="ci-row"><span class="ci-k">IEC 61850</span><span class="ci-v ci-ok">✓ Nativo</span>
-                        </div>
-                        <div class="ci-row"><span class="ci-k">DNP3</span><span class="ci-v ci-ok">✓ Nativo</span></div>
-                        <div class="ci-row"><span class="ci-k">CAN Bus</span><span class="ci-v ci-ok">✓ Nativo</span>
-                        </div>
-                        <div class="ci-row"><span class="ci-k">MQTT IoT</span><span class="ci-v ci-ok">✓ Nativo</span>
-                        </div>
-                        <div class="ci-row"><span class="ci-k">REST/gRPC API</span><span class="ci-v ci-ok">✓
-                                Nativo</span></div>
-                    </div>
-                </div>
-
-                <!-- Optimization -->
-                <div class="build-col">
-                    <div class="eyebrow" data-i18n="a5.opt">Motor de Optimización</div>
-                    <div class="ci-panel">
-                        <div class="ci-head" data-i18n="a5.optH">Estrategias de despacho</div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.o1">Arbitraje precio</span><span
-                                class="ci-v ci-ok">MILP</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.o2">Peak-shaving</span><span
-                                class="ci-v ci-ok">DRL</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.o3">Freq. regulation</span><span
-                                class="ci-v ci-ok">MPC</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.o4">Degradación</span><span
-                                class="ci-v ci-ok">SOH-aware</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.o5">Multi-mercado</span><span
-                                class="ci-v ci-beta">Beta</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.o6">V2G</span><span
-                                class="ci-v ci-soon">2025</span></div>
-                    </div>
-                </div>
-
-                <!-- AI -->
-                <div class="build-col">
-                    <div class="eyebrow" data-i18n="a5.ai">Inteligencia Artificial</div>
-                    <div class="ci-panel">
-                        <div class="ci-head" data-i18n="a5.aiH">Modelos y capacidades</div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m1">Predicción</span><span class="ci-v"
-                                data-i18n="a5.m1v">CMg 24h-ahead</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m2">Optimización</span><span class="ci-v"
-                                data-i18n="a5.m2v">Despacho MILP</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m3">Adaptación</span><span class="ci-v"
-                                data-i18n="a5.m3v">DRL con datos SEN</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m4">Anomalías</span><span class="ci-v"
-                                data-i18n="a5.m4v">Detección en tiempo real</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m5">Degradación</span><span class="ci-v"
-                                data-i18n="a5.m5v">Vida útil predictiva</span></div>
-                        <div class="ci-row"><span class="ci-k" data-i18n="a5.m6">Latencia</span><span
-                                class="ci-v">&lt;5ms local</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <p class="reveal a5-close" data-i18n="a5.close">
-                Este software fue diseñado, arquitecturado y construido desde cero con una premisa simple:
-                <span style="color:var(--white)">que ningún equipo de ingeniería en Latinoamérica tenga que volver a
-                    construir esto.</span>
-                El problema ya está resuelto. El código ya existe. Es open source. Úsenlo.
-            </p>
-        </div>
-    </section>
-
-    <hr class="rule" />
-
-    <!-- ══════════════════════════════════════════════════
-     IMPACT — 5 Dimensiones medibles
-══════════════════════════════════════════════════ -->
-    <section class="sec" id="impact">
-        <div class="wrap">
-            <div class="sec-head reveal">
-                <div class="act-badge badge-vi" style="margin-bottom:20px" data-i18n="imp.badge">
-                    <span class="badge-dot" style="background:var(--gold)"></span>VISIÓN · Impacto
-                </div>
-                <h2 class="sec-h2" style="font-size:clamp(1.6rem,4vw,2.6rem)" data-i18n="imp.h1">
-                    Esto no es un proyecto.<br>Es una <span class="gold">misión medible.</span>
-                </h2>
-                <p class="sec-p" style="max-width:640px" data-i18n="imp.sub">
-                    Cada línea de código tiene un propósito. Cada modelo un objetivo. Y cada objetivo una métrica. Así
-                    mediremos nuestro éxito — y así rendiremos cuentas.
-                </p>
-            </div>
-
-            <div class="impact-grid reveal">
-
-                <!-- ENERGÍA -->
-                <div class="impact-card">
-                    <div class="impact-icon" style="background:rgba(34,211,238,.1);color:var(--cyan)">⚡</div>
-                    <div class="impact-dim" data-i18n="imp.e.dim">Energía</div>
-                    <div class="impact-goal" data-i18n="imp.e.goal">Optimizar el despacho de al menos 50 MWh gestionados
-                        por BESSAI en los primeros 12 meses de operación real.</div>
-                    <div class="impact-source">
-                        <span class="src-label">Contexto</span>
-                        <span>Chile tiene la mayor densidad de radiación solar del mundo en el desierto de Atacama —
-                            <strong>8–9 kWh/m²/día</strong>. El desafío ahora es gestionar los excedentes. <a
-                                class="src-link" href="https://solargis.com/maps-and-gis-data/download/chile"
-                                target="_blank" rel="noopener">Solargis, 2023 ↗</a></span>
-                    </div>
-                    <div class="impact-kpi-row">
-                        <div class="impact-kpi">
-                            <span class="impact-kpi-val" data-count="50" data-suffix=" MWh">0 MWh</span>
-                            <span class="impact-kpi-lbl" data-i18n="imp.e.k1">Capacidad gestionada</span>
-                        </div>
-                        <div class="impact-kpi">
-                            <span class="impact-kpi-val" data-count="15" data-suffix="%">0%</span>
-                            <span class="impact-kpi-lbl" data-i18n="imp.e.k2">Mejora eficiencia</span>
-                        </div>
-                    </div>
-                    <div class="impact-bar-wrap">
-                        <div class="impact-bar" style="--bar-w:12%;--bar-color:var(--cyan)"></div>
-                    </div>
-                    <div class="impact-bar-label" data-i18n="imp.e.prog">Año 1 meta · operación piloto</div>
-                </div>
-
-                <div class="impact-card">
-                    <div class="impact-icon" style="background:rgba(251,191,36,.1);color:var(--gold)">$</div>
-                    <div class="impact-dim" data-i18n="imp.$.dim">Económico</div>
-                    <div class="impact-goal" data-i18n="imp.$.goal">Demostrar un ahorro operativo documentado de USD
-                        $200K+ anuales por operador via arbitraje e IA.</div>
-                    <div class="impact-source">
-                        <span class="src-label">Contexto</span>
-                        <span>El costo marginal del SEN chileno fluctúa entre <strong>$20–$350 USD/MWh</strong>
-                            intradiariamente. El arbitraje inteligente captura este spread. <a class="src-link"
-                                href="https://www.coordinador.cl/mercados/documentos/costos-marginales/" target="_blank"
-                                rel="noopener">Coordinador SEN ↗</a></span>
-                    </div>
-                    <div class="impact-kpi-row">
-                        <div class="impact-kpi">
-                            <span class="impact-kpi-val">$200K+</span>
-                            <span class="impact-kpi-lbl" data-i18n="imp.$.k1">Ahorro anual/operador</span>
-                        </div>
-                        <div class="impact-kpi">
-                            <span class="impact-kpi-val" data-count="30" data-suffix="%">0%</span>
-                            <span class="impact-kpi-lbl" data-i18n="imp.$.k2">Revenue arbitraje</span>
-                        </div>
-                    </div>
-                    <div class="impact-bar-wrap">
-                        <div class="impact-bar" style="--bar-w:8%;--bar-color:var(--gold)"></div>
-                    </div>
-                    <div class="impact-bar-label" data-i18n="imp.$.prog">Validación con early adopters</div>
-                </div>
-
-                <div class="impact-card">
-                    <div class="impact-icon" style="background:rgba(52,211,153,.1);color:var(--green)">🌱</div>
-                    <div class="impact-dim" data-i18n="imp.env.dim">Ambiental</div>
-                    <div class="impact-goal" data-i18n="imp.env.goal">Contribuir a evitar 10.000+ toneladas de CO₂
-                        anuales al optimizar el uso de baterías e integrar renovables.</div>
-                    <div class="impact-source">
-                        <span class="src-label">Contexto</span>
-                        <span>CO₂ atmosférico: <strong>424 ppm</strong> en 2024, el nivel más alto en 800.000 años. Cada
-                            MWh desplazado de carbón evita ~0.9 ton CO₂. <a class="src-link"
-                                href="https://climate.nasa.gov/vital-signs/carbon-dioxide/" target="_blank"
-                                rel="noopener">NASA GISS ↗</a></span>
-                    </div>
-                    <div class="impact-kpi-row">
-                        <div class="impact-kpi">
-                            <span class="impact-kpi-val">10K+</span>
-                            <span class="impact-kpi-lbl" data-i18n="imp.env.k1">Ton CO₂ evitadas/año</span>
-                        </div>
-                        <div class="impact-kpi">
-                            <span class="impact-kpi-val" data-count="95" data-suffix="%">0%</span>
-                            <span class="impact-kpi-lbl" data-i18n="imp.env.k2">Integración renovable</span>
-                        </div>
-                    </div>
-                    <div class="impact-bar-wrap">
-                        <div class="impact-bar" style="--bar-w:5%;--bar-color:var(--green)"></div>
-                    </div>
-                    <div class="impact-bar-label" data-i18n="imp.env.prog">Metodología en desarrollo</div>
-                </div>
-
-                <div class="impact-card">
-                    <div class="impact-icon" style="background:rgba(167,139,250,.1);color:#a78bfa">🌐</div>
-                    <div class="impact-dim" data-i18n="imp.com.dim">Comunidad</div>
-                    <div class="impact-goal" data-i18n="imp.com.goal">La comunidad open-source de referencia para BESS
-                        en LatAm. 500+ ingenieros, 10+ universidades, 4+ países.</div>
-                    <div class="impact-source">
-                        <span class="src-label">Contexto</span>
-                        <span>LatAm instalará <strong>500+ GW de renovables</strong> para 2030. Se necesitan 80.000+
-                            ingenieros especializados en almacenamiento. <a class="src-link"
-                                href="https://www.irena.org/Publications/2023/Nov/Renewable-Power-Generation-Costs-in-2022"
-                                target="_blank" rel="noopener">IRENA 2023 ↗</a></span>
-                    </div>
-                    <div class="impact-kpi-row">
-                        <div class="impact-kpi">
-                            <span class="impact-kpi-val" data-count="500" data-suffix="+">0+</span>
-                            <span class="impact-kpi-lbl" data-i18n="imp.com.k1">Ingenieros</span>
-                        </div>
-                        <div class="impact-kpi">
-                            <span class="impact-kpi-val" data-count="4" data-suffix=" países">0 países</span>
-                            <span class="impact-kpi-lbl" data-i18n="imp.com.k2">Presencia activa</span>
-                        </div>
-                    </div>
-                    <div class="impact-bar-wrap">
-                        <div class="impact-bar" style="--bar-w:18%;--bar-color:#a78bfa"></div>
-                    </div>
-                    <div class="impact-bar-label" data-i18n="imp.com.prog">Discord abierto · GitHub activo</div>
-                </div>
-
-                <div class="impact-card">
-                    <div class="impact-icon" style="background:rgba(0,212,255,.1);color:var(--cyan)">⚙</div>
-                    <div class="impact-dim" data-i18n="imp.tec.dim">Técnico</div>
-                    <div class="impact-goal" data-i18n="imp.tec.goal">99.9% uptime en despliegues edge, latencia &lt;5ms
-                        en inferencia local, precisión &gt;92% predicción CMg.</div>
-                    <div class="impact-source">
-                        <span class="src-label">Contexto</span>
-                        <span>Los BESS industriales requieren respuesta <strong>&lt;100ms</strong> para regulación de
-                            frecuencia (ROCOF). BESSAI Edge responde en &lt;5ms — 20× más rápido. <a class="src-link"
-                                href="https://www.iea.org/reports/grid-scale-storage" target="_blank" rel="noopener">IEA
-                                Grid Storage ↗</a></span>
-                    </div>
-                    <div class="impact-kpi-row">
-                        <div class="impact-kpi">
-                            <span class="impact-kpi-val">99.9%</span>
-                            <span class="impact-kpi-lbl" data-i18n="imp.tec.k1">Uptime objetivo</span>
-                        </div>
-                        <div class="impact-kpi">
-                            <span class="impact-kpi-val">&lt;5ms</span>
-                            <span class="impact-kpi-lbl" data-i18n="imp.tec.k2">Latencia inferencia</span>
-                        </div>
-                    </div>
-                    <div class="impact-bar-wrap">
-                        <div class="impact-bar" style="--bar-w:45%;--bar-color:var(--cyan)"></div>
-                    </div>
-                    <div class="impact-bar-label" data-i18n="imp.tec.prog">Benchmarks internos completados</div>
-                </div>
-            </div>
-
-            <div class="impact-pledge reveal">
-                <div class="impact-pledge-icon">📊</div>
-                <p data-i18n="imp.pledge">Publicaremos un <strong>reporte de impacto trimestral</strong> con datos
-                    reales verificables. Sin marketing. Sin inflación. Métricas honestas de un proyecto que cree en la
-                    transparencia radical.</p>
-            </div>
-        </div>
-    </section>
-
-    <hr class="rule" />
-
-    <!-- ══════════════════════════════════════════════════
-     DASHBOARD LIVE
-══════════════════════════════════════════════════ -->
-    <section class="sec" id="dashboard">
-        <div class="wrap">
-            <div class="sec-head reveal">
-                <div class="eyebrow" data-i18n="dash.eye">Telemetría en tiempo real</div>
-                <h2 class="sec-h2" data-i18n="dash.h2">Lo que ve el operador</h2>
-                <p class="sec-p" data-i18n="dash.sub">Simulación de la interfaz operativa de BESSAI Edge. Datos
-                    actualizados cada 2 segundos.</p>
-            </div>
-
-            <div class="dash-shell reveal">
-                <div class="dash-topbar">
-                    <div class="dash-site">
-                        <span class="site-dot"></span>
-                        <span data-i18n="dash.site">Sitio: Atacama Solar Storage · 2 MWh</span>
-                    </div>
-                    <div class="dash-statuses">
-                        <span class="dash-status ok" data-i18n="dash.opt">Optimizador</span>
-                        <span class="dash-status ok" data-i18n="dash.bms">BMS Link</span>
-                        <span class="dash-status ok" data-i18n="dash.sec">Seguridad</span>
-                    </div>
-                </div>
-
-                <div class="kpi-row">
-                    <div class="kpi-card">
-                        <div class="kpi-label">SoC</div>
-                        <div class="kpi-val" id="kpi-soc">—</div>
-                        <div class="kpi-delta" id="kpi-soc-d">—</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label" data-i18n="dash.pw">Potencia Activa</div>
-                        <div class="kpi-val" id="kpi-pw">—</div>
-                        <div class="kpi-delta" id="kpi-pw-d">—</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label" data-i18n="dash.cmg">Costo Marginal</div>
-                        <div class="kpi-val" id="kpi-cmg">—</div>
-                        <div class="kpi-delta kpi-delta-sub">CLP/MWh</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label" data-i18n="dash.lat">Latencia Edge</div>
-                        <div class="kpi-val" id="kpi-lat">—</div>
-                        <div class="kpi-delta kpi-delta-sub" data-i18n="dash.latK">Latencia</div>
-                    </div>
-                </div>
-
-                <div class="chart-wrap">
-                    <div class="chart-label" data-i18n="dash.chart">SoC y Potencia · últimos 20 ciclos</div>
-                    <canvas id="dash-chart" height="120" aria-label="Gráfico SoC y Potencia"></canvas>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <hr class="rule" />
-
-    <!-- ══════════════════════════════════════════════════
-     FEATURE CARDS
-══════════════════════════════════════════════════ -->
-    <section class="sec" id="features">
-        <div class="wrap">
-            <div class="sec-head reveal">
-                <div class="eyebrow" data-i18n="feat.eye">Por qué BESSAI</div>
-                <h2 class="sec-h2" data-i18n="feat.h2">Lo que otros no tienen</h2>
-            </div>
-            <div class="feat-grid reveal">
-                <div class="feat-card">
+            <div class="feat-grid">
+                <div class="feat-card reveal">
                     <div class="feat-num">01</div>
-                    <div class="feat-title" data-i18n="feat.1t">Edge-First</div>
-                    <div class="feat-desc" data-i18n="feat.1d">Corre en hardware embebido. Sin cloud obligatorio. Sin
-                        latencia de red. Sin single point of failure.</div>
+                    <div class="feat-icon">⚡</div>
+                    <div class="feat-title">Edge-First</div>
+                    <div class="feat-desc">Corre en hardware embebido. Sin cloud obligatorio. Sin latencia de red. Sin
+                        single point of failure. Raspberry Pi 4/5, amd64, arm64.</div>
                 </div>
-                <div class="feat-card">
+                <div class="feat-card reveal">
                     <div class="feat-num">02</div>
-                    <div class="feat-title" data-i18n="feat.2t">IA Local</div>
-                    <div class="feat-desc" data-i18n="feat.2d">Predicción de costos marginales, optimización MILP y DRL
-                        entrenados con datos reales del SEN chileno.</div>
+                    <div class="feat-icon">🤖</div>
+                    <div class="feat-title">IA Local</div>
+                    <div class="feat-desc">Predicción de costos marginales (CMg) 24h-ahead. Optimización MILP. DRL
+                        entrenado con datos reales del SEN chileno. Inferencia ONNX offline.</div>
                 </div>
-                <div class="feat-card">
+                <div class="feat-card reveal">
                     <div class="feat-num">03</div>
-                    <div class="feat-title" data-i18n="feat.3t">Open Source</div>
-                    <div class="feat-desc" data-i18n="feat.3d">Apache 2.0. Sin royalties, sin lock-in, sin black boxes.
-                        El código que gestiona tu batería es tuyo para auditar.</div>
+                    <div class="feat-icon">🔓</div>
+                    <div class="feat-title">Open Source</div>
+                    <div class="feat-desc">Apache 2.0. Sin royalties. Sin vendor lock-in. Sin black boxes. El código que
+                        gestiona tu batería es tuyo para auditar y modificar.</div>
                 </div>
-                <div class="feat-card">
+                <div class="feat-card reveal">
                     <div class="feat-num">04</div>
-                    <div class="feat-title" data-i18n="feat.4t">Industrial-Grade</div>
-                    <div class="feat-desc" data-i18n="feat.4d">IEC 62443 security baseline. Comunicación cifrada.
-                        Watchdog de hardware. Diseñado para 24/7 sin supervisión.</div>
+                    <div class="feat-icon">🏭</div>
+                    <div class="feat-title">Industrial-Grade</div>
+                    <div class="feat-desc">IEC 62443 SL-1 mapeado. IEEE 2030.5 / SEP 2.0. NTSyCS CEN Chile. Comunicación
+                        mTLS cifrada. Self-healing watchdog autónomo.</div>
                 </div>
-                <div class="feat-card">
+                <div class="feat-card reveal">
                     <div class="feat-num">05</div>
-                    <div class="feat-title" data-i18n="feat.5t">Multi-Química</div>
-                    <div class="feat-desc" data-i18n="feat.5d">LFP, NMC, NCA, VRLA. Si tiene Modbus o CAN, BESSAI lo
-                        habla. Agnóstico de hardware por diseño.</div>
+                    <div class="feat-icon">🔌</div>
+                    <div class="feat-title">Multi-Protocolo</div>
+                    <div class="feat-desc">Modbus RTU/TCP, IEC 61850, DNP3, CAN Bus, MQTT, REST/gRPC. Perfiles listos:
+                        Huawei SUN2000, SMA, Victron Cerbo, Fronius.</div>
                 </div>
-                <div class="feat-card">
+                <div class="feat-card reveal">
                     <div class="feat-num">06</div>
-                    <div class="feat-title" data-i18n="feat.6t">LatAm-Native</div>
-                    <div class="feat-desc" data-i18n="feat.6d">Integración nativa con CEN, ANDES, API Coordinador Chile.
-                        Entiende los mercados donde opera.</div>
+                    <div class="feat-icon">🇨🇱</div>
+                    <div class="feat-title">LatAm-Native</div>
+                    <div class="feat-desc">Integración nativa con API Coordinador CEN. Datos CMg reales Nodo Maitencillo
+                        220kV. Entiende los mercados donde opera.</div>
                 </div>
             </div>
         </div>
     </section>
 
-    <hr class="rule" />
+    <!-- ── STACK ── -->
+    <section class="sec" id="stack">
+        <div class="wrap">
+            <p class="sec-label">Stack Técnico</p>
+            <h2 class="sec-h2 reveal">Especificaciones que importan.</h2>
+            <p class="sec-sub reveal">Cada componente elegido por razones técnicas concretas. Sin magia, sin abstracción
+                innecesaria.</p>
 
-    <!-- ══════════════════════════════════════════════════
-     ROADMAP
-══════════════════════════════════════════════════ -->
+            <div class="spec-grid reveal">
+                <div class="spec-block">
+                    <div class="spec-head">Conectividad Industrial</div>
+                    <div class="spec-row"><span class="spec-k">Modbus RTU/TCP</span><span class="spec-v spec-ok">✓
+                            Nativo</span></div>
+                    <div class="spec-row"><span class="spec-k">IEC 61850</span><span class="spec-v spec-ok">✓
+                            Nativo</span></div>
+                    <div class="spec-row"><span class="spec-k">DNP3</span><span class="spec-v spec-ok">✓ Nativo</span>
+                    </div>
+                    <div class="spec-row"><span class="spec-k">IEEE 2030.5 / SEP 2.0</span><span
+                            class="spec-v spec-ok">✓ BEP-0100</span></div>
+                    <div class="spec-row"><span class="spec-k">MQTT (HA · AWS IoT · Azure)</span><span
+                            class="spec-v spec-ok">✓ Nativo</span></div>
+                    <div class="spec-row"><span class="spec-k">CAN Bus</span><span class="spec-v spec-ok">✓
+                            Nativo</span></div>
+                </div>
+                <div class="spec-block">
+                    <div class="spec-head">Motor de Inteligencia</div>
+                    <div class="spec-row"><span class="spec-k">Arbitraje precio (MILP)</span><span
+                            class="spec-v spec-ok">✓ Activo</span></div>
+                    <div class="spec-row"><span class="spec-k">DRL PPO (Ray RLlib)</span><span class="spec-v spec-ok">✓
+                            BEP-0200</span></div>
+                    <div class="spec-row"><span class="spec-k">Predicción CMg 24h</span><span class="spec-v spec-ok">✓
+                            MAPE 4.2%</span></div>
+                    <div class="spec-row"><span class="spec-k">Detección anomalías AI-IDS</span><span
+                            class="spec-v spec-ok">✓ IsolationForest</span></div>
+                    <div class="spec-row"><span class="spec-k">Peak-shaving</span><span class="spec-v spec-ok">✓
+                            Activo</span></div>
+                    <div class="spec-row"><span class="spec-k">V2G</span><span class="spec-v spec-b">2026</span></div>
+                </div>
+                <div class="spec-block">
+                    <div class="spec-head">Observabilidad</div>
+                    <div class="spec-row"><span class="spec-k">Prometheus Metrics</span><span class="spec-v spec-ok">22
+                            métricas</span></div>
+                    <div class="spec-row"><span class="spec-k">Grafana Dashboards</span><span class="spec-v spec-ok">✓
+                            Auto-provisioned</span></div>
+                    <div class="spec-row"><span class="spec-k">OpenTelemetry / OTLP</span><span class="spec-v spec-ok">✓
+                            Cloud Trace</span></div>
+                    <div class="spec-row"><span class="spec-k">Health Check HTTP</span><span class="spec-v spec-ok">GET
+                            /health</span></div>
+                    <div class="spec-row"><span class="spec-k">Structured logs (structlog)</span><span
+                            class="spec-v spec-ok">✓ JSON</span></div>
+                </div>
+                <div class="spec-block">
+                    <div class="spec-head">Cumplimiento y Seguridad</div>
+                    <div class="spec-row"><span class="spec-k">IEC 62443 SL-1</span><span class="spec-v spec-ok">✓
+                            Mapeado</span></div>
+                    <div class="spec-row"><span class="spec-k">NTSyCS CEN Chile</span><span class="spec-v spec-ok">✓
+                            Compliant</span></div>
+                    <div class="spec-row"><span class="spec-k">OpenSSF Best Practices</span><span
+                            class="spec-v spec-ok">✓ Passing</span></div>
+                    <div class="spec-row"><span class="spec-k">mTLS + TLS 1.2+</span><span class="spec-v spec-ok">✓ All
+                            comms</span></div>
+                    <div class="spec-row"><span class="spec-k">SPDX headers</span><span class="spec-v spec-ok">✓ Todos
+                            los archivos</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── ROADMAP ── -->
     <section class="sec" id="roadmap">
         <div class="wrap">
-            <div class="sec-head reveal">
-                <div class="eyebrow" data-i18n="rm.eye">Roadmap</div>
-                <h2 class="sec-h2" data-i18n="rm.h2">Construcción abierta y transparente</h2>
-            </div>
-            <div class="road-track reveal">
-                <div class="road-phase done">
-                    <div class="road-marker done-m"><span>✓</span></div>
-                    <div class="road-body">
-                        <div class="road-phase-period">Q1 2024 – Q4 2024</div>
-                        <div class="road-phase-name" data-i18n="rm.p1t">Fase 1 · Fundación</div>
-                        <div class="road-phase-desc" data-i18n="rm.p1b">Conectividad industrial, motor de optimización
-                            base, seguridad certificada, arquitectura edge</div>
-                        <div class="road-phase-tags">
-                            <span class="road-tag">Modbus/DNP3</span>
-                            <span class="road-tag">IEC 62443</span>
-                            <span class="road-tag">613 tests</span>
-                            <span class="road-tag road-tag-done">✓ Completado</span>
+            <p class="sec-label">Roadmap</p>
+            <h2 class="sec-h2 reveal">Construcción abierta y transparente.</h2>
+            <p class="sec-sub reveal">Cada fase tiene objetivos medibles. Sin roadmaps de marketing.</p>
+
+            <div class="road-list reveal">
+                <div class="road-item">
+                    <span class="road-period">Q1 – Q4 2024</span>
+                    <div class="road-content">
+                        <div class="road-status done">✓ Completado</div>
+                        <div class="road-title">Fase 1 · Fundación</div>
+                        <div class="road-desc">Conectividad industrial completa, motor de optimización base,
+                            arquitectura edge, seguridad certificada.</div>
+                        <div class="road-tags">
+                            <span class="rtag">Modbus/DNP3</span><span class="rtag">IEC 62443</span><span
+                                class="rtag">613 tests</span><span class="rtag">Docker multi-arch</span>
                         </div>
                     </div>
                 </div>
-                <div class="road-phase active">
-                    <div class="road-marker active-m"><span class="pulse-ring"></span></div>
-                    <div class="road-body">
-                        <div class="road-phase-period">Q1 2025 – Q3 2025</div>
-                        <div class="road-phase-name" data-i18n="rm.p2t">Fase 2 · Inteligencia</div>
-                        <div class="road-phase-desc" data-i18n="rm.p2b">Stack IA completo, predicción CMg, telemetría en
-                            tiempo real, entrenamiento datos SEN</div>
-                        <div class="road-phase-tags">
-                            <span class="road-tag">MILP Optimizer</span>
-                            <span class="road-tag">DRL PPO</span>
-                            <span class="road-tag">CMg 24h-ahead</span>
-                            <span class="road-tag road-tag-active">◉ En progreso</span>
+                <div class="road-item">
+                    <span class="road-period">Q1 – Q3 2025</span>
+                    <div class="road-content">
+                        <div class="road-status active">◉ En progreso</div>
+                        <div class="road-title">Fase 2 · Inteligencia</div>
+                        <div class="road-desc">Stack IA completo, predicción CMg con datos reales SEN, telemetría en
+                            tiempo real, entrenamiento DRL con datos CEN.</div>
+                        <div class="road-tags">
+                            <span class="rtag">MILP Optimizer</span><span class="rtag">DRL PPO</span><span
+                                class="rtag">CMg 24h-ahead</span><span class="rtag">ONNX Edge</span>
                         </div>
                     </div>
                 </div>
-                <div class="road-phase">
-                    <div class="road-marker"></div>
-                    <div class="road-body">
-                        <div class="road-phase-period">Q4 2025 – Q2 2026</div>
-                        <div class="road-phase-name" data-i18n="rm.p3t">Fase 3 · Flota</div>
-                        <div class="road-phase-desc" data-i18n="rm.p3b">Orquestación multi-sitio, respuesta demanda,
-                            interoperabilidad, early adopters en terreno</div>
-                        <div class="road-phase-tags">
-                            <span class="road-tag road-tag-future">Multi-site</span>
-                            <span class="road-tag road-tag-future">Early Adopters</span>
-                            <span class="road-tag road-tag-future">V2G</span>
+                <div class="road-item">
+                    <span class="road-period">Q4 2025 – Q2 2026</span>
+                    <div class="road-content">
+                        <div class="road-status next">Próxima</div>
+                        <div class="road-title">Fase 3 · Flota</div>
+                        <div class="road-desc">Orquestación multi-sitio, respuesta de demanda automática,
+                            interoperabilidad certificada, primeros early adopters en terreno.</div>
+                        <div class="road-tags">
+                            <span class="rtag">Multi-site</span><span class="rtag">Early Adopters</span><span
+                                class="rtag">V2G</span><span class="rtag">VPP</span>
                         </div>
                     </div>
                 </div>
-                <div class="road-phase">
-                    <div class="road-marker"></div>
-                    <div class="road-body">
-                        <div class="road-phase-period">Q3 2026 →</div>
-                        <div class="road-phase-name" data-i18n="rm.p4t">Fase 4 · Ecosistema</div>
-                        <div class="road-phase-desc" data-i18n="rm.p4b">Marketplace soluciones, programa certificación,
-                            expansión continental</div>
-                        <div class="road-phase-tags">
-                            <span class="road-tag road-tag-future">Marketplace</span>
-                            <span class="road-tag road-tag-future">Certificación</span>
-                            <span class="road-tag road-tag-future">LatAm</span>
+                <div class="road-item">
+                    <span class="road-period">Q3 2026 →</span>
+                    <div class="road-content">
+                        <div class="road-status next">Futura</div>
+                        <div class="road-title">Fase 4 · Ecosistema</div>
+                        <div class="road-desc">Marketplace de soluciones, programa de certificación de hardware,
+                            expansión continental, Data Lakehouse + P2P Trading.</div>
+                        <div class="road-tags">
+                            <span class="rtag">Marketplace</span><span class="rtag">Certificación</span><span
+                                class="rtag">P2P Trading</span><span class="rtag">LatAm</span>
                         </div>
                     </div>
                 </div>
@@ -629,156 +1202,177 @@
         </div>
     </section>
 
-    <hr class="rule" />
-
-    <!-- ══════════════════════════════════════════════════
-     EARLY ADOPTER
-══════════════════════════════════════════════════ -->
+    <!-- ── EARLY ADOPTER ── -->
     <section class="sec" id="early-adopter">
         <div class="wrap">
-            <div class="sec-head reveal">
-                <div class="eyebrow" data-i18n="ea.eye">Programa Early Adopter 2026</div>
-                <h2 class="sec-h2" data-i18n="ea.h2">Sea parte de los primeros.<br>Las condiciones no se repiten.</h2>
-                <p class="sec-p" data-i18n="ea.sub">Cupos limitados para proyectos BESS en Chile y Latinoamérica. A
-                    cambio: datos reales, feedback técnico, y co-autoría en publicaciones.</p>
-            </div>
+            <p class="sec-label">Programa Early Adopter 2026</p>
+            <h2 class="sec-h2 reveal">Sea parte de los primeros.<br />Las condiciones no se repiten.</h2>
+            <p class="sec-sub reveal">Cupos limitados para proyectos BESS en Chile y Latinoamérica. A cambio: datos
+                reales, feedback técnico, y co-autoría en publicaciones.</p>
 
-            <div class="ea-counter reveal">
-                <div class="ea-count-item">
-                    <span class="ea-count-val" data-i18n="ea.c1">5 cupos Pioneer</span>
-                    <span class="ea-count-sub">Implementación sin costo</span>
-                </div>
-                <div class="ea-count-sep"></div>
-                <div class="ea-count-item">
-                    <span class="ea-count-val" data-i18n="ea.c2">3 cupos Partner</span>
-                    <span class="ea-count-sub">Co-desarrollo técnico</span>
-                </div>
-                <div class="ea-count-sep"></div>
-                <div class="ea-count-item">
-                    <span class="ea-count-val" data-i18n="ea.c3">Q2 2026</span>
-                    <span class="ea-count-sub">Inicio despliegues</span>
-                </div>
-            </div>
-
-            <div class="ea-plans reveal">
-                <div class="ea-plan">
-                    <div class="ea-plan-badge" data-i18n="ea.p1name">Pioneer</div>
-                    <div class="ea-plan-price" data-i18n="ea.p1price">Sin costo · soporte técnico dedicado</div>
-                    <ul class="ea-plan-list">
-                        <li data-i18n="ea.p1b1">Licencia Apache 2.0 — sin royalties, para siempre</li>
-                        <li data-i18n="ea.p1b2">Instalación asistida en sitio o remota</li>
-                        <li data-i18n="ea.p1b3">Co-autoría en publicaciones técnicas</li>
-                        <li data-i18n="ea.p1b4">Acceso anticipado a nuevas funcionalidades</li>
-                        <li data-i18n="ea.p1b5">Integración prioritaria de nuevo hardware</li>
-                        <li data-i18n="ea.p1b6">Reporte mensual performance y ahorro estimado</li>
-                        <li data-i18n="ea.p1b7">Canal directo con equipo de ingeniería</li>
+            <div class="ea-grid reveal">
+                <div class="ea-card">
+                    <div>
+                        <div class="ea-tier">Tier 1</div>
+                        <div class="ea-name">Pioneer</div>
+                        <div class="ea-price">Sin costo · soporte técnico dedicado</div>
+                    </div>
+                    <ul class="ea-list">
+                        <li>Licencia Apache 2.0 — sin royalties, para siempre</li>
+                        <li>Instalación asistida en sitio o remota</li>
+                        <li>Co-autoría en publicaciones técnicas</li>
+                        <li>Acceso anticipado a nuevas funcionalidades</li>
+                        <li>Integración prioritaria de nuevo hardware</li>
+                        <li>Canal directo con el equipo de ingeniería</li>
                     </ul>
-                    <div class="ea-req" data-i18n="ea.p1req">Requisito: BESS 100 kWh+ operativo o en comisionamiento
-                        2026</div>
-                    <a class="ea-cta" href="mailto:pioneer@bess-solutions.cl?subject=Aplicaci%C3%B3n%20Pioneer%20BESSAI"
-                        data-i18n="ea.p1cta">Aplicar al programa Pioneer &rarr;</a>
+                    <div class="ea-req">Requisito: BESS 100 kWh+ operativo o en comisionamiento 2026 · 5 cupos</div>
+                    <a class="ea-cta" href="mailto:pioneer@bess-solutions.cl?subject=Aplicación Pioneer BESSAI">Aplicar
+                        al programa Pioneer →</a>
                 </div>
-
-                <div class="ea-plan ea-plan-hi">
-                    <div class="ea-plan-badge hi" data-i18n="ea.p2name">Strategic Partner</div>
-                    <div class="ea-plan-price" data-i18n="ea.p2price">Co-inversión · revenue sharing</div>
-                    <ul class="ea-plan-list">
-                        <li data-i18n="ea.p2b1">Todo lo de Pioneer incluido</li>
-                        <li data-i18n="ea.p2b2">Co-desarrollo de funcionalidades propias</li>
-                        <li data-i18n="ea.p2b3">Integración con sistemas SCADA existentes</li>
-                        <li data-i18n="ea.p2b4">Modelo de revenue sharing en ahorros</li>
-                        <li data-i18n="ea.p2b5">SLA de respuesta &lt;4h 24/7</li>
-                        <li data-i18n="ea.p2b6">Presencia en roadmap público</li>
-                        <li data-i18n="ea.p2b7">Board advisor seat opcional</li>
+                <div class="ea-card hi">
+                    <div>
+                        <div class="ea-tier">Tier 2</div>
+                        <div class="ea-name">Strategic Partner</div>
+                        <div class="ea-price">Co-inversión · revenue sharing</div>
+                    </div>
+                    <ul class="ea-list">
+                        <li>Todo lo de Pioneer incluido</li>
+                        <li>Co-desarrollo de funcionalidades propias</li>
+                        <li>Integración con sistemas SCADA existentes</li>
+                        <li>Modelo de revenue sharing en ahorros</li>
+                        <li>SLA de respuesta &lt;4h 24/7</li>
+                        <li>Presencia en roadmap público</li>
+                        <li>Board advisor seat opcional</li>
                     </ul>
-                    <div class="ea-req" data-i18n="ea.p2req">Requisito: BESS 500 kWh+ o flota de proyectos</div>
-                    <a class="ea-cta ea-cta-hi"
-                        href="mailto:partner@bess-solutions.cl?subject=Propuesta%20Strategic%20Partner"
-                        data-i18n="ea.p2cta">Hablar con el equipo fundador &rarr;</a>
+                    <div class="ea-req">Requisito: BESS 500 kWh+ o flota de proyectos · 3 cupos</div>
+                    <a class="ea-cta hi"
+                        href="mailto:partner@bess-solutions.cl?subject=Propuesta Strategic Partner">Hablar con el equipo
+                        fundador →</a>
                 </div>
             </div>
         </div>
     </section>
 
-    <hr class="rule" />
-
-    <!-- ══════════════════════════════════════════════════
-     FINAL CTA
-══════════════════════════════════════════════════ -->
-    <section class="sec" id="cta-final">
+    <!-- ── CTA ── -->
+    <section class="sec">
         <div class="wrap">
             <div class="cta-block reveal">
-                <div class="cta-glow" aria-hidden="true"></div>
-                <div class="eyebrow" data-i18n="cta.eye">Open Source · Gratis · Para siempre</div>
-                <h2 class="cta-h2" data-i18n="cta.h2">El futuro energético de<br>Latinoamérica se construye<br><span
-                        class="cyan">en código abierto.</span></h2>
-                <p class="cta-sub" data-i18n="cta.sub">Únete a la comunidad que está construyendo el software de gestión
-                    de baterías más avanzado de la región.</p>
+                <h2>El futuro energético de LatAm<br />se construye en código abierto.</h2>
+                <p>Únete a la comunidad que está construyendo el software de gestión de baterías más avanzado de la
+                    región.</p>
                 <div class="cta-btns">
-                    <a class="btn-primary" href="https://github.com/bess-solutions/open-bess-edge" target="_blank"
-                        rel="noopener" data-i18n="cta.gh">Ver en GitHub</a>
-                    <a class="btn-secondary" href="mailto:comunidad@bess-solutions.cl" data-i18n="cta.contact">Contactar
-                        al equipo</a>
+                    <a class="btn-p" href="https://github.com/bess-solutions/open-bess-edge" target="_blank"
+                        rel="noopener">Ver en GitHub</a>
+                    <a class="btn-s" href="mailto:contacto@bess-solutions.cl">Contactar al equipo</a>
                 </div>
                 <div class="social-row">
-                    <a class="social-link" href="https://github.com/bess-solutions" target="_blank"
-                        rel="noopener">GitHub</a>
-                    <a class="social-link" href="https://linkedin.com/company/bess-solutions" target="_blank"
+                    <a class="slink" href="https://discord.gg/bess-solutions" target="_blank" rel="noopener">Discord</a>
+                    <a class="slink" href="https://linkedin.com/company/bess-solutions" target="_blank"
                         rel="noopener">LinkedIn</a>
-                    <a class="social-link" href="https://discord.gg/bess-solutions" target="_blank"
-                        rel="noopener">Discord</a>
-                    <a class="social-link" href="https://x.com/bess_solutions" target="_blank" rel="noopener">X /
-                        Twitter</a>
-                    <a class="social-link" href="https://youtube.com/@bess-solutions" target="_blank"
+                    <a class="slink" href="https://x.com/bess_solutions" target="_blank" rel="noopener">X / Twitter</a>
+                    <a class="slink" href="https://youtube.com/@bess-solutions" target="_blank"
                         rel="noopener">YouTube</a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ══════════════════════════════════════════════════
-     FOOTER
-══════════════════════════════════════════════════ -->
-    <footer class="footer">
-        <div class="wrap">
-            <div class="foot-top">
-                <div class="foot-brand">
-                    <img class="logo-img" src="logo-bess.png" alt="BESS Solutions" height="22" />
-                    <p class="foot-tagline" data-i18n="foot.tag">Inteligencia para el almacenamiento de energía.</p>
+    <!-- ── FOOTER ── -->
+    <footer>
+        <div class="foot-inner">
+            <div class="foot-brand">
+                <div class="foot-logo">
+                    <img src="logo-bess.png" alt="BESS Solutions" onerror="this.style.display='none'" />
+                    BESS Solutions
                 </div>
-                <div class="foot-links-group">
-                    <div class="foot-col">
-                        <div class="foot-col-title" data-i18n="foot.proj">Proyecto</div>
-                        <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank"
-                            rel="noopener">GitHub</a>
-                        <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/CHANGELOG.md"
-                            target="_blank" rel="noopener" data-i18n="foot.ch">Changelog</a>
-                        <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/LICENSE" target="_blank"
-                            rel="noopener" data-i18n="foot.lic">Licencia</a>
-                    </div>
-                    <div class="foot-col">
-                        <div class="foot-col-title" data-i18n="foot.comm">Comunidad</div>
-                        <a href="https://discord.gg/bess-solutions" target="_blank" rel="noopener">Discord</a>
-                        <a href="https://linkedin.com/company/bess-solutions" target="_blank"
-                            rel="noopener">LinkedIn</a>
-                        <a href="https://x.com/bess_solutions" target="_blank" rel="noopener">X / Twitter</a>
-                        <a href="https://youtube.com/@bess-solutions" target="_blank" rel="noopener">YouTube</a>
-                    </div>
-                    <div class="foot-col">
-                        <div class="foot-col-title" data-i18n="foot.contact">Contacto</div>
-                        <a href="mailto:contacto@bess-solutions.cl">contacto@bess-solutions.cl</a>
-                        <a href="mailto:pioneer@bess-solutions.cl">pioneer@bess-solutions.cl</a>
-                    </div>
+                <p>Inteligencia para el almacenamiento de energía.</p>
+            </div>
+            <div class="foot-links">
+                <div class="foot-col">
+                    <div class="foot-col-title">Proyecto</div>
+                    <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank" rel="noopener">GitHub</a>
+                    <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/CHANGELOG.md" target="_blank"
+                        rel="noopener">Changelog</a>
+                    <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/LICENSE" target="_blank"
+                        rel="noopener">Licencia</a>
+                    <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/SECURITY.md" target="_blank"
+                        rel="noopener">Seguridad</a>
+                </div>
+                <div class="foot-col">
+                    <div class="foot-col-title">Comunidad</div>
+                    <a href="https://discord.gg/bess-solutions" target="_blank" rel="noopener">Discord</a>
+                    <a href="https://linkedin.com/company/bess-solutions" target="_blank" rel="noopener">LinkedIn</a>
+                    <a href="https://github.com/bess-solutions/open-bess-edge/discussions" target="_blank"
+                        rel="noopener">Discussions</a>
+                </div>
+                <div class="foot-col">
+                    <div class="foot-col-title">Contacto</div>
+                    <a href="mailto:contacto@bess-solutions.cl">contacto@bess-solutions.cl</a>
+                    <a href="mailto:pioneer@bess-solutions.cl">pioneer@bess-solutions.cl</a>
                 </div>
             </div>
-            <div class="foot-bottom">
-                <span>&copy; 2026 BESS Solutions SpA · Chile</span>
-                <span data-i18n="foot.oss">Software libre bajo Apache 2.0</span>
-            </div>
+        </div>
+        <div class="foot-bottom">
+            <span>© 2026 BESS Solutions SpA · Chile</span>
+            <span>Software libre bajo Apache 2.0</span>
         </div>
     </footer>
 
-    <script src="main.js" defer></script>
+    <script>
+        // ── NAV SCROLL ──
+        const nav = document.getElementById('nav');
+        window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 20), { passive: true });
+
+        // ── MOBILE MENU ──
+        function toggleMenu() {
+            const m = document.getElementById('mob-menu');
+            const isOpen = m.classList.toggle('open');
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+        }
+        function closeMenu() {
+            document.getElementById('mob-menu').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        window.addEventListener('scroll', () => closeMenu(), { passive: true });
+
+        // ── REVEAL ──
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); io.unobserve(e.target); } });
+        }, { threshold: .08 });
+        document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+        // ── TERMINAL ──
+        const lines = [
+            { t: 'cmd', text: 'bessai start --mode=optimize --site=atacama' },
+            { t: 'info', text: '→ Loading config edge.toml...', d: 500 },
+            { t: 'ok', text: '✓ BMS connected · Modbus RTU /dev/ttyUSB0', d: 900 },
+            { t: 'ok', text: '✓ Grid API · SEN Coordinador · OK', d: 1300 },
+            { t: 'info', text: '→ Fetching CMg forecast 24h...', d: 1700 },
+            { t: 'ok', text: '✓ Modelo ONNX · MAPE 4.2%', d: 2200 },
+            { t: 'info', text: '→ MILP optimizer running...', d: 2600 },
+            { t: 'ok', text: '✓ Dispatch plan ready · 18 cycles', d: 3100 },
+            { t: 'warn', text: '⚡ Peak window 18:00–22:00 · discharge', d: 3500 },
+            { t: 'ok', text: '✓ Latency 3.1ms · SoC 87.4% · Online', d: 3900 },
+        ];
+        const tbody = document.getElementById('term-body');
+        tbody.innerHTML = '';
+        lines.forEach(({ t, text, d = 0 }) => {
+            setTimeout(() => {
+                const div = document.createElement('div');
+                div.className = 't-l';
+                if (t === 'cmd') div.innerHTML = `<span class="t-p">$</span><span class="t-cmd">${text}</span>`;
+                else div.innerHTML = `<span class="t-${t}">${text}</span>`;
+                tbody.appendChild(div);
+                tbody.scrollTop = tbody.scrollHeight;
+            }, d);
+        });
+        setTimeout(() => {
+            const c = document.createElement('div');
+            c.className = 't-l';
+            c.innerHTML = `<span class="t-p">$</span><span class="t-cursor"></span>`;
+            tbody.appendChild(c);
+        }, 4500);
+    </script>
 </body>
 
 </html>
