@@ -1,0 +1,184 @@
+name: BESSAIEvolve — Autonomous Policy Evolution Loop
+
+# BEP-0303: Runs every Monday at 00:00 UTC
+# AlphaEvolve-inspired: generates, evaluates, and selects better arbitrage
+# policies automatically. Opens a PR if a promotion candidate is found.
+
+on:
+  schedule:
+    - cron: "0 0 * * 1"   # Every Monday 00:00 UTC
+  workflow_dispatch:        # Allow manual trigger for testing
+    inputs:
+      generations:
+        description: "Number of evolutionary generations"
+        default: "5"
+        required: false
+      population:
+        description: "Population size per generation"
+        default: "10"
+        required: false
+      eval_days:
+        description: "Days of CMg data for fitness evaluation"
+        default: "30"
+        required: false
+      dry_run:
+        description: "Dry run — skip PR creation"
+        default: "false"
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  evolve:
+    name: BESSAIEvolve Generation
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # BESSAIEvolve only needs gymnasium + numpy (no Ray, no ONNX)
+          pip install gymnasium numpy structlog
+
+      - name: Run BESSAIEvolve
+        id: evolve
+        run: |
+          GENERATIONS="${{ github.event.inputs.generations || '5' }}"
+          POPULATION="${{ github.event.inputs.population || '10' }}"
+          EVAL_DAYS="${{ github.event.inputs.eval_days || '30' }}"
+
+          echo "🧬 BESSAIEvolve starting..."
+          echo "  Generations: $GENERATIONS"
+          echo "  Population: $POPULATION"
+          echo "  Eval days: $EVAL_DAYS"
+
+          python -m src.agents.bessai_evolve \
+            --generations "$GENERATIONS" \
+            --population "$POPULATION" \
+            --eval-days "$EVAL_DAYS"
+
+          EXIT_CODE=$?
+          echo "exit_code=$EXIT_CODE" >> "$GITHUB_OUTPUT"
+
+          if [ $EXIT_CODE -eq 2 ]; then
+            echo "✅ Promotion candidate found!"
+            echo "promoted=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ℹ️ No promotion this cycle (no improvement ≥5% over baseline)"
+            echo "promoted=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Always exit 0 so the next steps can run
+          exit 0
+
+      - name: Upload evolution artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        with:
+          name: bessai-evolve-results-${{ github.run_id }}
+          path: |
+            models/evolution/population.json
+            models/evolution/history.jsonl
+            models/evolution/best_candidate.json
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Post evolution summary to workflow
+        run: |
+          if [ -f models/evolution/history.jsonl ]; then
+            echo "### 🧬 BESSAIEvolve Summary" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Metric | Value |" >> "$GITHUB_STEP_SUMMARY"
+            echo "|--------|-------|" >> "$GITHUB_STEP_SUMMARY"
+            python -c "
+          import json, pathlib
+          lines = pathlib.Path('models/evolution/history.jsonl').read_text().strip().splitlines()
+          records = [json.loads(l) for l in lines if l]
+          if records:
+              last = records[-1]
+              print(f\"| Generations run | {len(records)} |\")
+              print(f\"| Best fitness (last gen) | {last['best_fitness']:.4f} |\")
+              print(f\"| Mean fitness (last gen) | {last['mean_fitness']:.4f} |\")
+              print(f\"| Best candidate ID | {last['best_candidate_id'][:8]}... |\")
+          " >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            PROMOTED="${{ steps.evolve.outputs.promoted }}"
+            if [ "$PROMOTED" = "true" ]; then
+              echo "**🚀 Promotion candidate ready — PR will be opened.**" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "**ℹ️ No promotion this cycle.**" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
+
+      - name: Open PR for promotion candidate
+        if: steps.evolve.outputs.promoted == 'true' && github.event.inputs.dry_run != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ ! -f models/evolution/promote.json ]; then
+            echo "promote.json not found — skipping PR"
+            exit 0
+          fi
+
+          BRANCH="bessai-evolve/promote-$(date +%Y%m%d-%H%M)"
+          git config user.name "BESSAIEvolve Bot"
+          git config user.email "ingenieria@bess-solutions.cl"
+
+          git checkout -b "$BRANCH"
+          git add models/evolution/best_candidate.json models/evolution/promote.json
+          git commit -m "feat(bessai-evolve): 🧬 new policy candidate exceeds fitness threshold
+
+          BESSAIEvolve autonomous evolution loop (BEP-0303) found a
+          candidate that outperforms the baseline ArbitragePolicy by ≥5%.
+
+          See models/evolution/promote.json for candidate details.
+          Review, test, and merge to promote to production."
+
+          git push origin "$BRANCH"
+
+          CANDIDATE_ID=$(python -c "import json; d=json.load(open('models/evolution/promote.json')); print(d['candidate_id'][:8])")
+          FITNESS=$(python -c "import json; d=json.load(open('models/evolution/promote.json')); print(f\"{d['fitness']:.4f}\")")
+
+          gh pr create \
+            --title "🧬 BESSAIEvolve: promote policy candidate (fitness=$FITNESS)" \
+            --body "## BESSAIEvolve — Promotion Candidate
+
+          **Candidate ID:** \`$CANDIDATE_ID...\`
+          **Fitness ratio:** \`$FITNESS\` (baseline = 1.0000, threshold = 1.0500)
+
+          ### What this means
+          The autonomous evolution loop found an \`ArbitragePolicy\` configuration
+          that outperforms the current production baseline by **≥5%** in sandbox
+          evaluation over 30 days of CMg data.
+
+          ### Review checklist
+          - [ ] Review \`models/evolution/promote.json\` for the parameter values
+          - [ ] Verify fitness improvement is consistent (not an outlier)
+          - [ ] Confirm zero safety violations in candidate metadata
+          - [ ] Update \`src/agents/arbitrage_policy.py\` defaults with new params
+          - [ ] Run full test suite after updating defaults
+
+          ### Next steps
+          Merge this PR to adopt the evolved policy as the new production baseline.
+          The next evolution cycle will use this as the new baseline candidate.
+
+          ---
+          *Generated automatically by BESSAIEvolve (BEP-0303) on $(date -u +%Y-%m-%dT%H:%M:%SZ)*" \
+            --label "bessai-evolve" \
+            --label "ai-policy"
+
+          echo "✅ PR created for branch $BRANCH"
