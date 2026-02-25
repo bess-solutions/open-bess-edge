@@ -1,6 +1,6 @@
 ﻿# 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-24T21:30 v2.9.0-dev · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-25T02:00 v2.10.0-dev · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,14 +14,17 @@ Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivad
 
 ---
 
-## ✅ Estado Actual — v2.9.0-dev (DRL Optimizer Real + MILP + Scorecard Hardening)
+## ✅ Estado Actual — v2.10.0-dev (Plan de Inmortalidad Full Execution)
 
 > Ver: [`docs/PENDIENTES.md`](docs/PENDIENTES.md) · [`docs/MODULOS_Y_DATOS_SIMULADOS.md`](docs/MODULOS_Y_DATOS_SIMULADOS.md)
 
 ### Tests
 ```
-590 passed ✅  · 0 failed · 6 skipped · 19.20s
-Nuevo: test_watchdog_manager.py — 19/19 WatchdogManager ✅
+613 passed ✅  · 0 failed · 6 skipped · 43.21s
+Nuevo: test_bess_rl_env_cen.py — 23/23 BEP-0200 F3 (env CMg real CEN) ✅
+Nuevo: test_milp_optimizer.py — 14/14 MILP optimizer ✅
+Nuevo: test_degradation_model.py — 15/15 DegradationModel ✅
+Anterior: test_watchdog_manager.py — 19/19 WatchdogManager ✅
 Registry: 7 perfiles hardware (Fronius, Huawei, SMA, Victron + SolarEdge, BYD, Tesla)
 CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · helm ✅
 ```
