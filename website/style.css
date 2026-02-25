@@ -206,51 +206,6 @@ button {
   transform: translateY(-1px)
 }
 
-/* ── GEO BANNER ─────────────────────────────────────────── */
-.geo-banner {
-  position: fixed;
-  top: 60px;
-  left: 0;
-  right: 0;
-  z-index: 8000;
-  background: rgba(8, 145, 178, .12);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0, 212, 255, .15);
-  padding: 10px 48px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font: .75rem var(--body);
-  color: rgba(255, 255, 255, .7);
-}
-
-.geo-tag {
-  font: 600 .6rem var(--mono);
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  color: var(--cyan);
-  background: rgba(0, 212, 255, .1);
-  border: 1px solid rgba(0, 212, 255, .2);
-  padding: 2px 8px;
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-
-.geo-banner strong {
-  color: var(--white)
-}
-
-.geo-close {
-  margin-left: auto;
-  opacity: .4;
-  font-size: .8rem;
-  transition: opacity .2s;
-}
-
-.geo-close:hover {
-  opacity: 1
-}
-
 /* ── THREE.JS CANVAS ────────────────────────────────────── */
 #gl {
   position: fixed;
