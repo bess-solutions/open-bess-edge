@@ -1,0 +1,2263 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>BESS Solutions — Inteligencia para el almacenamiento de energía</title>
+    <meta name="description"
+        content="BESSAI Edge: gateway open-source industrial-grade para BESS. Optimización IA, IEC 62443, NTSyCS Chile. Apache 2.0." />
+    <meta property="og:title" content="BESS Solutions — Edge AI para BESS" />
+    <meta property="og:description"
+        content="Gateway open-source industrial-grade para sistemas de almacenamiento de energía en baterías." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="assets/logo-bess.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet" />
+    <style>
+/* ── BASE: Reset · Tokens · Tipografía ──────────────────── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0
+}
+
+:root {
+    /* Colores */
+    --bg: #070810;
+    --bg2: #0b0d18;
+    --bg3: #10121e;
+    --line: rgba(255, 255, 255, .07);
+    --line2: rgba(255, 255, 255, .04);
+    --muted: #5a6480;
+    --muted2: #373d54;
+    --text: #edf0ff;
+    --text2: #b0b8d4;
+    --accent: #22d3ee;
+    /* cyan */
+    --accent2: #34d399;
+    /* emerald */
+    --accent3: #818cf8;
+    /* indigo */
+    --warn: #fbbf24;
+    /* amber */
+
+    /* Espaciado */
+    --space-xs: .5rem;
+    --space-sm: 1rem;
+    --space-md: 2rem;
+    --space-lg: 4rem;
+    --space-xl: 8rem;
+
+    /* Tipografía */
+    --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    /* Bordes */
+    --radius: 8px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    line-height: 1.15;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+img {
+    max-width: 100%;
+}
+
+button {
+    font-family: inherit;
+}
+
+/* ── Grid background ── */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+        linear-gradient(var(--line2) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line2) 1px, transparent 1px);
+    background-size: 60px 60px;
+}
+
+/* ── Utility ── */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-md);
+}
+
+.section {
+    padding: var(--space-xl) 0;
+    position: relative;
+    z-index: 1;
+}
+
+.section-title {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: .75rem;
+}
+
+.section-sub {
+    text-align: center;
+    color: var(--text2);
+    font-size: 1.1rem;
+    margin-bottom: var(--space-lg);
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #070810;
+    font-weight: 700;
+    font-size: .9rem;
+    padding: .75rem 1.75rem;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(34, 211, 238, .3);
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background: transparent;
+    color: var(--text2);
+    font-size: .9rem;
+    padding: .7rem 1.6rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    transition: all .2s;
+}
+
+.btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .72rem;
+    font-family: var(--font-mono);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    background: rgba(52, 211, 153, .08);
+    border: 1px solid rgba(52, 211, 153, .2);
+    padding: .3rem .9rem;
+    border-radius: 100px;
+}
+
+/* ── Reveal on scroll ── */
+.reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity .6s ease, transform .6s ease;
+}
+
+.reveal.revealed {
+    opacity: 1;
+    transform: none;
+}
+
+.reveal-delay-1 {
+    transition-delay: .1s;
+}
+
+.reveal-delay-2 {
+    transition-delay: .2s;
+}
+
+.reveal-delay-3 {
+    transition-delay: .3s;
+}
+
+/* ── Fade animation ── */
+.fade-in {
+    animation: fadeIn .4s ease both;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px)
+    }
+
+    to {
+        opacity: 1;
+        transform: none
+    }
+}
+/* ── LAYOUT: Nav · Hero · Secciones ────────────────────── */
+
+/* ── NAV ── */
+#main-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .9rem 2rem;
+    transition: background .3s, backdrop-filter .3s, border-bottom .3s;
+}
+
+#main-nav.scrolled {
+    background: rgba(7, 8, 16, .9);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--line);
+}
+
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.nav-logo img {
+    height: 28px;
+    width: auto;
+}
+
+.nav-logo span {
+    color: var(--accent);
+}
+
+#nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+#nav-menu a {
+    font-size: .85rem;
+    color: var(--text2);
+    transition: color .2s;
+}
+
+#nav-menu a:hover {
+    color: var(--text);
+}
+
+.nav-lang {
+    display: flex;
+    gap: .3rem;
+}
+
+.nav-lang button {
+    font: 600 .7rem var(--font-mono);
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: .2rem .5rem;
+    cursor: pointer;
+    transition: all .2s;
+}
+
+.nav-lang button.active {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.nav-lang button:hover:not(.active) {
+    color: var(--text2);
+    border-color: var(--line);
+}
+
+/* Hamburger */
+#nav-burger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: .3rem;
+}
+
+#nav-burger span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--text2);
+    border-radius: 2px;
+    transition: all .3s;
+}
+
+#nav-burger.open span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+#nav-burger.open span:nth-child(2) {
+    opacity: 0;
+}
+
+#nav-burger.open span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ── HERO ── */
+#hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    position: relative;
+    z-index: 1;
+}
+
+.hero-badge {
+    margin-bottom: 1.5rem;
+}
+
+.hero-headline {
+    font-size: clamp(2.8rem, 8vw, 6rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    margin-bottom: 1.5rem;
+}
+
+#hero-l1,
+#hero-l2 {
+    display: block;
+    transition: opacity .35s ease;
+}
+
+#hero-l2 em {
+    font-style: normal;
+    color: var(--accent);
+}
+
+.hero-sub {
+    font-size: clamp(.95rem, 2vw, 1.2rem);
+    color: var(--text2);
+    max-width: 640px;
+    margin: 0 auto 2.5rem;
+}
+
+.hero-ctas {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* ── LIVE METRICS STRIP ── */
+#live-strip {
+    background: var(--bg2);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 1rem 0;
+    position: relative;
+    z-index: 1;
+}
+
+.live-inner {
+    display: flex;
+    gap: 0;
+    overflow: hidden;
+}
+
+.live-metric {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: .75rem 1rem;
+    border-right: 1px solid var(--line);
+    min-width: 140px;
+}
+
+.live-metric:last-child {
+    border-right: none;
+}
+
+.live-tag {
+    font: .55rem var(--font-mono);
+    color: var(--accent2);
+    letter-spacing: .1em;
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    margin-bottom: .2rem;
+}
+
+.live-tag::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent2);
+    animation: blink 1.4s ease-in-out infinite;
+}
+
+.live-value {
+    font: 700 1.6rem var(--font-mono);
+    color: var(--text);
+}
+
+.live-unit {
+    font: .65rem var(--font-mono);
+    color: var(--muted);
+}
+
+.live-label {
+    font: .65rem 'Inter', sans-serif;
+    color: var(--text2);
+    margin-top: .1rem;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1
+    }
+
+    50% {
+        opacity: .3
+    }
+}
+
+/* ── AUDIENCE TABS ── */
+.aud-tabs-wrap {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.aud-tab {
+    font: .8rem var(--font-mono);
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    padding: .4rem 1.1rem;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+}
+
+.aud-tab.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: rgba(34, 211, 238, .07);
+}
+
+.aud-tab:hover:not(.active) {
+    color: var(--text2);
+    border-color: var(--muted2);
+}
+
+.aud-panel {
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: left;
+    padding: 2rem;
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+}
+
+.aud-headline {
+    font: 700 1.6rem 'Inter', sans-serif;
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+.aud-body {
+    font-size: 1rem;
+    color: var(--text2);
+    margin-bottom: 1.5rem;
+    line-height: 1.7;
+}
+
+.aud-benefits {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .5rem 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.aud-benefits li {
+    font-size: .85rem;
+    color: var(--text2);
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+}
+
+.aud-benefits li::before {
+    content: '→';
+    color: var(--accent2);
+    flex-shrink: 0;
+    margin-top: .1rem;
+}
+
+/* ── PROBLEM STATS ── */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.stat-card {
+    background: var(--bg2);
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+}
+
+.stat-value {
+    font: 800 3rem var(--font-mono);
+    color: var(--accent);
+    line-height: 1;
+}
+
+.stat-label {
+    font: .85rem 'Inter', sans-serif;
+    color: var(--text2);
+    margin: .5rem 0 .25rem;
+}
+
+.stat-detail {
+    font: .7rem var(--font-mono);
+    color: var(--muted);
+}
+
+/* ── FEATURES GRID ── */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.feature-card {
+    background: var(--bg2);
+    padding: 2rem 1.75rem;
+    transition: background .3s;
+}
+
+.feature-card:hover {
+    background: var(--bg3);
+}
+
+.feature-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+}
+
+.feature-title {
+    font: 700 1.05rem 'Inter', sans-serif;
+    color: var(--text);
+    margin-bottom: .5rem;
+}
+
+.feature-desc {
+    font: .87rem 'Inter', sans-serif;
+    color: var(--text2);
+    line-height: 1.6;
+}
+
+/* ── STACK / SPEC TABLE ── */
+.spec-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.spec-section {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.spec-heading {
+    font: .7rem var(--font-mono);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding: .75rem 1.25rem;
+    border-bottom: 1px solid var(--line);
+    background: rgba(34, 211, 238, .04);
+}
+
+.spec-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.spec-table td {
+    padding: .6rem 1.25rem;
+    font-size: .82rem;
+    border-bottom: 1px solid var(--line2);
+    vertical-align: top;
+}
+
+.spec-table tr:last-child td {
+    border-bottom: none;
+}
+
+.spec-table td:first-child {
+    color: var(--muted);
+    white-space: nowrap;
+    width: 38%;
+}
+
+.spec-table td:last-child {
+    color: var(--text2);
+}
+
+/* ── TERMINAL ── */
+.terminal-wrap {
+    background: #080c14;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    max-width: 780px;
+    margin: 0 auto;
+}
+
+.term-bar {
+    background: #111827;
+    padding: .6rem 1rem;
+    display: flex;
+    gap: .4rem;
+    align-items: center;
+}
+
+.term-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.term-dot:nth-child(1) {
+    background: #ef4444;
+}
+
+.term-dot:nth-child(2) {
+    background: #f59e0b;
+}
+
+.term-dot:nth-child(3) {
+    background: #22c55e;
+}
+
+.term-title {
+    font: .65rem var(--font-mono);
+    color: var(--muted);
+    margin-left: .5rem;
+}
+
+#term-output {
+    padding: 1.25rem 1.5rem;
+    font: .8rem var(--font-mono);
+    line-height: 2;
+    height: 320px;
+    overflow-y: auto;
+}
+
+#term-output::-webkit-scrollbar {
+    width: 4px;
+}
+
+#term-output::-webkit-scrollbar-thumb {
+    background: var(--muted2);
+    border-radius: 2px;
+}
+
+.term-line {
+    animation: termFade .3s ease both;
+}
+
+@keyframes termFade {
+    from {
+        opacity: 0;
+        transform: translateX(-6px)
+    }
+
+    to {
+        opacity: 1;
+        transform: none
+    }
+}
+
+/* ── COMMUNITY CARDS ── */
+.community-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.comm-card {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: border-color .3s, transform .3s;
+}
+
+.comm-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+}
+
+.comm-icon {
+    font-size: 2rem;
+}
+
+.comm-title {
+    font: 700 1.1rem 'Inter', sans-serif;
+    color: var(--text);
+}
+
+.comm-desc {
+    font: .87rem 'Inter', sans-serif;
+    color: var(--text2);
+    flex: 1;
+    line-height: 1.6;
+}
+
+/* ── ROADMAP ── */
+.roadmap-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.roadmap-phase {
+    background: var(--bg2);
+    padding: 1.75rem 1.25rem;
+    position: relative;
+}
+
+.phase-tag {
+    font: .6rem var(--font-mono);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: .25rem .7rem;
+    border-radius: 100px;
+    display: inline-block;
+    margin-bottom: .75rem;
+}
+
+.phase-tag.released {
+    color: #22c55e;
+    background: rgba(34, 197, 94, .1);
+    border: 1px solid rgba(34, 197, 94, .25);
+}
+
+.phase-tag.progress {
+    color: #fbbf24;
+    background: rgba(251, 191, 36, .1);
+    border: 1px solid rgba(251, 191, 36, .25);
+    animation: blink 2s infinite;
+}
+
+.phase-tag.next {
+    color: #22d3ee;
+    background: rgba(34, 211, 238, .07);
+    border: 1px solid rgba(34, 211, 238, .2);
+}
+
+.phase-tag.planned {
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--line);
+}
+
+.phase-date {
+    font: .65rem var(--font-mono);
+    color: var(--muted);
+    margin-bottom: .5rem;
+}
+
+.phase-title {
+    font: 700 .95rem 'Inter', sans-serif;
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+.phase-items {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+}
+
+.phase-items li {
+    font: .78rem 'Inter', sans-serif;
+    color: var(--text2);
+    display: flex;
+    gap: .4rem;
+}
+
+.phase-items li::before {
+    content: '·';
+    color: var(--accent2);
+    flex-shrink: 0;
+}
+
+/* ── EARLY ADOPTER ── */
+.ea-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.ea-card {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .3s;
+}
+
+.ea-card.featured {
+    border-color: rgba(34, 211, 238, .4);
+}
+
+.ea-card.featured::before {
+    content: '⭐ RECOMMENDED';
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font: .55rem var(--font-mono);
+    letter-spacing: .1em;
+    color: var(--accent);
+    background: rgba(34, 211, 238, .1);
+    border: 1px solid rgba(34, 211, 238, .2);
+    padding: .2rem .6rem;
+    border-radius: 100px;
+}
+
+.ea-tier {
+    font: .65rem var(--font-mono);
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: .5rem;
+}
+
+.ea-price {
+    font: 800 2.2rem 'Inter', sans-serif;
+    color: var(--text);
+    margin-bottom: .25rem;
+}
+
+.ea-slots {
+    font: .75rem var(--font-mono);
+    color: var(--warn);
+    margin-bottom: 1.5rem;
+}
+
+.ea-benefits {
+    list-style: none;
+    flex: 1;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+}
+
+.ea-benefits li {
+    font: .85rem 'Inter', sans-serif;
+    color: var(--text2);
+    display: flex;
+    gap: .5rem;
+    align-items: flex-start;
+}
+
+.ea-benefits li::before {
+    content: '✓';
+    color: var(--accent2);
+    flex-shrink: 0;
+    margin-top: .1rem;
+}
+
+.ea-urgency {
+    text-align: center;
+    font: .8rem 'Inter', sans-serif;
+    color: var(--warn);
+    margin-top: 2rem;
+}
+
+/* ── FOOTER ── */
+footer {
+    background: var(--bg2);
+    border-top: 1px solid var(--line);
+    padding: var(--space-lg) 0 var(--space-sm);
+    position: relative;
+    z-index: 1;
+}
+
+.foot-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+}
+
+.foot-brand img {
+    height: 32px;
+    margin-bottom: 1rem;
+}
+
+.foot-tagline {
+    font: .85rem 'Inter', sans-serif;
+    color: var(--text2);
+}
+
+.foot-col h4 {
+    font: .65rem var(--font-mono);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+}
+
+.foot-col ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+}
+
+.foot-col ul a {
+    font: .82rem 'Inter', sans-serif;
+    color: var(--text2);
+    transition: color .2s;
+}
+
+.foot-col ul a:hover {
+    color: var(--text);
+}
+
+.foot-bottom {
+    border-top: 1px solid var(--line);
+    padding-top: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font: .72rem var(--font-mono);
+    color: var(--muted);
+}
+/* ── RESPONSIVE ─────────────────────────────────────────── */
+
+@media (max-width:1024px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .foot-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .roadmap-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width:768px) {
+    :root {
+        font-size: 15px;
+    }
+
+    .container {
+        padding: 0 1.25rem;
+    }
+
+    #main-nav {
+        padding: .75rem 1.25rem;
+    }
+
+    #nav-menu {
+        display: none;
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(7, 8, 16, .97);
+        backdrop-filter: blur(20px);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        z-index: 899;
+    }
+
+    #nav-menu.open {
+        display: flex;
+    }
+
+    #nav-menu a {
+        font-size: 1.1rem;
+    }
+
+    #nav-burger {
+        display: flex;
+    }
+
+    .live-inner {
+        overflow-x: auto;
+    }
+
+    .live-metric {
+        min-width: 110px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .spec-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .community-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .roadmap-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ea-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .aud-benefits {
+        grid-template-columns: 1fr;
+    }
+
+    .foot-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .foot-bottom {
+        flex-direction: column;
+        gap: .5rem;
+        text-align: center;
+    }
+
+    #music-player {
+        width: calc(100% - 2rem);
+        left: 1rem;
+        right: 1rem;
+    }
+}
+
+@media (max-width:480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-ctas {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .hero-ctas .btn-primary,
+    .hero-ctas .btn-secondary {
+        justify-content: center;
+    }
+}
+
+/* ── FLOATING MUSIC PLAYER ──────────────────────────────── */
+#music-player {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 990;
+    background: rgba(11, 13, 24, .95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, .1);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 280px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, .5);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: transform .5s cubic-bezier(.22, 1, .36, 1), opacity .5s ease;
+}
+
+#music-player .mp-cover {
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.mp-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.mp-title {
+    font: 600 .72rem 'Inter', sans-serif;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mp-sub {
+    font: .6rem var(--font-mono);
+    color: var(--muted);
+    margin: 2px 0 6px;
+}
+
+#mp-progress-wrap {
+    height: 3px;
+    background: rgba(255, 255, 255, .08);
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+#mp-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width .3s linear;
+}
+
+#mp-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: var(--bg);
+    font-size: .85rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .2s;
+}
+
+#mp-btn:hover {
+    transform: scale(1.08);
+}
+
+#mp-close {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: var(--muted2);
+    cursor: pointer;
+    font-size: .65rem;
+    line-height: 1;
+    padding: 2px;
+    transition: color .2s;
+}
+
+#mp-close:hover {
+    color: var(--muted);
+}
+
+.mp-suno-link {
+    position: absolute;
+    bottom: 7px;
+    right: 12px;
+    font: .52rem var(--font-mono);
+    color: var(--muted2);
+    transition: color .2s;
+}
+
+.mp-suno-link:hover {
+    color: var(--muted);
+}
+</style>
+</head>
+
+<body>
+
+    <!-- ── NAV ── -->
+    <nav id="main-nav">
+        <a class="nav-logo" href="#">
+            <img src="assets/logo-bess.png" alt="BESS Solutions" />
+            <span>BESSAI</span>
+        </a>
+        <div id="nav-menu">
+            <a href="#problema" data-i18n="nav.problema">El Problema</a>
+            <a href="#features" data-i18n="nav.features">Funciones</a>
+            <a href="#stack" data-i18n="nav.solucion">Solución</a>
+            <a href="#comunidad" data-i18n="nav.comunidad">Comunidad</a>
+            <a href="#roadmap" data-i18n="nav.roadmap">Roadmap</a>
+            <a href="#early-adopter" data-i18n="nav.contacto">Contacto</a>
+            <div class="nav-lang">
+                <button data-lang-btn="es" onclick="I18N.switchTo('es')">ES</button>
+                <button data-lang-btn="en" onclick="I18N.switchTo('en')">EN</button>
+            </div>
+        </div>
+        <button id="nav-burger" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <!-- ── HERO ── -->
+    <section id="hero">
+        <div class="hero-badge">
+            <span class="badge" data-i18n="hero.badge">Open Source · Apache 2.0 · IEC 62443</span>
+        </div>
+        <h1 class="hero-headline">
+            <span id="hero-l1">El cerebro de tu</span>
+            <span id="hero-l2">batería es <em>open-source.</em></span>
+        </h1>
+        <p class="hero-sub" data-i18n-html="hero.sub">Gateway industrial open-source para sistemas de almacenamiento de
+            energía en baterías.</p>
+        <div class="hero-ctas">
+            <a href="https://github.com/bess-solutions/open-bess-edge" class="btn-primary" target="_blank"
+                rel="noopener">
+                <span data-i18n="hero.cta_primary">Ver en GitHub</span> →
+            </a>
+            <a href="#early-adopter" class="btn-secondary">
+                <span data-i18n="hero.cta_secondary">Unirme al programa Early Adopter</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- ── LIVE METRICS STRIP ── -->
+    <div id="live-strip">
+        <div class="container">
+            <div class="live-inner">
+                <div class="live-metric">
+                    <div class="live-tag" data-i18n="live.live_tag">EN VIVO</div>
+                    <div class="live-value"><span id="lm-savings">13248</span></div>
+                    <div class="live-unit" data-i18n="live.unit_savings">$/día</div>
+                    <div class="live-label" data-i18n="live.label_savings">Ahorro energético</div>
+                </div>
+                <div class="live-metric">
+                    <div class="live-tag" data-i18n="live.live_tag">EN VIVO</div>
+                    <div class="live-value"><span id="lm-latency">38.4</span></div>
+                    <div class="live-unit" data-i18n="live.unit_latency">ms</div>
+                    <div class="live-label" data-i18n="live.label_latency">Latencia edge</div>
+                </div>
+                <div class="live-metric">
+                    <div class="live-tag" data-i18n="live.live_tag">EN VIVO</div>
+                    <div class="live-value"><span id="lm-soc">84.2</span></div>
+                    <div class="live-unit" data-i18n="live.unit_soc">% promedio</div>
+                    <div class="live-label" data-i18n="live.label_soc">SoC activo</div>
+                </div>
+                <div class="live-metric">
+                    <div class="live-tag" data-i18n="live.live_tag">EN VIVO</div>
+                    <div class="live-value"><span id="lm-cycles">5</span></div>
+                    <div class="live-unit" data-i18n="live.unit_cycles">instancias</div>
+                    <div class="live-label" data-i18n="live.label_cycles">Ciclos protegidos</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── AUDIENCES ── -->
+    <section id="audiencias" class="section">
+        <div class="container">
+            <h2 class="section-title reveal" data-i18n="audiences.title">¿Por qué BESSAI es para ti?</h2>
+            <div class="aud-tabs-wrap" id="aud-tabs"></div>
+            <div id="aud-content"></div>
+        </div>
+    </section>
+
+    <!-- ── PROBLEMA ── -->
+    <section id="problema" class="section"
+        style="background:var(--bg2); border-top:1px solid var(--line); border-bottom:1px solid var(--line)">
+        <div class="container">
+            <h2 class="section-title reveal" data-i18n="problem.title">El problema que resolvemos</h2>
+            <p class="section-sub reveal reveal-delay-1" data-i18n="problem.subtitle">Los sistemas BESS industriales
+                dependen de software propietario opaco, costoso y no certificable.</p>
+            <div class="stats-grid reveal reveal-delay-2">
+                <div class="stat-card">
+                    <div class="stat-value"><span data-count="38">0</span>%</div>
+                    <div class="stat-label" data-i18n="problem.stats.0.label">Crecimiento anual BESS en LatAm</div>
+                    <div class="stat-detail" data-i18n="problem.stats.0.detail">CAGR 2024–2027</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">$2.4B</div>
+                    <div class="stat-label" data-i18n="problem.stats.1.label">Mercado addressable 2027</div>
+                    <div class="stat-detail" data-i18n="problem.stats.1.detail">BNEF Research</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value"><span data-count="4.2">0</span>%</div>
+                    <div class="stat-label" data-i18n="problem.stats.2.label">MAPE predicción de precio CMg</div>
+                    <div class="stat-detail" data-i18n="problem.stats.2.detail">vs 8-12% competencia</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value"><span data-count="490">0</span>+</div>
+                    <div class="stat-label" data-i18n="problem.stats.3.label">Tests automatizados</div>
+                    <div class="stat-detail" data-i18n="problem.stats.3.detail">cobertura >85%</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── FEATURES ── -->
+    <section id="features" class="section">
+        <div class="container">
+            <h2 class="section-title reveal" data-i18n="features.title">Todo lo que necesitas, nada que no necesitas
+            </h2>
+            <div class="features-grid reveal reveal-delay-1">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-title" data-i18n="features.items.0.title">IA en el Edge</div>
+                    <div class="feature-desc" data-i18n="features.items.0.desc">DRL, MILP y modelos ONNX corriendo
+                        localmente. Sin latencia cloud, sin dependencias externas.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔌</div>
+                    <div class="feature-title" data-i18n="features.items.1.title">Conectividad Industrial</div>
+                    <div class="feature-desc" data-i18n="features.items.1.desc">Modbus TCP, IEC 61850, MQTT, DNP3, REST
+                        y OPC-UA listos para usar.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <div class="feature-title" data-i18n="features.items.2.title">Seguridad IEC 62443</div>
+                    <div class="feature-desc" data-i18n="features.items.2.desc">Certificación SL-2, gestión de
+                        certificados x.509, logs auditables firmados digitalmente.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-title" data-i18n="features.items.3.title">Observabilidad Total</div>
+                    <div class="feature-desc" data-i18n="features.items.3.desc">Prometheus + Grafana embebidos,
+                        dashboard web en tiempo real, alertas configurables.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌎</div>
+                    <div class="feature-title" data-i18n="features.items.4.title">NTSyCS Chile</div>
+                    <div class="feature-desc" data-i18n="features.items.4.desc">Cumplimiento nativo con la normativa
+                        técnica de sistemas de coordinación eléctrica chilena.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🐳</div>
+                    <div class="feature-title" data-i18n="features.items.5.title">Deploy Anywhere</div>
+                    <div class="feature-desc" data-i18n="features.items.5.desc">Docker multi-arch ARM64/AMD64. Corre en
+                        Raspberry Pi, PLCs, servidores edge y cloud.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── TERMINAL ── -->
+    <section id="stack" class="section"
+        style="background:var(--bg2); border-top:1px solid var(--line); border-bottom:1px solid var(--line)">
+        <div class="container">
+            <h2 class="section-title reveal" data-i18n="stack.title">Especificaciones técnicas</h2>
+            <div class="terminal-wrap reveal reveal-delay-1">
+                <div class="term-bar">
+                    <div class="term-dot"></div>
+                    <div class="term-dot"></div>
+                    <div class="term-dot"></div>
+                    <span class="term-title">bessai-edge — bash</span>
+                </div>
+                <div id="term-output"></div>
+            </div>
+            <div class="spec-grid" style="margin-top:2rem">
+                <!-- Conectividad -->
+                <div class="spec-section reveal reveal-delay-1">
+                    <div class="spec-heading" data-i18n="stack.sections.0.heading">Conectividad</div>
+                    <table class="spec-table">
+                        <tr>
+                            <td data-i18n="stack.sections.0.rows.0.0">Protocolos OT</td>
+                            <td data-i18n="stack.sections.0.rows.0.1">Modbus TCP, IEC 61850, DNP3, OPC-UA</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.0.rows.1.0">Protocolos IT</td>
+                            <td data-i18n="stack.sections.0.rows.1.1">MQTT 5, REST/HTTP, gRPC, WebSocket</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.0.rows.2.0">Seguridad red</td>
+                            <td data-i18n="stack.sections.0.rows.2.1">mTLS, VPN WireGuard, firewall integrado</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.0.rows.3.0">Latencia edge</td>
+                            <td data-i18n="stack.sections.0.rows.3.1">&lt; 50 ms ciclo de control</td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- IA -->
+                <div class="spec-section reveal reveal-delay-2">
+                    <div class="spec-heading" data-i18n="stack.sections.1.heading">Inteligencia Artificial</div>
+                    <table class="spec-table">
+                        <tr>
+                            <td data-i18n="stack.sections.1.rows.0.0">Algoritmos</td>
+                            <td data-i18n="stack.sections.1.rows.0.1">Deep Reinforcement Learning (DRL), MILP</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.1.rows.1.0">Inferencia</td>
+                            <td data-i18n="stack.sections.1.rows.1.1">ONNX Runtime, TensorRT (opcional)</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.1.rows.2.0">Predicción CMg</td>
+                            <td data-i18n="stack.sections.1.rows.2.1">MAPE 4.2% · histórico CEN Chile</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.1.rows.3.0">Entrenamiento</td>
+                            <td data-i18n="stack.sections.1.rows.3.1">Incremental online + batch offline</td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- Observabilidad -->
+                <div class="spec-section reveal reveal-delay-1">
+                    <div class="spec-heading" data-i18n="stack.sections.2.heading">Observabilidad</div>
+                    <table class="spec-table">
+                        <tr>
+                            <td data-i18n="stack.sections.2.rows.0.0">Métricas</td>
+                            <td data-i18n="stack.sections.2.rows.0.1">Prometheus + Grafana embebidos</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.2.rows.1.0">Logs</td>
+                            <td data-i18n="stack.sections.2.rows.1.1">Structured JSON · firma digital SHA-256</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.2.rows.2.0">Dashboard</td>
+                            <td data-i18n="stack.sections.2.rows.2.1">Web UI tiempo real · WebSocket</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.2.rows.3.0">Alertas</td>
+                            <td data-i18n="stack.sections.2.rows.3.1">PagerDuty, Slack, Email, Webhook</td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- Compliance -->
+                <div class="spec-section reveal reveal-delay-2">
+                    <div class="spec-heading" data-i18n="stack.sections.3.heading">Compliance</div>
+                    <table class="spec-table">
+                        <tr>
+                            <td data-i18n="stack.sections.3.rows.0.0">Ciberseguridad</td>
+                            <td data-i18n="stack.sections.3.rows.0.1">IEC 62443 SL-2 certificable</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.3.rows.1.0">Chile</td>
+                            <td data-i18n="stack.sections.3.rows.1.1">NTSyCS coordinación eléctrica</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.3.rows.2.0">PKI</td>
+                            <td data-i18n="stack.sections.3.rows.2.1">Gestión certificados x.509 integrada</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="stack.sections.3.rows.3.0">Auditoría</td>
+                            <td data-i18n="stack.sections.3.rows.3.1">Logs inmutables · trazabilidad completa</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── COMUNIDAD ── -->
+    <section id="comunidad" class="section">
+        <div class="container">
+            <h2 class="section-title reveal" data-i18n="community.title">Únete a la comunidad</h2>
+            <p class="section-sub reveal reveal-delay-1" data-i18n="community.subtitle">Somos un proyecto open-source
+                impulsado por la comunidad de energía de América Latina.</p>
+            <div class="community-grid">
+                <div class="comm-card reveal reveal-delay-1">
+                    <div class="comm-icon">💬</div>
+                    <div class="comm-title" data-i18n="community.cards.0.title">Discord</div>
+                    <div class="comm-desc" data-i18n="community.cards.0.desc">Discusión técnica, soporte y newsletter
+                        semanal.</div>
+                    <a href="https://discord.gg/bessai" class="btn-secondary" target="_blank" rel="noopener"
+                        data-i18n="community.cards.0.cta">Unirse al servidor</a>
+                </div>
+                <div class="comm-card reveal reveal-delay-2">
+                    <div class="comm-icon">🐙</div>
+                    <div class="comm-title" data-i18n="community.cards.1.title">GitHub</div>
+                    <div class="comm-desc" data-i18n="community.cards.1.desc">Código abierto, issues, PRs y roadmap
+                        público.</div>
+                    <a href="https://github.com/bess-solutions/open-bess-edge" class="btn-secondary" target="_blank"
+                        rel="noopener" data-i18n="community.cards.1.cta">Ver repositorio</a>
+                </div>
+                <div class="comm-card reveal reveal-delay-3">
+                    <div class="comm-icon">📄</div>
+                    <div class="comm-title" data-i18n="community.cards.2.title">Documentación</div>
+                    <div class="comm-desc" data-i18n="community.cards.2.desc">Guías, API reference y tutoriales.</div>
+                    <a href="https://bess-solutions.github.io/open-bess-edge" class="btn-secondary" target="_blank"
+                        rel="noopener" data-i18n="community.cards.2.cta">Leer docs</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── ROADMAP ── -->
+    <section id="roadmap" class="section"
+        style="background:var(--bg2); border-top:1px solid var(--line); border-bottom:1px solid var(--line)">
+        <div class="container">
+            <h2 class="section-title reveal" data-i18n="roadmap.title">Roadmap público</h2>
+            <p class="section-sub reveal reveal-delay-1" data-i18n="roadmap.subtitle">Desarrollo transparente con fechas
+                reales.</p>
+            <div class="roadmap-grid reveal reveal-delay-2">
+                <div class="roadmap-phase">
+                    <div class="phase-tag released" data-i18n="roadmap.phases.0.tag">LANZADO</div>
+                    <div class="phase-date" data-i18n="roadmap.phases.0.date">Q4 2024</div>
+                    <div class="phase-title" data-i18n="roadmap.phases.0.title">v1.0 — Foundation</div>
+                    <ul class="phase-items">
+                        <li data-i18n="roadmap.phases.0.items.0">490+ tests · cobertura >85%</li>
+                        <li data-i18n="roadmap.phases.0.items.1">Docker multi-arch ARM64/AMD64</li>
+                        <li data-i18n="roadmap.phases.0.items.2">Modbus + MQTT + REST</li>
+                        <li data-i18n="roadmap.phases.0.items.3">Dashboard web básico</li>
+                    </ul>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="phase-tag progress" data-i18n="roadmap.phases.1.tag">EN PROGRESO</div>
+                    <div class="phase-date" data-i18n="roadmap.phases.1.date">Q1 2025</div>
+                    <div class="phase-title" data-i18n="roadmap.phases.1.title">v1.5 — Intelligence</div>
+                    <ul class="phase-items">
+                        <li data-i18n="roadmap.phases.1.items.0">Motor DRL producción</li>
+                        <li data-i18n="roadmap.phases.1.items.1">Predictor CMg v2 (MAPE 4.2%)</li>
+                        <li data-i18n="roadmap.phases.1.items.2">Arbitraje de precio autónomo</li>
+                        <li data-i18n="roadmap.phases.1.items.3">API pública documentada</li>
+                    </ul>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="phase-tag next" data-i18n="roadmap.phases.2.tag">PRÓXIMO</div>
+                    <div class="phase-date" data-i18n="roadmap.phases.2.date">Q2 2025</div>
+                    <div class="phase-title" data-i18n="roadmap.phases.2.title">v2.0 — Compliance</div>
+                    <ul class="phase-items">
+                        <li data-i18n="roadmap.phases.2.items.0">Certificación IEC 62443 SL-2</li>
+                        <li data-i18n="roadmap.phases.2.items.1">Reporte NTSyCS automático</li>
+                        <li data-i18n="roadmap.phases.2.items.2">Logs con firma digital</li>
+                        <li data-i18n="roadmap.phases.2.items.3">Multi-tenant enterprise</li>
+                    </ul>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="phase-tag planned" data-i18n="roadmap.phases.3.tag">PLANIFICADO</div>
+                    <div class="phase-date" data-i18n="roadmap.phases.3.date">Q3 2025</div>
+                    <div class="phase-title" data-i18n="roadmap.phases.3.title">v2.5 — Ecosystem</div>
+                    <ul class="phase-items">
+                        <li data-i18n="roadmap.phases.3.items.0">Marketplace de algoritmos</li>
+                        <li data-i18n="roadmap.phases.3.items.1">SDK TypeScript</li>
+                        <li data-i18n="roadmap.phases.3.items.2">Certificación LatAm regional</li>
+                        <li data-i18n="roadmap.phases.3.items.3">Programa partner integrador</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── EARLY ADOPTER ── -->
+    <section id="early-adopter" class="section">
+        <div class="container">
+            <h2 class="section-title reveal" data-i18n="early_adopter.title">Programa Early Adopter</h2>
+            <p class="section-sub reveal reveal-delay-1" data-i18n="early_adopter.subtitle">Cupos limitados. Sin
+                segundas rondas.</p>
+            <div class="ea-grid">
+                <div class="ea-card reveal reveal-delay-1">
+                    <div class="ea-tier" data-i18n="early_adopter.cards.0.tier">Pioneer</div>
+                    <div class="ea-price" data-i18n="early_adopter.cards.0.price">Gratis</div>
+                    <div class="ea-slots" data-i18n="early_adopter.cards.0.slots">5 cupos</div>
+                    <ul class="ea-benefits">
+                        <li data-i18n="early_adopter.cards.0.benefits.0">Acceso prioritario a v2.0</li>
+                        <li data-i18n="early_adopter.cards.0.benefits.1">Soporte directo del equipo core</li>
+                        <li data-i18n="early_adopter.cards.0.benefits.2">Co-autoría en BESSAI-SPEC</li>
+                        <li data-i18n="early_adopter.cards.0.benefits.3">Badge 'BESSAI Pioneer' verificado</li>
+                        <li data-i18n="early_adopter.cards.0.benefits.4">Discord canal privado</li>
+                    </ul>
+                    <a href="mailto:hello@bess-solutions.cl?subject=Early Adopter Pioneer" class="btn-primary"
+                        data-i18n="early_adopter.cards.0.cta">Solicitar cupo Pioneer</a>
+                </div>
+                <div class="ea-card featured reveal reveal-delay-2">
+                    <div class="ea-tier" data-i18n="early_adopter.cards.1.tier">Strategic Partner</div>
+                    <div class="ea-price" data-i18n="early_adopter.cards.1.price">A convenir</div>
+                    <div class="ea-slots" data-i18n="early_adopter.cards.1.slots">3 cupos</div>
+                    <ul class="ea-benefits">
+                        <li data-i18n="early_adopter.cards.1.benefits.0">Todo lo de Pioneer</li>
+                        <li data-i18n="early_adopter.cards.1.benefits.1">Roadmap co-diseñado</li>
+                        <li data-i18n="early_adopter.cards.1.benefits.2">Integración personalizada</li>
+                        <li data-i18n="early_adopter.cards.1.benefits.3">SLA enterprise 99.9%</li>
+                        <li data-i18n="early_adopter.cards.1.benefits.4">Mención en documentación oficial</li>
+                    </ul>
+                    <a href="mailto:hello@bess-solutions.cl?subject=Strategic Partner" class="btn-primary"
+                        data-i18n="early_adopter.cards.1.cta">Hablar con el equipo</a>
+                </div>
+            </div>
+            <div class="ea-urgency" data-i18n="early_adopter.urgency">⚠️ Solo 8 cupos en total. Disponibles hasta
+                llenar.</div>
+        </div>
+    </section>
+
+    <!-- ── FOOTER ── -->
+    <footer>
+        <div class="container">
+            <div class="foot-grid">
+                <div class="foot-brand">
+                    <img src="assets/logo-bess.png" alt="BESS Solutions" />
+                    <p class="foot-tagline" data-i18n="footer.tagline">Gestión inteligente de energía, open-source.</p>
+                </div>
+                <div class="foot-col">
+                    <h4>Proyecto</h4>
+                    <ul>
+                        <li><a href="https://github.com/bess-solutions/open-bess-edge">GitHub</a></li>
+                        <li><a href="https://bess-solutions.github.io/open-bess-edge">Docs</a></li>
+                        <li><a
+                                href="https://github.com/bess-solutions/open-bess-edge/blob/main/CHANGELOG.md">CHANGELOG</a>
+                        </li>
+                        <li><a href="https://github.com/bess-solutions/open-bess-edge/blob/main/LICENSE">Apache 2.0</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="foot-col">
+                    <h4>Comunidad</h4>
+                    <ul>
+                        <li><a href="https://discord.gg/bessai">Discord</a></li>
+                        <li><a href="https://github.com/bess-solutions/open-bess-edge/issues">Reportar bug</a></li>
+                        <li><a
+                                href="https://github.com/bess-solutions/open-bess-edge/blob/main/CONTRIBUTING.md">Contribuir</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="foot-col">
+                    <h4>Empresa</h4>
+                    <ul>
+                        <li><a href="mailto:hello@bess-solutions.cl">Contacto</a></li>
+                        <li><a href="#early-adopter">Early Adopter</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="foot-bottom">
+                <span data-i18n="footer.copy">© 2025 BESS Solutions SpA · Santiago, Chile</span>
+                <span data-i18n="footer.license">Software libre bajo Apache License 2.0</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ── FLOATING MUSIC PLAYER ── -->
+    <div id="music-player">
+        <img class="mp-cover" src="https://cdn2.suno.ai/edbd3009-1ef6-4a49-9c09-937395b6a4db_dc1e96bf.jpeg"
+            alt="BESS Anthem" />
+        <div class="mp-info">
+            <div class="mp-title" data-i18n="player.title">BESS Solutions in the House</div>
+            <div class="mp-sub" data-i18n="player.subtitle">Phonk Chilean · Suno AI</div>
+            <div id="mp-progress-wrap">
+                <div id="mp-bar"></div>
+            </div>
+        </div>
+        <button id="mp-btn" onclick="toggleMusic()">▶</button>
+        <button id="mp-close" onclick="this.closest('#music-player').style.display='none'">✕</button>
+        <a class="mp-suno-link" href="https://suno.com/s/3fl7sTP1M0Oitou3" target="_blank" rel="noopener"
+            data-i18n="player.suno_link">suno ↗</a>
+    </div>
+    <audio id="bess-audio" crossorigin="anonymous" src="https://cdn1.suno.ai/edbd3009-1ef6-4a49-9c09-937395b6a4db.mp3"
+        preload="none"></audio>
+
+    <script>
+/* BESSAI Website — i18n Engine
+ * Supports: ES, EN
+ * Storage: localStorage('bessai_lang')
+ * Usage:  data-i18n="key.nested" on any element
+ *         data-i18n-html="key" to set innerHTML
+ *         data-i18n-attr="placeholder:key" to set attrs
+ */
+
+const I18N = (() => {
+    let _strings = {};
+    let _lang = 'es';
+
+    // Deep-get a key like "hero.cta_primary" from object
+    function get(key) {
+        return key.split('.').reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), _strings);
+    }
+
+    // Apply all data-i18n translations to DOM
+    function applyAll() {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const val = get(el.dataset.i18n);
+            if (val !== null) el.textContent = val;
+        });
+        document.querySelectorAll('[data-i18n-html]').forEach(el => {
+            const val = get(el.dataset.i18nHtml);
+            if (val !== null) el.innerHTML = val;
+        });
+        document.querySelectorAll('[data-i18n-attr]').forEach(el => {
+            const [attr, key] = el.dataset.i18nAttr.split(':');
+            const val = get(key);
+            if (val !== null) el.setAttribute(attr, val);
+        });
+        // Update html lang attr
+        document.documentElement.lang = _lang;
+        // Update lang toggle buttons
+        document.querySelectorAll('[data-lang-btn]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.langBtn === _lang);
+        });
+    }
+
+    // Load strings object and apply
+    function load(strings, lang) {
+        _strings = strings;
+        _lang = lang;
+        applyAll();
+    }
+
+    // Switch language — fetches JSON from i18n/ folder
+    async function switchTo(lang) {
+        if (lang === _lang) return;
+        try {
+            const res = await fetch(`i18n/${lang}.json`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            load(data, lang);
+            localStorage.setItem('bessai_lang', lang);
+            // Re-run any dynamic rendering that depends on i18n
+            if (window.BESSAI && window.BESSAI.refreshDynamic) window.BESSAI.refreshDynamic();
+        } catch (e) {
+            console.warn('[i18n] Failed to load', lang, e);
+        }
+    }
+
+    // Init: detect lang from localStorage or browser
+    async function init(inlineStrings) {
+        const stored = localStorage.getItem('bessai_lang');
+        const browser = navigator.language.slice(0, 2).toLowerCase();
+        const preferred = stored || (['es', 'en'].includes(browser) ? browser : 'es');
+
+        if (preferred === 'es' || !preferred) {
+            // Use inline strings (already bundled) for default ES
+            load(inlineStrings, 'es');
+        } else {
+            load(inlineStrings, 'es'); // paint immediately with default
+            await switchTo(preferred);  // then fetch preferred
+        }
+    }
+
+    return { init, switchTo, get, load };
+})();
+
+/* BESSAI Website — main.js
+ * Requires: I18N global (i18n.js)
+ */
+
+window.BESSAI = (() => {
+
+    // ── ROTATING HERO PHRASES ──────────────────────────────
+    let phraseIdx = 0;
+    let phraseTimer = null;
+
+    function startPhrases() {
+        const phrases = I18N.get('hero.phrases');
+        if (!phrases || !phrases.length) return;
+        const l1El = document.getElementById('hero-l1');
+        const l2El = document.getElementById('hero-l2');
+        if (!l1El || !l2El) return;
+
+        function show(i) {
+            l1El.style.opacity = '0'; l2El.style.opacity = '0';
+            setTimeout(() => {
+                l1El.innerHTML = phrases[i].l1;
+                l2El.innerHTML = phrases[i].l2;
+                l1El.style.opacity = '1'; l2El.style.opacity = '1';
+            }, 350);
+        }
+
+        show(phraseIdx);
+        phraseTimer = setInterval(() => {
+            phraseIdx = (phraseIdx + 1) % phrases.length;
+            show(phraseIdx);
+        }, 3200);
+    }
+
+    // ── AUDIENCE TABS ──────────────────────────────────────
+    const AUDIENCE_KEYS = ['integrador', 'developer', 'investor', 'academia', 'regulator'];
+
+    function buildAudienceTabs() {
+        const tabs = document.getElementById('aud-tabs');
+        const content = document.getElementById('aud-content');
+        if (!tabs || !content) return;
+
+        const labels = I18N.get('audiences.tabs') || [];
+        const data = I18N.get('audiences.content') || {};
+
+        // Build tab buttons
+        tabs.innerHTML = labels.map((label, i) =>
+            `<button class="aud-tab${i === 0 ? ' active' : ''}" data-idx="${i}">${label}</button>`
+        ).join('');
+
+        function renderPanel(idx) {
+            const key = AUDIENCE_KEYS[idx];
+            const d = data[key] || {};
+            content.innerHTML = `
+        <div class="aud-panel fade-in">
+          <h3 class="aud-headline">${d.headline || ''}</h3>
+          <p class="aud-body">${d.body || ''}</p>
+          <ul class="aud-benefits">
+            ${(d.benefits || []).map(b => `<li>${b}</li>`).join('')}
+          </ul>
+          <a href="#early-adopter" class="btn-secondary">${d.cta || ''}</a>
+        </div>`;
+        }
+
+        renderPanel(0);
+        tabs.addEventListener('click', e => {
+            const btn = e.target.closest('[data-idx]');
+            if (!btn) return;
+            tabs.querySelectorAll('.aud-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderPanel(+btn.dataset.idx);
+        });
+    }
+
+    // ── LIVE METRICS STRIP ────────────────────────────────
+    function startLiveMetrics() {
+        const defs = [
+            { id: 'lm-savings', min: 12400, max: 14800, decimals: 0 },
+            { id: 'lm-latency', min: 23, max: 48, decimals: 1 },
+            { id: 'lm-soc', min: 72, max: 91, decimals: 1 },
+            { id: 'lm-cycles', min: 3, max: 7, decimals: 0 },
+        ];
+        function rnd(mn, mx, d) { return (Math.random() * (mx - mn) + mn).toFixed(d); }
+        function update() {
+            defs.forEach(({ id, min, max, decimals }) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = rnd(min, max, decimals);
+            });
+        }
+        update();
+        setInterval(update, 3000);
+    }
+
+    // ── TERMINAL BOOT SEQUENCE ────────────────────────────
+    function runTerminal() {
+        const out = document.getElementById('term-output');
+        if (!out) return;
+        const lines = [
+            { text: '$ bessai-edge start --config /etc/bessai/prod.yml', delay: 0, color: '#34d399' },
+            { text: '[BOOT] Initializing BESSAI Edge v1.5.0 …', delay: 400, color: '#94a3b8' },
+            { text: '[CONN] Modbus TCP   → 192.168.1.10:502 ✓', delay: 900, color: '#94a3b8' },
+            { text: '[CONN] MQTT broker  → mqtt://edge:1883   ✓', delay: 1300, color: '#94a3b8' },
+            { text: '[CONN] Prometheus   → :9090              ✓', delay: 1700, color: '#94a3b8' },
+            { text: '[AI]  Loading DRL model (ONNX) …', delay: 2200, color: '#94a3b8' },
+            { text: '[AI]  Model loaded  → inference 12 ms latency', delay: 2800, color: '#94a3b8' },
+            { text: '[OPT] Price forecast:  CMg  $42.3/MWh  (MAPE 4.2%)', delay: 3400, color: '#fbbf24' },
+            { text: '[OPT] Decision: CHARGE  → SoC 72% → 91%  +$847/day', delay: 4000, color: '#34d399' },
+            { text: '[SEC] IEC 62443 SL-2 audit: PASS  ✓', delay: 4600, color: '#22d3ee' },
+            { text: '● BESSAI Edge ready  │  Dashboard: http://edge:8080', delay: 5200, color: '#e2e8f0' },
+        ];
+        lines.forEach(({ text, delay, color }) => {
+            setTimeout(() => {
+                const line = document.createElement('div');
+                line.className = 'term-line';
+                line.style.color = color;
+                line.textContent = text;
+                out.appendChild(line);
+                out.scrollTop = out.scrollHeight;
+            }, delay);
+        });
+    }
+
+    // ── SCROLL REVEAL + COUNTERS ──────────────────────────
+    function initReveal() {
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('revealed');
+                    obs.unobserve(e.target);
+                    const counter = e.target.querySelector('[data-count]');
+                    if (counter) animateCount(counter);
+                }
+            });
+        }, { threshold: 0.15 });
+        document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    }
+
+    function animateCount(el) {
+        const raw = el.dataset.count;
+        const isFloat = raw.includes('.');
+        const target = parseFloat(raw);
+        const duration = 1400;
+        const start = performance.now();
+        function step(now) {
+            const p = Math.min((now - start) / duration, 1);
+            const ease = 1 - Math.pow(1 - p, 3);
+            const val = target * ease;
+            el.textContent = isFloat ? val.toFixed(1) : Math.round(val).toLocaleString();
+            if (p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+
+    // ── NAV SCROLL BEHAVIOUR ─────────────────────────────
+    function initNav() {
+        const nav = document.getElementById('main-nav');
+        if (!nav) return;
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('scrolled', window.scrollY > 60);
+        }, { passive: true });
+
+        // Hamburger
+        const burger = document.getElementById('nav-burger');
+        const menu = document.getElementById('nav-menu');
+        if (burger && menu) {
+            burger.addEventListener('click', () => {
+                menu.classList.toggle('open');
+                burger.classList.toggle('open');
+            });
+            menu.querySelectorAll('a').forEach(a => {
+                a.addEventListener('click', () => {
+                    menu.classList.remove('open');
+                    burger.classList.remove('open');
+                });
+            });
+        }
+    }
+
+    // ── MUSIC PLAYER ─────────────────────────────────────
+    function initPlayer() {
+        const audio = document.getElementById('bess-audio');
+        const btn = document.getElementById('mp-btn');
+        const bar = document.getElementById('mp-bar');
+        const wrap = document.getElementById('mp-progress-wrap');
+        const player = document.getElementById('music-player');
+        if (!audio || !player) return;
+
+        setTimeout(() => {
+            player.style.transform = 'translateY(0)';
+            player.style.opacity = '1';
+        }, 2000);
+
+        window.toggleMusic = () => {
+            if (audio.paused) {
+                audio.play();
+                btn.textContent = '⏸';
+            } else {
+                audio.pause();
+                btn.textContent = '▶';
+            }
+        };
+        if (bar && wrap) {
+            audio.addEventListener('timeupdate', () => {
+                if (audio.duration) bar.style.width = (audio.currentTime / audio.duration * 100) + '%';
+            });
+            wrap.addEventListener('click', e => {
+                const r = wrap.getBoundingClientRect();
+                audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
+            });
+        }
+        audio.addEventListener('ended', () => {
+            btn.textContent = '▶';
+            if (bar) bar.style.width = '0%';
+        });
+    }
+
+    // ── REFRESH AFTER LANG SWITCH ─────────────────────────
+    function refreshDynamic() {
+        clearInterval(phraseTimer);
+        startPhrases();
+        buildAudienceTabs();
+    }
+
+    // ── INIT ──────────────────────────────────────────────
+    function init() {
+        initNav();
+        startPhrases();
+        buildAudienceTabs();
+        startLiveMetrics();
+        runTerminal();
+        initReveal();
+        initPlayer();
+    }
+
+    return { init, refreshDynamic };
+})();
+
+document.addEventListener('DOMContentLoaded', () => BESSAI.init());
+
+
+(function(){
+  var ES = {
+  "lang": "es",
+  "nav": {
+    "problema": "El Problema",
+    "solucion": "Solución",
+    "features": "Funciones",
+    "comunidad": "Comunidad",
+    "roadmap": "Roadmap",
+    "contacto": "Contacto"
+  },
+  "hero": {
+    "badge": "Open Source · Apache 2.0 · IEC 62443",
+    "phrases": [
+      { "l1": "El cerebro de tu",        "l2": "batería es <em>open-source.</em>" },
+      { "l1": "Optimización de energía", "l2": "con <em>IA en el edge.</em>" },
+      { "l1": "Más rentabilidad,",       "l2": "menos pérdidas, <em>más control.</em>" },
+      { "l1": "Cumple NTSyCS",           "l2": "e IEC 62443 <em>desde el día 1.</em>" },
+      { "l1": "Arbitraje de precio",     "l2": "autónomo, <em>sin cloud.</em>" },
+      { "l1": "Construido para LatAm,",  "l2": "<em>abierto al mundo.</em>" }
+    ],
+    "sub": "Gateway industrial open-source para sistemas de almacenamiento de energía en baterías. IEC 62443 · NTSyCS Chile · <strong>490+ tests</strong>.",
+    "cta_primary": "Ver en GitHub",
+    "cta_secondary": "Unirme al programa Early Adopter"
+  },
+  "live": {
+    "label_savings":  "Ahorro energético",
+    "label_latency":  "Latencia edge",
+    "label_soc":      "SoC activo",
+    "label_cycles":   "Ciclos protegidos",
+    "unit_savings":   "$/día",
+    "unit_latency":   "ms",
+    "unit_soc":       "% promedio",
+    "unit_cycles":    "instancias",
+    "live_tag":       "EN VIVO"
+  },
+  "audiences": {
+    "title": "¿Por qué BESSAI es para ti?",
+    "tabs": ["Integrador", "Desarrollador", "Inversionista", "Academia", "Regulador"],
+    "content": {
+      "integrador": {
+        "headline": "Deploy en horas, no semanas",
+        "body": "BESSAI Edge corre en cualquier hardware con Linux: Raspberry Pi, PLCs industriales, servidores edge. Soporte Modbus TCP, IEC 61850, MQTT, DNP3 y REST sin configuración adicional.",
+        "benefits": ["Stack Docker multi-arch (ARM64 + AMD64)", "Wizard de configuración guiado", "Soporte Modbus, IEC 61850, MQTT, DNP3", "Certificación IEC 62443 incluida"],
+        "cta": "Ver guía de instalación"
+      },
+      "developer": {
+        "headline": "API-first, test-first, open by design",
+        "body": "490+ tests automatizados, cobertura >85%, hooks de extensión para algoritmos propios (DRL/MILP/ONNX). Contribuye y acredita tu trabajo en la especificación BESSAI.",
+        "benefits": ["490+ tests · cobertura >85%", "Motor pluggable: DRL, MILP, ONNX", "SDK Python con tipos completos", "Discord activo + issues etiquetados"],
+        "cta": "Explorar el código"
+      },
+      "investor": {
+        "headline": "$2.4B TAM, posición de primero en LatAm",
+        "body": "El mercado BESS crece 38% anual en América Latina. BESSAI es el único stack open-source certificable para NTSyCS Chile y regulaciones similares en la región.",
+        "benefits": ["38% CAGR mercado BESS LatAm", "$2.4B TAM addressable 2027", "Primer mover en stack open-source certificable", "Modelo dual: open-core + soporte enterprise"],
+        "cta": "Descargar pitch deck"
+      },
+      "academia": {
+        "headline": "Infraestructura real para investigación real",
+        "body": "Usa BESSAI como plataforma de experimentación para algoritmos de optimización energética. Datos reales, entorno reproducible, publicaciones citables.",
+        "benefits": ["Dataset CMg histórico incluido", "Módulos DRL y MILP extensibles", "Entorno Docker reproducible", "Co-autoría en publicaciones BESSAI-SPEC"],
+        "cta": "Solicitar acceso académico"
+      },
+      "regulator": {
+        "headline": "Trazabilidad y cumplimiento por diseño",
+        "body": "Logs auditables firmados, reportes de cumplimiento NTSyCS automáticos, gestión de certificados x.509 integrada. Auditá el código completo: es open-source.",
+        "benefits": ["Logs inmutables con firma digital", "Reportes NTSyCS automáticos", "OT/IT seguro: IEC 62443 SL-2", "Código auditable al 100%"],
+        "cta": "Ver documentación de compliance"
+      }
+    }
+  },
+  "problem": {
+    "title": "El problema que resolvemos",
+    "subtitle": "Los sistemas BESS industriales dependen de software propietario opaco, costoso y no certificable.",
+    "stats": [
+      { "value": "38%", "label": "Crecimiento anual BESS en LatAm", "detail": "CAGR 2024–2027" },
+      { "value": "$2.4B", "label": "Mercado addressable 2027", "detail": "BNEF Research" },
+      { "value": "4.2%", "label": "MAPE predicción de precio CMg", "detail": "vs 8-12% competencia" },
+      { "value": "490+", "label": "Tests automatizados", "detail": "cobertura >85%" }
+    ]
+  },
+  "features": {
+    "title": "Todo lo que necesitas, nada que no necesitas",
+    "items": [
+      { "icon": "⚡", "title": "IA en el Edge",           "desc": "DRL, MILP y modelos ONNX corriendo localmente. Sin latencia cloud, sin dependencias externas." },
+      { "icon": "🔌", "title": "Conectividad Industrial", "desc": "Modbus TCP, IEC 61850, MQTT, DNP3, REST y OPC-UA listos para usar." },
+      { "icon": "🛡️", "title": "Seguridad IEC 62443",    "desc": "Certificación SL-2, gestión de certificados x.509, logs auditables firmados digitalmente." },
+      { "icon": "📊", "title": "Observabilidad Total",    "desc": "Prometheus + Grafana embebidos, dashboard web en tiempo real, alertas configurables." },
+      { "icon": "🌎", "title": "NTSyCS Chile",            "desc": "Cumplimiento nativo con la normativa técnica de sistemas de coordinación eléctrica chilena." },
+      { "icon": "🐳", "title": "Deploy Anywhere",         "desc": "Docker multi-arch ARM64/AMD64. Corre en Raspberry Pi, PLCs, servidores edge y cloud." }
+    ]
+  },
+  "stack": {
+    "title": "Especificaciones técnicas",
+    "sections": [
+      {
+        "heading": "Conectividad",
+        "rows": [
+          ["Protocolos OT",   "Modbus TCP, IEC 61850, DNP3, OPC-UA"],
+          ["Protocolos IT",   "MQTT 5, REST/HTTP, gRPC, WebSocket"],
+          ["Seguridad red",   "mTLS, VPN WireGuard, firewall integrado"],
+          ["Latencia edge",   "< 50 ms ciclo de control"]
+        ]
+      },
+      {
+        "heading": "Inteligencia Artificial",
+        "rows": [
+          ["Algoritmos",    "Deep Reinforcement Learning (DRL), MILP"],
+          ["Inferencia",    "ONNX Runtime, TensorRT (opcional)"],
+          ["Predicción CMg","MAPE 4.2% · histórico CEN Chile"],
+          ["Entrenamiento", "Incremental online + batch offline"]
+        ]
+      },
+      {
+        "heading": "Observabilidad",
+        "rows": [
+          ["Métricas",    "Prometheus + Grafana embebidos"],
+          ["Logs",        "Structured JSON · firma digital SHA-256"],
+          ["Dashboard",   "Web UI tiempo real · WebSocket"],
+          ["Alertas",     "PagerDuty, Slack, Email, Webhook"]
+        ]
+      },
+      {
+        "heading": "Compliance",
+        "rows": [
+          ["Ciberseguridad",  "IEC 62443 SL-2 certificable"],
+          ["Chile",           "NTSyCS coordinación eléctrica"],
+          ["PKI",             "Gestión certificados x.509 integrada"],
+          ["Auditoría",       "Logs inmutables · trazabilidad completa"]
+        ]
+      }
+    ]
+  },
+  "community": {
+    "title": "Únete a la comunidad",
+    "subtitle": "Somos un proyecto open-source impulsado por la comunidad de energía de América Latina.",
+    "cards": [
+      { "icon": "💬", "title": "Discord",    "desc": "Discusión técnica, soporte y newscletter semanal.", "cta": "Unirse al servidor", "href": "https://discord.gg/bessai" },
+      { "icon": "🐙", "title": "GitHub",     "desc": "Código abierto, issues, PRs y roadmap público.",   "cta": "Ver repositorio",   "href": "https://github.com/bess-solutions/open-bess-edge" },
+      { "icon": "📄", "title": "Documentación", "desc": "Guías, API reference y tutoriales.",             "cta": "Leer docs",         "href": "https://bess-solutions.github.io/open-bess-edge" }
+    ]
+  },
+  "roadmap": {
+    "title": "Roadmap público",
+    "subtitle": "Desarrollo transparente con fechas reales.",
+    "phases": [
+      { "tag": "LANZADO",    "date": "Q4 2024", "title": "v1.0 — Foundation",  "items": ["490+ tests · cobertura >85%", "Docker multi-arch ARM64/AMD64", "Modbus + MQTT + REST", "Dashboard web básico"] },
+      { "tag": "EN PROGRESO","date": "Q1 2025", "title": "v1.5 — Intelligence","items": ["Motor DRL producción", "Predictor CMg v2 (MAPE 4.2%)", "Arbitraje de precio autónomo", "API pública documentada"] },
+      { "tag": "PRÓXIMO",    "date": "Q2 2025", "title": "v2.0 — Compliance",  "items": ["Certificación IEC 62443 SL-2", "Reporte NTSyCS automático", "Logs con firma digital", "Multi-tenant enterprise"] },
+      { "tag": "PLANIFICADO","date": "Q3 2025", "title": "v2.5 — Ecosystem",   "items": ["Marketplace de algoritmos", "SDK TypeScript", "Certificación LatAm regional", "Programa partner integrador"] }
+    ]
+  },
+  "early_adopter": {
+    "title": "Programa Early Adopter",
+    "subtitle": "Cupos limitados. Sin segundas rondas.",
+    "cards": [
+      {
+        "tier": "Pioneer",
+        "slots": "5 cupos",
+        "price": "Gratis",
+        "benefits": ["Acceso prioritario a v2.0", "Soporte directo del equipo core", "Co-autoría en BESSAI-SPEC", "Badge 'BESSAI Pioneer' verificado", "Discord canal privado"],
+        "cta": "Solicitar cupo Pioneer"
+      },
+      {
+        "tier": "Strategic Partner",
+        "slots": "3 cupos",
+        "price": "A convenir",
+        "benefits": ["Todo lo de Pioneer", "Roadmap co-diseñado", "Integración personalizada", "SLA enterprise 99.9%", "Mención en documentación oficial"],
+        "cta": "Hablar con el equipo"
+      }
+    ],
+    "urgency": "⚠️ Solo 8 cupos en total. Disponibles hasta llenar."
+  },
+  "footer": {
+    "tagline": "Gestión inteligente de energía, open-source.",
+    "links": {
+      "proyecto": ["GitHub", "Documentación", "CHANGELOG", "Licencia Apache 2.0"],
+      "comunidad": ["Discord", "Reportar un bug", "Contribuir", "Hall of Fame"],
+      "empresa":   ["Sobre BESS Solutions", "Contacto", "Programa Early Adopter", "Blog técnico"]
+    },
+    "copy": "© 2025 BESS Solutions SpA · Santiago, Chile",
+    "license": "Software libre bajo Apache License 2.0"
+  },
+  "player": {
+    "title": "BESS Solutions in the House",
+    "subtitle": "Phonk Chilean · Suno AI",
+    "suno_link": "suno ↗"
+  }
+}
+;
+  document.addEventListener('DOMContentLoaded', function(){
+    I18N.init(ES);
+  });
+})();
+</script>
+</body>
+
+</html>
