@@ -1042,6 +1042,125 @@ img {
 }
 
 /* ═══════════════════════════════════════
+   IMPACT SECTION
+   ═══════════════════════════════════════ */
+.impact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin-top: 36px
+}
+
+.impact-card {
+  background: rgba(4, 5, 10, .9);
+  border: 1px solid rgba(255, 255, 255, .06);
+  border-radius: 14px;
+  padding: 28px;
+  backdrop-filter: blur(12px);
+  transition: all .3s
+}
+
+.impact-card:hover {
+  border-color: rgba(251, 191, 36, .2);
+  transform: translateY(-3px)
+}
+
+.impact-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  margin-bottom: 14px
+}
+
+.impact-dim {
+  font: 700 .65rem var(--mono);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--gold);
+  margin-bottom: 8px
+}
+
+.impact-goal {
+  font: .82rem/1.6 var(--body);
+  color: var(--muted);
+  margin-bottom: 18px
+}
+
+.impact-kpi-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 14px
+}
+
+.impact-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px
+}
+
+.impact-kpi-val {
+  font: 700 1.3rem var(--display);
+  color: var(--white);
+  line-height: 1
+}
+
+.impact-kpi-lbl {
+  font: .6rem var(--mono);
+  color: var(--muted)
+}
+
+.impact-bar-wrap {
+  height: 4px;
+  background: rgba(255, 255, 255, .04);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 6px
+}
+
+.impact-bar {
+  height: 100%;
+  width: var(--bar-w, 0%);
+  background: var(--bar-color, var(--cyan));
+  border-radius: 2px;
+  transition: width 1.5s cubic-bezier(.22, 1, .36, 1)
+}
+
+.impact-bar-label {
+  font: .58rem var(--mono);
+  color: var(--muted)
+}
+
+.impact-pledge {
+  margin-top: 36px;
+  padding: 28px 32px;
+  background: rgba(10, 12, 20, .9);
+  border: 1px solid rgba(251, 191, 36, .15);
+  border-radius: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 18px
+}
+
+.impact-pledge-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 2px
+}
+
+.impact-pledge p {
+  font: .85rem/1.65 var(--body);
+  color: var(--muted)
+}
+
+.impact-pledge strong {
+  color: var(--white)
+}
+
+/* ═══════════════════════════════════════
    SOCIAL LINKS
    ═══════════════════════════════════════ */
 .social-row {
@@ -1200,8 +1319,7 @@ footer {
   }
 
   .feat-grid,
-  .contrib-grid,
-  .ways-grid {
+  .impact-grid {
     grid-template-columns: 1fr
   }
 
@@ -1215,6 +1333,11 @@ footer {
 
   .wrap {
     padding: 0 24px
+  }
+
+  .impact-pledge {
+    flex-direction: column;
+    gap: 12px
   }
 }
 
