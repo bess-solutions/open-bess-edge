@@ -138,10 +138,7 @@ nav:
     - Hardware Profile Tutorial: tutorials/hardware_profile_contribution.md
     - DRL Training Custom: tutorials/training_custom_drl.md
   - Project Management:
-    - Pendientes: PENDIENTES.md
-    - Módulos y Datos Simulados: MODULOS_Y_DATOS_SIMULADOS.md
-    - Manual Acciones (Rodrigo): MANUAL_ACCIONES_RODRIGO.md
-    - Plan de Inmortalidad: PLAN_INMORTALIDAD.md
+    - Release Process: release_process.md
 
 extra:
   social:

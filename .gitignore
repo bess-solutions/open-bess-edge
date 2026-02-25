@@ -116,3 +116,16 @@ infrastructure/certs/*.srl
 infrastructure/certs/ca.key
 # Public certs are safe to commit (no secret material)
 # infrastructure/certs/*.crt  ← intentionally NOT ignored
+
+# ---------------------------------------------------------------------------
+# BESS Solutions proprietary files — MUST NOT be in the public repo
+# ---------------------------------------------------------------------------
+# Website (move to private repo: bess-solutions/bess-website)
+landing/
+# Dashboard + operational data (move to private repo)
+dashboard/
+# Internal-only documentation
+docs/MANUAL_ACCIONES_RODRIGO.md
+docs/PLAN_INMORTALIDAD.md
+docs/MODULOS_Y_DATOS_SIMULADOS.md
+docs/PENDIENTES.md
