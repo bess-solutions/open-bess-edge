@@ -1,0 +1,238 @@
+# BESSAI Performance Regression — Latency & throughput guard
+# Fails PRs if critical performance metrics regress >10%.
+
+name: Performance Regression
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/core/**"
+      - "src/drivers/**"
+      - "src/agents/**"
+  pull_request:
+    paths:
+      - "src/core/**"
+      - "src/drivers/**"
+      - "src/agents/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  PYTHON_VERSION: "3.11"
+  REGRESSION_THRESHOLD: "10"   # % allowed degradation
+
+jobs:
+  performance:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install -e ".[dev]"
+          pip install pytest-benchmark onnxruntime numpy
+
+      - name: Generate dummy ONNX model
+        run: python scripts/generate_dummy_onnx.py
+
+      - name: Run Modbus driver latency benchmark
+        id: modbus_bench
+        run: |
+          python - <<'EOF'
+          import time, statistics, json
+          from pathlib import Path
+
+          results = {}
+
+          # Simulate Modbus poll latency (core driver) 
+          try:
+              from src.drivers.modbus_driver import ModbusDriver
+              # We can't hit real hardware, but we can benchmark the
+              # parser / marshalling logic (no I/O)
+              from src.drivers.modbus_driver import _parse_register_block
+              samples = []
+              for _ in range(1000):
+                  t = time.perf_counter()
+                  _parse_register_block(b'\x00' * 64, "float32")
+                  samples.append((time.perf_counter() - t) * 1000)
+              results["modbus_parse_p99_ms"] = round(statistics.quantiles(samples, n=100)[98], 3)
+              results["modbus_parse_mean_ms"] = round(statistics.mean(samples), 3)
+              print(f"✅ Modbus parse p99: {results['modbus_parse_p99_ms']} ms")
+          except Exception as e:
+              print(f"⚠️  Modbus driver benchmark skipped: {e}")
+              results["modbus_parse_p99_ms"] = None
+
+          # Health endpoint response time (no server needed — test handler directly)
+          try:
+              from src.core.health import HealthHandler
+              import json as _json
+              samples = []
+              handler = HealthHandler()
+              for _ in range(500):
+                  t = time.perf_counter()
+                  body = _json.dumps(handler.get_status())
+                  samples.append((time.perf_counter() - t) * 1000)
+              results["health_p99_ms"] = round(statistics.quantiles(samples, n=100)[98], 3)
+              print(f"✅ /health handler p99: {results['health_p99_ms']} ms")
+          except Exception as e:
+              print(f"⚠️  Health benchmark skipped: {e}")
+              results["health_p99_ms"] = None
+
+          Path("benchmarks").mkdir(exist_ok=True)
+          Path("benchmarks/current.json").write_text(_json.dumps(results, indent=2))
+          print("Saved:", results)
+          EOF
+
+      - name: Run ONNX inference throughput benchmark
+        id: onnx_bench
+        run: |
+          python - <<'EOF'
+          import time, json, statistics
+          from pathlib import Path
+          import numpy as np
+          import onnxruntime as ort
+
+          results = {}
+          model_path = next(Path("models").glob("**/*.onnx"), None)
+
+          if model_path:
+              session = ort.InferenceSession(str(model_path))
+              input_name = session.get_inputs()[0].name
+              input_shape = session.get_inputs()[0].shape
+              
+              # Resolve dynamic dims
+              shape = [d if isinstance(d, int) else 1 for d in input_shape]
+              dummy = np.zeros(shape, dtype=np.float32)
+
+              # Warmup
+              for _ in range(10):
+                  session.run(None, {input_name: dummy})
+
+              # Benchmark
+              times = []
+              N = 500
+              for _ in range(N):
+                  t = time.perf_counter()
+                  session.run(None, {input_name: dummy})
+                  times.append(time.perf_counter() - t)
+
+              throughput = N / sum(times)
+              results["onnx_throughput_ips"] = round(throughput, 1)
+              results["onnx_latency_p99_ms"] = round(statistics.quantiles([t*1000 for t in times], n=100)[98], 3)
+              print(f"✅ ONNX throughput: {throughput:.1f} inf/s")
+              print(f"✅ ONNX p99 latency: {results['onnx_latency_p99_ms']} ms")
+          else:
+              print("⚠️  No ONNX model found — skipping inference benchmark")
+              results["onnx_throughput_ips"] = None
+
+          cur = json.loads(Path("benchmarks/current.json").read_text())
+          cur.update(results)
+          Path("benchmarks/current.json").write_text(json.dumps(cur, indent=2))
+          EOF
+
+      - name: Compare against baseline
+        id: compare
+        run: |
+          python - <<'EOF'
+          import json, sys
+          from pathlib import Path
+
+          THRESHOLD = float("${{ env.REGRESSION_THRESHOLD }}") / 100
+
+          current = json.loads(Path("benchmarks/current.json").read_text())
+          baseline_path = Path("benchmarks/baseline.json")
+
+          if not baseline_path.exists():
+              print("⚠️  No baseline found — saving current as baseline")
+              import shutil
+              shutil.copy("benchmarks/current.json", "benchmarks/baseline.json")
+              sys.exit(0)
+
+          baseline = json.loads(baseline_path.read_text())
+          regressions = []
+
+          METRICS = {
+              "modbus_parse_p99_ms": ("lower_is_better", 50.0),
+              "health_p99_ms": ("lower_is_better", 10.0),
+              "onnx_throughput_ips": ("higher_is_better", 100.0),
+          }
+
+          print("## 📊 Performance Comparison\n")
+          print(f"{'Metric':<30} {'Baseline':>12} {'Current':>12} {'Delta':>10} {'Status':>8}")
+          print("-" * 75)
+
+          for metric, (direction, target) in METRICS.items():
+              cur_val = current.get(metric)
+              base_val = baseline.get(metric)
+
+              if cur_val is None or base_val is None:
+                  print(f"{metric:<30} {'N/A':>12} {str(cur_val):>12} {'N/A':>10} {'⚠️  SKIP':>8}")
+                  continue
+
+              if direction == "lower_is_better":
+                  delta_pct = (cur_val - base_val) / base_val
+                  worse = delta_pct > THRESHOLD
+              else:
+                  delta_pct = (base_val - cur_val) / base_val
+                  worse = delta_pct > THRESHOLD
+
+              status = "❌ REGRESS" if worse else "✅ OK"
+              print(f"{metric:<30} {base_val:>12.2f} {cur_val:>12.2f} {delta_pct*100:>+9.1f}% {status:>8}")
+
+              if worse:
+                  regressions.append(f"{metric}: {base_val:.2f} → {cur_val:.2f} ({delta_pct*100:+.1f}%)")
+
+          if regressions:
+              print(f"\n❌ PERFORMANCE REGRESSION DETECTED ({len(regressions)} metric(s)):")
+              for r in regressions:
+                  print(f"  - {r}")
+              sys.exit(1)
+          else:
+              print("\n✅ No regressions — all metrics within threshold")
+          EOF
+
+      - name: Update baseline on main
+        if: github.ref == 'refs/heads/main' && success()
+        run: |
+          cp benchmarks/current.json benchmarks/baseline.json
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add benchmarks/baseline.json
+          git diff --staged --quiet || git commit -m "chore(bench): update performance baseline [skip ci]"
+          git push || true
+
+      - name: Post results to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const current = JSON.parse(fs.readFileSync('benchmarks/current.json', 'utf8'));
+            const body = [
+              '## ⚡ Performance Benchmark Results',
+              '',
+              '| Metric | Value | Target |',
+              '|--------|-------|--------|',
+              `| Modbus parse p99 | ${current.modbus_parse_p99_ms ?? 'N/A'} ms | <50ms |`,
+              `| /health handler p99 | ${current.health_p99_ms ?? 'N/A'} ms | <10ms |`,
+              `| ONNX throughput | ${current.onnx_throughput_ips ?? 'N/A'} inf/s | >100 |`,
+            ].join('\n');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });

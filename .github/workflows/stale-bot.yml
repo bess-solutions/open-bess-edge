@@ -1,0 +1,87 @@
+# BESSAI Stale Bot — Issue and PR lifecycle management
+
+name: Stale Bot
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   # Daily 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    name: Mark and close stale items
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-issue-stale: 60
+          days-before-issue-close: 14
+          stale-issue-label: "stale"
+          close-issue-label: "autoclosed"
+          stale-issue-message: |
+            👋 This issue has been inactive for **60 days**. We will close it in 14 days if there is no further activity.
+            Add the `pinned` label to keep it open, or comment with a status update.
+          close-issue-message: |
+            🔒 Closed due to inactivity. Feel free to reopen if still relevant.
+          days-before-pr-stale: 30
+          days-before-pr-close: 14
+          stale-pr-label: "stale"
+          close-pr-label: "autoclosed"
+          stale-pr-message: |
+            👋 This PR has been inactive for **30 days**. Closing in 14 days unless updated.
+          close-pr-message: |
+            🔒 Closed due to inactivity. Branch and commits are preserved — reopen anytime!
+          exempt-issue-labels: "pinned,security,good first issue,governance,incident"
+          exempt-pr-labels: "pinned,security,do not merge,WIP"
+          remove-stale-when-updated: true
+          ascending: true
+          operations-per-run: 100
+
+  weekly-health-report:
+    name: Weekly health report
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Generate health metrics
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open', per_page: 100
+            });
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open', per_page: 50
+            });
+            const { data: repo } = await github.rest.repos.get({
+              owner: context.repo.owner, repo: context.repo.repo
+            });
+
+            const stale = issues.filter(i => i.labels.some(l => l.name === 'stale')).length;
+            const bugs = issues.filter(i => i.labels.some(l => l.name === 'bug')).length;
+            const incidents = issues.filter(i => i.labels.some(l => l.name === 'incident')).length;
+
+            const lines = [
+              '## 🏥 BESSAI Weekly Repo Health',
+              `| Metric | Value |`,
+              `|--------|-------|`,
+              `| ⭐ Stars | ${repo.stargazers_count} |`,
+              `| 🐛 Open bugs | ${bugs} |`,
+              `| 🔴 Incidents | ${incidents} |`,
+              `| 📋 Open issues | ${issues.length} |`,
+              `| 🌀 Stale | ${stale} |`,
+              `| 🔀 Open PRs | ${prs.length} |`,
+            ].join('\n');
+
+            core.summary.addRaw(lines);
+            await core.summary.write();
