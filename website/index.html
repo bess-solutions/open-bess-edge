@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BESS Solutions — Inteligencia Energética Autónoma</title>
+  <meta name="description" content="BESSAI Edge es el sistema de gestión de baterías más avanzado de LatAm. IA, optimización MILP-DRL y cumplimiento IEEE 2030.5 — directo en el edge." />
+  <meta property="og:title" content="BESS Solutions — Inteligencia Energética Autónoma" />
+  <meta property="og:description" content="Optimización autónoma de BESS con IA real. 613 tests. IEC 62443 SL-2. Datos CEN en tiempo real." />
+  <meta property="og:url" content="https://bess-solutions.cl" />
+  <meta property="og:type" content="website" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════ NAV ═══════════════════════════════════ -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" rx="8" fill="#0891b2"/>
+        <path d="M8 20L14 12L19 17L23 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="24" cy="10" r="2.5" fill="#22d3ee"/>
+      </svg>
+      <span class="logo-text">BESS <span class="logo-accent">Solutions</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#producto">Producto</a></li>
+      <li><a href="#metricas">Métricas</a></li>
+      <li><a href="#hardware">Hardware</a></li>
+      <li><a href="#precios">Precios</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+    <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank" class="btn btn-outline nav-cta">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════ HERO ════════════════════════════════════ -->
+<section class="hero" id="inicio">
+  <div class="hero-bg">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+  </div>
+  <div class="container">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Open Source · IEC 62443 SL-2 Ready · v2.10.0
+    </div>
+    <h1 class="hero-title">
+      Gestión autónoma de BESS<br>
+      <span class="gradient-text">con inteligencia real</span>
+    </h1>
+    <p class="hero-subtitle">
+      BESSAI Edge conecta tu batería al mercado eléctrico chileno. Optimización MILP + DRL entrenado con datos CMg reales del CEN/SEN, autoprotección con watchdog autónomo y cumplimiento IEEE 2030.5 — todo en el edge, sin depender de la nube.
+    </p>
+    <div class="hero-actions">
+      <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank" class="btn btn-primary">
+        Comenzar gratis
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#producto" class="btn btn-ghost">Ver cómo funciona</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-number" data-target="613">0</span>
+        <span class="stat-label">Tests verdes</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-number" data-target="7">0</span>
+        <span class="stat-label">Marcas compatibles</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-number" data-suffix="ms" data-target="5">0</span>
+        <span class="stat-label">Latencia ciclo</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-number" data-suffix="%" data-target="98">0</span>
+        <span class="stat-label">IEC 62443 SL-2</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ FEATURES ════════════════════════════════ -->
+<section class="section" id="producto">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Producto</span>
+      <h2>Todo lo que necesita un BESS moderno</h2>
+      <p>Desde la adquisición de datos hasta la ejecución de estrategias de arbitraje optimizadas con IA — en un solo sistema open source.</p>
+    </div>
+    <div class="features-grid">
+
+      <div class="feature-card feature-card--large">
+        <div class="feature-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        </div>
+        <h3>Optimizador MILP + DRL</h3>
+        <p>Planificación de despacho por Programación Lineal Entera Mixta con fallback a agente DRL entrenado con datos CMg reales del nodo Maitencillo 220 kV (CEN/SEN Chile). Maximiza arbitraje respetando degradación de batería.</p>
+        <ul class="feature-list">
+          <li>Solver HiGHS/CBC integrado</li>
+          <li>48+ días de datos CMg históricos reales</li>
+          <li>Modelo de degradación semi-empírico (LFP, NMC, NCA)</li>
+          <li>Exportación ONNX para deploy edge (RPi 5)</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <h3>Seguridad IEC 62443 SL-2</h3>
+        <p>mTLS mutual auth, TOTP 2FA, rate limiting SR 7.1, bandit SAST, Trivy container scan y OpenSSF Scorecard en CI/CD. ~98% de cumplimiento.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+        </div>
+        <h3>WatchdogManager Autónomo</h3>
+        <p>Autorecuperación sin intervención humana. Detecta desconexiones del driver y reconecta con backoff exponencial (1s → 30s). Métricas Prometheus integradas.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        </div>
+        <h3>IEEE 2030.5 / SEP 2.0</h3>
+        <p>Adaptador IEEE 2030.5 completo para cumplimiento CPUC Rule 21 y AEMO AS/NZS 4777.2. Compatible con aggregadores VPP y demand response.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <h3>Publicación Dual-Canal</h3>
+        <p>GCP Pub/Sub + MQTT simultáneamente. Observabilidad con OpenTelemetry, métricas Prometheus en <code>/metrics</code> y health check en <code>/health</code>.</p>
+      </div>
+
+      <div class="feature-card feature-card--highlight">
+        <div class="feature-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+        </div>
+        <h3>100% Open Source</h3>
+        <p>Apache 2.0. Sin vendor lock-in. Certificación BESSAI disponible. Comunidad activa en GitHub con roadmap público y BEPs formales.</p>
+        <a href="https://github.com/bess-solutions/open-bess-edge" class="feature-link" target="_blank">Ver en GitHub →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ MÉTRICAS ════════════════════════════════ -->
+<section class="section section--alt" id="metricas">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Calidad verificada</span>
+      <h2>Números que hablan por sí solos</h2>
+    </div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-number">613</div>
+        <div class="metric-label">Tests automatizados</div>
+        <div class="metric-sub">0 failures · CI verde cada commit</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-number">~98%</div>
+        <div class="metric-label">IEC 62443 SL-2</div>
+        <div class="metric-sub">OpenSSF Scorecard passing</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-number">&lt;5ms</div>
+        <div class="metric-label">Latencia ciclo edge</div>
+        <div class="metric-sub">En Raspberry Pi 5 · 8GB RAM</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-number">48+</div>
+        <div class="metric-label">Días CMg reales CEN</div>
+        <div class="metric-sub">Nodo Maitencillo 220 kV</div>
+      </div>
+    </div>
+    <div class="ci-badge-row">
+      <div class="ci-badge">
+        <span class="badge-label">pytest</span>
+        <span class="badge-status badge-status--green">613 passing</span>
+      </div>
+      <div class="ci-badge">
+        <span class="badge-label">ruff</span>
+        <span class="badge-status badge-status--green">passing</span>
+      </div>
+      <div class="ci-badge">
+        <span class="badge-label">mypy</span>
+        <span class="badge-status badge-status--green">passing</span>
+      </div>
+      <div class="ci-badge">
+        <span class="badge-label">trivy</span>
+        <span class="badge-status badge-status--green">0 critical</span>
+      </div>
+      <div class="ci-badge">
+        <span class="badge-label">bandit</span>
+        <span class="badge-status badge-status--green">clean</span>
+      </div>
+      <div class="ci-badge">
+        <span class="badge-label">docker</span>
+        <span class="badge-status badge-status--green">linux/amd64 · arm64</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ HARDWARE ════════════════════════════════ -->
+<section class="section" id="hardware">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Compatibilidad</span>
+      <h2>7 marcas. Un solo sistema.</h2>
+      <p>Conecta tu inversor real vía Modbus TCP con perfiles YAML pre-validados. Nuevo perfil en &lt;1 hora.</p>
+    </div>
+    <div class="hw-grid">
+      <div class="hw-card">
+        <div class="hw-logo">🔆</div>
+        <div class="hw-name">Huawei SUN2000</div>
+        <div class="hw-status hw-status--stable">Estable</div>
+      </div>
+      <div class="hw-card">
+        <div class="hw-logo">⚡</div>
+        <div class="hw-name">Fronius Primo</div>
+        <div class="hw-status hw-status--stable">Estable</div>
+      </div>
+      <div class="hw-card">
+        <div class="hw-logo">☀️</div>
+        <div class="hw-name">SMA Sunny Boy</div>
+        <div class="hw-status hw-status--stable">Estable</div>
+      </div>
+      <div class="hw-card">
+        <div class="hw-logo">🔋</div>
+        <div class="hw-name">Victron MultiPlus</div>
+        <div class="hw-status hw-status--stable">Estable</div>
+      </div>
+      <div class="hw-card">
+        <div class="hw-logo">🌞</div>
+        <div class="hw-name">SolarEdge</div>
+        <div class="hw-status hw-status--beta">Beta</div>
+      </div>
+      <div class="hw-card">
+        <div class="hw-logo">🔋</div>
+        <div class="hw-name">BYD Battery-Box</div>
+        <div class="hw-status hw-status--beta">Beta</div>
+      </div>
+      <div class="hw-card">
+        <div class="hw-logo">⚡</div>
+        <div class="hw-name">Tesla Powerwall</div>
+        <div class="hw-status hw-status--beta">Beta</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ HOW IT WORKS ════════════════════════════ -->
+<section class="section section--alt">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Arquitectura</span>
+      <h2>Del dato al despacho en 5 pasos</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h3>Adquisición</h3>
+          <p>Driver Modbus TCP lee SoC, potencia activa y temperatura cada 5 segundos desde el inversor real.</p>
+        </div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h3>Seguridad</h3>
+          <p>SafetyGuard valida rangos. Si algo sale del límite, bloquea la publicación y activa alertas inmediatas.</p>
+        </div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h3>Optimización</h3>
+          <p>MILP calcula el plan de despacho óptimo. DRL PPO lo refina usando precios CMg en tiempo real del CEN.</p>
+        </div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <h3>Publicación</h3>
+          <p>Telemetría segura a GCP Pub/Sub + MQTT. Métricas Prometheus. Dashboard actualizado al instante.</p>
+        </div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">05</div>
+        <div class="step-content">
+          <h3>Auto-sanación</h3>
+          <p>WatchdogManager detecta fallos y reconecta sin intervención humana. El sistema sigue operando.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ PRICING ════════════════════════════════ -->
+<section class="section" id="precios">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Precios</span>
+      <h2>Empieza gratis. Escala cuando lo necesites.</h2>
+    </div>
+    <div class="pricing-grid">
+
+      <div class="pricing-card">
+        <div class="pricing-header">
+          <div class="pricing-name">Open Source</div>
+          <div class="pricing-price">Gratis</div>
+          <div class="pricing-period">Para siempre · Apache 2.0</div>
+        </div>
+        <ul class="pricing-features">
+          <li>✓ Código completo en GitHub</li>
+          <li>✓ 7 perfiles de hardware</li>
+          <li>✓ Optimizador MILP</li>
+          <li>✓ Datos CMg históricos CEN</li>
+          <li>✓ Docker + Helm charts</li>
+          <li>✓ Documentación completa</li>
+        </ul>
+        <a href="https://github.com/bess-solutions/open-bess-edge" class="btn btn-outline" target="_blank">Clonar repositorio</a>
+      </div>
+
+      <div class="pricing-card pricing-card--featured">
+        <div class="pricing-badge">Early Adopter</div>
+        <div class="pricing-header">
+          <div class="pricing-name">BESSAI Pro</div>
+          <div class="pricing-price">A convenir</div>
+          <div class="pricing-period">Proyecto piloto · Precio especial 2026</div>
+        </div>
+        <ul class="pricing-features">
+          <li>✓ Todo lo de Open Source</li>
+          <li>✓ Integración llave en mano</li>
+          <li>✓ Soporte dedicado 24/7</li>
+          <li>✓ Dashboard personalizado</li>
+          <li>✓ Certificación BESSAI</li>
+          <li>✓ CMg feed en tiempo real</li>
+          <li>✓ SLA garantizado</li>
+        </ul>
+        <a href="#contacto" class="btn btn-primary">Solicitar demo</a>
+      </div>
+
+      <div class="pricing-card">
+        <div class="pricing-header">
+          <div class="pricing-name">Enterprise</div>
+          <div class="pricing-price">Personalizado</div>
+          <div class="pricing-period">Multi-sitio · OEM · Utilities</div>
+        </div>
+        <ul class="pricing-features">
+          <li>✓ Despliegue multi-sitio</li>
+          <li>✓ Integración ERP/SCADA</li>
+          <li>✓ Perfil Modbus custom</li>
+          <li>✓ Compliance regulatorio</li>
+          <li>✓ Training equipo técnico</li>
+          <li>✓ IP privada disponible</li>
+        </ul>
+        <a href="#contacto" class="btn btn-outline">Contactar</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ ROADMAP ════════════════════════════════ -->
+<section class="section section--alt">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Roadmap 2026</span>
+      <h2>El futuro de BESSAI</h2>
+    </div>
+    <div class="roadmap">
+      <div class="roadmap-item roadmap-item--done">
+        <div class="roadmap-dot"></div>
+        <div class="roadmap-content">
+          <div class="roadmap-date">Q4 2025</div>
+          <h3>Núcleo Edge v1</h3>
+          <p>Modbus TCP, GCP Pub/Sub, SafetyGuard, MQTT, OpenTelemetry, IEEE 2030.5</p>
+        </div>
+      </div>
+      <div class="roadmap-item roadmap-item--done">
+        <div class="roadmap-dot"></div>
+        <div class="roadmap-content">
+          <div class="roadmap-date">Ene–Feb 2026</div>
+          <h3>IA y Seguridad</h3>
+          <p>MILP optimizer, DRL PPO con datos CEN reales, WatchdogManager, IEC 62443 SL-2 ~98%, OpenSSF Scorecard</p>
+        </div>
+      </div>
+      <div class="roadmap-item roadmap-item--active">
+        <div class="roadmap-dot"></div>
+        <div class="roadmap-content">
+          <div class="roadmap-date">Q1 2026</div>
+          <h3>Plataforma & Comunidad</h3>
+          <p>Certificación BESSAI pública, multisite dashboard, Discord community, primeros early adopters</p>
+        </div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-dot"></div>
+        <div class="roadmap-content">
+          <div class="roadmap-date">Q2 2026</div>
+          <h3>Integración VPP</h3>
+          <p>write_tag control, OpenADR 2.0, aggregación de flota MARL, API pública CMg predictor</p>
+        </div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-dot"></div>
+        <div class="roadmap-content">
+          <div class="roadmap-date">Q3–Q4 2026</div>
+          <h3>Expansión LatAm</h3>
+          <p>Colombia, Perú, Brasil; traducción pt-BR, regulación ONS/CAMMESA, alianzas con fabricantes</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ CONTACTO ════════════════════════════════ -->
+<section class="section" id="contacto">
+  <div class="container">
+    <div class="contact-box">
+      <div class="contact-content">
+        <span class="section-tag">Contacto</span>
+        <h2>¿Tienes un BESS que optimizar?</h2>
+        <p>Agenda una demo técnica gratuita. En 30 minutos te mostramos BESSAI corriendo en hardware real con tus condiciones de mercado.</p>
+        <div class="contact-details">
+          <a href="mailto:contacto@bess-solutions.cl" class="contact-link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            contacto@bess-solutions.cl
+          </a>
+          <a href="https://github.com/bess-solutions/open-bess-edge" class="contact-link" target="_blank">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            github.com/bess-solutions/open-bess-edge
+          </a>
+        </div>
+      </div>
+      <div class="contact-cta-box">
+        <a href="mailto:contacto@bess-solutions.cl?subject=Demo%20BESSAI%20Edge&body=Hola%2C%20me%20interesa%20agendar%20una%20demo%20t%C3%A9cnica%20de%20BESSAI%20Edge." class="btn btn-primary btn-lg">
+          Agendar demo gratuita
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <p class="contact-note">Sin compromiso · Respuesta en &lt;24h · Técnicos, no vendedores</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ FOOTER ══════════════════════════════════ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo">
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="8" fill="#0891b2"/>
+            <path d="M8 20L14 12L19 17L23 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="24" cy="10" r="2.5" fill="#22d3ee"/>
+          </svg>
+          <span class="logo-text">BESS <span class="logo-accent">Solutions</span></span>
+        </a>
+        <p>Sistema de gestión de baterías con inteligencia artificial. Open source, edge-native, LatAm-ready.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Producto</h4>
+          <a href="#producto">Features</a>
+          <a href="#hardware">Hardware</a>
+          <a href="#precios">Precios</a>
+          <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/CHANGELOG.md" target="_blank">Changelog</a>
+        </div>
+        <div class="footer-col">
+          <h4>Documentación</h4>
+          <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/docs/QUICKSTART.md" target="_blank">Quickstart</a>
+          <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/docs/PLAN_INMORTALIDAD.md" target="_blank">Roadmap</a>
+          <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/SECURITY.md" target="_blank">Security</a>
+        </div>
+        <div class="footer-col">
+          <h4>Empresa</h4>
+          <a href="#contacto">Contacto</a>
+          <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank">GitHub</a>
+          <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/LICENSE" target="_blank">Apache 2.0</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 BESS Solutions SpA · Santiago, Chile</p>
+      <p>Hecho con ⚡ para el mercado eléctrico chileno</p>
+    </div>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
