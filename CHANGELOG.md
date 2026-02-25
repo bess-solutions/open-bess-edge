@@ -7,6 +7,9 @@
 
 ---
 
+
+## [Unreleased]
+
 ## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-25T13:43 -03:00)
 
 > [!IMPORTANT]
@@ -61,6 +64,9 @@
 > 4. **Early Adopters** → Publicar `docs/early_adopters.md` en Discord/LinkedIn
 > 5. **Scrollytelling Landing build** → `cd landing && npm install && npm run build` → desplegar en GitHub Pages
 
+
+### ✨ New Features
+- **workflows**: add 8 power workflows for BESSAI monster automation (`0be81e39`, @BESS Solutions)
 
 ### Contexto del sistema
 **BESSAI Edge Gateway** (`open-bess-edge`) es el componente de borde de un sistema de gestión de baterías industriales (BESS). Adquiere telemetría via **Modbus TCP** desde inversores Huawei SUN2000 + batería LUNA2000, valida seguridad, y publica a **GCP Pub/Sub** con observabilidad via **OpenTelemetry** y **Prometheus**.
