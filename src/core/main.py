@@ -15,6 +15,7 @@ Entry point for the async acquisition loop.  Brings together:
 5. ``PubSubPublisher``  — publishes safe telemetry to GCP Pub/Sub.
 6. ``watchdog_loop``    — background heartbeat task (auto-restarted if it dies).
 7. ``HealthServer``     — HTTP /health + /metrics endpoints on port 8000.
+8. ``WatchdogManager``  — autonomous self-healing reconnection loop (Plan Inmortalidad Eje 1).
 
 Lifecycle
 ---------
@@ -77,6 +78,14 @@ try:
 except ImportError:  # gymnasium not installed
     _DRL_AVAILABLE = False
 
+# Plan de Inmortalidad Eje 1 — WatchdogManager (optional, fail-safe)
+try:
+    from src.core.watchdog_manager import WatchdogManager as _WatchdogManager
+    _WATCHDOG_MANAGER_AVAILABLE = True
+except ImportError:
+    _WATCHDOG_MANAGER_AVAILABLE = False
+    _WatchdogManager = None  # type: ignore[assignment]
+
 # Resolve settings once at module level (safe — uses _LazySettings proxy)
 _cfg = get_settings()
 
@@ -103,6 +112,7 @@ log: structlog.BoundLogger = structlog.get_logger(__name__)
 # ---------------------------------------------------------------------------
 _DRL_MODEL_PATH: str = os.getenv("BESSAI_DRL_MODEL_PATH", "models/drl_arbitrage_v1.onnx")
 _DRL_ENABLED: bool = os.getenv("BESSAI_DRL_ENABLED", "false").lower() == "true"
+_WATCHDOG_MANAGER_ENABLED: bool = os.getenv("BESSAI_WATCHDOG_ENABLED", "true").lower() == "true"
 
 # ---------------------------------------------------------------------------
 # Tags read on every acquisition cycle
@@ -246,6 +256,29 @@ async def main() -> None:  # noqa: C901
             action="exiting",
         )
         return
+
+    # ── Step 4b — WatchdogManager self-healing (Plan de Inmortalidad Eje 1) ──
+    _watchdog_manager_task: asyncio.Task | None = None
+    if _WATCHDOG_MANAGER_AVAILABLE and _WATCHDOG_MANAGER_ENABLED:
+        try:
+            _wdm = _WatchdogManager(driver=driver)  # type: ignore[call-arg]
+            _watchdog_manager_task = asyncio.create_task(
+                _wdm.run(), name="watchdog_manager_self_heal"
+            )
+            log.info(
+                "watchdog_manager.enabled",
+                note="Autonomous self-healing loop active — Plan de Inmortalidad Eje 1",
+            )
+        except Exception as exc:
+            log.warning(
+                "watchdog_manager.start_failed",
+                error=str(exc),
+                action="continuing_without_watchdog_manager",
+            )
+    elif not _WATCHDOG_MANAGER_AVAILABLE:
+        log.debug("watchdog_manager.unavailable", reason="import_failed")
+    else:
+        log.debug("watchdog_manager.disabled", tip="Set BESSAI_WATCHDOG_ENABLED=true to enable")
 
     # ── Step 5b — Health & Metrics server ────────────────────────────────
     health_server = HealthServer(
@@ -517,6 +550,12 @@ async def main() -> None:  # noqa: C901
                 pass
 
     # PubSubPublisher.__aexit__ already closed the session here.
+    if _watchdog_manager_task is not None and not _watchdog_manager_task.done():
+        _watchdog_manager_task.cancel()
+        try:
+            await _watchdog_manager_task
+        except (asyncio.CancelledError, Exception):
+            pass
     if mqtt_pub is not None:
         await mqtt_pub.stop()
     if _sep2_adapter is not None:

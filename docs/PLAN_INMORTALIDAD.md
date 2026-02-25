@@ -22,17 +22,20 @@
 > "Un sistema inmortal detecta degradación antes de morir."
 
 ### Ya implementado ✅
-- 541 tests + chaos engineering + CI/CD 10 jobs
+- 590 tests + chaos engineering + CI/CD 10 jobs
 - ONNX offline → funciona sin internet ni cloud
 - Multi-arch (amd64/arm64) → corre en cualquier hardware
 - Protocolos estándar abiertos → no vendor lock-in (Modbus/IEEE/IEC)
+- **Watchdog autónomo + self-healing loop** ✅ `v2.9.0-dev` (`src/core/watchdog_manager.py`)
+- **Fix C901 `handle_der_control`** ✅ `v2.9.0-dev` — 3 métodos privados async
+- **Fix SSL mTLS validation** ✅ `v2.9.0-dev` — fail-fast antes de `load_cert_chain()`
 
 ### Pendiente ⏳
 | Acción | Por qué es inmortalidad | Target |
 |---|---|---|
 | 100% coverage módulos críticos (`safety.py`, `modbus_driver.py`) | Un bug en safety puede matar el proyecto de un día para otro | v2.10.0 |
 | BEP-0201 Digital Twin PINN | El sistema predice cuándo va a fallar — no solo reacciona | v3.0.0 |
-| Watchdog autónomo + self-healing loop | El gateway se reinicia solo ante fallos detectados | v2.10.0 |
+| **WatchdogManager integration en `main.py`** | Activar en producción → auto-heal real | v2.9.0 |
 | Test de regresión automático contra hardware simulado | Cada PR valida que no se rompió algo real | v2.9.0 |
 | Soporte DNP3 + OPC-UA (BEP-0202) | Más protocolos = más dispositivos = más irreemplazable | v3.0.0 |
 
@@ -134,9 +137,11 @@ Capa 5 (CONTRATOS):        PoC pagados con utilities Chile/LatAm
 ```
 Semana 1-2 (Feb 24 - Mar 7):
   └─ Branch-Protection + cosign keypair  ← Rodrigo
-  └─ 10 good first issues en GitHub      ← Rodrigo
+  └─ 10 good first issues en GitHub      ← Rodrigo + AI ✅ (workflow creado)
   └─ GitHub Sponsors activo              ← Rodrigo
-  └─ Fix C901 + SSL test + tests MILP    ← AI
+  └─ Fix C901 + SSL test + tests MILP    ← AI ✅ COMPLETADO
+  └─ WatchdogManager self-healing         ← AI ✅ COMPLETADO
+  └─ BEP-0200 Fase 3 env CMg CEN real    ← AI ✅ COMPLETADO
 
 Semana 3-4 (Mar 8-21):
   └─ LF Energy Landscape PR
@@ -171,5 +176,7 @@ Semana 9-12 (Abr 19 - May 17):
 | Funding mensual sostenible | ≥ $2.000 USD/mes | $0 |
 | Adopters productivos | ≥ 3 | 0 |
 | LF Energy status | Incubation o Graduated | No aplicado |
+| **Tests passing** | ≥ 600 | **590** ↗ |
+| **Eje Técnico: Watchdog** | Integrado en prod | v2.9.0-dev ✅ |
 
 **Cuando todos esos indicadores se cumplan: el proyecto sobrevivirá aunque BESS Solutions SpA desaparezca.**
