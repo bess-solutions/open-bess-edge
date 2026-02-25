@@ -225,11 +225,33 @@ Because this software controls physical battery hardware, we apply additional ru
 
 ## Testing Requirements
 
-- **Minimum coverage:** 80% overall (enforced by CI)
+> **Test Policy (OpenSSF `test_policy`):** Every major new feature or functional change MUST include automated tests. Pull Requests that add new functionality without corresponding tests will **not be merged**. This policy is enforced by CI.
+
+- **Minimum coverage:** 80% overall (enforced by CI with `--cov-fail-under=80`)
 - **Test style:** `pytest` with `pytest-asyncio` for async code
-- Every new module in `src/interfaces/` must have a corresponding `tests/test_<module>.py`
+- **New functionality:** Every new module or feature MUST have tests in `tests/test_<module>.py`
+- **Failure modes:** Tests MUST cover error paths, not just happy paths (safety-critical requirement)
 - Use `pytest.mark.parametrize` for data-driven tests
 - Do not use `time.sleep()` in tests — use `pytest-asyncio` + `asyncio.sleep` or mock
+
+### How to run the test suite
+
+```bash
+# Run full suite (standard invocation)
+pytest tests/ -v --tb=short
+
+# With coverage
+pytest tests/ -v --cov=src --cov-report=term-missing --cov-fail-under=80
+
+# Run a specific module
+pytest tests/test_modbus_driver.py -v
+```
+
+### Recent evidence of test policy adherence
+
+- `v2.9.0`: WatchdogManager added → 19 new tests added (`tests/test_watchdog_manager.py`)
+- `v2.9.0`: BEP-0200 Phase 3 → 23 new tests added (`tests/agents/test_bep0200_*.py`)
+- `v2.8.0`: IEEE 2030.5 SEP 2.0 adapter → full test suite in `tests/test_sep2_adapter.py`
 
 ---
 
