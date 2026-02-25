@@ -301,6 +301,17 @@ button {
   background: var(--green)
 }
 
+/* Impact section badge (VISIÓN) */
+.badge-vi {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 .6rem var(--mono);
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: var(--gold);
+}
+
 /* Act Typography */
 .act-h1 {
   font: 700 clamp(3rem, 7.5vw, 6rem)/1 var(--display);
@@ -864,9 +875,27 @@ button {
   font: .6rem var(--mono);
   padding: 3px 10px;
   border-radius: 4px;
+  background: rgba(255, 255, 255, .04);
+  color: var(--muted);
+  border: 1px solid rgba(255, 255, 255, .08);
+}
+
+.dash-status.ok {
   background: rgba(52, 211, 153, .08);
   color: var(--green);
-  border: 1px solid rgba(52, 211, 153, .15);
+  border-color: rgba(52, 211, 153, .2);
+}
+
+.dash-status.warn {
+  background: rgba(251, 191, 36, .08);
+  color: var(--gold);
+  border-color: rgba(251, 191, 36, .2);
+}
+
+.dash-status.err {
+  background: rgba(249, 115, 22, .08);
+  color: var(--amber);
+  border-color: rgba(249, 115, 22, .2);
 }
 
 .kpi-row {
