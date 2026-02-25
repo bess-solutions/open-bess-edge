@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════
    BESS Solutions — ORBITAL main.js
-   Three.js multi-scene + GSAP ScrollTrigger + Chart.js + i18n
+   Three.js multi-scene + IntersectionObserver + Chart.js + i18n
    ═══════════════════════════════════════════════════════════ */
 (function () {
     'use strict';
