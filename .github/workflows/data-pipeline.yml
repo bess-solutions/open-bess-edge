@@ -1,0 +1,177 @@
+# BESSAI Data Pipeline — Daily market data scraper
+# Runs bessai_data_scraper.py daily to keep training data fresh.
+# Outputs are used by bessai-evolve.yml and model-drift.yml.
+
+name: Data Pipeline
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # Daily 03:00 UTC (before Chilean market opens)
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Days of history to fetch"
+        default: "7"
+        required: false
+      sources:
+        description: "Sources (all | cmg ernc weather ...)"
+        default: "all"
+        required: false
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  scrape:
+    name: Scrape market & environmental data
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      sources_ok: ${{ steps.scrape.outputs.sources_ok }}
+      total_records: ${{ steps.scrape.outputs.total_records }}
+      failed_sources: ${{ steps.scrape.outputs.failed_sources }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install scraper dependencies
+        run: |
+          pip install pandas requests openpyxl pyarrow numpy
+
+      - name: Run data scraper
+        id: scrape
+        run: |
+          DAYS="${{ github.event.inputs.days || '7' }}"
+          SOURCES="${{ github.event.inputs.sources || 'all' }}"
+
+          echo "🔍 Scraping $SOURCES (last $DAYS days)..."
+          python scripts/bessai_data_scraper.py --days "$DAYS" --sources $SOURCES
+          EXIT=$?
+
+          if [ -f data/scraper_manifest.json ]; then
+            cat data/scraper_manifest.json
+            SOURCES_OK=$(python -c "import json; d=json.load(open('data/scraper_manifest.json')); print(','.join(d.get('sources_ok',[])))" || echo "none")
+            FAILED=$(python -c "import json; d=json.load(open('data/scraper_manifest.json')); print(','.join(d.get('sources_failed',[])))" || echo "")
+            echo "sources_ok=$SOURCES_OK" >> "$GITHUB_OUTPUT"
+            echo "failed_sources=$FAILED" >> "$GITHUB_OUTPUT"
+          else
+            echo "sources_ok=none" >> "$GITHUB_OUTPUT"
+            echo "failed_sources=all" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ -f data/training_dataset.parquet ]; then
+            ROWS=$(python -c "import pandas as pd; df=pd.read_parquet('data/training_dataset.parquet'); print(len(df))" || echo "0")
+            echo "total_records=$ROWS" >> "$GITHUB_OUTPUT"
+            echo "✅ Training dataset: $ROWS rows"
+          else
+            echo "total_records=0" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload training dataset
+        uses: actions/upload-artifact@v4
+        with:
+          name: bessai-training-data-${{ github.run_number }}
+          path: |
+            data/training_dataset.parquet
+            data/cmg_historico.parquet
+            data/scraper_manifest.json
+            data/raw/
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Validate data quality
+        id: validate
+        run: |
+          python - <<'EOF'
+          import sys
+          from pathlib import Path
+
+          path = Path("data/training_dataset.parquet")
+          if not path.exists():
+              print("❌ No training_dataset.parquet found")
+              sys.exit(1)
+
+          try:
+              import pandas as pd
+              df = pd.read_parquet(path)
+              print(f"✅ Training dataset: {len(df)} rows × {len(df.columns)} columns")
+              if len(df) < 100:
+                  print(f"⚠️  WARNING: Only {len(df)} rows — data may be sparse")
+              print(f"   Columns: {list(df.columns)}")
+          except Exception as e:
+              print(f"❌ Validation failed: {e}")
+              sys.exit(1)
+          EOF
+
+      - name: Post summary
+        if: always()
+        run: |
+          echo "## 🔍 BESSAI Data Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Sources OK | \`${{ steps.scrape.outputs.sources_ok }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Failed | \`${{ steps.scrape.outputs.failed_sources || 'none' }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Total records | ${{ steps.scrape.outputs.total_records }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Run date | $(date -u '+%Y-%m-%d %H:%M UTC') |" >> $GITHUB_STEP_SUMMARY
+
+  alert-on-failure:
+    name: Alert if data pipeline fails
+    needs: scrape
+    if: failure() || needs.scrape.outputs.sources_ok == 'none'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create incident issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `🚨 Data Pipeline: all sources failed — ${new Date().toISOString().slice(0,10)}`;
+            const body = [
+              '## Data Pipeline Failure',
+              '',
+              'The daily data scraper failed to retrieve data from **all configured sources**.',
+              '',
+              '**Impact:** BESSAIEvolve will use synthetic data this week instead of real market data.',
+              '',
+              '**Sources failed:** ' + '${{ needs.scrape.outputs.failed_sources }}',
+              '',
+              '**Action required:**',
+              '1. Check if CEN Chile APIs are available: https://api.energiaabierta.cl',
+              '2. Check Open-Meteo: https://api.open-meteo.com',
+              '3. Re-run the workflow manually: `workflow_dispatch`',
+              '',
+              `**Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`
+            ].join('\n');
+
+            // Check if a similar open issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'data-pipeline,incident'
+            });
+
+            if (issues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['data-pipeline', 'incident', 'bug']
+              });
+              console.log('Created incident issue');
+            } else {
+              console.log('Existing incident issue found — not creating duplicate');
+            }

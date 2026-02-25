@@ -1,0 +1,185 @@
+# BESSAI Security Full — Deep security audit
+# SAST (semgrep), secrets scan, SBOM, container scan, license check.
+# Runs weekly + on every push to main.
+
+name: Security Full
+
+on:
+  schedule:
+    - cron: "0 2 * * 0"   # Sundays 02:00 UTC
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "requirements*.txt"
+      - "pyproject.toml"
+      - "Dockerfile"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  issues: write
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  sast-semgrep:
+    name: SAST — Semgrep
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/python
+            p/secrets
+            p/owasp-top-ten
+            p/gitlab-bandit
+            p/semgrep-rule-packs
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+        continue-on-error: true
+
+      - name: Run Semgrep CLI (no token fallback)
+        if: env.SEMGREP_APP_TOKEN == ''
+        run: |
+          pip install semgrep
+          semgrep --config=p/python --config=p/secrets \
+            --sarif --output=semgrep.sarif src/ || true
+
+      - name: Upload Semgrep SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+        if: always() && hashFiles('semgrep.sarif') != ''
+        continue-on-error: true
+
+  secrets-scan:
+    name: Secrets Scan — TruffleHog
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # Full history for secret scan
+
+      - name: TruffleHog full history scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ""
+          head: HEAD
+          extra_args: --debug --only-verified
+
+  sbom:
+    name: SBOM — Generate & Upload
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Install Syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Generate SBOM (SPDX 2.3)
+        run: |
+          syft dir:. \
+            --output spdx-json=sbom-spdx.json \
+            --output cyclonedx-json=sbom-cyclonedx.json \
+            --output table
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.sha }}
+          path: |
+            sbom-spdx.json
+            sbom-cyclonedx.json
+          retention-days: 90
+
+      - name: Post SBOM summary
+        run: |
+          echo "## 📦 SBOM Summary" >> $GITHUB_STEP_SUMMARY
+          python -c "
+          import json
+          with open('sbom-spdx.json') as f: d = json.load(f)
+          pkgs = d.get('packages', [])
+          print(f'Total packages: {len(pkgs)}')
+          " >> $GITHUB_STEP_SUMMARY || true
+
+  license-check:
+    name: License Compatibility Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install and check licenses
+        run: |
+          pip install -e ".[dev]" pip-licenses
+          echo "## 📜 License Report" >> $GITHUB_STEP_SUMMARY
+          pip-licenses --format=markdown >> $GITHUB_STEP_SUMMARY || true
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Fail on GPL/AGPL (incompatible with Apache 2.0 distribution)
+          VIOLATIONS=$(pip-licenses --format=plain --allow-only="MIT;BSD;Apache;ISC;PSF;Python;LGPL;CC0;MPL;Unlicense;Public Domain" 2>&1 | grep "^FAIL" || true)
+          if [ -n "$VIOLATIONS" ]; then
+            echo "❌ License violations found:"
+            echo "$VIOLATIONS"
+            exit 1
+          fi
+          echo "✅ All licenses compatible with Apache 2.0"
+
+  container-security:
+    name: Container — Trivy full scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image for scanning
+        run: docker build -t bessai-edge:scan .
+
+      - name: Trivy — vulnerability scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "bessai-edge:scan"
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL,HIGH"
+          exit-code: "0"   # Don't fail CI — report only
+
+      - name: Upload Trivy SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+        if: always()
+        continue-on-error: true
+
+      - name: Trivy — misconfig scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "config"
+          scan-ref: "."
+          format: "table"
+          severity: "HIGH,CRITICAL"
+          exit-code: "0"

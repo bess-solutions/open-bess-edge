@@ -1,0 +1,198 @@
+# BESSAI Changelog Bot — Auto-update CHANGELOG.md on every feat/fix commit
+# Parses conventional commits, updates CHANGELOG.md, and notifies Discord.
+
+name: Changelog Bot
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "CHANGELOG.md"
+      - "benchmarks/**"
+      - "data/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: read
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  update-changelog:
+    name: Update CHANGELOG.md
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 10
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Parse commit and update CHANGELOG
+        id: changelog
+        run: |
+          python - <<'EOF'
+          import re, subprocess, sys, os
+          from datetime import date
+          from pathlib import Path
+
+          # Get latest commit info
+          commit_msg = subprocess.check_output(
+              ["git", "log", "-1", "--format=%s"], text=True
+          ).strip()
+          commit_sha = subprocess.check_output(
+              ["git", "log", "-1", "--format=%H"], text=True
+          ).strip()[:8]
+          commit_author = subprocess.check_output(
+              ["git", "log", "-1", "--format=%an"], text=True
+          ).strip()
+
+          # Parse conventional commit
+          pattern = r'^(feat|fix|docs|refactor|perf|test|ci|chore|security|breaking)(?:\(([^)]+)\))?: (.+)$'
+          match = re.match(pattern, commit_msg, re.IGNORECASE)
+
+          if not match:
+              print(f"⏭️  Not a conventional commit — skipping: {commit_msg}")
+              with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                  f.write("updated=false\n")
+                  f.write("commit_type=skip\n")
+              sys.exit(0)
+
+          commit_type, scope, description = match.groups()
+          commit_type = commit_type.lower()
+          today = date.today().isoformat()
+
+          # Determine section
+          type_to_section = {
+              "feat": "### ✨ New Features",
+              "fix": "### 🐛 Bug Fixes",
+              "security": "### 🔐 Security",
+              "breaking": "### ⚠️ Breaking Changes",
+              "perf": "### ⚡ Performance",
+              "docs": "### 📚 Documentation",
+              "refactor": "### 🔨 Refactoring",
+              "ci": "### 🤖 CI/CD",
+              "chore": "### 🔧 Maintenance",
+              "test": "### 🧪 Tests",
+          }
+          section = type_to_section.get(commit_type, "### 🔧 Maintenance")
+          scope_str = f"**{scope}**: " if scope else ""
+          entry = f"- {scope_str}{description} (`{commit_sha}`, @{commit_author})"
+
+          print(f"✅ Parsed: [{commit_type}] {scope_str}{description}")
+          print(f"   Adding to CHANGELOG.md under '{section}'")
+
+          # Read CHANGELOG
+          changelog_path = Path("CHANGELOG.md")
+          if not changelog_path.exists():
+              print("⚠️  CHANGELOG.md not found — skipping")
+              with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                  f.write("updated=false\n")
+              sys.exit(0)
+
+          content = changelog_path.read_text(encoding="utf-8")
+
+          # Find or create [Unreleased] section
+          unreleased_marker = "## [Unreleased]"
+          if unreleased_marker not in content:
+              # Insert after the first heading line
+              lines = content.split("\n")
+              insert_at = next((i for i, l in enumerate(lines) if l.startswith("## ")), 2)
+              lines.insert(insert_at, f"\n{unreleased_marker}\n")
+              content = "\n".join(lines)
+
+          # Find or create the type section within Unreleased
+          unreleased_pos = content.index(unreleased_marker)
+          next_version_pos = content.find("\n## [", unreleased_pos + 1)
+          if next_version_pos == -1:
+              next_version_pos = len(content)
+
+          unreleased_block = content[unreleased_pos:next_version_pos]
+
+          if section in unreleased_block:
+              # Append entry after the section header
+              updated_block = unreleased_block.replace(
+                  section + "\n",
+                  section + "\n" + entry + "\n",
+                  1
+              )
+          else:
+              # Add new section before next section or at end of Unreleased
+              first_section = re.search(r'\n### ', unreleased_block)
+              if first_section:
+                  insert_pos = unreleased_pos + first_section.start()
+                  updated_block = (
+                      unreleased_block[:first_section.start()] +
+                      f"\n{section}\n{entry}\n" +
+                      unreleased_block[first_section.start():]
+                  )
+              else:
+                  updated_block = unreleased_block + f"\n{section}\n{entry}\n"
+
+          new_content = content[:unreleased_pos] + updated_block + content[next_version_pos:]
+          changelog_path.write_text(new_content, encoding="utf-8")
+          print("✅ CHANGELOG.md updated")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write("updated=true\n")
+              f.write(f"commit_type={commit_type}\n")
+              f.write(f"commit_scope={scope or ''}\n")
+              f.write(f"description={description}\n")
+              f.write(f"section={section}\n")
+          EOF
+
+      - name: Commit CHANGELOG update
+        if: steps.changelog.outputs.updated == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git diff --staged --quiet || git commit -m "docs(changelog): auto-update [skip ci]"
+          git push
+
+      - name: Notify Discord on new feature
+        if: steps.changelog.outputs.updated == 'true' && steps.changelog.outputs.commit_type == 'feat' && env.DISCORD_WEBHOOK != ''
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          python - <<'EOF'
+          import os, json, urllib.request
+
+          scope = "${{ steps.changelog.outputs.commit_scope }}"
+          desc = "${{ steps.changelog.outputs.description }}"
+          scope_str = f"[{scope}] " if scope else ""
+          feature_name = f"{scope_str}{desc}"
+          repo = "${{ github.repository }}"
+          sha = "${{ github.sha }}"[:8]
+          author = "${{ github.actor }}"
+
+          payload = {
+            "username": "BESSAI Changelog Bot",
+            "embeds": [{
+              "title": f"✨ New Feature: {feature_name}",
+              "description": f"A new feature was just merged into `main`!",
+              "color": 0x00D26A,
+              "fields": [
+                {"name": "Commit", "value": f"`{sha}`", "inline": True},
+                {"name": "By", "value": f"@{author}", "inline": True},
+              ],
+              "footer": {"text": f"github.com/{repo}"},
+              "url": f"https://github.com/{repo}/blob/main/CHANGELOG.md"
+            }]
+          }
+
+          req = urllib.request.Request(
+            os.environ["DISCORD_WEBHOOK"],
+            data=json.dumps(payload).encode(),
+            headers={"Content-Type": "application/json"},
+            method="POST"
+          )
+          try:
+              urllib.request.urlopen(req, timeout=10)
+              print("✅ Discord notified")
+          except Exception as e:
+              print(f"⚠️ Discord failed: {e}")
+          EOF
