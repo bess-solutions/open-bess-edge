@@ -989,6 +989,77 @@
                 flex-direction: column
             }
         }
+
+        /* ── LANG SWITCHER ── */
+        .lang-sw {
+            display: flex;
+            gap: 3px;
+            margin-right: 6px
+        }
+
+        .lang-btn {
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: .72rem;
+            font-family: var(--mono);
+            letter-spacing: .06em;
+            color: var(--muted);
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, .08);
+            cursor: pointer;
+            transition: all var(--tr)
+        }
+
+        .lang-btn:hover {
+            color: var(--white);
+            border-color: rgba(255, 255, 255, .2)
+        }
+
+        .lang-btn.active {
+            color: var(--cyan);
+            border-color: rgba(34, 211, 238, .4);
+            background: rgba(34, 211, 238, .06)
+        }
+
+        /* ── GEOPOLITICAL BANNER ── */
+        .geo-banner {
+            position: relative;
+            z-index: 10;
+            background: linear-gradient(90deg, rgba(5, 150, 105, .06), rgba(8, 145, 178, .05), rgba(5, 150, 105, .06));
+            border-bottom: 1px solid rgba(52, 211, 153, .15);
+            padding: 7px 0;
+            overflow: hidden
+        }
+
+        .geo-inner {
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: 0 28px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap
+        }
+
+        .geo-tag {
+            font-family: var(--mono);
+            font-size: .63rem;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--green);
+            flex-shrink: 0
+        }
+
+        .geo-text {
+            font-family: var(--mono);
+            font-size: .7rem;
+            color: var(--muted);
+            flex: 1
+        }
+
+        .geo-text strong {
+            color: var(--green)
+        }
     </style>
 </head>
 
@@ -1001,21 +1072,36 @@
     <nav class="nav" id="nav">
         <div class="nav-inner">
             <a class="nav-logo" href="#ch1">
-                <div class="logo-badge">⚡</div>BESS Solutions
+                <div class="logo-badge">&#x26A1;</div>BESS Solutions
             </a>
             <div class="nav-links">
-                <a href="#ch1">El Porqué</a>
-                <a href="#ch2">La Oportunidad</a>
-                <a href="#ch3">La Solución</a>
+                <a href="#ch1" data-i18n="nav.why">El Porqu&#233;</a>
+                <a href="#ch2" data-i18n="nav.opp">La Oportunidad</a>
+                <a href="#ch3" data-i18n="nav.sol">La Soluci&#243;n</a>
                 <a href="#dashboard">Dashboard</a>
                 <a href="#roadmap">Roadmap</a>
             </div>
             <div class="nav-end">
+                <div class="lang-sw" role="group" aria-label="Language">
+                    <button class="lang-btn active" onclick="setLang('es')" aria-label="Espa&#241;ol">ES</button>
+                    <button class="lang-btn" onclick="setLang('en')" aria-label="English">EN</button>
+                    <button class="lang-btn" onclick="setLang('pt')" aria-label="Portugu&#234;s">PT</button>
+                </div>
                 <a class="btn-gh" href="https://github.com/bess-solutions/open-bess-edge" target="_blank">GitHub</a>
-                <a class="btn-demo" href="#contacto">Solicitar demo</a>
+                <a class="btn-demo" href="#contacto" data-i18n="nav.demo">Solicitar demo</a>
             </div>
         </div>
     </nav>
+
+    <!-- GEOPOLITICAL CONTEXT BANNER -->
+    <div class="geo-banner">
+        <div class="geo-inner">
+            <span class="geo-tag">&#x1F30D; Contexto Global</span>
+            <span class="geo-text" data-i18n="geo.text">Mientras algunos dan marcha atr&#225;s, <strong>Am&#233;rica
+                    Latina lidera</strong> la transici&#243;n energ&#233;tica con el mejor recurso solar y e&#243;lico
+                del mundo. Chile, Colombia, Per&#250;, Brasil.</span>
+        </div>
+    </div>
 
     <!-- ═════════════════════════════════════════
      CAPÍTULO 1 — LA CRISIS CLIMÁTICA
@@ -1023,20 +1109,22 @@
     <section class="chapter" id="ch1">
         <div class="chapter-overlay"></div>
         <div class="ch-inner">
-            <div class="ch-badge badge-1"><span class="ch-dot b1-dot"></span>01 · El Contexto</div>
-            <h1 class="ch-h1">El planeta<br>está <span class="accent-orange">en transición.</span><br>La energía,
-                también.</h1>
-            <p class="ch-sub">
-                El CO₂ alcanza máximos históricos. La temperatura sube. Pero en lugar de resignación,<br>
-                el mundo eligió <em>acelerar la transformación energética</em> más grande de la historia.
+            <div class="ch-badge badge-1" data-i18n="ch1.badge"><span class="ch-dot b1-dot"></span>01 &middot; El
+                Contexto</div>
+            <h1 class="ch-h1" data-i18n="ch1.h1">El planeta<br>est&#225; <span class="accent-orange">en
+                    transici&#243;n.</span><br>&#161;Y LatAm lidera.</h1>
+            <p class="ch-sub" data-i18n="ch1.sub">
+                Mientras potencias tradicionales vuelven al carbon, <em>Chile tiene el mejor recurso solar del
+                    mundo</em> (Atacama), Colombia el mejor e&#243;lico de LatAm, y todo un continente eligiendo la
+                transici&#243;n energ&#233;tica limpia.
             </p>
             <div class="ch-pills">
-                <div class="pill pill-1"><span class="pill-v">424 ppm</span><span class="pill-l">CO₂ atmosférico — NASA
-                        2024</span></div>
-                <div class="pill pill-2"><span class="pill-v">+1.2 °C</span><span class="pill-l">Anomalía temp. global ·
-                        NASA</span></div>
-                <div class="pill pill-3"><span class="pill-v">195</span><span class="pill-l">países comprometidos ·
-                        Acuerdo de París</span></div>
+                <div class="pill pill-1"><span class="pill-v">424 ppm</span><span class="pill-l"
+                        data-i18n="ch1.p1">CO&#x2082; atm. &mdash; NASA 2024</span></div>
+                <div class="pill pill-2"><span class="pill-v">+1.2 &#176;C</span><span class="pill-l"
+                        data-i18n="ch1.p2">Anomal&#237;a temp. global &middot; NASA</span></div>
+                <div class="pill pill-3"><span class="pill-v">195</span><span class="pill-l"
+                        data-i18n="ch1.p3">pa&#237;ses &middot; Acuerdo de Par&#237;s</span></div>
             </div>
         </div>
         <div class="scroll-ind"><span class="scroll-line"></span>scroll</div>
@@ -1534,6 +1622,70 @@
                 document.getElementById('nav').style.background = scrollY > 60 ? 'rgba(6,8,15,.97)' : 'rgba(6,8,15,.8)';
             });
 
+        })();
+
+        // ── i18n ENGINE ──────────────────────────────────────────
+        const T = {
+            es: {
+                'nav.why': 'El Porqu&#233;',
+                'nav.opp': 'La Oportunidad',
+                'nav.sol': 'La Soluci&#243;n',
+                'nav.demo': 'Solicitar demo',
+                'geo.text': 'Mientras algunos dan marcha atr&#225;s, <strong>Am&#233;rica Latina lidera</strong> la transici&#243;n energ&#233;tica con el mejor recurso solar y e&#243;lico del mundo.',
+                'ch1.badge': '<span class="ch-dot b1-dot"></span>01 &middot; El Contexto',
+                'ch1.h1': 'El planeta<br>est&#225; <span class="accent-orange">en transici&#243;n.</span><br>&#161;Y LatAm lidera.',
+                'ch1.sub': 'Mientras potencias tradicionales vuelven al carb&#243;n, <em>Chile tiene el mejor recurso solar del mundo</em> (Atacama), Colombia el mejor e&#243;lico de LatAm, y todo un continente eligiendo la transici&#243;n energ&#233;tica limpia.',
+                'ch1.p1': 'CO&#x2082; atm. &mdash; NASA 2024',
+                'ch1.p2': 'Anomal&#237;a temp. global &middot; NASA',
+                'ch1.p3': 'pa&#237;ses &middot; Acuerdo de Par&#237;s'
+            },
+            en: {
+                'nav.why': 'Why Now',
+                'nav.opp': 'The Opportunity',
+                'nav.sol': 'The Solution',
+                'nav.demo': 'Request demo',
+                'geo.text': 'While some step back, <strong>Latin America leads</strong> the energy transition with the world\'s best solar &amp; wind resources. Chile, Colombia, Peru, Brazil.',
+                'ch1.badge': '<span class="ch-dot b1-dot"></span>01 &middot; The Context',
+                'ch1.h1': 'The planet<br>is <span class="accent-orange">in transition.</span><br>And LatAm leads.',
+                'ch1.sub': 'While traditional powers return to coal, <em>Chile has the world\'s best solar resource</em> (Atacama), Colombia the best wind in LatAm, and an entire continent choosing the clean energy transition.',
+                'ch1.p1': 'Atm. CO&#x2082; &mdash; NASA 2024',
+                'ch1.p2': 'Global temp. anomaly &middot; NASA',
+                'ch1.p3': 'countries &middot; Paris Agreement'
+            },
+            pt: {
+                'nav.why': 'Por Qu&#234;',
+                'nav.opp': 'A Oportunidade',
+                'nav.sol': 'A Solu&#231;&#227;o',
+                'nav.demo': 'Solicitar demo',
+                'geo.text': 'Enquanto alguns recuam, <strong>a Am&#233;rica Latina lidera</strong> a transi&#231;&#227;o energ&#233;tica com os melhores recursos solar e e&#243;lico do mundo.',
+                'ch1.badge': '<span class="ch-dot b1-dot"></span>01 &middot; O Contexto',
+                'ch1.h1': 'O planeta<br>est&#225; <span class="accent-orange">em transi&#231;&#227;o.</span><br>E a LatAm lidera.',
+                'ch1.sub': 'Enquanto pot&#234;ncias tradicionais voltam ao carv&#227;o, <em>o Chile tem o melhor recurso solar do mundo</em> (Atacama), Col&#244;mbia o melhor e&#243;lico da LatAm, e um continente inteiro escolhendo a transi&#231;&#227;o energ&#233;tica.',
+                'ch1.p1': 'CO&#x2082; atm. &mdash; NASA 2024',
+                'ch1.p2': 'Anomalia temp. global &middot; NASA',
+                'ch1.p3': 'pa&#237;ses &middot; Acordo de Paris'
+            }
+        };
+
+        function setLang(lang) {
+            document.documentElement.lang = lang === 'pt' ? 'pt-BR' : lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                const val = T[lang] && T[lang][key];
+                if (val !== undefined) el.innerHTML = val;
+            });
+            document.querySelectorAll('.lang-btn').forEach(b => {
+                b.classList.toggle('active', b.textContent.trim().toLowerCase() === lang);
+            });
+            localStorage.setItem('bessai_lang', lang);
+        }
+
+        // auto-detect language on load
+        (function () {
+            const saved = localStorage.getItem('bessai_lang');
+            const browser = (navigator.language || '').toLowerCase();
+            const lang = saved || (browser.startsWith('pt') ? 'pt' : browser.startsWith('en') ? 'en' : 'es');
+            if (lang !== 'es') setLang(lang);
         })();
     </script>
 </body>
