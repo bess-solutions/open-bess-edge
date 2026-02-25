@@ -49,7 +49,7 @@
 | **IEC 62443 Compliance** | ✅ SL-1 mapeado · SL-2 certification path en `docs/compliance/` |
 | **IEEE 2030.5** | ✅ **Implementado** (BEP-0100) + gap analysis en `docs/compliance/` |
 | **NTSyCS CEN Chile** | ✅ Mapeado en `docs/compliance/` |
-| **OpenSSF Best Practices** | ✅ Passing badge — bestpractices.dev |
+| **OpenSSF Best Practices** | 🟡 In Progress (Passing level) — bestpractices.dev/projects/12001 |
 | **Spec Formales (BESSAI-SPEC)** | ✅ 4 specs: driver, safety, telemetry, **BMS data model (IEEE P2686)** |
 | **Gobernanza TSC + BEP** | ✅ BEP-0001 · `GOVERNANCE.md` · **BESSAI Open Alliance Charter** |
 | **WatchdogManager** (Plan Inmortalidad) | ✅ Self-healing autónomo · backoff · Prometheus · AlertDispatcher |
@@ -140,7 +140,7 @@ open-bess-edge/
 ├── registry/          # Perfiles JSON: Huawei, SMA, Victron, Fronius
 ├── config/            # Variables de entorno (.env.example)
 ├── models/            # ONNX models: dispatch_policy.onnx · drl_arbitrage_v1.onnx
-├── tests/             # Suite de tests (pytest, 490/490 ✅ · interop · chaos · DRL)
+├── tests/             # Suite de tests (pytest, 613/613 ✅ · interop · chaos · DRL)
 ├── infrastructure/
 │   ├── terraform/     # IaC para GCP — Pub/Sub + IAM + WIF (aplicado ✅)
 │   ├── prometheus/    # prometheus.yml · alert_rules.yml
