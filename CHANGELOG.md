@@ -65,6 +65,9 @@
 > 5. **Scrollytelling Landing build** → `cd landing && npm install && npm run build` → desplegar en GitHub Pages
 
 
+### 🔧 Maintenance
+- remove deprecated fetch_cmg_evolution.py (superseded by bessai_data_scraper.py) (`1f734cd4`, @BESS Solutions)
+
 ### ✨ New Features
 - **workflows**: add 8 power workflows for BESSAI monster automation (`0be81e39`, @BESS Solutions)
 
