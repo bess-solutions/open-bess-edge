@@ -69,6 +69,7 @@
 - remove deprecated fetch_cmg_evolution.py (superseded by bessai_data_scraper.py) (`1f734cd4`, @BESS Solutions)
 
 ### ✨ New Features
+- **ai-20-10**: XAI engine, auto-retrain loop, dummy ONNX generator, perf baseline (`a1f10f13`, @BESS Solutions)
 - **workflows**: add 8 power workflows for BESSAI monster automation (`0be81e39`, @BESS Solutions)
 
 ### Contexto del sistema
