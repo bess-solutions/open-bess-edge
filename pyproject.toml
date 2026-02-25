@@ -18,7 +18,7 @@ description     = "Open-source industrial BESS gateway: Modbus, IEEE 2030.5, IEC
 readme          = "README.md"
 license         = { file = "LICENSE" }
 requires-python = ">=3.10"
-authors         = [{ name = "BESS Solutions", email = "contacto@bess-solutions.com" }]
+authors         = [{ name = "BESS Solutions", email = "ingenieria@bess-solutions.cl" }]
 keywords        = [
     "BESS", "battery-energy-storage", "Modbus", "IIoT",
     "anomaly-detection", "edge-AI", "ONNX", "industrial-control",

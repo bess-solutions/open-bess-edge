@@ -64,7 +64,7 @@ cp config/.env.example config/.env
 
 # 5. Verify setup — run the full test suite
 pytest tests/ -v --tb=short
-# Expected: 372 passed ✅
+# Expected: 613 passed ✅ (v2.10.0)
 ```
 
 ### Running with Docker (Simulator)

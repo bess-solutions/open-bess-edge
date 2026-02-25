@@ -100,7 +100,9 @@ nav:
     - BEP-0100 — IEEE 2030.5 Adapter: bep/BEP-0100.md
     - BEP-0200 — DRL Arbitrage Agent: bep/BEP-0200.md
     - BEP-0202 — Protocol Registry: bep/BEP-0202.md
-  - API Reference: api_reference.md
+  - API Reference:
+    - External Interface (API): API.md
+    - API Reference (Legacy): api_reference.md
   - Operations:
     - Runbook: runbook.md
   - Security & Compliance:
