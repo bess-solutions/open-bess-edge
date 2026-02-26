@@ -1,6 +1,6 @@
 ﻿# 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-25 v2.10.0 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-02-25 v2.11.0 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,13 +14,14 @@ Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivad
 
 ---
 
-## ✅ Estado Actual — v2.10.0 (360° Audit + OpenSSF + BEPs 300-302)
+## ✅ Estado Actual — v2.11.0 (BESSAIEvolve v2 Fase 1 + Consolidación Cuántica)
 
 > Ver: [`docs/PENDIENTES.md`](docs/PENDIENTES.md) · [`docs/MODULOS_Y_DATOS_SIMULADOS.md`](docs/MODULOS_Y_DATOS_SIMULADOS.md)
 
 ### Tests
 ```
-613 passed ✅  · 0 failed · 6 skipped · 43.21s
+685 passed ✅  · 0 failed · 6 skipped · ~32s              mypy: 0 errores ✅
+Nuevo: test_bessai_evolve_v2.py — 24/24 CMAESMutator + NSGA-II + EliteArchive ✅
 Nuevo: test_bess_rl_env_cen.py — 23/23 BEP-0200 F3 (env CMg real CEN) ✅
 Nuevo: test_milp_optimizer.py — 14/14 MILP optimizer ✅
 Nuevo: test_degradation_model.py — 15/15 DegradationModel ✅

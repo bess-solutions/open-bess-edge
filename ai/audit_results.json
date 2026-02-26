@@ -1,0 +1,146 @@
+{
+  "timestamp": "2026-02-26T00:12:15Z",
+  "score_20_10": 8.8,
+  "implemented": 11,
+  "total_features": 25,
+  "onnx_benchmarks": {
+    "dispatch_policy.onnx": {
+      "error": "[ONNXRuntimeError] : 2 : INVALID_ARGUMENT : Got invalid dimensions for input: input for the following indices\n index: 1 Got: 3 Expected: 4\n Please fix either the inputs/outputs or the model."
+    }
+  },
+  "ai_modules": {
+    "arbitrage_policy": {
+      "path": "src\\agents\\arbitrage_policy.py",
+      "lines": 153,
+      "has_docstring": true,
+      "has_tests": false,
+      "is_v2": false,
+      "status": "\u2705 v1"
+    },
+    "benchmark_suite": {
+      "path": "src\\agents\\benchmark_suite.py",
+      "lines": 398,
+      "has_docstring": true,
+      "has_tests": false,
+      "is_v2": false,
+      "status": "\u2705 v1"
+    },
+    "bess_rl_env": {
+      "path": "src\\agents\\bess_rl_env.py",
+      "lines": 332,
+      "has_docstring": true,
+      "has_tests": false,
+      "is_v2": false,
+      "status": "\u2705 v1"
+    },
+    "bess_rl_env_cen": {
+      "path": "src\\agents\\bess_rl_env_cen.py",
+      "lines": 337,
+      "has_docstring": true,
+      "has_tests": true,
+      "is_v2": false,
+      "status": "\u2705 v1"
+    },
+    "bessai_evolve": {
+      "path": "src\\agents\\bessai_evolve.py",
+      "lines": 304,
+      "has_docstring": true,
+      "has_tests": false,
+      "is_v2": false,
+      "status": "\u2705 v1"
+    },
+    "bessai_evolve_v2": {
+      "path": "src\\agents\\bessai_evolve_v2.py",
+      "lines": 340,
+      "has_docstring": true,
+      "has_tests": true,
+      "is_v2": true,
+      "status": "\ud83c\udd95 v2"
+    },
+    "candidate_generator": {
+      "path": "src\\agents\\candidate_generator.py",
+      "lines": 309,
+      "has_docstring": true,
+      "has_tests": false,
+      "is_v2": false,
+      "status": "\u2705 v1"
+    },
+    "cmaes_mutator": {
+      "path": "src\\agents\\cmaes_mutator.py",
+      "lines": 326,
+      "has_docstring": true,
+      "has_tests": false,
+      "is_v2": true,
+      "status": "\ud83c\udd95 v2"
+    },
+    "degradation_model": {
+      "path": "src\\agents\\degradation_model.py",
+      "lines": 361,
+      "has_docstring": true,
+      "has_tests": true,
+      "is_v2": false,
+      "status": "\u2705 v1"
+    },
+    "drl_agent": {
+      "path": "src\\agents\\drl_agent.py",
+      "lines": 351,
+      "has_docstring": true,
+      "has_tests": false,
+      "is_v2": false,
+      "status": "\u2705 v1"
+    },
+    "elite_archive": {
+      "path": "src\\agents\\elite_archive.py",
+      "lines": 286,
+      "has_docstring": true,
+      "has_tests": false,
+      "is_v2": true,
+      "status": "\ud83c\udd95 v2"
+    },
+    "fitness_evaluator": {
+      "path": "src\\agents\\fitness_evaluator.py",
+      "lines": 382,
+      "has_docstring": true,
+      "has_tests": false,
+      "is_v2": false,
+      "status": "\u2705 v1"
+    },
+    "marl_env": {
+      "path": "src\\agents\\marl_env.py",
+      "lines": 374,
+      "has_docstring": true,
+      "has_tests": true,
+      "is_v2": false,
+      "status": "\u2705 v1"
+    },
+    "milp_optimizer": {
+      "path": "src\\agents\\milp_optimizer.py",
+      "lines": 384,
+      "has_docstring": true,
+      "has_tests": true,
+      "is_v2": false,
+      "status": "\u2705 v1"
+    },
+    "multi_objective_fitness": {
+      "path": "src\\agents\\multi_objective_fitness.py",
+      "lines": 348,
+      "has_docstring": true,
+      "has_tests": false,
+      "is_v2": true,
+      "status": "\ud83c\udd95 v2"
+    },
+    "population_manager": {
+      "path": "src\\agents\\population_manager.py",
+      "lines": 277,
+      "has_docstring": true,
+      "has_tests": false,
+      "is_v2": false,
+      "status": "\u2705 v1"
+    }
+  },
+  "evolution_archive": {
+    "status": "empty",
+    "size": 0
+  },
+  "elapsed_s": 0.15
+}
