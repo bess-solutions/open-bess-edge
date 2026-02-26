@@ -65,6 +65,9 @@
 > 5. **Scrollytelling Landing build** → `cd landing && npm install && npm run build` → desplegar en GitHub Pages
 
 
+### 🐛 Bug Fixes
+- **quality**: remediacion completa Pyright 0 errores + Bandit 0 alertas Medium/High (`bbb366cc`, @BESS Solutions)
+
 ### 🔧 Maintenance
 - remove deprecated fetch_cmg_evolution.py (superseded by bessai_data_scraper.py) (`1f734cd4`, @BESS Solutions)
 
