@@ -167,8 +167,8 @@ class MultiObjectiveFitnessEvaluator:
             safety_score=float(np.clip(safety, 0.0, 1.0)),
             battery_life_score=battery_score,
             n_cycles=total_cycles / self.n_eval_days,
-            n_violations=total_violations,
-            n_steps=total_steps,
+            n_violations=int(total_violations),
+            n_steps=int(total_steps),
             elapsed_s=time.perf_counter() - t0,
             metadata={"n_days": self.n_eval_days},
         )
@@ -326,7 +326,9 @@ class MultiObjectiveFitnessEvaluator:
         )
 
         obs, _ = env.reset(seed=day_idx)
-        revenue = violations = steps = 0
+        revenue: float = 0.0
+        violations: int = 0
+        steps: int = 0
         prev_soc = 0.5
         eq_cycles = 0.0
 

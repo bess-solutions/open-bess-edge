@@ -58,12 +58,12 @@ _PARAM_RANGES = {
 }
 
 
-def _to_norm_vec(params: dict[str, float]) -> np.ndarray:
-    v = []
+def _to_norm_vec(params: dict[str, float]) -> np.ndarray:  # type: ignore[return]
+    v: list[float] = []
     for name in _PARAM_NAMES:
         lo, hi = _PARAM_RANGES.get(name, (0.0, 1.0))
         v.append((params.get(name, (lo + hi) / 2) - lo) / (hi - lo))
-    return np.clip(np.array(v), 0.0, 1.0)
+    return np.clip(np.array(v, dtype=np.float64), 0.0, 1.0)
 
 
 @dataclass

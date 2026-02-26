@@ -81,6 +81,8 @@ nav:
     - Overview: architecture.md
     - Sim-First Strategy: simulation_registry.md
     - Roadmap v2.7–3.0: ROADMAP.md
+    - 🚀 AI Roadmap 20/10: ai_roadmap_20_10.md
+    - 🔍 AI Audit Report: ai_audit_report.md
     - 🧬 BESSAIEvolve — AlphaEvolve: BESSAI_EVOLVE.md
     - Decision Records (ADRs):
       - Overview: adr/README.md

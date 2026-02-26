@@ -112,3 +112,11 @@ cryptography>=46.0.0
 # GAP-001 CLOSED when DASHBOARD_MFA_SECRET is configured and pyotp is installed.
 pyotp>=2.9.0
 
+# ---------------------------------------------------------------------------
+# v2.x — BESSAIEvolve v2: CMA-ES + NSGA-II (optional, numpy fallback available)
+# ---------------------------------------------------------------------------
+# Hansen's CMA-ES library — better convergence than numpy fallback
+# Install with: pip install cma>=3.3.0
+# cma>=3.3.0
+# SHAP for XAI explanations (already in requirements-dev.txt, optional here)
+# shap>=0.45.0

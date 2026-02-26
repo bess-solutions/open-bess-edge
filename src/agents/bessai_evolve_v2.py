@@ -114,9 +114,11 @@ class BESSAIEvolveV2:
         )
 
         # Evaluators
+        self.mo_evaluator: MultiObjectiveFitnessEvaluator | None
+        self.evaluator: FitnessEvaluator | None
         if use_mo:
             self.mo_evaluator = MultiObjectiveFitnessEvaluator(n_eval_days=n_eval_days)
-            self.evaluator: FitnessEvaluator | None = None
+            self.evaluator = None
         else:
             self.evaluator = FitnessEvaluator(n_eval_days=n_eval_days)
             self.mo_evaluator = None
