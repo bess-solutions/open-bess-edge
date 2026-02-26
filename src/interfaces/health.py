@@ -63,7 +63,7 @@ class HealthServer:
         self,
         site_id: str,
         version: str = _VERSION,
-        host: str = "0.0.0.0",
+        host: str = "0.0.0.0",  # nosec B104
         port: int = 8000,
     ) -> None:
         self._site_id = site_id

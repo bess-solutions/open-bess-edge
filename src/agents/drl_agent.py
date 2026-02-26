@@ -39,7 +39,7 @@ _stdlib_log = logging.getLogger(__name__)  # mypy-friendly fallback ref — not 
 # ---------------------------------------------------------------------------
 try:
     import ray
-    from ray import tune
+    from ray import tune  # type: ignore[attr-defined]
     from ray.rllib.algorithms.ppo import PPOConfig
     from ray.rllib.policy.policy import Policy
 
@@ -151,7 +151,7 @@ def train_ppo(
         PPOConfig()  # type: ignore[union-attr]
         .environment(BESSArbitrageEnv, env_config=env_config)
         .training(**{k: v for k, v in cfg.items() if k not in {"model"}})
-        .rl_module(model_config_dict=cfg.get("model", {}))
+        .rl_module(model_config_dict=cfg.get("model", {}))  # type: ignore[attr-defined]
         .resources(num_gpus=0)
     )
 
@@ -219,14 +219,14 @@ def export_onnx(
     model = policy.model  # type: ignore[attr-defined]
     model.eval()
 
-    dummy_obs = torch.zeros(1, obs_dim, dtype=torch.float32)
-    state = [torch.zeros(1, 1, dtype=torch.float32)]  # dummy LSTM state
+    dummy_obs = torch.zeros(1, obs_dim, dtype=torch.float32)  # type: ignore[attr-defined]
+    state = [torch.zeros(1, 1, dtype=torch.float32)]  # type: ignore[attr-defined] # dummy LSTM state
 
     out_path = Path(output_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     with torch.no_grad():
-        torch.onnx.export(
+        torch.onnx.export(  # type: ignore[attr-defined]
             model,
             (dummy_obs, state, [1]),
             str(out_path),

@@ -193,7 +193,7 @@ class MQTTPublisher:
         if not _PAHO_AVAILABLE:
             raise RuntimeError("paho-mqtt not installed. Run: pip install paho-mqtt>=2.0")
 
-        self._client = mqtt.Client(client_id=self._client_id, protocol=mqtt.MQTTv5)
+        self._client = mqtt.Client(client_id=self._client_id, protocol=mqtt.MQTTv5)  # type: ignore[union-attr]
 
         if self._username:
             self._client.username_pw_set(self._username, self._password)
@@ -244,7 +244,7 @@ class MQTTPublisher:
         result = self._client.publish(
             topic, self._dump(payload), qos=self._qos, retain=self._retain
         )
-        if result.rc != mqtt.MQTT_ERR_SUCCESS:
+        if result.rc != mqtt.MQTT_ERR_SUCCESS:  # type: ignore[union-attr]
             log.warning("mqtt_publisher.publish_error", topic=topic, rc=result.rc)
         else:
             self._publish_count += 1

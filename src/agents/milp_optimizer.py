@@ -47,8 +47,8 @@ Constraints:
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
 
 import numpy as np
 
@@ -195,13 +195,13 @@ def solve_milp_schedule(
     # ----------------------------------------------------------------
     # Build PuLP model
     # ----------------------------------------------------------------
-    prob = pulp.LpProblem("BESS_DayAhead_Dispatch", pulp.LpMaximize)
+    prob = pulp.LpProblem("BESS_DayAhead_Dispatch", pulp.LpMaximize)  # type: ignore[union-attr]
 
     # Decision variables
-    p_ch = [pulp.LpVariable(f"p_ch_{t}", 0, max_power_kw) for t in range(n)]
-    p_dis = [pulp.LpVariable(f"p_dis_{t}", 0, max_power_kw) for t in range(n)]
-    u = [pulp.LpVariable(f"u_{t}", cat="Binary") for t in range(n)]
-    e = [pulp.LpVariable(f"e_{t}", e_min, e_max) for t in range(n + 1)]
+    p_ch = [pulp.LpVariable(f"p_ch_{t}", 0, max_power_kw) for t in range(n)]  # type: ignore[union-attr]
+    p_dis = [pulp.LpVariable(f"p_dis_{t}", 0, max_power_kw) for t in range(n)]  # type: ignore[union-attr]
+    u = [pulp.LpVariable(f"u_{t}", cat="Binary") for t in range(n)]  # type: ignore[union-attr]
+    e = [pulp.LpVariable(f"e_{t}", e_min, e_max) for t in range(n + 1)]  # type: ignore[union-attr]
 
     # Initial energy state
     prob += (e[0] == e_init), "InitialEnergy"
@@ -228,31 +228,31 @@ def solve_milp_schedule(
         -(p_ch[t] + p_dis[t]) * dt_h * degradation_cost_usd_kwh
         for t in range(n)
     ]
-    prob += pulp.lpSum(revenue_terms) + pulp.lpSum(deg_terms)
+    prob += pulp.lpSum(revenue_terms) + pulp.lpSum(deg_terms)  # type: ignore[union-attr]
 
     # ----------------------------------------------------------------
     # Solve with HiGHS (preferred) or CBC fallback
     # ----------------------------------------------------------------
     try:
-        solver = pulp.HiGHS_CMD(
+        solver = pulp.HiGHS_CMD(  # type: ignore[union-attr]
             msg=False,
             timeLimit=solver_time_limit_s,
         )
     except AttributeError:
         # Fallback to CBC if HiGHS not available
-        solver = pulp.PULP_CBC_CMD(msg=False, timeLimit=solver_time_limit_s)
+        solver = pulp.PULP_CBC_CMD(msg=False, timeLimit=solver_time_limit_s)  # type: ignore[union-attr]
 
     prob.solve(solver)
     solve_time_ms = (time.perf_counter() - t0) * 1000.0
 
-    status = pulp.LpStatus[prob.status]
+    status = pulp.LpStatus[prob.status]  # type: ignore[union-attr]
 
     # ----------------------------------------------------------------
     # Extract results
     # ----------------------------------------------------------------
-    p_ch_vals = np.array([pulp.value(p_ch[t]) or 0.0 for t in range(n)])
-    p_dis_vals = np.array([pulp.value(p_dis[t]) or 0.0 for t in range(n)])
-    e_vals = np.array([pulp.value(e[t]) or e_init for t in range(n + 1)])
+    p_ch_vals = np.array([pulp.value(p_ch[t]) or 0.0 for t in range(n)])  # type: ignore[union-attr]
+    p_dis_vals = np.array([pulp.value(p_dis[t]) or 0.0 for t in range(n)])  # type: ignore[union-attr]
+    e_vals = np.array([pulp.value(e[t]) or e_init for t in range(n + 1)])  # type: ignore[union-attr]
 
     p_net = p_dis_vals - p_ch_vals  # + = discharge, - = charge
     soc_profile = np.clip(e_vals[:-1] / capacity_kwh, 0.0, 1.0)

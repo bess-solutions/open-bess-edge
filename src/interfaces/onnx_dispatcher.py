@@ -170,7 +170,7 @@ class ONNXDispatcher:
         try:
             outputs = self._session.run(None, {self._input_name: features})
             elapsed_ms = (time.perf_counter() - t0) * 1000.0
-            target_kw = float(outputs[0].flatten()[0])
+            target_kw = float(np.asarray(outputs[0]).flatten()[0])
 
             # Update Prometheus metrics
             ONNX_INFERENCE_MS.labels(site_id=self.site_id).set(elapsed_ms)
@@ -178,8 +178,8 @@ class ONNXDispatcher:
 
             log.debug(
                 "onnx_dispatcher.inference",
-                target_kw=round(target_kw, 2),
-                inference_ms=round(elapsed_ms, 2),
+                target_kw=round(float(target_kw), 2),
+                inference_ms=round(float(elapsed_ms), 2),
                 soc_pct=soc_pct,
                 site_id=self.site_id,
             )

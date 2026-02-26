@@ -1,10 +1,10 @@
-# SPDX-License-Identifier: Apache-2.0
+﻿# SPDX-License-Identifier: Apache-2.0
 # Copyright 2024-2026 BESS Solutions SpA
 
 """
 src/agents/bess_rl_env.py
 =========================
-BESSAI Edge Gateway — BEP-0200: DRL Arbitrage Gymnasium Environment.
+BESSAI Edge Gateway â€” BEP-0200: DRL Arbitrage Gymnasium Environment.
 
 Extends ``BESSEnv`` (src/simulation/bess_env.py) with:
 
@@ -12,17 +12,17 @@ Extends ``BESSEnv`` (src/simulation/bess_env.py) with:
    of the synthetic ENTSO-E profile.  When real data is unavailable, falls
    back to a realistic synthetic Chilean CMg profile.
 2. **5-minute timesteps** (288 per day) matching CEN settlement intervals.
-3. **CMg forecast observations** — 1-hour and 4-hour ahead price signals,
+3. **CMg forecast observations** â€” 1-hour and 4-hour ahead price signals,
    simulating a CMg Predictor v2 output.
-4. **Graceful degradation** — env works without real data; synthetic profile
+4. **Graceful degradation** â€” env works without real data; synthetic profile
    captures Atacama solar duck curve and peak price patterns.
 
-Observation space (8-d, all ∈ [0, 1] or [-1, 1]):
+Observation space (8-d, all âˆˆ [0, 1] or [-1, 1]):
     [soc, power_norm, temp_norm, cmg_actual_norm,
      cmg_fcast_1h_norm, cmg_fcast_4h_norm, hour_sin, hour_cos]
 
 Action space (continuous, shape=[1]):
-    p_setpoint_pu ∈ [-1, +1]   (−1 = max charge, +1 = max discharge)
+    p_setpoint_pu âˆˆ [-1, +1]   (âˆ’1 = max charge, +1 = max discharge)
 
 Reward:
     revenue_usd - degradation_cost_usd - thermal_penalty - safety_penalty
@@ -44,8 +44,8 @@ from typing import Any, SupportsFloat
 import numpy as np
 
 try:
-    import gymnasium as gym
-    from gymnasium import spaces
+    import gymnasium as gym  # type: ignore[assignment]
+    from gymnasium import spaces  # type: ignore[assignment]
 
     _GYM_AVAILABLE = True
 except ImportError:  # pragma: no cover
@@ -53,11 +53,11 @@ except ImportError:  # pragma: no cover
 
     class gym:  # type: ignore[no-redef]
         class Env:
-            pass
+            ...
 
     class spaces:  # type: ignore[no-redef]
         class Box:
-            pass
+            ...
 
 
 from src.simulation.bess_model import BESSPhysicsModel
@@ -67,7 +67,7 @@ __all__ = ["BESSArbitrageEnv"]
 
 # ---------------------------------------------------------------------------
 # Synthetic Chilean CMg profile (5-min, 288 steps/day, USD/MWh)
-# Calibrated on CEN data 2023-2025 — Atacama solar duck curve:
+# Calibrated on CEN data 2023-2025 â€” Atacama solar duck curve:
 #   - Off-peak night:  ~15-25 USD/MWh
 #   - Morning ramp:    ~60-90 USD/MWh (07:00-09:00)
 #   - Solar dump:      ~5-15 USD/MWh (11:00-15:00, Atacama peak)
@@ -78,11 +78,11 @@ def _build_synthetic_cmg_profile() -> np.ndarray:
     hours = np.linspace(0, 24, 288, endpoint=False)
     # Base off-peak price
     base = 20.0
-    # Morning ramp (06:00–09:00)
+    # Morning ramp (06:00â€“09:00)
     morning = 70.0 * np.exp(-0.5 * ((hours - 7.5) / 1.0) ** 2)
-    # Solar dump (11:00–16:00): negative duck
+    # Solar dump (11:00â€“16:00): negative duck
     solar_dump = -12.0 * np.exp(-0.5 * ((hours - 13.0) / 2.0) ** 2)
-    # Evening peak (18:00–22:00)
+    # Evening peak (18:00â€“22:00)
     evening = 120.0 * np.exp(-0.5 * ((hours - 20.0) / 1.5) ** 2)
     profile = base + morning + solar_dump + evening
     return np.clip(profile, 5.0, 300.0).astype(np.float32)
@@ -90,7 +90,7 @@ def _build_synthetic_cmg_profile() -> np.ndarray:
 
 _SYNTHETIC_CMG_PROFILE = _build_synthetic_cmg_profile()
 
-# Price normalisation constant (USD/MWh) — clips > this are treated as 1.0
+# Price normalisation constant (USD/MWh) â€” clips > this are treated as 1.0
 _CMG_MAX_NORM = 300.0
 
 
@@ -122,8 +122,8 @@ class BESSArbitrageEnv(gym.Env):  # type: ignore[misc]
     DT_MINUTES: float = 5.0
 
     # Forecast horizons (number of steps ahead)
-    FCAST_1H_STEPS: int = 12  # 12 × 5 min = 60 min
-    FCAST_4H_STEPS: int = 48  # 48 × 5 min = 240 min
+    FCAST_1H_STEPS: int = 12  # 12 Ã— 5 min = 60 min
+    FCAST_4H_STEPS: int = 48  # 48 Ã— 5 min = 240 min
 
     def __init__(
         self,
@@ -150,22 +150,22 @@ class BESSArbitrageEnv(gym.Env):  # type: ignore[misc]
         # Physics model (same as BESSEnv)
         self._bess = BESSPhysicsModel(capacity_kwh=capacity_kwh, max_power_kw=max_power_kw)
 
-        # Action space: per-unit setpoint ∈ [-1, 1]
-        #   -1.0 → max charge (−max_power_kw)
-        #   +1.0 → max discharge (+max_power_kw)
-        self.action_space = spaces.Box(  # type: ignore[union-attr]
-            low=np.array([-1.0], dtype=np.float32),
-            high=np.array([1.0], dtype=np.float32),
-            dtype=np.float32,
+        # Action space: per-unit setpoint âˆˆ [-1, 1]
+        #   -1.0 â†’ max charge (âˆ’max_power_kw)
+        #   +1.0 â†’ max discharge (+max_power_kw)
+        self.action_space = spaces.Box(  # type: ignore[union-attr,call-arg]
+            low=np.array([-1.0], dtype=np.float32),  # type: ignore[call-arg]
+            high=np.array([1.0], dtype=np.float32),  # type: ignore[call-arg]
+            dtype=np.float32,  # type: ignore[call-arg]
         )
 
         # Observation space: 8-d, all in [-1, 1] or [0, 1]
         # [soc, power_norm, temp_norm, cmg_now_norm,
         #  cmg_1h_norm, cmg_4h_norm, hour_sin, hour_cos]
-        self.observation_space = spaces.Box(  # type: ignore[union-attr]
-            low=np.array([0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, -1.0], dtype=np.float32),
-            high=np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=np.float32),
-            dtype=np.float32,
+        self.observation_space = spaces.Box(  # type: ignore[union-attr,call-arg]
+            low=np.array([0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, -1.0], dtype=np.float32),  # type: ignore[call-arg]
+            high=np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=np.float32),  # type: ignore[call-arg]
+            dtype=np.float32,  # type: ignore[call-arg]
         )
 
         # Runtime state
@@ -185,7 +185,7 @@ class BESSArbitrageEnv(gym.Env):  # type: ignore[misc]
         options: dict[str, Any] | None = None,
     ) -> tuple[np.ndarray, dict[str, Any]]:
         """Reset to start of a new trading day."""
-        super().reset(seed=seed)
+        super().reset(seed=seed)  # type: ignore[misc]
         self._bess.reset()
         self._step_idx = 0
         self._episode_revenue = 0.0
@@ -201,7 +201,7 @@ class BESSArbitrageEnv(gym.Env):  # type: ignore[misc]
         Parameters
         ----------
         action:
-            1-D array with a single value ∈ [-1, 1] (per-unit setpoint).
+            1-D array with a single value âˆˆ [-1, 1] (per-unit setpoint).
 
         Returns
         -------
@@ -209,13 +209,13 @@ class BESSArbitrageEnv(gym.Env):  # type: ignore[misc]
         """
         # Convert per-unit action to kW
         p_pu = float(np.clip(action[0], -1.0, 1.0))
-        # Convention: p_pu = +1 → max DISCHARGE (−kW in physics model)
-        #             p_pu = −1 → max CHARGE   (+kW in physics model)
+        # Convention: p_pu = +1 â†’ max DISCHARGE (âˆ’kW in physics model)
+        #             p_pu = âˆ’1 â†’ max CHARGE   (+kW in physics model)
         power_kw = -p_pu * self.max_power_kw
 
         # Observed CMg (add noise to simulate real-time measurement uncertainty)
         cmg = self._cmg_at(self._step_idx) + float(
-            self.np_random.normal(0.0, self.noise_std)  # use gym-seeded RNG
+            self.np_random.normal(0.0, self.noise_std)  # type: ignore[attr-defined] # use gym-seeded RNG
         )
         cmg = max(0.0, cmg)
 
@@ -227,14 +227,14 @@ class BESSArbitrageEnv(gym.Env):  # type: ignore[misc]
         # Reward components (all in USD)
         # ----------------------------------------------------------------
         dt_h = self.DT_MINUTES / 60.0
-        energy_kwh = clipped_kw * dt_h  # + = charging, − = discharging
+        energy_kwh = clipped_kw * dt_h  # + = charging, âˆ’ = discharging
         revenue = -energy_kwh * cmg / 1000.0  # USD (positive when discharging)
 
-        # Degradation penalty: replace_cost × SoH loss
+        # Degradation penalty: replace_cost Ã— SoH loss
         deg = physics["degradation"]
         degradation_cost = deg * self.capacity_kwh * self.battery_cost_usd_kwh
 
-        # Thermal penalty: quadratic above 45 °C
+        # Thermal penalty: quadratic above 45 Â°C
         temp_excess = max(0.0, physics["temp_c"] - 45.0)
         thermal_penalty = temp_excess**2 * 0.05
 
@@ -269,7 +269,7 @@ class BESSArbitrageEnv(gym.Env):  # type: ignore[misc]
             return (
                 f"Step {self._step_idx:03d}/{self._n_steps:03d} | "
                 f"SOC={self._bess.soc:.1%} | "
-                f"Temp={self._bess.temp_c:.1f}°C | "
+                f"Temp={self._bess.temp_c:.1f}Â°C | "
                 f"CMg={cmg:.1f} USD/MWh | "
                 f"Revenue={self._episode_revenue:.3f} USD"
             )
@@ -293,7 +293,7 @@ class BESSArbitrageEnv(gym.Env):  # type: ignore[misc]
         for reproducibility.
         """
         fcast_idx = min(idx + horizon_steps, self._n_steps - 1)
-        forecast_noise = float(self.np_random.normal(0.0, self._cmg_at(fcast_idx) * 0.08))
+        forecast_noise = float(self.np_random.normal(0.0, self._cmg_at(fcast_idx) * 0.08))  # type: ignore[attr-defined]
         return max(0.0, self._cmg_at(fcast_idx) + forecast_noise)
 
     def _observe(self) -> np.ndarray:

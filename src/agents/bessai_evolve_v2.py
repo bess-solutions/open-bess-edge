@@ -303,8 +303,8 @@ def run_evolution_v2(
 
     # Print GitHub Actions summary
     print("\n## 🧬 BESSAIEvolve v2 Summary\n")
-    print(f"| Metric | Value |")
-    print(f"|--------|-------|")
+    print("| Metric | Value |")
+    print("|--------|-------|")
     print(f"| Generations | {summary['n_generations']} |")
     print(f"| Mode | {'NSGA-II Multi-Objective' if summary['use_multi_objective'] else 'Single-Objective'} |")
     print(f"| Best Fitness | {summary['best_fitness']} |")

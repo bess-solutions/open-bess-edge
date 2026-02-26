@@ -248,12 +248,12 @@ class CMgPredictor:
             )
             return
 
-        opts = ort.SessionOptions()
+        opts = ort.SessionOptions()  # type: ignore[union-attr]
         opts.log_severity_level = 3
         opts.intra_op_num_threads = 1  # prevents thread-pool churn on edge device
 
         try:
-            self._session = ort.InferenceSession(
+            self._session = ort.InferenceSession(  # type: ignore[union-attr]
                 str(self.model_path),
                 sess_options=opts,
                 providers=["CPUExecutionProvider"],
@@ -281,7 +281,7 @@ class CMgPredictor:
                     setattr(
                         self,
                         attr,
-                        ort.InferenceSession(
+                        ort.InferenceSession(  # type: ignore[union-attr]
                             str(path),
                             sess_options=opts,
                             providers=["CPUExecutionProvider"],
@@ -424,7 +424,7 @@ class CMgPredictor:
         lag_168h: float,
         day_of_week: float = 0.0,
         soc_pct: float = 50.0,
-    ) -> np.ndarray:
+    ) -> Any:  # np.ndarray when numpy available; guarded by _ONNX_AVAILABLE callers
         """Build the input feature vector for ONNX inference."""
         is_weekend = float(int(day_of_week) >= 5)
         if self._n_features == 11:
@@ -455,9 +455,9 @@ class CMgPredictor:
                 lag_1h,
                 lag_24h,
             ]
-        return np.array([vec], dtype=np.float32)
+        return np.array([vec], dtype=np.float32)  # type: ignore[union-attr]
 
-    def _run_session(self, session: Any, features: np.ndarray) -> float:
+    def _run_session(self, session: Any, features: Any) -> float:
         """Run a single ONNX session and return scalar output."""
         out = session.run(None, {self._input_name: features})  # type: ignore[union-attr]
         return float(out[0].flatten()[0])

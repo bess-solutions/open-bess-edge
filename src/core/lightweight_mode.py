@@ -48,6 +48,7 @@ Usage::
 from __future__ import annotations
 
 import os
+
 import structlog
 
 log: structlog.BoundLogger = structlog.get_logger(__name__)

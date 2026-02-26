@@ -60,7 +60,7 @@ from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 import structlog
 
 if TYPE_CHECKING:
-    from src.drivers.base import DataProvider
+    pass
 
 __all__ = ["WatchdogManager", "WatchdogMetrics", "ReconnectableDriver"]
 

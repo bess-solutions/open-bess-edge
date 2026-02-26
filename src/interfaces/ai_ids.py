@@ -134,7 +134,7 @@ class ModbusAnomalyDetector:
         if _SKLEARN_AVAILABLE and len(frames) >= self.min_fit_samples:
             X = np.array([f.to_features() for f in frames])
             self._iso_forest = IsolationForest(
-                contamination=self.contamination,
+                contamination=self.contamination,  # type: ignore[arg-type]
                 random_state=42,
             )
             self._iso_forest.fit(X)
@@ -177,15 +177,15 @@ class ModbusAnomalyDetector:
             IDS_ALERTS_TOTAL.labels(site_id=self.site_id, reason="anomaly").inc()
             log.warning(
                 "ai_ids.anomaly_detected",
-                score=round(s, 4),
+                score=round(float(s), 4),
                 threshold=self.threshold,
                 fc_code=frame.fc_code,
                 address=frame.address,
-                timing_ms=round(frame.timing_ms, 2),
+                timing_ms=round(float(frame.timing_ms), 2),
                 site_id=self.site_id,
             )
         else:
-            log.debug("ai_ids.normal", score=round(s, 4), site_id=self.site_id)
+            log.debug("ai_ids.normal", score=round(float(s), 4), site_id=self.site_id)
 
         return s
 

@@ -162,7 +162,7 @@ class TestRequiredTags:
     @pytest.fixture(autouse=True)
     async def _connect(self, driver: DataProvider) -> None:  # type: ignore[return]
         await driver.connect()
-        yield
+        yield  # type: ignore[misc]
         await driver.disconnect()
 
     @pytest.mark.asyncio

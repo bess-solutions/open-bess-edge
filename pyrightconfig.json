@@ -14,17 +14,11 @@
         "docs"
     ],
     "typeCheckingMode": "basic",
-    "reportMissingImports": "warning",
     "reportMissingModuleSource": "none",
-    "reportGeneralTypeIssues": "warning",
-    "reportOptionalMemberAccess": "warning",
     "useLibraryCodeForTypes": true,
-    "executionEnvironments": [
-        {
-            "root": "src"
-        },
-        {
-            "root": "tests"
-        }
+    "stubPath": "typings",
+    "extraPaths": [
+        ".",
+        "src"
     ]
 }

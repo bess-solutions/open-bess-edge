@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+﻿# SPDX-License-Identifier: Apache-2.0
 # Copyright 2024-2026 BESS Solutions SpA
 
 """
@@ -21,7 +21,7 @@ Usage
 
 In application code that needs a module-level reference::
 
-    from src.core.config import settings   # lazy — resolved at first access
+    from src.core.config import settings   # lazy â€” resolved at first access
 """
 
 from __future__ import annotations
@@ -154,7 +154,7 @@ class Settings(BaseSettings):
     )
 
     # ------------------------------------------------------------------
-    # IEEE 2030.5 / SEP 2.0 Adapter (BEP-0100) — opt-in
+    # IEEE 2030.5 / SEP 2.0 Adapter (BEP-0100) â€” opt-in
     # ------------------------------------------------------------------
     SEP2_ENABLED: bool = Field(
         default=False,
@@ -167,7 +167,7 @@ class Settings(BaseSettings):
         description="TCP port for the IEEE 2030.5 (SEP 2.0) server.",
     )
     SEP2_HOST: str = Field(
-        default="0.0.0.0",
+        default="0.0.0.0",  # nosec B104 — configurable via env var SEP2_HOST; defaults to all interfaces for container deployments
         description="Bind address for the IEEE 2030.5 server.",
     )
     SEP2_TLS_CERT: str | None = Field(
@@ -258,6 +258,6 @@ class _LazySettings:
         return getattr(self._resolve(), name)
 
 
-#: Module-level lazy singleton — safe to import even without a .env file.
+#: Module-level lazy singleton â€” safe to import even without a .env file.
 #: Resolves to the real Settings object on first attribute access.
 settings: Settings = _LazySettings()  # type: ignore[assignment]

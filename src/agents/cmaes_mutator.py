@@ -150,7 +150,7 @@ class CMAESMutator:
             return
 
         # Sort by fitness descending
-        pairs = sorted(zip(fitnesses, candidates), reverse=True)
+        pairs = sorted(zip(fitnesses, candidates, strict=False), reverse=True)
         sorted_cands = [c for _, c in pairs]
 
         if self._use_cma_lib:

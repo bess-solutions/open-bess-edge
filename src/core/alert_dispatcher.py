@@ -40,14 +40,14 @@ Usage::
 
 from __future__ import annotations
 
+import json
 import os
 import smtplib
-import json
-from email.mime.text import MIMEText
+from datetime import datetime, timezone
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from enum import Enum
 from typing import Any
-from datetime import datetime, timezone
 
 import structlog
 
@@ -64,11 +64,11 @@ class AlertSeverity(str, Enum):
     WARNING = "WARNING"
     CRITICAL = "CRITICAL"
 
-    def __ge__(self, other: "AlertSeverity") -> bool:
+    def __ge__(self, other: AlertSeverity) -> bool:
         order = {AlertSeverity.INFO: 0, AlertSeverity.WARNING: 1, AlertSeverity.CRITICAL: 2}
         return order[self] >= order[other]
 
-    def __gt__(self, other: "AlertSeverity") -> bool:
+    def __gt__(self, other: AlertSeverity) -> bool:
         order = {AlertSeverity.INFO: 0, AlertSeverity.WARNING: 1, AlertSeverity.CRITICAL: 2}
         return order[self] > order[other]
 
@@ -242,7 +242,7 @@ class AlertDispatcher:
                 headers={"Content-Type": "application/json"},
                 method="POST",
             )
-            with urllib.request.urlopen(req, timeout=5) as resp:
+            with urllib.request.urlopen(req, timeout=5) as resp:  # nosec B310
                 if resp.status != 200:
                     log.error("alert_dispatcher.slack_error", status=resp.status)
                 else:

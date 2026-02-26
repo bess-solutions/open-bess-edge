@@ -101,7 +101,7 @@ def _make_json_response(body: str, content_type: str, status: int) -> Any:
     """
     Create an aiohttp JSON Response.
 
-    Centralises all access to ``aiohttp._web.Response`` in one place so that
+    Centralises all access to ``aiohttp._web.Response`` in one place so that  # type: ignore[union-attr]
     static analysers (Pyre2 / Pyright) only need to trust that this helper
     is correct, rather than reasoning about the ``try/except ImportError``
     guard that affects the module-level ``_web`` binding.
@@ -244,7 +244,7 @@ class SEP2Adapter:
             )
 
         self._driver = driver
-        self._host = host or os.getenv("SEP2_HOST", "0.0.0.0")
+        self._host = host or os.getenv("SEP2_HOST", "0.0.0.0")  # nosec B104
         self._port = port or int(os.getenv("SEP2_PORT", "8443"))
         self._tls_cert = tls_cert or os.getenv("SEP2_TLS_CERT")
         self._tls_key = tls_key or os.getenv("SEP2_TLS_KEY")
@@ -287,13 +287,13 @@ class SEP2Adapter:
         """
         ssl_ctx = self._build_ssl_context()
 
-        app = _web.Application()
+        app = _web.Application()  # type: ignore[union-attr]
         self._register_routes(app)
 
-        self._runner = _web.AppRunner(app)
+        self._runner = _web.AppRunner(app)  # type: ignore[union-attr]
         await self._runner.setup()
 
-        site = _web.TCPSite(
+        site = _web.TCPSite(  # type: ignore[union-attr]
             self._runner,
             host=self._host,
             port=self._port,
@@ -427,7 +427,7 @@ class SEP2Adapter:
             "quality": 7,
             "tzOffset": 0,
         }
-        return _web.Response(
+        return _web.Response(  # type: ignore[union-attr]
             text=_json_dumps(body),
             content_type=self._CONTENT_TYPE,
             status=200,
@@ -441,7 +441,7 @@ class SEP2Adapter:
             "results": 1,
             "EndDevice": [self._build_edev_resource()],
         }
-        return _web.Response(
+        return _web.Response(  # type: ignore[union-attr]
             text=_json_dumps(body),
             content_type=self._CONTENT_TYPE,
             status=200,
@@ -449,7 +449,7 @@ class SEP2Adapter:
 
     async def handle_edev(self, request: Any) -> Any:
         """GET /edev/{edev_id} — EndDevice resource (IEEE 2030.5 §8.4.2)."""
-        return _web.Response(
+        return _web.Response(  # type: ignore[union-attr]
             text=_json_dumps(self._build_edev_resource()),
             content_type=self._CONTENT_TYPE,
             status=200,
@@ -463,7 +463,7 @@ class SEP2Adapter:
             "results": 1,
             "DER": [{"href": "/edev/0/der/0"}],
         }
-        return _web.Response(
+        return _web.Response(  # type: ignore[union-attr]
             text=_json_dumps(body),
             content_type=self._CONTENT_TYPE,
             status=200,
@@ -503,7 +503,7 @@ class SEP2Adapter:
             "storageModeStatus": {"value": storage_mode},
             "inverterStatus": {"value": 1 if self._driver.is_connected else 6},
         }
-        return _web.Response(
+        return _web.Response(  # type: ignore[union-attr]
             text=_json_dumps(body),
             content_type=self._CONTENT_TYPE,
             status=200,
@@ -525,7 +525,7 @@ class SEP2Adapter:
             "setMaxDischargeRateW": {"value": self._max_w, "multiplier": 0},
             "updatedTime": int(time.time()),
         }
-        return _web.Response(
+        return _web.Response(  # type: ignore[union-attr]
             text=_json_dumps(body),
             content_type=self._CONTENT_TYPE,
             status=200,
@@ -541,7 +541,7 @@ class SEP2Adapter:
             "rtgMinPFNormalOperation": {"value": 95, "multiplier": -2},
             "type_": 80,  # DERType: other storage
         }
-        return _web.Response(
+        return _web.Response(  # type: ignore[union-attr]
             text=_json_dumps(body),
             content_type=self._CONTENT_TYPE,
             status=200,
@@ -561,7 +561,7 @@ class SEP2Adapter:
                 }
             ],
         }
-        return _web.Response(
+        return _web.Response(  # type: ignore[union-attr]
             text=_json_dumps(body),
             content_type=self._CONTENT_TYPE,
             status=200,
@@ -583,7 +583,7 @@ class SEP2Adapter:
         503 if driver is not connected.
         """
         if not self._driver.is_connected:
-            return _web.Response(
+            return _web.Response(  # type: ignore[union-attr]
                 text=_json_dumps({"error": "DER not connected"}),
                 content_type=self._CONTENT_TYPE,
                 status=503,
@@ -592,7 +592,7 @@ class SEP2Adapter:
         try:
             payload: dict = await request.json()
         except Exception:
-            return _web.Response(
+            return _web.Response(  # type: ignore[union-attr]
                 text=_json_dumps({"error": "Invalid JSON payload"}),
                 content_type=self._CONTENT_TYPE,
                 status=400,
@@ -606,13 +606,13 @@ class SEP2Adapter:
         await self._apply_op_mod_energize(der_control_base, errors)
 
         if errors:
-            return _web.Response(
+            return _web.Response(  # type: ignore[union-attr]
                 text=_json_dumps({"errors": errors, "status": "partial_failure"}),
                 content_type=self._CONTENT_TYPE,
                 status=400,
             )
 
-        return _web.Response(
+        return _web.Response(  # type: ignore[union-attr]
             text=_json_dumps({"status": "accepted"}),
             content_type=self._CONTENT_TYPE,
             status=201,
@@ -683,7 +683,7 @@ class SEP2Adapter:
         except Exception:
             pass
 
-        return _web.Response(
+        return _web.Response(  # type: ignore[union-attr]
             text=_json_dumps({"status": "registered"}),
             content_type=self._CONTENT_TYPE,
             status=201,

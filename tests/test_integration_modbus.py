@@ -73,7 +73,7 @@ def _mock_client(reg_map: dict[int, list[int]] | None = None) -> MagicMock:
         return r
 
     client.read_holding_registers.side_effect = _read
-    client.write_register.return_value = MagicMock(isError=lambda: False)
+    client.write_register.return_value = MagicMock(isError=lambda: False)  # type: ignore[attr-defined,union-attr]
     client.connect.return_value = True
     return client
 
@@ -150,8 +150,8 @@ class TestLUNARegisters:
 
     def test_mode_write_is_called(self):
         self.drv._write_reg(47086, int(BatteryMode.TIME_OF_USE))
-        self.drv._client.write_register.assert_called_once()
-        call_kwargs = self.drv._client.write_register.call_args
+        self.drv._client.write_register.assert_called_once()  # type: ignore[attr-defined,union-attr]
+        call_kwargs = self.drv._client.write_register.call_args  # type: ignore[attr-defined,union-attr]
         # address is first positional arg or 'address' kwarg
         args = call_kwargs.args
         kwargs = call_kwargs.kwargs

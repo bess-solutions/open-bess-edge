@@ -21,7 +21,7 @@ class TestVPPSignal:
     def test_initializes_with_zero_state(self) -> None:
         signal = VPPSignal(n_sites=3, max_power_kw_per_site=100.0)
         vec = signal.as_vector()
-        assert vec.shape == (3,)
+        assert vec.shape == (3,)  # type: ignore[attr-defined]
 
     def test_vector_bounded(self) -> None:
         signal = VPPSignal(n_sites=5, max_power_kw_per_site=100.0)
@@ -54,22 +54,22 @@ class TestBESSFleetMARLEnv:
         env = BESSFleetMARLEnv(n_sites=3)
         for site in env.possible_agents:
             obs_space = env.observation_space(site)
-            assert obs_space.shape == (11,)  # 8 local + 3 VPP
+            assert obs_space.shape == (11,)  # 8 local + 3 VPP  # type: ignore[attr-defined]
 
     def test_action_space_shape(self) -> None:
         env = BESSFleetMARLEnv(n_sites=3)
         for site in env.possible_agents:
             act_space = env.action_space(site)
-            assert act_space.shape == (1,)
-            assert act_space.low[0] == pytest.approx(-1.0)
-            assert act_space.high[0] == pytest.approx(1.0)
+            assert act_space.shape == (1,)  # type: ignore[attr-defined]
+            assert act_space.low[0] == pytest.approx(-1.0)  # type: ignore[attr-defined]
+            assert act_space.high[0] == pytest.approx(1.0)  # type: ignore[attr-defined]
 
     def test_reset_returns_obs_for_all_agents(self) -> None:
         env = BESSFleetMARLEnv(n_sites=4)
         obs, infos = env.reset(seed=42)
         assert set(obs.keys()) == set(env.possible_agents)
         for site, ob in obs.items():
-            assert ob.shape == (11,)
+            assert ob.shape == (11,)  # type: ignore[attr-defined]
             assert np.all(np.isfinite(ob))
 
     def test_obs_bounded_after_reset(self) -> None:
@@ -83,7 +83,7 @@ class TestBESSFleetMARLEnv:
         env = BESSFleetMARLEnv(n_sites=3)
         obs, _ = env.reset(seed=10)
         actions = {
-            site: env.action_space(site).sample()
+            site: env.action_space(site).sample()  # type: ignore[attr-defined]
             for site in env.agents
         }
         next_obs, rewards, terminateds, truncateds, infos = env.step(actions)
@@ -99,7 +99,7 @@ class TestBESSFleetMARLEnv:
         obs, _ = env.reset(seed=0)
         terminated = False
         for _ in range(20):
-            actions = {site: env.action_space(site).sample() for site in env.agents}
+            actions = {site: env.action_space(site).sample() for site in env.agents}  # type: ignore[attr-defined]
             obs, rewards, terminateds, truncateds, infos = env.step(actions)
             if terminateds.get("__all__", False):
                 terminated = True
@@ -145,13 +145,13 @@ class TestBESSFleetMARLEnv:
         env = BESSFleetMARLEnv(n_sites=1)
         obs, _ = env.reset(seed=0)
         assert "site_0" in obs
-        assert obs["site_0"].shape == (11,)
+        assert obs["site_0"].shape == (11,)  # type: ignore[attr-defined]
 
     def test_large_fleet(self) -> None:
         """Large fleet (10 sites) should initialize and run without issues."""
         env = BESSFleetMARLEnv(n_sites=10)
         obs, _ = env.reset(seed=0)
         assert len(obs) == 10
-        actions = {site: env.action_space(site).sample() for site in env.agents}
+        actions = {site: env.action_space(site).sample() for site in env.agents}  # type: ignore[attr-defined]
         next_obs, rewards, *_ = env.step(actions)
         assert len(rewards) == 10 + 1  # 10 agents + "__all__"

@@ -60,7 +60,7 @@ class MOFitnessVector:
         """Return objectives as maximization vector."""
         return np.array([self.revenue_usd_day, self.safety_score, self.battery_life_score])
 
-    def dominates(self, other: "MOFitnessVector") -> bool:
+    def dominates(self, other: MOFitnessVector) -> bool:
         """Return True if self Pareto-dominates other."""
         o_self = self.objectives
         o_other = other.objectives
@@ -248,13 +248,21 @@ class MultiObjectiveFitnessEvaluator:
     # ──────────────────────────────────────────────────────────────────────
 
     @staticmethod
-    def _fast_non_dominating_sort(vectors: list[MOFitnessVector]) -> list[list[int]]:
-        """O(MN²) fast non-dominated sort from Deb et al. (2002)."""
+    def _build_domination_sets(
+        vectors: list[MOFitnessVector],
+    ) -> tuple[list[list[int]], list[int]]:
+        """Build domination sets (Sp) and domination counts (np_count) for NSGA-II.
+
+        Returns
+        -------
+        sp:
+            sp[i] = list of indices that candidate i dominates.
+        np_count:
+            np_count[i] = number of candidates that dominate candidate i.
+        """
         n = len(vectors)
         sp: list[list[int]] = [[] for _ in range(n)]
         np_count = [0] * n
-        fronts: list[list[int]] = [[]]
-
         for i in range(n):
             for j in range(n):
                 if i == j:
@@ -263,7 +271,16 @@ class MultiObjectiveFitnessEvaluator:
                     sp[i].append(j)
                 elif vectors[j].dominates(vectors[i]):
                     np_count[i] += 1
-            if np_count[i] == 0:
+        return sp, np_count
+
+    @staticmethod
+    def _fast_non_dominating_sort(vectors: list[MOFitnessVector]) -> list[list[int]]:
+        """O(MN²) fast non-dominated sort from Deb et al. (2002)."""
+        sp, np_count = MultiObjectiveFitnessEvaluator._build_domination_sets(vectors)
+        fronts: list[list[int]] = [[]]
+
+        for i, count in enumerate(np_count):
+            if count == 0:
                 fronts[0].append(i)
 
         k = 0

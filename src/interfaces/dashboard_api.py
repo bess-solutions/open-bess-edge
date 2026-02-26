@@ -291,13 +291,13 @@ class DashboardAPI:
         return True
 
     def _json_response(self, data: dict) -> Any:
-        return web.Response(
+        return web.Response(  # type: ignore[union-attr]
             text=__import__("json").dumps(data, indent=2),
             content_type="application/json",
         )
 
     def _unauthorized(self) -> Any:
-        return web.Response(
+        return web.Response(  # type: ignore[union-attr]
             text='{"error": "Unauthorized"}',
             status=401,
             content_type="application/json",
@@ -353,8 +353,8 @@ class DashboardAPI:
         dashboard_dir = Path(__file__).resolve().parents[2] / "dashboard"
         file = dashboard_dir / "index.html"
         if not file.exists():
-            return web.Response(text="Dashboard UI not found. Run from project root.", status=404)
-        return web.FileResponse(file)
+            return web.Response(text="Dashboard UI not found. Run from project root.", status=404)  # type: ignore[union-attr]
+        return web.FileResponse(file)  # type: ignore[union-attr]
 
     async def handle_static(self, request: Any) -> Any:
         """Serve CSS/JS assets under /dashboard/static/."""
@@ -362,9 +362,9 @@ class DashboardAPI:
         dashboard_dir = Path(__file__).resolve().parents[2] / "dashboard"
         file = dashboard_dir / filename
         if not file.exists() or not file.is_file():
-            return web.Response(text="Not found", status=404)
+            return web.Response(text="Not found", status=404)  # type: ignore[union-attr]
         mime, _ = mimetypes.guess_type(str(file))
-        return web.FileResponse(file, headers={"Content-Type": mime or "application/octet-stream"})
+        return web.FileResponse(file, headers={"Content-Type": mime or "application/octet-stream"})  # type: ignore[union-attr]
 
     async def handle_schedule(self, request: Any) -> Any:
         """Compute and return optimal 24h arbitrage dispatch schedule.
@@ -490,11 +490,11 @@ class DashboardAPI:
         if not _AIOHTTP_AVAILABLE:
             raise RuntimeError("aiohttp not installed. Run: pip install aiohttp")
 
-        @middleware
+        @middleware  # type: ignore[misc]
         async def cors_middleware(request: Any, handler: Any) -> Any:
             """Allow cross-origin requests from the React frontend."""
             if request.method == "OPTIONS":
-                resp = web.Response()
+                resp = web.Response()  # type: ignore[union-attr]
             else:
                 resp = await handler(request)
             resp.headers["Access-Control-Allow-Origin"] = "*"
@@ -502,7 +502,7 @@ class DashboardAPI:
             resp.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type"
             return resp
 
-        @middleware
+        @middleware  # type: ignore[misc]
         async def rate_limit_middleware(request: Any, handler: Any) -> Any:
             """IEC 62443 SR 7.1 — Deny-of-Service protection via per-IP rate limiting."""
             # Exempt OPTIONS preflight and health endpoint from rate limiting
@@ -515,7 +515,7 @@ class DashboardAPI:
             )
             if not _rate_limiter.is_allowed(ip):
                 retry = _rate_limiter.retry_after(ip)
-                return web.Response(
+                return web.Response(  # type: ignore[union-attr]
                     text='{"error": "Too Many Requests", "retry_after_s": ' + str(retry) + "}",
                     status=429,
                     content_type="application/json",
@@ -547,7 +547,7 @@ class DashboardAPI:
             except Exception as exc:
                 log.warning("dashboard_api.flywheel_init_failed", error=str(exc))
 
-        self._app = web.Application(middlewares=[rate_limit_middleware, cors_middleware])
+        self._app = web.Application(middlewares=[rate_limit_middleware, cors_middleware])  # type: ignore[union-attr]
         self._app.router.add_get("/", self.handle_dashboard)
         self._app.router.add_get("/dashboard", self.handle_dashboard)
         self._app.router.add_get(r"/{filename:.*\.(?:css|js|ico|png|svg)}", self.handle_static)
@@ -563,14 +563,14 @@ class DashboardAPI:
         self._app.router.add_get("/api/v1/auth/totp-info", self.handle_totp_info)
         self._app.router.add_options("/{path_info:.*}", self._cors_preflight)
 
-        self._runner = web.AppRunner(self._app)
+        self._runner = web.AppRunner(self._app)  # type: ignore[union-attr]
         await self._runner.setup()
-        site = web.TCPSite(self._runner, "0.0.0.0", self.port)
+        site = web.TCPSite(self._runner, "0.0.0.0", self.port)  # nosec B104  # type: ignore[union-attr]
         await site.start()
         log.info("dashboard_api.started", port=self.port, flywheel=_FLYWHEEL_AVAILABLE)
 
     async def _cors_preflight(self, request: Any) -> Any:
-        return web.Response(
+        return web.Response(  # type: ignore[union-attr]
             headers={
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "GET, OPTIONS",

@@ -514,8 +514,8 @@ async def main() -> None:  # noqa: C901
                     )
                     _p_pu, _drl_info = _drl_agent.predict(_obs)
                     _p_kw = (
-                        _p_pu * _cfg.MAX_CONTINUOUS_DISCHARGE_KW
-                        if hasattr(_cfg, "MAX_CONTINUOUS_DISCHARGE_KW")
+                        _p_pu * _cfg.MAX_CONTINUOUS_DISCHARGE_KW  # type: ignore[attr-defined]
+                        if hasattr(_cfg, "MAX_CONTINUOUS_DISCHARGE_KW")  # type: ignore[attr-defined]
                         else _p_pu * 100.0
                     )
                     log.info(
