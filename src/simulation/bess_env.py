@@ -34,8 +34,8 @@ from typing import SupportsFloat
 import numpy as np
 
 try:
-    import gymnasium as gym
-    from gymnasium import spaces
+    import gymnasium as gym  # type: ignore[assignment]
+    from gymnasium import spaces  # type: ignore[assignment]
 
     _GYM_AVAILABLE = True
 except ImportError:
@@ -306,18 +306,18 @@ class BESSEnv(gym.Env):
         self._bess = BESSPhysicsModel(capacity_kwh=capacity_kwh, max_power_kw=max_power_kw)
 
         # Action space: continuous dispatch power [-max_kw, +max_kw]
-        self.action_space = spaces.Box(
-            low=-max_power_kw,
-            high=max_power_kw,
-            shape=(1,),
-            dtype=np.float32,
+        self.action_space = spaces.Box(  # type: ignore[union-attr,call-arg]
+            low=-max_power_kw,  # type: ignore[call-arg]
+            high=max_power_kw,  # type: ignore[call-arg]
+            shape=(1,),  # type: ignore[call-arg]
+            dtype=np.float32,  # type: ignore[call-arg]
         )
 
         # Observation space: 8 features, all normalised to [-1, 1] / [0, 1]
-        self.observation_space = spaces.Box(
-            low=np.array([0.0, -1.0, 0.0, -1.0, -1.0, 0.0, 0.0, 0.0], dtype=np.float32),
-            high=np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=np.float32),
-            dtype=np.float32,
+        self.observation_space = spaces.Box(  # type: ignore[union-attr,call-arg]
+            low=np.array([0.0, -1.0, 0.0, -1.0, -1.0, 0.0, 0.0, 0.0], dtype=np.float32),  # type: ignore[call-arg]
+            high=np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=np.float32),  # type: ignore[call-arg]
+            dtype=np.float32,  # type: ignore[call-arg]
         )
 
         # Runtime state
@@ -336,7 +336,7 @@ class BESSEnv(gym.Env):
         options: dict | None = None,
     ) -> tuple[np.ndarray, dict]:
         """Reset environment to start of a new episode."""
-        super().reset(seed=seed)
+        super().reset(seed=seed)  # type: ignore[misc]
         self._bess.reset()
         self._step_idx = 0
         self._episode_revenue = 0.0

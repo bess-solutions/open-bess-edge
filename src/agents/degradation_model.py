@@ -37,11 +37,8 @@ Python only (no C extension required) — runs at <1 ms/step on RPi 5.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Sequence
-
-import numpy as np
 
 __all__ = [
     "BatteryChemistry",
@@ -310,7 +307,6 @@ class DegradationModel:
         # 3) Calendar aging: α_cal * sqrt(Δt_days) * thermal_factor
         self._total_time_days += dt_days
         new_cal_fade = p["alpha_cal"] * math.sqrt(self._total_time_days) * thermal_factor
-        cal_fade_step = max(0.0, new_cal_fade - self._cumulative_calendar_fade)
         self._cumulative_calendar_fade = new_cal_fade
 
         # 4) Total capacity fade

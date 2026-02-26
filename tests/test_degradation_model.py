@@ -208,7 +208,7 @@ class TestDegradationWithEnv:
         terminated = truncated = False
 
         while not (terminated or truncated):
-            action = env.action_space.sample()
+            action = env.action_space.sample()  # type: ignore[attr-defined]
             obs, reward, terminated, truncated, info = env.step(action)
             # Use degradation model alongside env step for richer cost signal
             soc = float(obs[0])

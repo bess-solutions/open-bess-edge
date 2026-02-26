@@ -215,10 +215,10 @@ if _GYM_AVAILABLE:
             self._total_deg: float = 0.0
 
             # Gymnasium spaces (identical to BESSArbitrageEnv)
-            self.observation_space = spaces.Box(
+            self.observation_space = spaces.Box(  # type: ignore[union-attr]
                 low=0.0, high=1.0, shape=(8,), dtype=np.float32
             )
-            self.action_space = spaces.Box(
+            self.action_space = spaces.Box(  # type: ignore[union-attr]
                 low=-1.0, high=1.0, shape=(1,), dtype=np.float32
             )
 

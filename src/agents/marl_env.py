@@ -46,19 +46,20 @@ from typing import Any
 import numpy as np
 
 try:
-    import gymnasium as gym
-    from gymnasium import spaces
+    import gymnasium as gym  # type: ignore[assignment]
+    from gymnasium import spaces  # type: ignore[assignment]
     _GYM_AVAILABLE = True
 except ImportError:
     _GYM_AVAILABLE = False
 
     class gym:  # type: ignore[no-redef]
         class Env:
-            pass
+            np_random: Any
+            def reset(self, *args: Any, **kwargs: Any) -> Any: ...
 
     class spaces:  # type: ignore[no-redef]
         class Box:
-            pass
+            def __init__(self, *args: Any, **kwargs: Any) -> None: ...
 
 
 from .bess_rl_env import BESSArbitrageEnv, _build_synthetic_cmg_profile

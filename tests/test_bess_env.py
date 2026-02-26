@@ -1,7 +1,7 @@
 """
 tests/test_bess_env.py
 =======================
-Unit tests for BESSPhysicsModel and BESSEnv.
+Unit tests for BESSPhysicsModel and BESSEnv.  # type: ignore[name-defined]
 
 Tests cover:
   - Physics model: SOC dynamics, clipping, degradation, thermal
@@ -88,7 +88,7 @@ class TestBESSPhysicsModel:
 
 
 # ===========================================================================
-# BESSEnv tests (does not require gymnasium installed)
+# BESSEnv tests (does not require gymnasium installed)  # type: ignore[name-defined]
 # ===========================================================================
 
 
@@ -102,11 +102,11 @@ def _has_gymnasium() -> bool:
 
 
 @pytest.mark.skipif(not _has_gymnasium(), reason="gymnasium not installed")
-class TestBESSEnv:
-    def _env(self) -> BESSEnv:  # noqa: F821
-        from src.simulation.bess_env import BESSEnv
+class TestBESSEnv:  # type: ignore[name-defined]
+    def _env(self) -> BESSEnv:  # noqa: F821  # type: ignore[name-defined]
+        from src.simulation.bess_env import BESSEnv  # type: ignore[name-defined]
 
-        return BESSEnv(capacity_kwh=100.0, max_power_kw=50.0)
+        return BESSEnv(capacity_kwh=100.0, max_power_kw=50.0)  # type: ignore[name-defined]
 
     def test_reset_returns_correct_obs_shape(self):
         env = self._env()
@@ -140,21 +140,21 @@ class TestBESSEnv:
         assert terminated is True
 
     def test_discharge_at_high_price_positive_reward(self):
-        from src.simulation.bess_env import _DEFAULT_PRICE_PROFILE, BESSEnv
+        from src.simulation.bess_env import _DEFAULT_PRICE_PROFILE, BESSEnv  # type: ignore[name-defined]
 
         # Advance to peak-price timestep (step 73 ≈ 110 EUR/MWh)
         peak_step = int(np.argmax(_DEFAULT_PRICE_PROFILE))
-        env = BESSEnv(capacity_kwh=100.0, max_power_kw=50.0, noise_std=0.0)
+        env = BESSEnv(capacity_kwh=100.0, max_power_kw=50.0, noise_std=0.0)  # type: ignore[name-defined]
         env.reset(seed=42)
         env._step_idx = peak_step
         env._bess.soc = 0.8  # enough charge to discharge
         _, reward, _, _, _ = env.step(np.array([-50.0]))  # discharge
-        assert reward > 0, f"Expected positive reward at peak price, got {reward:.4f}"
+        assert reward > 0, f"Expected positive reward at peak price, got {reward:.4f}"  # type: ignore[operator]
 
     def test_render_ansi_returns_string(self):
-        from src.simulation.bess_env import BESSEnv
+        from src.simulation.bess_env import BESSEnv  # type: ignore[name-defined]
 
-        env = BESSEnv(render_mode="ansi")
+        env = BESSEnv(render_mode="ansi")  # type: ignore[name-defined]
         env.reset()
         text = env.render()
         assert text is not None

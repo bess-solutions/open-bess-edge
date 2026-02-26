@@ -209,7 +209,7 @@ class BESSAIFLServer:
         if not _FLWR_AVAILABLE:
             raise RuntimeError("Flower not installed. Run: pip install flwr>=1.5")
 
-        strategy = FedAvg(
+        strategy = FedAvg(  # type: ignore[call-arg]
             fraction_fit=self.config.fraction_fit,
             fraction_evaluate=self.config.fraction_evaluate,
             min_fit_clients=self.config.min_fit_clients,
@@ -224,7 +224,7 @@ class BESSAIFLServer:
         )
         fl.server.start_server(
             server_address=server_address,
-            config=fl.server.ServerConfig(num_rounds=self.config.num_rounds),
+            config=fl.server.ServerConfig(num_rounds=self.config.num_rounds),  # type: ignore[union-attr]
             strategy=strategy,
         )
 

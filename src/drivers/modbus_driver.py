@@ -185,7 +185,7 @@ class UniversalDriver:
         self._client = AsyncModbusTcpClient(
             host=self._host,
             port=self._port,
-            **(dict(sslctx=_sslctx) if _sslctx else {}),
+            **(dict(sslctx=_sslctx) if _sslctx else {}),  # type: ignore[arg-type]
         )
         log.info(
             "driver.initialized",
@@ -229,7 +229,7 @@ class UniversalDriver:
         Attempts up to ``_MAX_CONNECT_RETRIES`` times with exponential
         back-off.  Raises ``ConnectionException`` if all attempts fail.
         """
-        last_exc: Exception | None = None
+        last_exc: BaseException | None = None
         for attempt in range(1, _MAX_CONNECT_RETRIES + 1):
             try:
                 await self._client.connect()
@@ -352,7 +352,8 @@ class UniversalDriver:
                 raise DriverConfigError(f"Unsupported register type: '{reg_type}'")
         # Convert packed bytes back to list of 16-bit register values
         return [
-            int.from_bytes(packed[i : i + 2], byteorder="big") for i in range(0, len(packed), 2)
+            int.from_bytes(packed[i : i + 2], byteorder="big")  # type: ignore[index]
+            for i in range(0, len(packed), 2)
         ]
 
     # ------------------------------------------------------------------

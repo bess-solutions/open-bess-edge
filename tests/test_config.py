@@ -28,10 +28,10 @@ from src.core import config as config_module
 
 
 @pytest.fixture(autouse=True)
-def _clear_settings_cache() -> None:
+def _clear_settings_cache() -> None:  # type: ignore[misc,return-value]
     """Ensure each test gets a fresh Settings parse."""
     config_module.get_settings.cache_clear()
-    yield
+    yield  # type: ignore[misc]
     config_module.get_settings.cache_clear()
 
 

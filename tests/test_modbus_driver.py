@@ -237,7 +237,7 @@ class TestConnect:
     async def test_connect_success_on_first_try(self, tmp_path: Path) -> None:
         driver = await _make_driver(tmp_path)
         driver._client.connect = AsyncMock()
-        type(driver._client).connected = PropertyMock(return_value=True)
+        type(driver._client).connected = PropertyMock(return_value=True)  # type: ignore[attr-defined,misc]
         await driver.connect()
         driver._client.connect.assert_awaited_once()
 
@@ -253,9 +253,9 @@ class TestConnect:
                 raise OSError("refused")
             # 3rd call succeeds (no exception)
 
-        driver._client.connect = flaky_connect
+        driver._client.connect = flaky_connect  # type: ignore[assignment,attr-defined]
         # connected always returns True — the check only runs after a successful connect()
-        type(driver._client).connected = PropertyMock(return_value=True)
+        type(driver._client).connected = PropertyMock(return_value=True)  # type: ignore[attr-defined,misc]
         await asyncio.wait_for(driver.connect(), timeout=30.0)
         assert call_count == 3
 
@@ -265,7 +265,7 @@ class TestConnect:
 
         driver = await _make_driver(tmp_path)
         driver._client.connect = AsyncMock(side_effect=OSError("refused"))
-        type(driver._client).connected = PropertyMock(return_value=False)
+        type(driver._client).connected = PropertyMock(return_value=False)  # type: ignore[attr-defined,misc]
 
         with pytest.raises(ConnectionException):
             await asyncio.wait_for(driver.connect(), timeout=10.0)

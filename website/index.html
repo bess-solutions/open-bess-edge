@@ -6,12 +6,44 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>BESS Solutions — Inteligencia para el almacenamiento de energía</title>
     <meta name="description"
-        content="BESSAI Edge: gateway open-source industrial-grade para BESS. Optimización IA, IEC 62443, NTSyCS Chile. Apache 2.0." />
+        content="BESSAI Edge: gateway open-source industrial-grade para BESS. Optimización IA, IEC 62443 SL-2, NTSyCS Chile. Apache 2.0." />
+
+    <!-- ── SECURITY HEADERS (IEC 62443 SL-2 / OWASP) ────────────── -->
+    <!--
+        CSP: permite scripts solo desde 'self'.
+        Google Fonts (fonts.googleapis.com, fonts.gstatic.com) y Suno CDN
+        (cdn1/cdn2.suno.ai) están allowlisted explícitamente.
+        'unsafe-inline' NO está permitido — todos los handlers son via addEventListener.
+    -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src  'self';
+        style-src   'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src    'self' https://fonts.gstatic.com;
+        img-src     'self' https://cdn2.suno.ai data:;
+        media-src   'self' https://cdn1.suno.ai;
+        connect-src 'self';
+        frame-src   'none';
+        object-src  'none';
+        base-uri    'self';
+        form-action 'self' mailto:;
+    " />
+    <!-- NOTE IEC 62443 SL-2:
+         script-src 'self' (sin 'unsafe-inline') → bloquea inyección de JS.
+         style-src 'unsafe-inline' → permitido porque CSS no ejecuta código;
+         es la práctica estándar cuando hay inline styles que no se pueden mover.
+    -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), camera=(), microphone=(), payment=()" />
+
+    <!-- ── FONTS ────────────────────────────────────────────────── -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
         rel="stylesheet" />
+
     <link rel="stylesheet" href="style.css" />
     <style>
         /* Terminal inline styles */
@@ -98,10 +130,28 @@
                 opacity: 1
             }
 
+
             50%,
             100% {
                 opacity: 0
             }
+        }
+
+        /* ── MATRIX RAIN CANVAS ── */
+        #matrix-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: .20;
+            z-index: 0;
+            display: block;
+        }
+
+        .hero-inner {
+            position: relative;
+            z-index: 1;
         }
     </style>
 </head>
@@ -125,7 +175,8 @@
             <div class="nav-right">
                 <span class="nav-tag">v2.10 · Apache 2.0</span>
                 <a class="nav-cta" href="mailto:contacto@bess-solutions.cl">Solicitar demo</a>
-                <button class="nav-burger" aria-label="Menú" onclick="toggleMenu()">
+                <!-- onclick removido — manejado por main.js via addEventListener -->
+                <button class="nav-burger" type="button" aria-label="Menú" aria-expanded="false">
                     <span></span><span></span><span></span>
                 </button>
             </div>
@@ -133,17 +184,18 @@
     </nav>
 
     <div class="mob-menu" id="mob-menu">
-        <a href="#audiencias" onclick="closeMenu()">¿Para quién?</a>
-        <a href="#producto" onclick="closeMenu()">Producto</a>
-        <a href="#stack" onclick="closeMenu()">Stack</a>
-        <a href="#roadmap" onclick="closeMenu()">Roadmap</a>
-        <a href="#early-adopter" onclick="closeMenu()">Early Adopter</a>
-        <a class="mob-cta2" href="mailto:contacto@bess-solutions.cl" onclick="closeMenu()">Solicitar demo</a>
+        <a href="#audiencias">¿Para quién?</a>
+        <a href="#producto">Producto</a>
+        <a href="#stack">Stack</a>
+        <a href="#roadmap">Roadmap</a>
+        <a href="#early-adopter">Early Adopter</a>
+        <a class="mob-cta2" href="mailto:contacto@bess-solutions.cl">Solicitar demo</a>
     </div>
 
     <!-- ── HERO ── -->
     <section class="hero" id="hero">
-        <div class="hero-glow"></div>
+        <!-- Matrix rain canvas — full hero background -->
+        <canvas id="matrix-canvas" aria-hidden="true"></canvas>
         <div class="hero-inner">
             <div class="hero-badge">🇨🇱 Hecho en Chile · Hecho para LatAm</div>
 
@@ -158,11 +210,13 @@
             </p>
 
             <div class="hero-btns">
-                <a class="btn-p" href="https://github.com/bess-solutions/open-bess-edge" target="_blank" rel="noopener">
+                <a class="btn-p" href="https://github.com/bess-solutions/open-bess-edge" target="_blank"
+                    rel="noopener noreferrer">
                     ★ Ver en GitHub
                 </a>
                 <a class="btn-s" href="mailto:contacto@bess-solutions.cl">Hablar con el equipo</a>
-                <a class="btn-g" href="https://discord.gg/ZqpE8AZs" target="_blank" rel="noopener">Unirse al Discord</a>
+                <a class="btn-g" href="https://discord.gg/ZqpE8AZs" target="_blank" rel="noopener noreferrer">Unirse al
+                    Discord</a>
             </div>
 
             <!-- Live strip -->
@@ -209,33 +263,34 @@
             <h2 class="sec-h2 reveal">Una plataforma, cinco formas de participar.</h2>
             <p class="sec-sub reveal">Cada rol tiene un camino claro. Encuentra el tuyo.</p>
 
-            <div class="audience-grid reveal">
-                <button class="aud-btn active" data-aud="integrador" onclick="setAudience('integrador')">
-                    <span class="aud-icon">🔌</span><span class="aud-name">Integrador BESS</span>
+            <!-- onclick removido — manejado por main.js via addEventListener -->
+            <div class="audience-grid reveal" role="tablist" aria-label="Audiencias">
+                <button class="aud-btn active" type="button" role="tab" data-aud="integrador" aria-selected="true">
+                    <span class="aud-icon">[⚡]</span><span class="aud-name">Integrador BESS</span>
                 </button>
-                <button class="aud-btn" data-aud="desarrollador" onclick="setAudience('desarrollador')">
-                    <span class="aud-icon">💻</span><span class="aud-name">Desarrollador</span>
+                <button class="aud-btn" type="button" role="tab" data-aud="desarrollador" aria-selected="false">
+                    <span class="aud-icon">[//]</span><span class="aud-name">Desarrollador</span>
                 </button>
-                <button class="aud-btn" data-aud="inversionista" onclick="setAudience('inversionista')">
-                    <span class="aud-icon">📈</span><span class="aud-name">Inversionista</span>
+                <button class="aud-btn" type="button" role="tab" data-aud="inversionista" aria-selected="false">
+                    <span class="aud-icon">[▲]</span><span class="aud-name">Inversionista</span>
                 </button>
-                <button class="aud-btn" data-aud="academia" onclick="setAudience('academia')">
-                    <span class="aud-icon">🎓</span><span class="aud-name">Academia / I+D</span>
+                <button class="aud-btn" type="button" role="tab" data-aud="academia" aria-selected="false">
+                    <span class="aud-icon">[∑]</span><span class="aud-name">Academia / I+D</span>
                 </button>
-                <button class="aud-btn" data-aud="regulador" onclick="setAudience('regulador')">
-                    <span class="aud-icon">🏛️</span><span class="aud-name">Regulador / CRE</span>
+                <button class="aud-btn" type="button" role="tab" data-aud="regulador" aria-selected="false">
+                    <span class="aud-icon">[§]</span><span class="aud-name">Regulador / CRE</span>
                 </button>
             </div>
 
             <!-- Panel: Integrador -->
-            <div class="aud-panel active" id="aud-integrador">
+            <div class="aud-panel active" id="aud-integrador" role="tabpanel">
                 <div class="aud-main">
                     <h3>Para integradores y operadores de BESS</h3>
                     <p>BESSAI elimina meses de desarrollo e integra tu sistema en días. Compatible con Huawei, SMA,
                         Victron y Fronius out-of-the-box.</p>
                     <div class="aud-wins">
                         <div class="aud-win">Conectividad Modbus RTU/TCP lista en &lt;1 hora</div>
-                        <div class="aud-win">Cumple IEC 62443 y NTSyCS desde el día 1 — sin auditorías extra</div>
+                        <div class="aud-win">Cumple IEC 62443 SL-2 y NTSyCS desde el día 1 — sin auditorías extra</div>
                         <div class="aud-win">Optimización MILP que maximiza el diferencial de precio CMg/CSP en el SEN
                         </div>
                         <div class="aud-win">Grafana + Prometheus: visibilidad total de tu activo sin subscripciones
@@ -248,7 +303,7 @@
                         <h4>🚀 Quick Start</h4>
                         <p>Ten tu primer ciclo de optimización corriendo en menos de 1 hora.</p>
                         <a class="aud-link" href="https://github.com/bess-solutions/open-bess-edge#quick-start"
-                            target="_blank" rel="noopener">Ver guía de instalación →</a>
+                            target="_blank" rel="noopener noreferrer">Ver guía de instalación →</a>
                     </div>
                     <div class="aud-cta-card">
                         <h4>📋 Programa Pioneer</h4>
@@ -259,7 +314,7 @@
             </div>
 
             <!-- Panel: Desarrollador -->
-            <div class="aud-panel" id="aud-desarrollador">
+            <div class="aud-panel" id="aud-desarrollador" role="tabpanel">
                 <div class="aud-main">
                     <h3>Para desarrolladores de software</h3>
                     <p>Una base production-ready bajo Apache 2.0. Protocolo Driver bien definido (BESSAI-SPEC-001), 613
@@ -278,19 +333,20 @@
                         <p>Abre un PR con tu driver, protocolo o mejora. Los mejores contribs entran al CHANGELOG.</p>
                         <a class="aud-link"
                             href="https://github.com/bess-solutions/open-bess-edge/blob/main/CONTRIBUTING.md"
-                            target="_blank" rel="noopener">Guía de contribución →</a>
+                            target="_blank" rel="noopener noreferrer">Guía de contribución →</a>
                     </div>
                     <div class="aud-cta-card">
                         <h4>💬 Discord técnico</h4>
                         <p>Canal #dev-core para discutir arquitectura, PRs y roadmap técnico.</p>
-                        <a class="aud-link" href="https://discord.gg/ZqpE8AZs" target="_blank" rel="noopener">Unirse al
+                        <a class="aud-link" href="https://discord.gg/ZqpE8AZs" target="_blank"
+                            rel="noopener noreferrer">Unirse al
                             Discord →</a>
                     </div>
                 </div>
             </div>
 
             <!-- Panel: Inversionista -->
-            <div class="aud-panel" id="aud-inversionista">
+            <div class="aud-panel" id="aud-inversionista" role="tabpanel">
                 <div class="aud-main">
                     <h3>Para inversionistas y fondos de energía</h3>
                     <p>El mercado BESS en LatAm crece 38%/año. BESSAI es la única plataforma open-source con compliance
@@ -309,7 +365,7 @@
                 </div>
                 <div style="display:flex;flex-direction:column;gap:14px">
                     <div class="aud-cta-card">
-                        <h4>📊 Deck & Due Diligence</h4>
+                        <h4>📊 Deck &amp; Due Diligence</h4>
                         <p>Agenda una llamada con el equipo fundador para acceder al data room.</p>
                         <a class="aud-link"
                             href="mailto:contacto@bess-solutions.cl?subject=Investor Inquiry BESSAI">Contactar
@@ -324,7 +380,7 @@
             </div>
 
             <!-- Panel: Academia -->
-            <div class="aud-panel" id="aud-academia">
+            <div class="aud-panel" id="aud-academia" role="tabpanel">
                 <div class="aud-main">
                     <h3>Para investigadores y academia</h3>
                     <p>Dataset real de operación BESS en el SEN chileno. Entorno gym-compatible para DRL. Co-autoría en
@@ -350,20 +406,21 @@
                         <h4>📄 Citar BESSAI</h4>
                         <p>CITATION.cff disponible en GitHub para citas académicas formales.</p>
                         <a class="aud-link" href="https://github.com/bess-solutions/open-bess-edge" target="_blank"
-                            rel="noopener">Ver repositorio →</a>
+                            rel="noopener noreferrer">Ver repositorio →</a>
                     </div>
                 </div>
             </div>
 
             <!-- Panel: Regulador -->
-            <div class="aud-panel" id="aud-regulador">
+            <div class="aud-panel" id="aud-regulador" role="tabpanel">
                 <div class="aud-main">
                     <h3>Para reguladores y policy makers</h3>
-                    <p>BESSAI implementa y documenta el cumplimiento de NTSyCS del CEN, IEC 62443 e IEEE 2030.5 de forma
+                    <p>BESSAI implementa y documenta el cumplimiento de NTSyCS del CEN, IEC 62443 SL-2 e IEEE 2030.5 de
+                        forma
                         transparente y auditable por cualquier tercero.</p>
                     <div class="aud-wins">
                         <div class="aud-win">NTSyCS CEN Chile: mapping completo publicado en docs/compliance/</div>
-                        <div class="aud-win">IEC 62443 SL-1 mapeado · SL-2 certification path documentado</div>
+                        <div class="aud-win">IEC 62443 SL-2 · certificación activa en progreso — path documentado</div>
                         <div class="aud-win">IEEE 2030.5 / SEP 2.0: 10 endpoints, TLS 1.2+, mTLS, DERControl</div>
                         <div class="aud-win">Código abierto: auditable por cualquier entidad — sin black boxes</div>
                         <div class="aud-win">OpenSSF Best Practices Passing: proceso de desarrollo trazable</div>
@@ -375,7 +432,7 @@
                         <p>Accede al mapping técnico completo entre BESSAI y los marcos regulatorios.</p>
                         <a class="aud-link"
                             href="https://github.com/bess-solutions/open-bess-edge/tree/main/docs/compliance"
-                            target="_blank" rel="noopener">Ver documentación →</a>
+                            target="_blank" rel="noopener noreferrer">Ver documentación →</a>
                     </div>
                     <div class="aud-cta-card">
                         <h4>🏛️ Diálogo técnico</h4>
@@ -430,42 +487,43 @@
             <div class="feat-grid">
                 <div class="feat-card reveal">
                     <div class="feat-num">01</div>
-                    <div class="feat-icon">⚡</div>
+                    <div class="feat-icon">&gt;_ edge</div>
                     <div class="feat-title">Edge-First, sin cloud obligatorio</div>
                     <div class="feat-desc">Raspberry Pi 4/5, amd64, arm64. Opera sin internet. Sin latencia de red. Sin
                         vendor lock-in. Sin suscripción mensual.</div>
                 </div>
                 <div class="feat-card reveal">
                     <div class="feat-num">02</div>
-                    <div class="feat-icon">🤖</div>
+                    <div class="feat-icon">∑ AI</div>
                     <div class="feat-title">IA local: MILP + DRL + ONNX</div>
                     <div class="feat-desc">Predicción CMg 24h-ahead. Optimizador MILP. Agente DRL entrenado con datos
                         reales del SEN chileno. Inferencia ONNX offline.</div>
                 </div>
                 <div class="feat-card reveal">
                     <div class="feat-num">03</div>
-                    <div class="feat-icon">🔓</div>
+                    <div class="feat-icon">//OSS</div>
                     <div class="feat-title">Open Source real · Apache 2.0</div>
                     <div class="feat-desc">Sin royalties. Sin black boxes. El código que gestiona tu batería es tuyo
                         para auditar, modificar y redistribuir libremente.</div>
                 </div>
                 <div class="feat-card reveal">
                     <div class="feat-num">04</div>
-                    <div class="feat-icon">🏭</div>
+                    <div class="feat-icon">[IEC]</div>
                     <div class="feat-title">Industrial-Grade certificado</div>
-                    <div class="feat-desc">IEC 62443 SL-1 mapeado. IEEE 2030.5 / SEP 2.0. NTSyCS CEN Chile. Comunicación
+                    <div class="feat-desc">IEC 62443 SL-2 en certificación activa. IEEE 2030.5 / SEP 2.0. NTSyCS CEN
+                        Chile. Comunicación
                         mTLS. Self-healing watchdog autónomo.</div>
                 </div>
                 <div class="feat-card reveal">
                     <div class="feat-num">05</div>
-                    <div class="feat-icon">🔌</div>
+                    <div class="feat-icon">&lt;/&gt;</div>
                     <div class="feat-title">Multi-protocolo · Multi-hardware</div>
                     <div class="feat-desc">Modbus RTU/TCP, IEC 61850, DNP3, MQTT, REST. Perfiles: Huawei SUN2000, SMA,
                         Victron Cerbo GX, Fronius. Añade el tuyo.</div>
                 </div>
                 <div class="feat-card reveal">
                     <div class="feat-num">06</div>
-                    <div class="feat-icon">📊</div>
+                    <div class="feat-icon">[█]</div>
                     <div class="feat-title">Observabilidad total incluida</div>
                     <div class="feat-desc">22 métricas Prometheus. Grafana auto-provisioned. OpenTelemetry + Cloud
                         Trace. Alertas configurables. Sin configuración manual.</div>
@@ -520,8 +578,8 @@
                 </div>
                 <div class="spec-block">
                     <div class="spec-head">Compliance y Seguridad</div>
-                    <div class="spec-row"><span class="spec-k">IEC 62443 SL-1</span><span class="spec-v ok">✓
-                            Mapeado</span></div>
+                    <div class="spec-row"><span class="spec-k">IEC 62443 SL-2</span><span class="spec-v ok">◉
+                            Certificación activa</span></div>
                     <div class="spec-row"><span class="spec-k">NTSyCS CEN Chile</span><span class="spec-v ok">✓
                             Compliant</span></div>
                     <div class="spec-row"><span class="spec-k">OpenSSF Best Practices</span><span class="spec-v ok">✓
@@ -557,10 +615,11 @@
             </div>
             <div class="comm-ctas reveal">
                 <a class="btn-p" href="https://github.com/bess-solutions/open-bess-edge" target="_blank"
-                    rel="noopener">★ Star en GitHub</a>
-                <a class="btn-g" href="https://discord.gg/ZqpE8AZs" target="_blank" rel="noopener">Unirse al Discord</a>
+                    rel="noopener noreferrer">★ Star en GitHub</a>
+                <a class="btn-g" href="https://discord.gg/ZqpE8AZs" target="_blank" rel="noopener noreferrer">Unirse al
+                    Discord</a>
                 <a class="btn-s" href="https://linkedin.com/company/bess-solutions" target="_blank"
-                    rel="noopener">Seguir en LinkedIn</a>
+                    rel="noopener noreferrer">Seguir en LinkedIn</a>
             </div>
         </div>
     </section>
@@ -692,20 +751,23 @@
                     Hay un lugar para cada rol.</p>
                 <div class="cta-btns">
                     <a class="btn-p" href="https://github.com/bess-solutions/open-bess-edge" target="_blank"
-                        rel="noopener">★ Star en GitHub</a>
+                        rel="noopener noreferrer">★ Star en GitHub</a>
                     <a class="btn-s" href="mailto:contacto@bess-solutions.cl">Contactar al equipo</a>
-                    <a class="btn-g" href="https://discord.gg/ZqpE8AZs" target="_blank" rel="noopener">Unirse al
+                    <a class="btn-g" href="https://discord.gg/ZqpE8AZs" target="_blank" rel="noopener noreferrer">Unirse
+                        al
                         Discord</a>
                 </div>
                 <div class="social-row">
-                    <a class="slink" href="https://discord.gg/ZqpE8AZs" target="_blank" rel="noopener">Discord</a>
+                    <a class="slink" href="https://discord.gg/ZqpE8AZs" target="_blank"
+                        rel="noopener noreferrer">Discord</a>
                     <a class="slink" href="https://linkedin.com/company/bess-solutions" target="_blank"
-                        rel="noopener">LinkedIn</a>
-                    <a class="slink" href="https://x.com/bess_solutions" target="_blank" rel="noopener">X / Twitter</a>
+                        rel="noopener noreferrer">LinkedIn</a>
+                    <a class="slink" href="https://x.com/bess_solutions" target="_blank" rel="noopener noreferrer">X /
+                        Twitter</a>
                     <a class="slink" href="https://github.com/bess-solutions/open-bess-edge" target="_blank"
-                        rel="noopener">GitHub</a>
+                        rel="noopener noreferrer">GitHub</a>
                     <a class="slink" href="https://youtube.com/@bess-solutions" target="_blank"
-                        rel="noopener">YouTube</a>
+                        rel="noopener noreferrer">YouTube</a>
                 </div>
             </div>
         </div>
@@ -724,22 +786,24 @@
             <div class="foot-links">
                 <div class="foot-col">
                     <div class="foot-col-t">Proyecto</div>
-                    <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank" rel="noopener">GitHub</a>
+                    <a href="https://github.com/bess-solutions/open-bess-edge" target="_blank"
+                        rel="noopener noreferrer">GitHub</a>
                     <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/CHANGELOG.md" target="_blank"
-                        rel="noopener">Changelog</a>
+                        rel="noopener noreferrer">Changelog</a>
                     <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/LICENSE" target="_blank"
-                        rel="noopener">Licencia Apache 2.0</a>
+                        rel="noopener noreferrer">Licencia Apache 2.0</a>
                     <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/SECURITY.md" target="_blank"
-                        rel="noopener">Seguridad</a>
+                        rel="noopener noreferrer">Seguridad</a>
                 </div>
                 <div class="foot-col">
                     <div class="foot-col-t">Comunidad</div>
-                    <a href="https://discord.gg/ZqpE8AZs" target="_blank" rel="noopener">Discord</a>
-                    <a href="https://linkedin.com/company/bess-solutions" target="_blank" rel="noopener">LinkedIn</a>
+                    <a href="https://discord.gg/ZqpE8AZs" target="_blank" rel="noopener noreferrer">Discord</a>
+                    <a href="https://linkedin.com/company/bess-solutions" target="_blank"
+                        rel="noopener noreferrer">LinkedIn</a>
                     <a href="https://github.com/bess-solutions/open-bess-edge/discussions" target="_blank"
-                        rel="noopener">GitHub Discussions</a>
+                        rel="noopener noreferrer">GitHub Discussions</a>
                     <a href="https://github.com/bess-solutions/open-bess-edge/blob/main/CONTRIBUTING.md" target="_blank"
-                        rel="noopener">Contribuir</a>
+                        rel="noopener noreferrer">Contribuir</a>
                 </div>
                 <div class="foot-col">
                     <div class="foot-col-t">Contacto</div>
@@ -756,6 +820,10 @@
     </footer>
 
     <!-- ── FLOATING MUSIC PLAYER ── -->
+    <!--
+        crossorigin="anonymous" requerido para CORS. Audio y artwork provienen de cdn1/cdn2.suno.ai,
+        allowlisted explícitamente en el Content-Security-Policy del <head>.
+    -->
     <div id="music-player" style="
         position:fixed;bottom:24px;right:24px;z-index:990;
         background:rgba(11,13,24,.95);backdrop-filter:blur(20px);
@@ -780,242 +848,35 @@
                 </div>
             </div>
         </div>
-        <button id="mp-btn" onclick="toggleMusic()" style="
+        <!-- onclick removido — main.js via addEventListener (initMusicPlayer) -->
+        <button id="mp-btn" type="button" aria-label="Reproducir" style="
             width:34px;height:34px;border-radius:50%;border:none;
             background:linear-gradient(135deg,#22d3ee,#34d399);
             color:#070810;font-size:.85rem;cursor:pointer;flex-shrink:0;
             display:flex;align-items:center;justify-content:center;
             transition:transform .2s;
         ">▶</button>
-        <button onclick="document.getElementById('music-player').style.display='none'" style="
+        <!-- onclick y onmouseover removidos — main.js via addEventListener -->
+        <button id="mp-close" type="button" aria-label="Cerrar reproductor" style="
             position:absolute;top:6px;right:8px;background:none;border:none;
             color:#3a4052;cursor:pointer;font-size:.65rem;line-height:1;padding:2px;
         ">✕</button>
-        <a href="https://suno.com/s/3fl7sTP1M0Oitou3" target="_blank" rel="noopener" style="
+        <a href="https://suno.com/s/3fl7sTP1M0Oitou3" target="_blank" rel="noopener noreferrer" style="
             position:absolute;bottom:7px;right:12px;
             font:.52rem 'JetBrains Mono',monospace;color:#3a4052;
             text-decoration:none;transition:color .2s;
-        " onmouseover="this.style.color='#60697a'" onmouseout="this.style.color='#3a4052'">suno ↗</a>
+        ">suno ↗</a>
     </div>
+
     <audio id="bess-audio" crossorigin="anonymous" src="https://cdn1.suno.ai/edbd3009-1ef6-4a49-9c09-937395b6a4db.mp3"
         preload="none"></audio>
 
-    <script>
-        (function () {
-            const audio = document.getElementById('bess-audio');
-            const btn = document.getElementById('mp-btn');
-            const bar = document.getElementById('mp-bar');
-            const wrap = document.getElementById('mp-progress-wrap');
-            const player = document.getElementById('music-player');
+    <!-- ── SCRIPTS ────────────────────────────────────────────────────
+         defer: garantiza que el DOM esté listo antes de ejecutar.
+         Solo un script centralizado — no hay código inline duplicado.
+    ──────────────────────────────────────────────────────────────── -->
+    <script src="main.js" defer></script>
 
-            // Show player after 2s
-            setTimeout(() => {
-                player.style.transform = 'translateY(0)';
-                player.style.opacity = '1';
-            }, 2000);
-
-            window.toggleMusic = function () {
-                if (audio.paused) {
-                    audio.play();
-                    btn.textContent = '⏸';
-                    btn.style.transform = 'scale(.92)';
-                } else {
-                    audio.pause();
-                    btn.textContent = '▶';
-                    btn.style.transform = '';
-                }
-            };
-
-            audio.addEventListener('timeupdate', () => {
-                if (audio.duration) bar.style.width = (audio.currentTime / audio.duration * 100) + '%';
-            });
-
-            wrap.addEventListener('click', e => {
-                const r = wrap.getBoundingClientRect();
-                const pct = (e.clientX - r.left) / r.width;
-                audio.currentTime = pct * audio.duration;
-            });
-
-            audio.addEventListener('ended', () => {
-                btn.textContent = '▶';
-                btn.style.transform = '';
-                bar.style.width = '0%';
-            });
-        })();
-    </script>
-
-    <script>
-        /* BESS Solutions — main.js v3 */
-
-        // ── ROTATING HERO PHRASES ──────────────────────────────────────
-        const phrases = [
-            { line1: 'El cerebro de tu', line2: 'batería es', accent: 'open-source.' },
-            { line1: 'Optimización de', line2: 'energía con', accent: 'IA en el edge.' },
-            { line1: 'Más rentabilidad,', line2: 'menos pérdidas,', accent: 'más control.' },
-            { line1: 'Cumple NTSyCS', line2: 'y IEC 62443', accent: 'desde el día 1.' },
-            { line1: 'Arbitraje de precio', line2: 'autónomo,', accent: 'sin cloud.' },
-            { line1: 'Construido para', line2: 'LatAm,', accent: 'abierto al mundo.' },
-        ];
-        let phraseIdx = 0;
-        let typing = false;
-
-        function setPhrase(idx) {
-            const h = document.getElementById('hero-phrase');
-            if (!h) return;
-            const p = phrases[idx];
-            h.style.opacity = '0';
-            h.style.transform = 'translateY(10px)';
-            setTimeout(() => {
-                h.innerHTML = `${p.line1}<br/>${p.line2} <span class="accent">${p.accent}</span>`;
-                h.style.transition = 'opacity .6s ease, transform .6s ease';
-                h.style.opacity = '1';
-                h.style.transform = 'none';
-            }, 350);
-        }
-
-        function rotatePhrases() {
-            phraseIdx = (phraseIdx + 1) % phrases.length;
-            setPhrase(phraseIdx);
-        }
-
-        // ── NAV ────────────────────────────────────────────────────────
-        const nav = document.getElementById('nav');
-        window.addEventListener('scroll', () => {
-            nav.classList.toggle('scrolled', scrollY > 20);
-        }, { passive: true });
-
-        // ── MOBILE MENU ────────────────────────────────────────────────
-        function toggleMenu() {
-            const m = document.getElementById('mob-menu');
-            const open = m.classList.toggle('open');
-            document.body.style.overflow = open ? 'hidden' : '';
-        }
-        function closeMenu() {
-            document.getElementById('mob-menu')?.classList.remove('open');
-            document.body.style.overflow = '';
-        }
-        window.addEventListener('scroll', closeMenu, { passive: true });
-        window.toggleMenu = toggleMenu;
-        window.closeMenu = closeMenu;
-
-        // ── AUDIENCE TABS ──────────────────────────────────────────────
-        function setAudience(id) {
-            document.querySelectorAll('.aud-btn').forEach(b => b.classList.toggle('active', b.dataset.aud === id));
-            document.querySelectorAll('.aud-panel').forEach(p => p.classList.toggle('active', p.id === 'aud-' + id));
-        }
-        window.setAudience = setAudience;
-
-        // ── ANIMATED COUNTERS ──────────────────────────────────────────
-        function animateCounter(el) {
-            const target = parseFloat(el.dataset.target);
-            const decimals = el.dataset.dec ? parseInt(el.dataset.dec) : 0;
-            const suffix = el.dataset.suffix || '';
-            const prefix = el.dataset.prefix || '';
-            const duration = 1800;
-            const start = performance.now();
-            function tick(now) {
-                const t = Math.min((now - start) / duration, 1);
-                const ease = 1 - Math.pow(1 - t, 3);
-                const val = target * ease;
-                el.textContent = prefix + val.toFixed(decimals) + suffix;
-                if (t < 1) requestAnimationFrame(tick);
-            }
-            requestAnimationFrame(tick);
-        }
-
-        // ── LIVE METRICS (updates every 3s) ───────────────────────────
-        let liveBase = { savings: 14820, latency: 3.1, soc: 87.4, cycles: 18 };
-        function updateLive() {
-            const el = {
-                savings: document.getElementById('live-savings'),
-                latency: document.getElementById('live-latency'),
-                soc: document.getElementById('live-soc'),
-                cycles: document.getElementById('live-cycles'),
-            };
-            liveBase.savings += Math.floor(Math.random() * 80 + 20);
-            liveBase.latency = +(2.8 + Math.random() * 1.2).toFixed(1);
-            liveBase.soc = +(82 + Math.random() * 12).toFixed(1);
-            liveBase.cycles = 16 + Math.floor(Math.random() * 6);
-            if (el.savings) el.savings.textContent = '$' + liveBase.savings.toLocaleString('es-CL');
-            if (el.latency) el.latency.textContent = liveBase.latency + 'ms';
-            if (el.soc) el.soc.textContent = liveBase.soc + '%';
-            if (el.cycles) el.cycles.textContent = liveBase.cycles;
-        }
-
-        // ── TERMINAL ──────────────────────────────────────────────────
-        const termLines = [
-            { t: 'cmd', text: 'bessai start --mode=optimize --site=atacama-1', delay: 0 },
-            { t: 'info', text: '→ Loading config edge.toml…', delay: 500 },
-            { t: 'ok', text: '✓ BMS · Huawei SUN2000 · Modbus RTU connected', delay: 950 },
-            { t: 'ok', text: '✓ Grid API · Coordinador CEN · OK', delay: 1300 },
-            { t: 'info', text: '→ Fetching CMg forecast 24h SEN…', delay: 1700 },
-            { t: 'ok', text: '✓ Modelo ONNX · MAPE 4.2% · CMg: $142/MWh', delay: 2150 },
-            { t: 'info', text: '→ MILP optimizer solving dispatch plan…', delay: 2550 },
-            { t: 'ok', text: '✓ 18 ciclos optimizados · ahorro: $14.820 CLP', delay: 3000 },
-            { t: 'warn', text: '⚡ Peak window 18:00–22:00 → discharge 92 kW', delay: 3400 },
-            { t: 'ok', text: '✓ SoC 87.4% · Latency 3.1ms · WDG ❤ online', delay: 3850 },
-        ];
-
-        function bootTerminal() {
-            const tbody = document.getElementById('term-body');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-            termLines.forEach(({ t, text, delay }) => {
-                setTimeout(() => {
-                    const div = document.createElement('div');
-                    div.className = 't-l';
-                    if (t === 'cmd') {
-                        div.innerHTML = `<span class="t-p">$</span><span class="t-cmd">${text}</span>`;
-                    } else {
-                        div.innerHTML = `<span class="t-${t}">${text}</span>`;
-                    }
-                    tbody.appendChild(div);
-                    tbody.scrollTop = tbody.scrollHeight;
-                }, delay);
-            });
-            setTimeout(() => {
-                const c = document.createElement('div');
-                c.className = 't-l';
-                c.innerHTML = '<span class="t-p">$</span><span class="t-cursor"></span>';
-                tbody.appendChild(c);
-            }, 4400);
-        }
-
-        // ── REVEAL ────────────────────────────────────────────────────
-        const io = new IntersectionObserver(entries => {
-            entries.forEach(e => {
-                if (e.isIntersecting) {
-                    e.target.classList.add('vis');
-                    // trigger counters
-                    e.target.querySelectorAll('[data-target]').forEach(animateCounter);
-                    io.unobserve(e.target);
-                }
-            });
-        }, { threshold: 0.08 });
-
-        // ── BOOT ─────────────────────────────────────────────────────
-        window.addEventListener('DOMContentLoaded', () => {
-            // Init phrase
-            setPhrase(0);
-            setInterval(rotatePhrases, 3200);
-
-            // Audience default
-            setAudience('integrador');
-
-            // Terminal
-            bootTerminal();
-
-            // Reveal observers
-            document.querySelectorAll('.reveal,.reveal-l').forEach(el => io.observe(el));
-
-            // Live metrics
-            setInterval(updateLive, 3000);
-            updateLive();
-
-            // Counters in hero (immediate)
-            document.querySelectorAll('.live-strip [data-target]').forEach(animateCounter);
-        });
-    </script>
 </body>
 
 </html>

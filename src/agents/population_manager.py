@@ -85,7 +85,7 @@ class PopulationManager:
 
     def load_or_init(
         self,
-        generator: "CandidateGenerator",
+        generator: CandidateGenerator,
         population_size: int = 10,
     ) -> list[PolicyCandidate]:
         """Load existing population from disk or initialise a new one.

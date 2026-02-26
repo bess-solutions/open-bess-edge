@@ -110,7 +110,7 @@ class DataLakePublisher:
         table: str = "edge_readings",
         buffer_size: int = 10_000,
         batch_size: int = 100,
-        local_buffer_path: str = "/tmp/bessai_datalake_buffer.jsonl",
+        local_buffer_path: str = "/tmp/bessai_datalake_buffer.jsonl",  # nosec B108
     ) -> None:
         self.project_id = project_id
         self.dataset = dataset

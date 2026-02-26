@@ -108,7 +108,7 @@ class PolicyCandidate:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "PolicyCandidate":
+    def from_dict(cls, data: dict[str, Any]) -> PolicyCandidate:
         """Deserialise from JSON-compatible dict."""
         return cls(
             id=data["id"],

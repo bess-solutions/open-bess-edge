@@ -142,7 +142,7 @@ class TOTPAuth:
 
         if self._secret and _PYOTP_AVAILABLE:
             try:
-                self._totp = _pyotp.TOTP(
+                self._totp = _pyotp.TOTP(  # type: ignore[union-attr]
                     self._secret,
                     digits=_TOTP_DIGITS,
                     interval=_TOTP_STEP_SECONDS,
@@ -201,7 +201,7 @@ class TOTPAuth:
             log.warning("totp_auth.invalid_token_format", length=len(token))
             return False
 
-        valid = self._totp.verify(token, valid_window=_TOTP_WINDOW)
+        valid = self._totp.verify(token, valid_window=_TOTP_WINDOW)  # type: ignore[union-attr]
         log.info("totp_auth.verify", valid=valid)
         return bool(valid)
 
