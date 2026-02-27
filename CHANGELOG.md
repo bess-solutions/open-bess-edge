@@ -73,6 +73,7 @@
 - remove deprecated fetch_cmg_evolution.py (superseded by bessai_data_scraper.py) (`1f734cd4`, @BESS Solutions)
 
 ### ✨ New Features
+- **docs**: agregar GOOD_FIRST_ISSUES.md (12 issues), TECHNICAL_RECOMMENDATIONS.md (5 REQs), limpiar Makefile duplicado (`642899a9`, @BESS Solutions)
 - **ai**: BESSAIEvolve v2 - CMA-ES + NSGA-II + Elite Archive (Fase 1 plan 20/10) (`cdf85807`, @BESS Solutions)
 - **ai-20-10**: XAI engine, auto-retrain loop, dummy ONNX generator, perf baseline (`a1f10f13`, @BESS Solutions)
 - **workflows**: add 8 power workflows for BESSAI monster automation (`0be81e39`, @BESS Solutions)
