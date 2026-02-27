@@ -1,0 +1,112 @@
+{
+    "_comment": "Tarifas CFE GDMTH (Gran Demanda Media Tensión Horaria) — Sistema Interconectado Nacional (SIN)",
+    "_source": "Tarifas CFE vigentes 2024-2025 — actualizar con cada resolución CRE",
+    "_version": "2025-01",
+    "tariff_name": "GDMTH",
+    "market": "Mexico",
+    "regulator": "CRE",
+    "utility": "CFE",
+    "seasons": {
+        "summer": {
+            "months": [
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ],
+            "_note": "Febrero a Septiembre — verificar zona tarifaria"
+        },
+        "winter": {
+            "months": [
+                10,
+                11,
+                12,
+                1
+            ],
+            "_note": "Octubre a Enero"
+        }
+    },
+    "periods": {
+        "BASE": {
+            "description": "Periodo base — precio más bajo",
+            "rules": [
+                {
+                    "days": [
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday"
+                    ],
+                    "hours_start": 0,
+                    "hours_end": 6
+                },
+                {
+                    "days": [
+                        "Saturday",
+                        "Sunday"
+                    ],
+                    "hours_start": 0,
+                    "hours_end": 24
+                }
+            ]
+        },
+        "INTERMEDIA": {
+            "description": "Periodo intermedio",
+            "rules": [
+                {
+                    "days": [
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday"
+                    ],
+                    "hours_start": 6,
+                    "hours_end": 18
+                },
+                {
+                    "days": [
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday"
+                    ],
+                    "hours_start": 22,
+                    "hours_end": 24
+                }
+            ]
+        },
+        "PUNTA": {
+            "description": "Periodo punta — precio más alto — target para Peak Shaving con BESS",
+            "rules": [
+                {
+                    "days": [
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday"
+                    ],
+                    "hours_start": 18,
+                    "hours_end": 22
+                }
+            ]
+        }
+    },
+    "prices_mxn_kwh": {
+        "_note": "Precios referenciales — actualizar con tarifa vigente del mes",
+        "BASE": 1.25,
+        "INTERMEDIA": 1.85,
+        "PUNTA": 4.20
+    },
+    "demand_charge_mxn_kw_month": {
+        "_note": "Cargo por demanda máxima mensual en periodo punta",
+        "PUNTA": 185.0
+    }
+}
