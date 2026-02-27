@@ -1,7 +1,8 @@
 {
     "_comment": "Tarifas CFE GDMTH (Gran Demanda Media Tensión Horaria) — Sistema Interconectado Nacional (SIN)",
-    "_source": "Tarifas CFE vigentes 2024-2025 — actualizar con cada resolución CRE",
-    "_version": "2025-01",
+    "_source": "DOF/SEGOB — Tarifas Finales Suministro Basico CFE vigentes desde agosto 2025. URL: segob.gob.mx",
+    "_version": "2025-08",
+    "_verified": "2026-02-27",
     "tariff_name": "GDMTH",
     "market": "Mexico",
     "regulator": "CRE",
@@ -100,13 +101,17 @@
         }
     },
     "prices_mxn_kwh": {
-        "_note": "Precios referenciales — actualizar con tarifa vigente del mes",
-        "BASE": 1.25,
-        "INTERMEDIA": 1.85,
-        "PUNTA": 4.20
+        "_note": "Tarifas REALES DOF agosto 2025. Fuente: segob.gob.mx / CFE Suministrador de Servicios Basicos",
+        "BASE": 0.9649,
+        "INTERMEDIA": 1.8829,
+        "PUNTA": 2.1757
     },
     "demand_charge_mxn_kw_month": {
-        "_note": "Cargo por demanda máxima mensual en periodo punta",
-        "PUNTA": 185.0
+        "_note": "Cargo por demanda maxima medida en periodo punta (MXN/kW/mes). Real DOF agosto 2025.",
+        "PUNTA": 102.05
+    },
+    "fixed_charge_mxn_month": {
+        "_note": "Cargo fijo mensual independiente del consumo (MXN/mes). Real DOF agosto 2025.",
+        "amount": 1106.85
     }
 }
