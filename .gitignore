@@ -122,6 +122,7 @@ infrastructure/certs/ca.key
 # ---------------------------------------------------------------------------
 # Website (move to private repo: bess-solutions/bess-website)
 landing/
+website/
 # Dashboard + operational data (move to private repo)
 dashboard/
 # Internal-only documentation
@@ -129,3 +130,20 @@ docs/MANUAL_ACCIONES_RODRIGO.md
 docs/PLAN_INMORTALIDAD.md
 docs/MODULOS_Y_DATOS_SIMULADOS.md
 docs/PENDIENTES.md
+
+# ---------------------------------------------------------------------------
+# Node / frontend (not part of backend package)
+# ---------------------------------------------------------------------------
+node_modules/
+.vite/
+
+# ---------------------------------------------------------------------------
+# Analysis output files (pyright, bandit, mypy, pytest)
+# ---------------------------------------------------------------------------
+pyright_*.txt
+bandit_*.txt
+mypy_*.txt
+pytest_*.txt
+*_out.txt
+*_current.txt
+*_result.txt
