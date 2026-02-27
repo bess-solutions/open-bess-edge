@@ -1,0 +1,125 @@
+# GitHub Actions Workflow — SEC Normative Gap Analysis
+# ───────────────────────────────────────────────────
+# Este workflow se ejecuta automáticamente cada lunes a las 08:00 UTC (05:00 CL)
+# y puede lanzarse manualmente desde la UI de GitHub.
+#
+# Para activarlo: copia este archivo a
+#   .github/workflows/sec_gap_analysis.yml
+# en el repositorio bess-solutions/open-bess-edge
+#
+# Requiere secrets:
+#   GH_PAT_SEC_INGESTOR — Personal Access Token con scope `repo`
+#      (nombre distinto a GITHUB_TOKEN para evitar conflicto con el token
+#       automático de Actions que no puede crear PRs cross-repo)
+
+name: "🇨🇱 SEC Normative Gap Analysis"
+
+on:
+  schedule:
+    # Cada lunes 08:00 UTC → 05:00 hora Chile (GMT-3)
+    - cron: "0 8 * * 1"
+  workflow_dispatch:
+    inputs:
+      bess_only:
+        description: "Solo documentos BESS relevantes"
+        required: false
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+      dry_run:
+        description: "Dry-run (no push al repo)"
+        required: false
+        default: "false"
+        type: choice
+        options: ["true", "false"]
+
+jobs:
+  sec-gap-analysis:
+    name: "Scrape SEC & Analyze Normative Gaps"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: "📥 Checkout open-bess-edge"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT_SEC_INGESTOR }}
+
+      - name: "🐍 Setup Python 3.12"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: sec-bess-ingestor/requirements.txt
+
+      - name: "📦 Install dependencies"
+        run: |
+          pip install -r sec-bess-ingestor/requirements.txt
+
+      - name: "🕷️ Scrape SEC Chile"
+        working-directory: sec-bess-ingestor
+        env:
+          PYTHONUTF8: "1"
+          BESS_EDGE_LOCAL: ".."
+        run: |
+          BESS_ONLY_FLAG=""
+          if [ "${{ github.event.inputs.bess_only || 'true' }}" = "true" ]; then
+            BESS_ONLY_FLAG="--bess-only"
+          fi
+          python cli.py scrape $BESS_ONLY_FLAG
+
+      - name: "🔍 Analyze normative gaps"
+        working-directory: sec-bess-ingestor
+        env:
+          PYTHONUTF8: "1"
+          BESS_EDGE_LOCAL: ".."
+        run: python cli.py analyze
+
+      - name: "📄 Generate reports"
+        working-directory: sec-bess-ingestor
+        env:
+          PYTHONUTF8: "1"
+          BESS_EDGE_LOCAL: ".."
+        run: python cli.py report
+
+      - name: "🚀 Generate BEPs for critical gaps"
+        working-directory: sec-bess-ingestor
+        env:
+          PYTHONUTF8: "1"
+          BESS_EDGE_LOCAL: ".."
+        run: python scripts/bep_generator.py
+
+      - name: "📬 Publish to repo via PR"
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        working-directory: sec-bess-ingestor
+        env:
+          PYTHONUTF8: "1"
+          GITHUB_TOKEN: ${{ secrets.GH_PAT_SEC_INGESTOR }}
+          BESS_EDGE_LOCAL: ".."
+        run: python cli.py publish --no-dry-run
+
+      - name: "📋 Upload reports as artifacts"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sec-gap-reports-${{ github.run_number }}
+          path: |
+            sec-bess-ingestor/data/reports/
+            sec-bess-ingestor/data/raw/
+          retention-days: 30
+
+      - name: "📊 Print summary to job summary"
+        if: always()
+        working-directory: sec-bess-ingestor
+        env:
+          PYTHONUTF8: "1"
+        run: |
+          echo "## 🇨🇱 SEC Gap Analysis Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          # Mostrar el resumen más reciente
+          SUMMARY=$(ls -t data/reports/gap_summary_*.md 2>/dev/null | head -1)
+          if [ -n "$SUMMARY" ]; then
+            cat "$SUMMARY" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No se generó resumen." >> $GITHUB_STEP_SUMMARY
+          fi
