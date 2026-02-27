@@ -1,0 +1,57 @@
+{
+  "scraped_at": "2026-02-27T17:00:00+00:00",
+  "total_records": 3,
+  "bess_relevant_count": 2,
+  "sections_scraped": ["normativa", "circulares"],
+  "records": [
+    {
+      "id": "abc123def456",
+      "type": "normativa",
+      "section": "normativa",
+      "title": "Norma Técnica de Seguridad y Calidad de Servicio (NTSyCS) - Actualización 2022",
+      "url": "https://www.sec.cl/normativa/ntscys-2022/",
+      "date": "2022-06-15",
+      "number": "125",
+      "body_text": "La presente norma establece los requisitos técnicos para la conexión y operación de unidades de almacenamiento de energía (BESS) al Sistema Eléctrico Nacional. Se establecen límites de rampa de potencia de 10% de Pnom por minuto para sistemas de almacenamiento. La respuesta en frecuencia primaria deberá activarse dentro de los 2 segundos posteriores a la detección de desviación de frecuencia superior a 0.1 Hz del valor nominal (50 Hz). Los sistemas deberán reportar telemetría en tiempo real al Coordinador Eléctrico Nacional mediante protocolo IEC 60870-5-104.",
+      "pdf_links": [
+        {"url": "https://www.sec.cl/normativa/ntscys-2022.pdf", "text": "Descargar NTSyCS 2022"}
+      ],
+      "metadata": {},
+      "bess_relevant": true,
+      "relevance_score": 8,
+      "scraped_at": "2026-02-27T17:00:00+00:00"
+    },
+    {
+      "id": "bcd234efg567",
+      "type": "circular",
+      "section": "circulares",
+      "title": "Circular N°3721 - Requisitos de Ciberseguridad para Infraestructura Eléctrica Crítica",
+      "url": "https://www.sec.cl/circulares/circular-3721/",
+      "date": "2024-03-20",
+      "number": "3721/2024",
+      "body_text": "La presente circular establece los requisitos mínimos de ciberseguridad para operadores de infraestructura eléctrica crítica. Se exige implementación de IEC 62443 nivel de seguridad SL-2 para sistemas de control industrial. Los operadores deberán implementar canal TLS cifrado para comunicaciones SCADA y mantener registros de auditoría por un mínimo de 2 años. Los sistemas de almacenamiento de energía (BESS) con capacidad igual o superior a 1 MW quedan sujetos a estas disposiciones.",
+      "pdf_links": [
+        {"url": "https://www.sec.cl/circulares/circular-3721.pdf", "text": "Descargar Circular 3721"}
+      ],
+      "metadata": {},
+      "bess_relevant": true,
+      "relevance_score": 6,
+      "scraped_at": "2026-02-27T17:00:00+00:00"
+    },
+    {
+      "id": "cde345fgh678",
+      "type": "normativa",
+      "section": "normativa",
+      "title": "Reglamento de Distribución y Comercialización de Combustibles",
+      "url": "https://www.sec.cl/normativa/reglamento-combustibles/",
+      "date": "2021-08-10",
+      "number": "99/2021",
+      "body_text": "El presente reglamento regula las condiciones técnicas y de seguridad para la distribución y comercialización de combustibles líquidos y gaseosos en el territorio nacional.",
+      "pdf_links": [],
+      "metadata": {},
+      "bess_relevant": false,
+      "relevance_score": 0,
+      "scraped_at": "2026-02-27T17:00:00+00:00"
+    }
+  ]
+}
