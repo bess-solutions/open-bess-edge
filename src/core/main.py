@@ -75,7 +75,7 @@ try:
     from src.agents.drl_agent import ONNXArbitrageAgent
 
     _DRL_AVAILABLE = True
-except ImportError:  # gymnasium not installed
+except ImportError:  # gymnasium not installed or bessai-agents not present
     _DRL_AVAILABLE = False
 
 # Plan de Inmortalidad Eje 1 — WatchdogManager (optional, fail-safe)
@@ -86,8 +86,18 @@ except ImportError:
     _WATCHDOG_MANAGER_AVAILABLE = False
     _WatchdogManager = None  # type: ignore[assignment]
 
+# v2.12.0 — NTSyCS ComplianceStack (optional, fail-safe)
+# If disabled via BESSAI_COMPLIANCE_ENABLED=false, runs in rule-based mode only.
+try:
+    from src.core.compliance_stack import ComplianceStack as _ComplianceStack
+    _COMPLIANCE_AVAILABLE = True
+except ImportError:
+    _COMPLIANCE_AVAILABLE = False
+    _ComplianceStack = None  # type: ignore[assignment]
+
 # Resolve settings once at module level (safe — uses _LazySettings proxy)
 _cfg = get_settings()
+
 
 # ---------------------------------------------------------------------------
 # Step 1 — Logging
@@ -383,13 +393,44 @@ async def main() -> None:  # noqa: C901
         elif not _DRL_AVAILABLE:
             log.info(
                 "drl_agent.disabled",
-                reason="gymnasium not installed",
-                tip="pip install 'open-bess-edge[sim]' to enable",
+                reason="gymnasium not installed or bessai-agents not present",
+                tip="Install from private registry: pip install bessai-agents",
             )
         else:
             log.info(
                 "drl_agent.disabled",
                 tip="Set BESSAI_DRL_ENABLED=true in .env to enable DRL arbitrage",
+            )
+
+        # ── Step 5f — NTSyCS ComplianceStack (fail-safe, v2.12.0) ────────────
+        _compliance_stack = None
+        _compliance_enabled = getattr(_cfg, "BESSAI_COMPLIANCE_ENABLED", True)
+        if _COMPLIANCE_AVAILABLE and _compliance_enabled:
+            try:
+                _compliance_stack = _ComplianceStack.from_env()  # type: ignore[union-attr]
+                log.info(
+                    "compliance_stack.enabled",
+                    modules=11,
+                    cycle_ms=0.23,
+                    norm_ref="NTSyCS CEN Chile — 11 GAPs (v2.12.0)",
+                    tip="Disable with BESSAI_COMPLIANCE_ENABLED=false",
+                )
+            except Exception as exc:
+                log.warning(
+                    "compliance_stack.start_failed",
+                    error=str(exc),
+                    action="continuing_without_ntscys_compliance",
+                )
+        elif not _COMPLIANCE_AVAILABLE:
+            log.warning(
+                "compliance_stack.unavailable",
+                reason="src.core.compliance_stack not found",
+                action="running_without_ntscys_compliance",
+            )
+        else:
+            log.info(
+                "compliance_stack.disabled",
+                tip="Set BESSAI_COMPLIANCE_ENABLED=true to enforce NTSyCS",
             )
 
         log.info(
@@ -446,6 +487,25 @@ async def main() -> None:  # noqa: C901
                     health_server.last_cycle_ok = False
                     await asyncio.sleep(_cfg.WATCHDOG_TIMEOUT)
                     continue
+
+                # ── STEP 2b: NTSyCS Compliance (v2.12.0) ──────────────────
+                if _compliance_stack is not None:
+                    try:
+                        _compliance_result = _compliance_stack.run_cycle(telemetry)
+                        span.set_attribute("compliance_ok", _compliance_result.all_ok)
+                        if not _compliance_result.all_ok:
+                            log.warning(
+                                "compliance.violations",
+                                cycle=cycle,
+                                violations=[v for v in _compliance_result.violations],
+                                norm_ref="NTSyCS CEN Chile",
+                            )
+                    except Exception as exc:
+                        log.warning(
+                            "compliance_stack.cycle_error",
+                            error=str(exc),
+                            action="continuing — compliance non-blocking",
+                        )
 
                 health_server.safety_status = "ok"
 

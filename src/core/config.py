@@ -211,6 +211,79 @@ class Settings(BaseSettings):
     )
 
     # ------------------------------------------------------------------
+    # NTSyCS / CEN Chile compliance (v2.12.0)
+    # ------------------------------------------------------------------
+    BESSAI_P_NOM_KW: float = Field(
+        default=1000.0,
+        gt=0,
+        description="Nominal active power of the BESS in kW. Used for ramp and SC calculations.",
+    )
+    BESSAI_Q_MAX_KVAR: float = Field(
+        default=484.0,
+        ge=0,
+        description="Maximum reactive power in kVAr. Used for Q/V droop compliance.",
+    )
+    CEN_ENDPOINT: str = Field(
+        default="https://cen.coordinador.cl/api/telemetry",
+        description="CEN telemetry HTTPS endpoint (GAP-003 — NTSyCS Cap. 6.1).",
+    )
+    CEN_TLS_CERT: str | None = Field(
+        default=None,
+        description="Path to mTLS client cert PEM for CEN telemetry (GAP-003).",
+    )
+    CEN_TLS_KEY: str | None = Field(
+        default=None,
+        description="Path to mTLS client private key PEM for CEN telemetry.",
+    )
+    CEN_TLS_CA: str | None = Field(
+        default=None,
+        description="Path to CEN CA certificate PEM for server verification.",
+    )
+    IEC104_HOST: str = Field(
+        default="0.0.0.0",  # nosec B104
+        description="Bind address for the IEC 60870-5-104 SCADA server (GAP-004).",
+    )
+    IEC104_PORT: int = Field(
+        default=2404,
+        ge=1,
+        le=65535,
+        description="TCP port for IEC 60870-5-104 SCADA (default 2404).",
+    )
+    BESSAI_COMPLIANCE_ENABLED: bool = Field(
+        default=True,
+        description="Enable ComplianceStack (NTSyCS 11 GAPs) in the main control loop.",
+    )
+    CSIRT_ENDPOINT: str = Field(
+        default="https://csirt.gob.cl/api/report",
+        description="CSIRT Nacional incident reporting endpoint (Ley 21.663/2024).",
+    )
+    CSIRT_API_KEY: str | None = Field(
+        default=None,
+        description="API key for CSIRT Nacional incident reporting.",
+    )
+    # Servicios Complementarios pricing (public CEN reference values, operator-tunable)
+    SC_PFR_PRICE_USD_MWH: float = Field(
+        default=1.5,
+        gt=0,
+        description="PFR ancillary service reference price USD/MWh (CEN 2024).",
+    )
+    SC_R2_PRICE_USD_MWH: float = Field(
+        default=2.0,
+        gt=0,
+        description="R2 AGC ancillary service reference price USD/MWh (CEN 2024).",
+    )
+    SC_R3_PRICE_USD_MWH: float = Field(
+        default=2.5,
+        gt=0,
+        description="R3 reserve ancillary service reference price USD/MWh (CEN 2024).",
+    )
+    SC_QV_PRICE_USD_MWH: float = Field(
+        default=0.8,
+        gt=0,
+        description="Q/V reactive ancillary service reference price USD/MWh (CEN 2024).",
+    )
+
+    # ------------------------------------------------------------------
     # Derived helpers (not environment variables)
     # ------------------------------------------------------------------
     @property
