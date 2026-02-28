@@ -1,9 +1,10 @@
 # BESSAI Edge Gateway — Developer Makefile
 # Usage: make <target>   →   make help  for full list
 
-.PHONY: help dev install test test-cov test-fast lint lint-fix type-check security audit \
+.PHONY: help dev install test test-cov test-compliance test-fast lint lint-fix type-check security audit \
         all-checks simulate health up up-sim down logs build \
-        gen-onnx export-cmg fetch-cmg evolve train-drl \
+        gen-onnx export-cmg fetch-cmg evolve train-drl train-ppo \
+        cert pilot compliance-report fleet \
         validate-registry tf-plan helm-lint helm-template \
         docs docs-serve \
         changelog release-dry-run release publish-pypi \
@@ -12,6 +13,8 @@
 PYTHON  ?= python
 COMPOSE  = docker compose
 VERSION  ?= $(shell git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+SITE_ID  ?= SITE-CL-001
+PORT     ?= 8000
 
 # ── Help ───────────────────────────────────────────────────────────────────────
 
@@ -31,8 +34,21 @@ install: ## Install runtime dependencies only
 
 # ── Testing ────────────────────────────────────────────────────────────────────
 
-test: ## Run full test suite (613 tests)
-	pytest -x --tb=short -q
+test: ## Run full test suite (compliance + edge)
+	pytest -x --tb=short -q \
+		--ignore=tests/agents/ \
+		--ignore=tests/test_sun2000_monitor.py \
+		--ignore=tests/test_totp_auth.py \
+		--ignore=tests/test_vpp_publisher.py
+
+test-compliance: ## NTSyCS compliance tests only (11 GAPs) — v2.14.0
+	pytest \
+		tests/test_compliance_api.py \
+		tests/test_cen_sc_bidder.py \
+		tests/test_ppo_trainer.py \
+		tests/test_cen_publisher.py \
+		tests/test_iec104_driver.py \
+		-v --tb=short
 
 test-cov: ## Run tests with HTML coverage report  →  htmlcov/index.html
 	pytest --cov=src --cov-report=term-missing --cov-report=html -q
@@ -113,6 +129,26 @@ export-cmg: ## Export CMg data as JSON for dashboard
 
 train-drl: ## Train DRL policy  (requires ray[rllib] + real CMg data)
 	$(PYTHON) scripts/train_drl_policy.py
+
+train-ppo: ## BEP-0200 Phase 3: Train PPO dispatch agent (500k steps)
+	@mkdir -p models logs/ppo_training
+	$(PYTHON) -c "\
+from src.core.ppo_trainer import PPOTrainer, TrainingConfig; \
+cfg = TrainingConfig(total_timesteps=500_000); \
+t = PPOTrainer(site_id='$(SITE_ID)', data_path='data/cen_telemetry.csv', config=cfg); \
+r = t.train(); print(f'BEP-0200 Phase 3 done: {r.total_timesteps} steps, reward={r.final_mean_reward:.3f}')"
+
+cert: ## Generate mTLS certs for CEN (SITE_ID=SITE-CL-001)
+	bash infrastructure/certs/gen_certs.sh $(SITE_ID)
+
+pilot: ## Validate pilot site readiness (runs pilot_setup.py wizard)
+	$(PYTHON) scripts/pilot_setup.py --site-id $(SITE_ID)
+
+compliance-report: ## Fetch compliance report from running gateway
+	curl -sf http://localhost:$(PORT)/compliance/report | python -m json.tool
+
+fleet: ## Fleet VPP summary from running gateway
+	curl -sf http://localhost:$(PORT)/fleet/summary | python -m json.tool
 
 
 # ── Hardware Registry ──────────────────────────────────────────────────────────

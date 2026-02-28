@@ -10,7 +10,36 @@
 
 ## [Unreleased]
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-28T13:49 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-28T14:45 -03:00)
+
+## v2.14.0 — Arquitectura Senior 5.0 (2026-02-28)
+
+> [!IMPORTANT]
+> **Sprint v2.14.0 — BESSAIServer unificado, SC bidder automático CEN, BEP-0200 Phase 3 PPO**
+
+### Entregables v2.14.0
+
+| Archivo | Descripción |
+|---|---|
+| `src/interfaces/server.py` | `BESSAIServer` — 8 endpoints unificados: `/health` `/metrics` `/compliance/status` `/compliance/report` `/fleet/summary` `/fleet/sites` `/api/v1/telemetry`. Stateful, aiohttp |
+| `src/core/cen_sc_bidder.py` | `CENSCBidder` — licitación automática SC (PFR/CREG/AGC/SE) al CEN con mTLS, dry-run, auto-bid loop, stats y métricas de revenue |
+| `src/core/ppo_trainer.py` | `PPOTrainer` + `BESSDispatchEnv` — BEP-0200 Phase 3: entorno Gymnasium 8-feat, reward multi-obj, entrenamiento PPO vía SB3 o fallback validation, exportación ONNX con metadata JSON |
+| `tests/test_cen_sc_bidder.py` | 20 tests: elegibilidad SOC/P_nom, construcción bids, payload NTSyCS, dry-run, revenue |
+| `tests/test_ppo_trainer.py` | 9 tests: obs/step/reset, SOC clamping, episodio, CMg sintético |
+| `.github/workflows/pilot-validation.yml` | 4 jobs CI paralelos: NTSyCS 11 GAPs, BEP-0200 PPO, BESSAIServer smoke, Pilot Readiness. Weekly regression check |
+| `Makefile` | +7 targets: `test-compliance` `train-ppo` `cert` `pilot` `compliance-report` `fleet` + `SITE_ID`/`PORT` vars |
+
+### Próximas prioridades v2.15.0
+
+- `src/interfaces/server.py` — mount en `main.py` reemplazando `HealthServer`
+- `src/core/cen_sc_bidder.py` — integrar en main loop post-ComplianceStack
+- Datos reales CEN → entrenar PPO 500k steps → `models/dispatch_policy.onnx`
+- Activar `CENSCBidder` en producción (dry_run=False post-registro CEN)
+- FleetOrchestrator: añadir sitios 2+3 (VPP multi-site activo)
+
+---
+
+## 🤖 AGENT HANDOFF — Estado anterior v2.13.0 (2026-02-28T13:49 -03:00)
 
 > [!IMPORTANT]
 > **v2.13.0 — Infraestructura de Producción LISTA** (2026-02-28)
