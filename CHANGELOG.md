@@ -74,6 +74,7 @@
 - remove deprecated fetch_cmg_evolution.py (superseded by bessai_data_scraper.py) (`1f734cd4`, @BESS Solutions)
 
 ### ✨ New Features
+- NTSyCS Full Compliance Sprint v2.12.0 — 11 GAPs, 148 tests, ComplianceStack (`d1fa7440`, @bess-solutions)
 - **analytics**: LoadProfiler Mexico CFE GDMTH - ingesta/limpieza/resampleo/etiquetado tarifario, 29 tests, demo sintetico (`7c2b53b0`, @BESS Solutions)
 - **docs**: agregar GOOD_FIRST_ISSUES.md (12 issues), TECHNICAL_RECOMMENDATIONS.md (5 REQs), limpiar Makefile duplicado (`642899a9`, @BESS Solutions)
 - **ai**: BESSAIEvolve v2 - CMA-ES + NSGA-II + Elite Archive (Fase 1 plan 20/10) (`cdf85807`, @BESS Solutions)
