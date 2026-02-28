@@ -1,4 +1,4 @@
-## 🔍 SEC Gap Analysis Update — 2026-02-27 21:06 UTC
+## 🔍 SEC Gap Analysis Update — 2026-02-28 00:12 UTC
 
 **11 brechas** identificadas entre la normativa SEC Chile y open-bess-edge.
 
