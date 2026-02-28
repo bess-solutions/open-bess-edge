@@ -66,6 +66,7 @@
 
 
 ### 🔐 Security
+- **pi**: migrate AI agents to private bessai-core repo (`a2e50533`, @BESSAI sec-ingestor)
 - **pi**: SECURITY.md + parametrize SC prices via env vars (`8280f53c`, @BESSAI sec-ingestor)
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
