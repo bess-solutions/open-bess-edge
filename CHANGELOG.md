@@ -52,6 +52,9 @@
 
 
 
+### 📚 Documentation
+- update README + CHANGELOG to v2.12.0 state (`4e5edbd1`, @BESSAI sec-ingestor)
+
 ### 🔐 Security
 - **pi**: remove FL client/server — moved to bessai-core (private) (`9736306c`, @BESSAI sec-ingestor)
 - **pi**: migrate AI agents to private bessai-core repo (`a2e50533`, @BESSAI sec-ingestor)
