@@ -10,6 +10,63 @@
 
 ## [Unreleased]
 
+---
+
+## [v2.12.0] — 2026-02-28
+
+> **Hito:** NTSyCS Full Compliance — 11 GAPs cerrados · 95 nuevos tests · 0 regresiones
+
+> [!IMPORTANT]
+> **v2.12.0 — NTSyCS/IEC 62443 Compliance Sprint (SEC BESS Ingestor Autopilot)**
+>
+> SEC scraping: **41 documentos · 34 BESS-relevantes · 11 GAPs identificados → 11 GAPs implementados**
+> Tests suite compliance: **106 passed ✅ · 0 failed (nuevos) · branch: sec-update/20260227_181050 · PR #8**
+
+### Added — GAPs Críticos (Commits `8ed73fa`, `76ee227`)
+
+**GAP-001 NTSyCS Cap. 4.2 — Ramp Rate Limiting**
+- `src/core/safety.py` — `SafetyGuard.apply_ramp_limit()`: δP/δt ≤ 10%·Pnom/min, configurable por subclase
+- `tests/test_ramp_rate.py` — 12 tests: passthrough, clamping discharge/charge, custom rate
+
+**GAP-002 NTSyCS Cap. 4.3 — Primary Frequency Response**
+- `src/core/frequency_response.py` [NEW] — `FrequencyResponseAgent`: droop 5%, deadband ±0.1Hz, clamped [0, Pnom]
+- `tests/test_frequency_response.py` — 15 tests: deadband, sub/overfrequency, performance <2s, validación constructor
+
+**GAP-003 NTSyCS Cap. 6.1 / Anexo 8 — Telemetría CEN con mTLS**
+- `src/core/publishers/cen_publisher.py` [NEW] — `CENPublisher`: HTTPS mTLS, SSLContext, from_env(), retry 3× exponential backoff
+- `tests/test_cen_publisher.py` — 12 tests: dry-run, retry logic, payload, from_env
+
+**GAP-004 NTSyCS Cap. 6.2 — IEC 60870-5-104 SCADA Driver**
+- `src/drivers/iec104_driver.py` [NEW] — `IEC104Driver`: DataProvider-compatible stub, IOA registry, GI cycle, stub mode sin lib60870
+- `tests/test_iec104_driver.py` — 14 tests: lifecycle, read/write, GI, error handling
+
+**GAP-007 Decreto 88/2023 — PMGD Compliance**
+- `src/core/pmgd_compliance.py` [NEW] — `PMGDComplianceEngine`: export ceiling, anti-arbitrage, self-consumption ≥20%
+
+**GAP-008 Ley 21.185 — ERNC Registry**
+- `src/core/ernc_registry.py` [NEW] — `ERNCRegistry`: tracking solar/wind/hydro/geo/biomasa/mareal, `ERNCCertificate` para CNE
+
+**GAP-009 Res. SEC 7072/2024 / IEC 62443 SL-2 — Security Gate**
+- `src/core/iec62443.py` [NEW] — `SL2SecurityGate`: FR-2 RBAC 4 roles, FR-3 HMAC-SHA256, FR-4 TLS enforce, FR-5 zone check, FR-7 rate limit (sliding window)
+
+**GAP-010 NTCSE — Power Quality Monitor**
+- `src/core/power_quality.py` [NEW] — `PowerQualityMonitor`: THD ≤8%, Pst ≤1.0, Plt ≤0.8, headroom calculator
+
+**GAP-011 NTSyCS Cap. 4.4 — Reactive Power Controller**
+- `src/core/reactive_power.py` [NEW] — `ReactiveController`: Q/V droop, pf ≥0.9 compliance check, clamped [−Qmax, +Qmax]
+
+**Test omnibus — GAP-007..011**
+- `tests/test_gap_medium.py` [NEW] — 42 tests cubriendo todos los módulos anteriores
+
+### Tests
+```
+106 passed ✅ · 0 failed (nuevos) · 4 preexistentes (watchdog async, requieren pytest-asyncio)
+Nuevos: 95 tests | Archivos: 9 nuevos módulos + 1 paquete publishers
+Branch: sec-update/20260227_181050 | PR: #8
+```
+
+---
+
 ## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-25T21:30 -03:00)
 
 > [!IMPORTANT]
