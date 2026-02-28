@@ -66,6 +66,7 @@
 
 
 ### 🔐 Security
+- **pi**: SECURITY.md + parametrize SC prices via env vars (`8280f53c`, @BESSAI sec-ingestor)
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
