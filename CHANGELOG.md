@@ -72,6 +72,7 @@
 
 
 ### 📚 Documentation
+- expand PILOT_GUIDE.md to v2.14.0 — hardware reqs, SC bidder, PPO training, timeline (`50481c51`, @BESSAI sec-ingestor)
 - update README + CHANGELOG to v2.12.0 state (`4e5edbd1`, @BESSAI sec-ingestor)
 
 ### 🔐 Security
