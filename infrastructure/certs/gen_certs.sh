@@ -1,120 +1,113 @@
 #!/usr/bin/env bash
 # =============================================================================
-# BESSAI Edge Gateway — OT PKI Certificate Generator
-# IEC 62443-3-3 SR 3.1: Communication Integrity via mutual TLS
-# GAP-003 REMEDIATION
+# BESSAI Edge Gateway — mTLS Certificate Generator
+# GAP-003: NTSyCS Cap. 6.1 — CEN Telemetry TLS
 # =============================================================================
 # Usage:
-#   bash infrastructure/certs/gen_certs.sh
+#   bash infrastructure/certs/gen_certs.sh [SITE_ID]
 #
-# Output (in infrastructure/certs/):
-#   ca.key              — CA private key          (SECRET — never commit)
-#   ca.crt              — CA root certificate     (safe to commit)
-#   gateway-client.key  — Gateway private key     (SECRET — never commit)
-#   gateway-client.crt  — Gateway certificate     (safe to commit)
-#   gateway-client.csr  — CSR (intermediate)      (safe to commit/discard)
-#   modbus-proxy.key    — Proxy private key       (SECRET — never commit)
-#   modbus-proxy.crt    — Proxy certificate       (safe to commit)
-#   modbus-proxy.csr    — CSR (intermediate)      (safe to commit/discard)
+# Output (DO NOT commit *.key *.pem — they are in .gitignore):
+#   infrastructure/certs/ca.key          ← CA private key (KEEP SECRET)
+#   infrastructure/certs/ca.crt          ← CA certificate (safe to commit)
+#   infrastructure/certs/client.key      ← Client private key
+#   infrastructure/certs/client.csr      ← Certificate signing request
+#   infrastructure/certs/client.crt      ← Client certificate (signed by CA)
+#   infrastructure/certs/client.pem      ← Combined cert+key for convenience
 #
-# Requirements: openssl (ships with Git for Windows / WSL / macOS / Linux)
+# After running this script, set in config/.env:
+#   CEN_TLS_CERT=infrastructure/certs/client.crt
+#   CEN_TLS_KEY=infrastructure/certs/client.key
+#   CEN_TLS_CA=infrastructure/certs/ca.crt
 # =============================================================================
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-OUT_DIR="$SCRIPT_DIR"
+SITE_ID="${1:-SITE-CL-001}"
+CERTS_DIR="$(cd "$(dirname "$0")" && pwd)"
+DAYS=825   # max validity for mTLS (< 2 years per CAB Forum)
+COUNTRY="CL"
+ORG="BESS Solutions SpA"
+OU="BESSAI Edge Gateway"
 
-# Certificate validity — 10 years (edge devices have infrequent rotations)
-VALIDITY_DAYS=3650
+echo "========================================================"
+echo "  BESSAI mTLS Certificate Generator"
+echo "  Site: ${SITE_ID}"
+echo "  Output: ${CERTS_DIR}/"
+echo "========================================================"
 
-# Organization info (customize per deployment)
-COUNTRY="${BESSAI_CERT_COUNTRY:-CL}"
-ORG="${BESSAI_CERT_ORG:-BESSAI-Solutions}"
-SITE_ID="${BESSAI_SITE_ID:-edge-001}"
+# Ensure OpenSSL is available
+command -v openssl >/dev/null 2>&1 || { echo "ERROR: openssl not found"; exit 1; }
 
-echo "════════════════════════════════════════════════════"
-echo "  BESSAI OT PKI Generator — IEC 62443 GAP-003"
-echo "  Site: ${SITE_ID}  |  Org: ${ORG}"
-echo "════════════════════════════════════════════════════"
+mkdir -p "${CERTS_DIR}"
 
-# ── 1. CA Root (BESSAI-OT-CA) ─────────────────────────────────────────────────
-echo ""
-echo "[1/3] Generating BESSAI-OT-CA root certificate..."
-
-openssl genrsa -out "${OUT_DIR}/ca.key" 4096 2>/dev/null
-
+# --- Step 1: CA Key + Certificate (self-signed) ----------------------------
+echo "[1/5] Generating CA key and certificate..."
+openssl genrsa -out "${CERTS_DIR}/ca.key" 4096 2>/dev/null
 openssl req -new -x509 \
-    -key "${OUT_DIR}/ca.key" \
-    -out "${OUT_DIR}/ca.crt" \
-    -days "${VALIDITY_DAYS}" \
-    -subj "/C=${COUNTRY}/O=${ORG}/CN=BESSAI-OT-CA-${SITE_ID}" \
-    -addext "basicConstraints=critical,CA:TRUE,pathlen:0" \
-    -addext "keyUsage=critical,keyCertSign,cRLSign"
+    -key "${CERTS_DIR}/ca.key" \
+    -out "${CERTS_DIR}/ca.crt" \
+    -days ${DAYS} \
+    -subj "/C=${COUNTRY}/O=${ORG}/OU=${OU}/CN=BESSAI-CA-${SITE_ID}"
+echo "    ✓ CA certificate: ${CERTS_DIR}/ca.crt"
 
-echo "    ✅ CA: ${OUT_DIR}/ca.crt"
-
-# ── 2. Gateway Client Certificate ─────────────────────────────────────────────
-echo ""
-echo "[2/3] Generating gateway client certificate..."
-
-openssl genrsa -out "${OUT_DIR}/gateway-client.key" 2048 2>/dev/null
-
+# --- Step 2: Client Key + CSR -----------------------------------------------
+echo "[2/5] Generating client key and CSR..."
+openssl genrsa -out "${CERTS_DIR}/client.key" 2048 2>/dev/null
 openssl req -new \
-    -key "${OUT_DIR}/gateway-client.key" \
-    -out "${OUT_DIR}/gateway-client.csr" \
-    -subj "/C=${COUNTRY}/O=${ORG}/CN=bessai-gateway-${SITE_ID}"
+    -key "${CERTS_DIR}/client.key" \
+    -out "${CERTS_DIR}/client.csr" \
+    -subj "/C=${COUNTRY}/O=${ORG}/OU=${OU}/CN=${SITE_ID}"
+echo "    ✓ Client CSR: ${CERTS_DIR}/client.csr"
+
+# --- Step 3: Sign client cert with CA ----------------------------------------
+echo "[3/5] Signing client certificate with CA..."
+cat > "${CERTS_DIR}/client_ext.cnf" << EOF
+[req]
+req_extensions = v3_req
+[v3_req]
+subjectAltName = DNS:${SITE_ID},DNS:bessai-edge
+extendedKeyUsage = clientAuth
+keyUsage = digitalSignature, keyEncipherment
+EOF
 
 openssl x509 -req \
-    -in "${OUT_DIR}/gateway-client.csr" \
-    -CA "${OUT_DIR}/ca.crt" \
-    -CAkey "${OUT_DIR}/ca.key" \
+    -in "${CERTS_DIR}/client.csr" \
+    -CA "${CERTS_DIR}/ca.crt" \
+    -CAkey "${CERTS_DIR}/ca.key" \
     -CAcreateserial \
-    -out "${OUT_DIR}/gateway-client.crt" \
-    -days "${VALIDITY_DAYS}" \
-    -extfile <(printf "extendedKeyUsage=clientAuth\nsubjectAltName=DNS:bessai-gateway,DNS:localhost") \
+    -out "${CERTS_DIR}/client.crt" \
+    -days ${DAYS} \
+    -extensions v3_req \
+    -extfile "${CERTS_DIR}/client_ext.cnf" \
     2>/dev/null
+echo "    ✓ Client certificate: ${CERTS_DIR}/client.crt"
 
-echo "    ✅ Gateway client cert: ${OUT_DIR}/gateway-client.crt"
+# --- Step 4: Combined PEM (optional, for curl/httpx testing) ----------------
+echo "[4/5] Creating combined PEM..."
+cat "${CERTS_DIR}/client.crt" "${CERTS_DIR}/client.key" > "${CERTS_DIR}/client.pem"
+echo "    ✓ Combined PEM: ${CERTS_DIR}/client.pem"
 
-# ── 3. Modbus Proxy (stunnel) Server Certificate ──────────────────────────────
+# --- Step 5: Verify ----------------------------------------------------------
+echo "[5/5] Verifying certificate chain..."
+openssl verify -CAfile "${CERTS_DIR}/ca.crt" "${CERTS_DIR}/client.crt" 2>/dev/null
+echo "    ✓ Certificate chain valid"
+
+# --- Cleanup temp files -------------------------------------------------------
+rm -f "${CERTS_DIR}/client.csr" "${CERTS_DIR}/client_ext.cnf" "${CERTS_DIR}/ca.srl"
+
+# --- Summary ------------------------------------------------------------------
 echo ""
-echo "[3/3] Generating modbus-proxy (stunnel) server certificate..."
-
-openssl genrsa -out "${OUT_DIR}/modbus-proxy.key" 2048 2>/dev/null
-
-openssl req -new \
-    -key "${OUT_DIR}/modbus-proxy.key" \
-    -out "${OUT_DIR}/modbus-proxy.csr" \
-    -subj "/C=${COUNTRY}/O=${ORG}/CN=bessai-modbus-proxy-${SITE_ID}"
-
-openssl x509 -req \
-    -in "${OUT_DIR}/modbus-proxy.csr" \
-    -CA "${OUT_DIR}/ca.crt" \
-    -CAkey "${OUT_DIR}/ca.key" \
-    -CAcreateserial \
-    -out "${OUT_DIR}/modbus-proxy.crt" \
-    -days "${VALIDITY_DAYS}" \
-    -extfile <(printf "extendedKeyUsage=serverAuth\nsubjectAltName=DNS:bessai-stunnel,DNS:localhost") \
-    2>/dev/null
-
-echo "    ✅ Proxy server cert: ${OUT_DIR}/modbus-proxy.crt"
-
-# ── Summary ───────────────────────────────────────────────────────────────────
+echo "========================================================"
+echo "  ✅ Certificates generated successfully for ${SITE_ID}"
+echo "========================================================"
 echo ""
-echo "════════════════════════════════════════════════════"
-echo "  PKI generation complete."
+echo "  Add to config/.env:"
+echo "    CEN_TLS_CERT=infrastructure/certs/client.crt"
+echo "    CEN_TLS_KEY=infrastructure/certs/client.key"
+echo "    CEN_TLS_CA=infrastructure/certs/ca.crt"
 echo ""
-echo "  Certificates generated in: ${OUT_DIR}"
+echo "  ⚠️  IMPORTANT:"
+echo "    - ca.key and client.key are PRIVATE — never commit them"
+echo "    - They are already in .gitignore"
+echo "    - Share ca.crt with the CEN operator for server-side config"
 echo ""
-echo "  ⚠️  PRIVATE KEYS — DO NOT COMMIT:"
-echo "     ca.key  gateway-client.key  modbus-proxy.key"
-echo ""
-echo "  Next steps:"
-echo "    1. docker compose --profile ot-security up -d"
-echo "    2. Set in .env:"
-echo "       OT_MTLS_ENABLED=true"
-echo "       OT_CA_CERT_PATH=infrastructure/certs/ca.crt"
-echo "       OT_CLIENT_CERT_PATH=infrastructure/certs/gateway-client.crt"
-echo "       OT_CLIENT_KEY_PATH=infrastructure/certs/gateway-client.key"
-echo "════════════════════════════════════════════════════"

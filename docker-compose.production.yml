@@ -1,0 +1,76 @@
+# BESSAI Edge Gateway — Production Docker Compose
+# Extends docker-compose.yml for production sites with NTSyCS compliance
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.production.yml up -d
+
+services:
+  bessai-edge:
+    image: ghcr.io/bess-solutions/open-bess-edge:latest
+    container_name: bessai-edge-production
+    restart: unless-stopped
+    env_file:
+      - config/.env
+    ports:
+      - "${HEALTH_PORT:-8000}:8000"      # Health + Metrics + Compliance API
+      - "${IEC104_PORT:-2404}:2404"       # SCADA IEC 60870-5-104 (GAP-004)
+      - "${SEP2_PORT:-8443}:8443"         # IEEE 2030.5 / SEP 2.0 (if enabled)
+    volumes:
+      - ./config:/app/config:ro           # .env (read-only)
+      - ./infrastructure/certs:/app/infrastructure/certs:ro  # mTLS certs
+      - ./models:/app/models:ro           # ONNX dispatch model (from bessai-core)
+      - ./logs:/app/logs                  # Persistent compliance logs
+    environment:
+      - BESSAI_MODE=production
+      - BESSAI_COMPLIANCE_ENABLED=true
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - bessai-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # Prometheus + Grafana for site monitoring
+  prometheus:
+    image: prom/prometheus:v2.49.1
+    container_name: bessai-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - bessai-net
+    profiles: ["monitoring"]
+
+  grafana:
+    image: grafana/grafana:10.3.1
+    container_name: bessai-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=bessai2026
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    ports:
+      - "3000:3000"
+    depends_on: [prometheus]
+    networks:
+      - bessai-net
+    profiles: ["monitoring"]
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  bessai-net:
+    driver: bridge
