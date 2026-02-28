@@ -1,6 +1,6 @@
 # 🔍 Análisis de Brechas Normativas — SEC Chile × Open-BESS-Edge
 
-> **Generado:** 2026-02-27 21:06 UTC  
+> **Generado:** 2026-02-28 00:12 UTC  
 > **Datos SEC:** 41 documentos scraped,
 > 34 relevantes a BESS  
 > **Repo analizado:** [bess-solutions/open-bess-edge](https://github.com/bess-solutions/open-bess-edge)  
@@ -441,4 +441,4 @@ python cli.py publish     # Publica al repo (requiere GITHUB_TOKEN)
 python cli.py update      # Todo en uno
 ```
 
-> *Generado automáticamente por [sec-bess-ingestor](https://github.com/bess-solutions/open-bess-edge/tree/main/sec-bess-ingestor) — 2026-02-27 21:06 UTC*
+> *Generado automáticamente por [sec-bess-ingestor](https://github.com/bess-solutions/open-bess-edge/tree/main/sec-bess-ingestor) — 2026-02-28 00:12 UTC*
