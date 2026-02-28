@@ -2,179 +2,67 @@
 
 ## Supported Versions
 
-| Version | Supported |
+| Version | Support Status |
 |---|---|
-| 2.1.x (latest) | ✅ Active support — all CVEs |
-| 2.0.x | ✅ Security patches — Critical + High |
-| 1.7.x | ⚠️ Critical patches only |
-| < 1.7 | ❌ End of life |
+| v2.12.x (main) | ✅ Active support |
+| v2.11.x | ⚠️ Security fixes only |
+| < v2.11 | ❌ No longer supported |
 
 ## Reporting a Vulnerability
 
-**⚠️ Do NOT report security vulnerabilities via public GitHub Issues.**
+**Please do NOT open a public GitHub issue for security vulnerabilities.**
 
-### Preferred Channel — GitHub Security Advisories (Private)
+Report security issues via:
 
-Use GitHub's private, encrypted reporting channel:
+- **Email:** security@bess-solutions.cl
+- **Response SLA:** Within 48 hours for acknowledgment; 90 days to patch.
+- **Encryption:** PGP key available on request.
 
-1. Navigate to the [Security Advisories page](https://github.com/bess-solutions/open-bess-edge/security/advisories)
-2. Click **"Report a vulnerability"**
-3. Fill out the form with maximum detail
+### What to include in your report
 
-### Alternative Channel
-
-Email: **security@bess-solutions.cl**
-- Use PGP encryption if possible (key available on [keys.openpgp.org](https://keys.openpgp.org/))
-- Subject: `[BESSAI SECURITY] <brief description>`
-
----
-
-## What to Include in Your Report
-
-Please include as much of the following as possible:
-
-```
-- Type of vulnerability (e.g., injection, auth bypass, DoS, info disclosure)
-- Affected component (e.g., Dashboard API, Modbus driver, config parsing)
-- Full path to the file(s) with the vulnerability
-- Location of the affected source code (tag/branch/commit or direct URL)
-- Step-by-step instructions to reproduce the issue
-- Proof-of-concept or exploit code (if available)
-- Impact assessment: what an attacker could achieve
-- CVSS score suggestion (optional)
-```
-
----
-
-## Response Timeline
-
-| Event | Target SLA |
-|---|---|
-| Acknowledgement of receipt | **≤ 48 hours** |
-| Initial triage & severity assessment | **≤ 5 business days** |
-| Status update to reporter | **≤ 14 days** |
-| Patch release (Critical/High) | **≤ 30 days** |
-| Patch release (Medium/Low) | **≤ 90 days** |
-| Public disclosure (coordinated) | **After patch is released** |
-
----
-
-## Severity Classification
-
-We follow the [CVSS v3.1](https://www.first.org/cvss/v3.1/specification-document) scoring system:
-
-| Severity | CVSS Score | Expected Response |
-|---|---|---|
-| Critical | 9.0–10.0 | Immediate — patch within 30 days |
-| High | 7.0–8.9 | Patch within 30 days |
-| Medium | 4.0–6.9 | Patch within 90 days |
-| Low | 0.1–3.9 | Patch in next scheduled release |
-
----
-
-## Industrial / ICS Specific Concerns
-
-Given that BESSAI Edge Gateway operates in **industrial environments (ICS/OT)**, we treat the following with Critical priority:
-
-- **Modbus protocol injection** — commands that could cause unsafe battery operation
-- **Safety Guard bypass** — circumventing SOC/temperature safety limits
-- **Authentication bypass** — in Dashboard API or ONNX inference endpoints
-- **Denial of Service** — that could disrupt BESS operational cycles
-- **Credential exposure** — GCP service account keys, API tokens
-
-Any vulnerability with potential for **physical harm** (battery fire, grid instability) is treated under a **Zero-Day Emergency Protocol**: 24-hour response, out-of-band patch.
-
----
+1. Description of the vulnerability
+2. Steps to reproduce
+3. Potential impact (exploitability, affected components)
+4. Suggested mitigation (optional)
 
 ## Scope
 
-### In Scope
-- `src/` — all Python source modules
-- `infrastructure/docker/` — Dockerfile and docker-compose configurations
-- `infrastructure/terraform/` — GCP infrastructure-as-code
-- `.github/workflows/` — CI/CD pipeline configurations
-- `config/` — configuration handling and secrets management
+This security policy covers **BESSAI Edge Gateway** (`open-bess-edge`):
 
-### Out of Scope
-- Third-party dependencies (report to the respective upstream project)
-- GCP infrastructure managed by Google
-- Social engineering attacks
-- Physical security (data center access)
+- `src/core/` — compliance and control logic
+- `src/drivers/` — hardware drivers (Modbus, IEC 60870-5-104)
+- `src/interfaces/` — publishers, health server, metrics
 
----
+## Out of Scope
 
-## Safe Harbor
+- Third-party libraries (report to their respective projects)
+- Issues in trained AI models (stored privately — not in this repo)
+- Physical security of BESS hardware installations
 
-BESS Solutions commits to:
+## Cybersecurity Standards
 
-- Not pursue legal action against security researchers acting in **good faith**
-- Work collaboratively to understand and resolve reported issues
-- Publicly credit researchers in our release notes (unless anonymity is preferred)
-- Not share researcher identity without explicit permission
+BESSAI Edge Gateway implements:
 
----
+| Standard | Implementation |
+|---|---|
+| IEC 62443 SL-2 | `SL2SecurityGate` — RBAC, HMAC-SHA256, rate limiting |
+| Ley Marco Ciberseguridad 21.663/2024 | `SecurityNotifier` — CSIRT notification ≤3h |
+| OWASP Top 10 | No hardcoded secrets, input validation, structured logging |
+| Apache 2.0 License | Open source — contributions welcome |
 
-## Security Updates Notification
+## Responsible Disclosure
 
-Subscribe to security notifications:
-- **GitHub Watch** → "Security alerts" on [bess-solutions/open-bess-edge](https://github.com/bess-solutions/open-bess-edge)
-- **GitHub Releases** → new releases always include a security changelog section
+We follow a **90-day coordinated disclosure** policy. Reporters who responsibly
+disclose vulnerabilities will be credited in our CHANGELOG (unless they prefer anonymity).
 
----
+## Known Security Notes
 
-## Compliance Standards
-
-This project targets compliance with:
-
-- **IEC 62443** — Industrial Automation and Control Systems Security
-- **NIST SP 800-82** — Guide to Industrial Control Systems Security
-- **NTSyCS** — Norma Técnica de Seguridad y Calidad de Servicio (CEN Chile)
-
-See [`docs/compliance/`](docs/compliance/) for detailed compliance mappings.
-
-Key compliance documents:
-- [System Security Plan (SSP-001)](docs/compliance/ssp_iec62443_sl2.md) — IEC 62443-3-3 SL-2 coverage
-- [Patch Management SLA (PMS-001)](docs/compliance/patch_management_sla.md) — IEC 62443-2-3
-- [Network Architecture (NAD-001)](docs/architecture/network_diagram.md) — IEC 62443-3-2
-- [SL-2 Certification Path](docs/compliance/iec_62443_sl2_certification_path.md)
+- **mTLS for CEN telemetry (GAP-003):** Certificates are never stored in this repo.
+  Generate them via `bash infrastructure/certs/gen_certs.sh`.
+- **AI models:** Trained ONNX models are not included in this open-source repository.
+  They are distributed via the private `bessai-models` package.
+- **Environment variables:** All sensitive configuration (endpoints, keys) must be
+  set via `.env` file — never committed. See `.env.example`.
 
 ---
-
-## PSIRT — Product Security Incident Response Team
-
-**IEC 62443-3-3 SR 2.12 — Non-repudiation | Vulnerability disclosure**
-
-### Contact
-
-| Channel | Address | SLA |
-|---------|---------|-----|
-| GitHub Security Advisories (preferred) | [Report privately](https://github.com/bess-solutions/open-bess-edge/security/advisories/new) | 48h acknowledgement |
-| Email | security@bess-solutions.cl | 48h acknowledgement |
-| Emergency (physical safety risk) | security@bess-solutions.cl Subject: `[EMERGENCY]` | 4h response |
-
-### PSIRT Process
-
-1. **Receipt** — Researcher submits via GitHub Security Advisory or email
-2. **Acknowledgement** — PSIRT acknowledges within 48h (4h for [EMERGENCY])
-3. **Triage** — Engineering Lead assigns CVSS score and severity within 5 business days
-4. **Remediation** — Fix timeline per [Patch Management SLA](docs/compliance/patch_management_sla.md)
-5. **Coordination** — PSIRT works with researcher on disclosure timeline (default: 90 days)
-6. **Disclosure** — CVE requested from MITRE; GitHub Advisory published; release notes updated
-7. **Credit** — Researcher credited in release notes unless anonymity requested
-
-### ICS-Specific Emergency Protocol
-
-If the vulnerability has potential for **physical harm** (battery fire, grid instability, safety system bypass):
-
-- Response SLA: **4 hours** (not 48)
-- Out-of-band patch issued **within 24 hours** of confirmation
-- Immediate notification to affected site operators via `SITE_ID`-tagged alert
-- Coordinated disclosure with CISA ICS-CERT if CVSS ≥ 9.0
-
-### PSIRT Team
-
-| Role | Responsibility |
-|------|---------------|
-| PSIRT Lead | Triage, coordination, disclosure | 
-| Engineering Lead | Fix implementation, patch review |
-| Site Operations | Deployment coordination with field teams |
+*BESS Solutions SpA — security@bess-solutions.cl*
