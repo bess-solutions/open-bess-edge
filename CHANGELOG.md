@@ -10,44 +10,34 @@
 
 ## [Unreleased]
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-28T13:19 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-28T13:49 -03:00)
 
 > [!IMPORTANT]
-> **v2.12.0 — NTSyCS Full Compliance Sprint COMPLETADO** (2026-02-28)
+> **v2.13.0 — Infraestructura de Producción LISTA** (2026-02-28)
 >
-> 11/11 GAPs cerrados · Tests: **148 passed ✅ · 0 failed** · PR #8 mergeado · PI auditada y migrada
+> ComplianceStack wired · REST API compliance · mTLS certs · Pilot setup wizard · Docker production
 
-> ### Sprint completado en esta sesión
+> ### Entregables v2.13.0
 >
-> **Compliance modules (src/core/):**
-> - `ComplianceStack` — façade unificada 11 GAPs, 0.23ms/ciclo
-> - `SecurityNotifier` — CSIRT automático Ley 21.663/2024
-> - `ServiciosComplementarios` — oferta SC al CEN 2024
-> - `ComplianceReporter` — informes JSON + Markdown para SEC/CEN
+> | Archivo | Commit |
+> |---|---|
+> | `src/core/config.py` — 15 vars NTSyCS/SC/CEN | `e6be52a` |
+> | `src/core/main.py` — ComplianceStack (startup + loop) | `e6be52a` |
+> | `.env.example` — template completo 30+ vars | `e6be52a` |
+> | `src/interfaces/compliance_api.py` — `/compliance/status` + `/report` | `c5bca2b` |
+> | `infrastructure/certs/gen_certs.sh` — mTLS CEN GAP-003 | `c5bca2b` |
+> | `scripts/pilot_setup.py` — readiness wizard 0-100 | `c5bca2b` |
+> | `docker-compose.production.yml` | `c5bca2b` |
+> | `docs/PILOT_GUIDE.md` | `c5bca2b` |
+
+> ### Próximas prioridades — v2.14.0
 >
-> **Seguridad PI (bess-solutions/bessai-core — PRIVADO):**
-> - 16 módulos IA migrados de src/agents/ → repo privado
-> - fl_client.py, fl_server.py migrados → repo privado
-> - models/*.onnx en .gitignore
-> - Precios SC → env vars (SC_PFR_PRICE_USD_MWH, etc.)
-> - SECURITY.md publicado
+> 1. Arrancar el primer sitio piloto real (ver `docs/PILOT_GUIDE.md`)
+> 2. API REST compliance → integrar al HealthServer en misma instancia
+> 3. PPO training con datos reales CEN → `models/dispatch_policy.onnx` real
+> 4. VPP FleetOrchestrator: agregar 3 sitios para SC
 
-> ### Suite de tests
-> ```
-> 148 passed ✅ · 0 failed · 0.28s
-> ```
 
-> ### Estado repositorios
-> - `bess-solutions/open-bess-edge` (público): gateway OSS + 11 GAPs + stubs agents/FL
-> - `bess-solutions/bessai-core` (privado): 16 módulos IA + fl + onnx
-
-> ### Próximas prioridades — v2.13.0
->
-> 1. Configurar env vars `CEN_*` en producción (certificados mTLS reales)
-> 2. Activar Servicios Complementarios CEN en 1 sitio piloto
-> 3. BEP-0200 Fase 3: entrenar PPO con datos reales CEN → ONNX real
-> 4. Branch-Protection en GitHub Settings (requiere acción manual Rodrigo)
-> 5. Instalar `pytest-asyncio` → resolver 4 tests watchdog pre-existentes
 
 
 
