@@ -1,0 +1,217 @@
+name: Pilot Site Validation
+
+# BEP-0200 Phase 3 + NTSyCS Compliance CI
+# Triggers on every push/PR that touches compliance or core modules.
+# Also runs weekly to detect regressions in regulatory requirements.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/core/**"
+      - "src/interfaces/**"
+      - "tests/test_compliance*"
+      - "tests/test_cen_*"
+      - "tests/test_ppo_*"
+      - "scripts/pilot_setup.py"
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1"   # Weekly Monday 06:00 UTC — regulatory regression check
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────
+  # JOB 1: NTSyCS Compliance Tests (11 GAPs)
+  # ─────────────────────────────────────────────────────────────────────
+  compliance:
+    name: "NTSyCS Compliance — 11 GAPs"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run compliance test suite
+        id: compliance_tests
+        run: |
+          pytest \
+            tests/test_compliance_api.py \
+            tests/test_cen_sc_bidder.py \
+            tests/test_cen_publisher.py \
+            tests/test_iec104_driver.py \
+            -v --tb=short --junitxml=reports/compliance.xml \
+            --ignore=tests/agents/
+        env:
+          BESSAI_SITE_ID: SITE-CI-VALIDATION
+          BESSAI_P_NOM_KW: "1000"
+          BESSAI_COMPLIANCE_ENABLED: "true"
+
+      - name: Upload compliance report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compliance-junit-${{ github.run_id }}
+          path: reports/compliance.xml
+
+  # ─────────────────────────────────────────────────────────────────────
+  # JOB 2: BEP-0200 Phase 3 — PPO Environment Validation
+  # ─────────────────────────────────────────────────────────────────────
+  ppo-validation:
+    name: "BEP-0200 Phase 3 — PPO Environment"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies (no SB3 in CI — validation mode)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Validate BESSDispatchEnv
+        run: |
+          pytest tests/test_ppo_trainer.py -v --tb=short
+        env:
+          BESSAI_P_NOM_KW: "1000"
+
+      - name: Validate PPOTrainer (synthetic data / no SB3)
+        run: |
+          python -c "
+          from src.core.ppo_trainer import PPOTrainer, TrainingConfig
+          cfg = TrainingConfig(total_timesteps=2_000, max_episode_steps=96)
+          t = PPOTrainer(site_id='CI-TEST', config=cfg)
+          r = t.train()
+          assert r.training_duration_s > 0, 'Training did not run'
+          assert r.bep_ref.startswith('BEP-0200'), f'Wrong BEP ref: {r.bep_ref}'
+          print(f'✅ BEP-0200 Phase 3 validated: {r.total_timesteps} steps, reward={r.final_mean_reward:.4f}')
+          "
+
+  # ─────────────────────────────────────────────────────────────────────
+  # JOB 3: Unified Server Smoke Test
+  # ─────────────────────────────────────────────────────────────────────
+  server-smoke:
+    name: "BESSAIServer Endpoints Smoke Test"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Smoke test BESSAIServer
+        run: |
+          python -c "
+          import asyncio, json
+          from src.interfaces.server import BESSAIServer
+
+          server = BESSAIServer(site_id='CI-TEST', version='2.14.0')
+          server.set_cycle(1, True, 'ok')
+          server.set_compliance_state(True, 100.0, [], 1)
+
+          # Verify state is set correctly
+          assert server._compliance.all_ok == True
+          assert server._compliance.score == 100.0
+          assert server._last_cycle == 1
+          assert server._version == '2.14.0'
+          print('✅ BESSAIServer state management validated')
+          "
+
+  # ─────────────────────────────────────────────────────────────────────
+  # JOB 4: Pilot Readiness Check
+  # ─────────────────────────────────────────────────────────────────────
+  pilot-readiness:
+    name: "Pilot Site Readiness (CI Mode)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Validate pilot_setup.py script exists and parses
+        run: |
+          python -c "
+          import ast, sys
+          with open('scripts/pilot_setup.py') as f:
+              ast.parse(f.read())
+          print('✅ pilot_setup.py syntax valid')
+          "
+
+      - name: Validate .env.example completeness
+        run: |
+          python -c "
+          required = [
+              'BESSAI_SITE_ID', 'BESSAI_CAPACITY_KWH', 'BESSAI_P_NOM_KW',
+              'CEN_ENDPOINT', 'CEN_TLS_CERT', 'CEN_TLS_KEY',
+              'CSIRT_API_KEY', 'SC_PFR_PRICE_USD_MWH',
+          ]
+          with open('.env.example') as f:
+              content = f.read()
+          missing = [k for k in required if k not in content]
+          if missing:
+              print(f'❌ Missing from .env.example: {missing}')
+              sys.exit(1)
+          print(f'✅ .env.example has all {len(required)} required variables')
+          import sys; sys.exit(0)
+          "
+
+  # ─────────────────────────────────────────────────────────────────────
+  # Summary badge
+  # ─────────────────────────────────────────────────────────────────────
+  summary:
+    name: "v2.14.0 Pilot Validation Summary"
+    needs: [compliance, ppo-validation, server-smoke, pilot-readiness]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Report validation status
+        run: |
+          echo "## BESSAI v2.14.0 — Pilot Validation Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| NTSyCS Compliance (11 GAPs) | ${{ needs.compliance.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| BEP-0200 Phase 3 PPO | ${{ needs.ppo-validation.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| BESSAIServer Smoke | ${{ needs.server-smoke.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Pilot Readiness | ${{ needs.pilot-readiness.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Commit: \`${{ github.sha }}\` — Ref: \`${{ github.ref }}\`" >> $GITHUB_STEP_SUMMARY
