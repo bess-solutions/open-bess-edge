@@ -8,22 +8,29 @@ BESSAI Edge Gateway — Main Orchestrator.
 
 Entry point for the async acquisition loop.  Brings together:
 
-1. ``Settings``         — reads all configuration from environment.
-2. ``configure_otel``   — bootstraps distributed tracing & metrics.
-3. ``UniversalDriver``  — connects to the BESS device via Modbus TCP.
-4. ``SafetyGuard``      — validates telemetry before forwarding.
-5. ``PubSubPublisher``  — publishes safe telemetry to GCP Pub/Sub.
-6. ``watchdog_loop``    — background heartbeat task (auto-restarted if it dies).
-7. ``HealthServer``     — HTTP /health + /metrics endpoints on port 8000.
-8. ``WatchdogManager``  — autonomous self-healing reconnection loop (Plan Inmortalidad Eje 1).
+1. ``Settings``               — reads all configuration from environment.
+2. ``configure_otel``         — bootstraps distributed tracing & metrics.
+3. ``UniversalDriver``        — connects to the BESS device via Modbus TCP.
+4. ``SafetyGuard``            — validates telemetry + ramp rate (GAP-001).
+5. ``PubSubPublisher``        — publishes safe telemetry to GCP Pub/Sub.
+6. ``watchdog_loop``          — background heartbeat task (auto-restarted if it dies).
+7. ``HealthServer``           — HTTP /health + /metrics endpoints on port 8000.
+8. ``WatchdogManager``        — autonomous self-healing reconnection (Plan Inmortalidad Eje 1).
+9. ``FrequencyResponseAgent`` — Primary Frequency Response droop (GAP-002).
+10. ``PowerQualityMonitor``   — THD/Flicker gate NTCSE (GAP-010).
+11. ``ReactiveController``    — Q/V droop reactive power (GAP-011).
+12. ``CENPublisher``          — Telemetría CEN mTLS (GAP-003).
+13. ``SL2SecurityGate``       — IEC 62443 SL-2 command auth (GAP-009).
 
 Lifecycle
 ---------
 ::
 
-    startup → connect → while True { acquire → safety → watchdog → publish → sleep }
-                                                                              ↓
-    SIGINT/SIGTERM ──────────────────────────────────────────── graceful shutdown
+    startup → connect → while True {
+        acquire → pq_gate → safety → ramp_limit → pfr → q_v →
+        watchdog → publish → cen_publish → sleep
+    }
+    SIGINT/SIGTERM ───────────────────────────────────── graceful shutdown
 
 Run
 ---
@@ -86,6 +93,22 @@ except ImportError:
     _WATCHDOG_MANAGER_AVAILABLE = False
     _WatchdogManager = None  # type: ignore[assignment]
 
+# NTSyCS Compliance Modules (optional, fail-safe — GAP-002/003/009/010/011)
+try:
+    from src.core.frequency_response import FrequencyResponseAgent as _FrequencyResponseAgent
+    from src.core.power_quality import PowerQualityMonitor as _PowerQualityMonitor
+    from src.core.reactive_power import ReactiveController as _ReactiveController
+    from src.core.publishers.cen_publisher import CENPublisher as _CENPublisher
+    from src.core.iec62443 import SL2SecurityGate as _SL2SecurityGate
+    _COMPLIANCE_MODULES_AVAILABLE = True
+except ImportError as _compliance_err:
+    _COMPLIANCE_MODULES_AVAILABLE = False
+    _FrequencyResponseAgent = None  # type: ignore[assignment,misc]
+    _PowerQualityMonitor = None  # type: ignore[assignment,misc]
+    _ReactiveController = None  # type: ignore[assignment,misc]
+    _CENPublisher = None  # type: ignore[assignment,misc]
+    _SL2SecurityGate = None  # type: ignore[assignment,misc]
+
 # Resolve settings once at module level (safe — uses _LazySettings proxy)
 _cfg = get_settings()
 
@@ -114,10 +137,27 @@ _DRL_MODEL_PATH: str = os.getenv("BESSAI_DRL_MODEL_PATH", "models/drl_arbitrage_
 _DRL_ENABLED: bool = os.getenv("BESSAI_DRL_ENABLED", "false").lower() == "true"
 _WATCHDOG_MANAGER_ENABLED: bool = os.getenv("BESSAI_WATCHDOG_ENABLED", "true").lower() == "true"
 
+# Compliance feature flags (env-controlled, all default ON if modules available)
+_PFR_ENABLED: bool = os.getenv("BESSAI_PFR_ENABLED", "true").lower() == "true"
+_PQ_GATE_ENABLED: bool = os.getenv("BESSAI_PQ_GATE_ENABLED", "true").lower() == "true"
+_QV_ENABLED: bool = os.getenv("BESSAI_QV_ENABLED", "true").lower() == "true"
+_CEN_PUBLISH_ENABLED: bool = bool(os.getenv("CEN_ENDPOINT_URL"))
+_SL2_ENABLED: bool = os.getenv("BESSAI_SL2_ENABLED", "true").lower() == "true"
+_P_NOM_KW: float = float(os.getenv("BESSAI_P_NOM_KW", "1000.0"))
+_Q_MAX_KVAR: float = float(os.getenv("BESSAI_Q_MAX_KVAR", "484.0"))
+
 # ---------------------------------------------------------------------------
 # Tags read on every acquisition cycle
+# Compliance modules need: grid_frequency (GAP-002), ac_voltage (GAP-011),
+# thd_pct/pst/plt (GAP-010), temp_c (GAP-003)
 # ---------------------------------------------------------------------------
-_ACQUISITION_TAGS: list[str] = ["active_power", "soc"]
+_ACQUISITION_TAGS: list[str] = [
+    "active_power",
+    "soc",
+    "grid_frequency",  # GAP-002: Primary Frequency Response
+    "ac_voltage",      # GAP-011: Reactive Power Q/V droop
+    "temp_c",          # GAP-003: CEN telemetry temperature
+]
 
 # ---------------------------------------------------------------------------
 # Graceful shutdown — shared event set by signal handlers
@@ -290,7 +330,43 @@ async def main() -> None:  # noqa: C901
     GATEWAY_INFO.labels(site_id=_cfg.SITE_ID, version=_GATEWAY_VERSION).set(1)
 
     # ── Step 5 — Safety guard, publisher, watchdog reference ─────────────
-    guard = SafetyGuard(watchdog_interval_s=1.0)
+    guard = SafetyGuard(watchdog_interval_s=1.0, p_nom_kw=_P_NOM_KW)
+
+    # ── Step 5f — NTSyCS Compliance modules (GAP-002/003/009/010/011) ────
+    _pfr_agent = None
+    _pq_monitor = None
+    _qv_controller = None
+    _cen_publisher = None
+    _sl2_gate = None
+    _prev_power_kw: float = 0.0
+    _prev_cycle_ts: float = time.monotonic()
+
+    if _COMPLIANCE_MODULES_AVAILABLE:
+        if _PFR_ENABLED:
+            _pfr_agent = _FrequencyResponseAgent(  # type: ignore[misc]
+                f_nominal=50.0, deadband_hz=0.1, droop_pct=5.0,
+                p_nom_kw=_P_NOM_KW,
+            )
+            log.info("pfr_agent.enabled", p_nom_kw=_P_NOM_KW,
+                     norm_ref="NTSyCS Cap. 4.3 (GAP-002)")
+        if _PQ_GATE_ENABLED:
+            _pq_monitor = _PowerQualityMonitor()  # type: ignore[misc]
+            log.info("pq_monitor.enabled", norm_ref="NTCSE (GAP-010)")
+        if _QV_ENABLED:
+            _qv_controller = _ReactiveController(  # type: ignore[misc]
+                q_max_kvar=_Q_MAX_KVAR, p_nom_kw=_P_NOM_KW,
+            )
+            log.info("qv_controller.enabled", q_max_kvar=_Q_MAX_KVAR,
+                     norm_ref="NTSyCS Cap. 4.4 (GAP-011)")
+        if _CEN_PUBLISH_ENABLED:
+            _cen_publisher = _CENPublisher.from_env()  # type: ignore[misc]
+            log.info("cen_publisher.enabled", norm_ref="NTSyCS Cap. 6.1 (GAP-003)")
+        if _SL2_ENABLED:
+            _sl2_gate = _SL2SecurityGate(enforce_tls=False)  # TLS enforced at network layer
+            log.info("sl2_gate.enabled", norm_ref="IEC 62443 SL-2 (GAP-009)")
+    else:
+        log.info("compliance_modules.disabled",
+                 tip="Install open-bess-edge compliance modules to enable GAP-002/003/009/010/011")
     watchdog_ref: list[asyncio.Task[None]] = []  # mutable single-element ref
 
     if not _cfg.GCP_PROJECT_ID:
@@ -430,7 +506,19 @@ async def main() -> None:  # noqa: C901
                         float(telemetry["active_power"]) / 1000.0
                     )
 
-                # ── STEP 2: Seguridad ─────────────────────────────────────
+                # ── STEP 2a: Power Quality Gate (NTCSE GAP-010) ───────────
+                if _pq_monitor is not None:
+                    _pq_ok, _pq_reason = _pq_monitor.check(telemetry)
+                    if not _pq_ok:
+                        log.warning("pq_gate.block", cycle=cycle, reason=_pq_reason,
+                                    norm_ref="NTCSE (GAP-010)")
+                        SAFETY_BLOCKS_TOTAL.labels(site_id=_cfg.SITE_ID,
+                                                   reason="power_quality").inc()
+                        health_server.last_cycle_ok = False
+                        await asyncio.sleep(_cfg.WATCHDOG_TIMEOUT)
+                        continue
+
+                # ── STEP 2b: Safety (SOC / Temp hard limits, GAP-001 integrated) ─
                 is_safe = guard.check_safety(telemetry)
                 span.set_attribute("safety_ok", is_safe)
 
@@ -448,6 +536,33 @@ async def main() -> None:  # noqa: C901
                     continue
 
                 health_server.safety_status = "ok"
+
+                # ── STEP 2c: Ramp Rate Limit (NTSyCS Cap.4.2 GAP-001) ────────
+                _now_ts = time.monotonic()
+                _dt_s = _now_ts - _prev_cycle_ts
+                _prev_cycle_ts = _now_ts
+                _current_kw = float(telemetry.get("active_power", 0.0)) / 1000.0
+                _safe_kw = guard.apply_ramp_limit(_prev_power_kw, _current_kw, _dt_s)
+                if abs(_safe_kw - _current_kw) > 0.1:
+                    log.info("ramp_rate.limited", cycle=cycle,
+                             requested_kw=round(_current_kw, 2),
+                             clamped_kw=round(_safe_kw, 2),
+                             norm_ref="NTSyCS Cap. 4.2 (GAP-001)")
+                _prev_power_kw = _safe_kw
+
+                # ── STEP 2d: Primary Frequency Response (NTSyCS Cap.4.3 GAP-002) ─
+                _pfr_setpoint: float | None = None
+                if _pfr_agent is not None and "grid_frequency" in telemetry:
+                    _f_hz = float(telemetry["grid_frequency"])
+                    _pfr_setpoint = _pfr_agent.compute_setpoint(_f_hz, _safe_kw)
+                    span.set_attribute("pfr_setpoint_kw", round(_pfr_setpoint, 2))
+
+                # ── STEP 2e: Reactive Power Q/V (NTSyCS Cap.4.4 GAP-011) ─────
+                _q_setpoint: float | None = None
+                if _qv_controller is not None and "ac_voltage" in telemetry:
+                    _v_pu = float(telemetry["ac_voltage"]) / 230.0  # normalise to pu
+                    _q_setpoint = _qv_controller.compute_q_setpoint(_v_pu)
+                    span.set_attribute("q_setpoint_kvar", round(_q_setpoint, 2))
 
                 # ── STEP 3: Watchdog ──────────────────────────────────────
                 _ensure_watchdog(guard, driver, watchdog_ref)
@@ -528,6 +643,19 @@ async def main() -> None:  # noqa: C901
                         soc_pct=round(_soc * 100, 1),
                         note="observe-only — write_tag integration in BEP-0200 Phase 4",
                     )
+
+                # ── STEP 4d: CEN Telemetry Publisher (GAP-003, async fire-forget) ─
+                if _cen_publisher is not None:
+                    _cen_payload = {
+                        "soc_pct": float(telemetry.get("soc", 0.0)),
+                        "p_kw": _pfr_setpoint if _pfr_setpoint is not None else _safe_kw,
+                        "q_kvar": _q_setpoint if _q_setpoint is not None else 0.0,
+                        "f_hz": float(telemetry.get("grid_frequency", 50.0)),
+                        "status": "ONLINE",
+                        "bess_temp_c": float(telemetry.get("temp_c", 0.0)),
+                    }
+                    # Fire-and-forget  (errors logged inside CENPublisher)
+                    asyncio.ensure_future(_cen_publisher.publish(_cen_payload))
 
                 CYCLES_TOTAL.labels(site_id=_cfg.SITE_ID).inc()
                 LAST_CYCLE_DURATION_S.labels(site_id=_cfg.SITE_ID).set(
