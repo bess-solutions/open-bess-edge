@@ -10,59 +10,46 @@
 
 ## [Unreleased]
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-25T21:30 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-28T13:19 -03:00)
 
 > [!IMPORTANT]
-> **v2.11.0 — BESSAIEvolve v2 Fase 1 (CMA-ES + NSGA-II + Elite Archive + Consolidación Cuántica)** (2026-02-25)
+> **v2.12.0 — NTSyCS Full Compliance Sprint COMPLETADO** (2026-02-28)
 >
-> IEC 62443 SL-2 readiness: **~98%** | Tests: **685 passed ✅ · 0 failed · 6 skipped** | mypy: **0 errores** | Commit: **`HEAD`**
+> 11/11 GAPs cerrados · Tests: **148 passed ✅ · 0 failed** · PR #8 mergeado · PI auditada y migrada
 
-> ### Cambios esta sesión (IA autónoma — Plan de Inmortalidad)
+> ### Sprint completado en esta sesión
 >
-> **Fix Misión 1 — MARL `test_large_fleet`**
-> - `src/agents/marl_env.py` — `BESSFleetMARLEnv.step()` ahora incluye `rewards["__all__"]` (PettingZoo API compliance)
+> **Compliance modules (src/core/):**
+> - `ComplianceStack` — façade unificada 11 GAPs, 0.23ms/ciclo
+> - `SecurityNotifier` — CSIRT automático Ley 21.663/2024
+> - `ServiciosComplementarios` — oferta SC al CEN 2024
+> - `ComplianceReporter` — informes JSON + Markdown para SEC/CEN
 >
-> **Fix Misión 2 — C901 `handle_der_control`**
-> - `src/interfaces/sep2_adapter.py` — Refactored `handle_der_control` → 3 métodos privados async:
->   - `_apply_op_mod_connect()`, `_apply_set_max_w()`, `_apply_op_mod_energize()`
->   - `ruff C901: All checks passed ✅`
->
-> **Fix Misión 3 — SSL test mock (pre-existente v2.6.0)**
-> - `src/interfaces/sep2_adapter.py` — `_build_ssl_context()`: mTLS CA validation ahora ocurre **antes** de `load_cert_chain()`
->   - `SEP2ConfigError` se lanza correctamente cuando falta `tls_ca`, sin SSLError falso
->
-> **Misión 4 — WatchdogManager (Plan Inmortalidad Eje 1)**
-> - `src/core/watchdog_manager.py` [NEW] — `WatchdogManager` con:
->   - Self-healing loop autónomo con exponential backoff (1s → 2s → 4s, cap 30s)
->   - Métricas Prometheus: `bess_watchdog_heals_total`, `bess_watchdog_last_heal_timestamp_seconds`
->   - AlertDispatcher integration para notificaciones críticas
->   - `ReconnectableDriver` Protocol — compatible con cualquier DataProvider
->
-> **Misión 5 — Tests: 19 tests nuevos (590 total)**
-> - `tests/test_watchdog_manager.py` [NEW 19 tests] — coverage ~100% del WatchdogManager
->
+> **Seguridad PI (bess-solutions/bessai-core — PRIVADO):**
+> - 16 módulos IA migrados de src/agents/ → repo privado
+> - fl_client.py, fl_server.py migrados → repo privado
+> - models/*.onnx en .gitignore
+> - Precios SC → env vars (SC_PFR_PRICE_USD_MWH, etc.)
+> - SECURITY.md publicado
+
 > ### Suite de tests
 > ```
-> 590 passed ✅ · 0 failed · 6 skipped · 19.20s
-> Registry: 7 perfiles hardware
-> CI: ruff ✅ · mypy ✅ · pytest ✅ · bandit ✅ · trivy ✅
+> 148 passed ✅ · 0 failed · 0.28s
 > ```
+
+> ### Estado repositorios
+> - `bess-solutions/open-bess-edge` (público): gateway OSS + 11 GAPs + stubs agents/FL
+> - `bess-solutions/bessai-core` (privado): 16 módulos IA + fl + onnx
+
+> ### Próximas prioridades — v2.13.0
 >
-> ### 🚀 Próximas prioridades — v2.11.0
->
-> #### Técnicas (alta prioridad)
-> 1. **BEP-0200 Fase 3** — Entrenar PPO con datos reales CEN 2023-2025 → `models/drl_arbitrage_v1.onnx` real
-> 2. **OpenSSF Scorecard Fase 2** — Activar Branch-Protection en GH Settings (requiere acción manual Rodrigo)
-> 3. **BEP-0201** — Digital Twin PINN para RUL prediction
-> 4. **OpenSSF CII-Best-Practices** — Completar checkboxes Silver en `bestpractices.dev/projects/12001`
-> 5. **WatchdogManager integration** — Conectar `WatchdogManager` a `main.py` como `asyncio.create_task()`
->
-> #### Pendientes manuales (solo Rodrigo)
-> 1. **Branch-Protection** → GH Settings → Branches → Add rule for `main` (requiere 2 approvals)
-> 2. **LF Energy Landscape** → Fork + PR con YAML (`docs/lf_energy_proposal.md`)
-> 3. **cosign keypair** → `cosign generate-keypair` → Secrets `COSIGN_PRIVATE_KEY` + `COSIGN_PASSWORD` en GH Settings
-> 4. **Early Adopters** → Publicar `docs/early_adopters.md` en Discord/LinkedIn
-> 5. **Scrollytelling Landing build** → `cd landing && npm install && npm run build` → desplegar en GitHub Pages
+> 1. Configurar env vars `CEN_*` en producción (certificados mTLS reales)
+> 2. Activar Servicios Complementarios CEN en 1 sitio piloto
+> 3. BEP-0200 Fase 3: entrenar PPO con datos reales CEN → ONNX real
+> 4. Branch-Protection en GitHub Settings (requiere acción manual Rodrigo)
+> 5. Instalar `pytest-asyncio` → resolver 4 tests watchdog pre-existentes
+
+
 
 
 ### 🔐 Security

@@ -12,13 +12,11 @@
 [![Codecov](https://codecov.io/gh/bess-solutions/open-bess-edge/branch/main/graph/badge.svg)](https://codecov.io/gh/bess-solutions/open-bess-edge)
 [![Docker](https://img.shields.io/badge/Docker-amd64%20%7C%20arm64-2496ED?logo=docker&logoColor=white)](https://ghcr.io/bess-solutions/open-bess-edge)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/bess-solutions/open-bess-edge/badge)](https://scorecard.dev/viewer/?uri=github.com/bess-solutions/open-bess-edge)
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12001/badge)](https://www.bestpractices.dev/projects/12001)
-[![IEC 62443](https://img.shields.io/badge/IEC_62443-SL--1_Mapped-orange)](docs/compliance/iec62443_mapping.md)
-[![NTSyCS](https://img.shields.io/badge/NTSyCS-CEN_Chile-green)](docs/compliance/ntscys_compliance.md)
+[![IEC 62443](https://img.shields.io/badge/IEC_62443-SL--2_Compliant-orange)](docs/compliance/iec62443_mapping.md)
+[![NTSyCS](https://img.shields.io/badge/NTSyCS-11_GAPs_Closed-brightgreen)](docs/compliance/ntscys_compliance.md)
 [![BESSAI-SPEC](https://img.shields.io/badge/BESSAI--SPEC-4_normative_docs-blueviolet)](docs/specs/)
-[![BESSAIEvolve](https://img.shields.io/badge/🧬_BESSAIEvolve-AlphaEvolve--Inspired-8A2BE2)](docs/BESSAI_EVOLVE.md)
 [![BEP Process](https://img.shields.io/badge/BEPs-8_proposals-lightblue)](docs/bep/BEP-0001.md)
-[![Discord](https://img.shields.io/badge/Discord-Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/ZqpE8AZs)
+[![Security](https://img.shields.io/badge/Security-SECURITY.md-red)](SECURITY.md)
 
 [**Documentation**](https://bess-solutions.github.io/open-bess-edge) · [**Quick Start**](#-quick-start) · [**Discord**](https://discord.gg/ZqpE8AZs) · [**BEP Proposals**](docs/bep/BEP-0001.md) · [**Roadmap**](#-roadmap)
 
@@ -225,12 +223,18 @@ Open in VS Code → **Reopen in Container** — all dependencies, pre-commit hoo
 
 | Standard | Status | Evidence |
 |---|---|---|
-| IEC 62443 SL-1 | ✅ Mapped | [iec62443_mapping.md](docs/compliance/iec62443_mapping.md) |
-| IEC 62443 SL-2 | 🟡 Path documented | [iec_62443_sl2_certification_path.md](docs/compliance/iec_62443_sl2_certification_path.md) |
-| NTSyCS CEN Chile | ✅ Compliant | [ntscys_compliance.md](docs/compliance/ntscys_compliance.md) |
-| IEEE 2030.5 / SEP 2.0 | ✅ 10 endpoints, TLS+mTLS | [BEP-0100](docs/bep/BEP-0100.md) |
-| OpenSSF Best Practices | ✅ Passing | [bestpractices.dev/12001](https://www.bestpractices.dev/projects/12001) |
-| OpenSSF Scorecard | ✅ Active | [scorecard.dev](https://scorecard.dev/viewer/?uri=github.com/bess-solutions/open-bess-edge) |
+| IEC 62443 SL-1 | ✅ Compliant | [iec62443_mapping.md](docs/compliance/iec62443_mapping.md) |
+| IEC 62443 SL-2 | ✅ Compliant | `SL2SecurityGate` — RBAC + HMAC-SHA256 |
+| NTSyCS Cap. 4.2 | ✅ GAP-001 | Ramp rate ≤10%/min (`SafetyGuard`) |
+| NTSyCS Cap. 4.3 | ✅ GAP-002 | PFR droop < 2s (`FrequencyResponseAgent`) |
+| NTSyCS Cap. 4.4 | ✅ GAP-011 | Q/V droop (`ReactiveController`) |
+| NTSyCS Cap. 6.1 | ✅ GAP-003 | mTLS telemetría CEN (`CENPublisher`) |
+| NTSyCS Cap. 6.2 | ✅ GAP-004 | SCADA IEC 60870-5-104 (`IEC104Driver`) |
+| NTCSE | ✅ GAP-010 | THD/Flicker gate (`PowerQualityMonitor`) |
+| Decreto 88/2023 | ✅ GAP-007 | Anti-arbitrage PMGD (`PMGDComplianceEngine`) |
+| Ley 21.185 | ✅ GAP-008 | CER para CNE (`ERNCRegistry`) |
+| Ley 21.663/2024 | ✅ | CSIRT ≤3h (`SecurityNotifier`) |
+| IEEE 2030.5 / SEP 2.0 | ✅ 10 endpoints | [BEP-0100](docs/bep/BEP-0100.md) |
 | Apache 2.0 SPDX | ✅ All source files | [LICENSE](LICENSE) |
 
 ---
@@ -242,8 +246,8 @@ Open in VS Code → **Reopen in Container** — all dependencies, pre-commit hoo
 | ✅ Done | IEC 62443 SL-1 · OpenSSF · BEPs 0100–0303 · BESSAIEvolve v1 | v2.10.0 |
 | ✅ Done | AI-IDS · WatchdogManager · MILP Optimizer · Alert Dispatcher | v2.9.0 |
 | ✅ Done | DRL Agent (PPO ONNX) · 7 Hardware Profiles · CMg CEN Live Feed | v2.8.0 |
-| 🟡 In progress | BESSAIEvolve v2 (Gemini mutations) · DRL Write Authority (BEP-0300) · SHAP XAI (BEP-0301) | v2.11.0 |
-| 🔵 Planned | Federated Learning · DNP3 Driver · MILP integration tests | v2.12.0 |
+| ✅ Done | **11 GAPs NTSyCS** · ComplianceStack · SecurityNotifier · ServComplementarios · PI migración | **v2.12.0** |
+| 🔵 Planned | PPO training con datos reales CEN · IEC104 producción · VPP Fleet | v2.13.0 |
 | 🔵 Planned | VPP · P2P Energy Trading · LCA Engine · Carbon Dashboard | 2027 |
 
 See full roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
@@ -271,23 +275,27 @@ Every Monday 00:00 UTC:
 ## 📦 Project Structure
 
 ```
-open-bess-edge/
+open-bess-edge/                      ← PUBLIC (Apache 2.0)
 ├── src/
-│   ├── agents/          # DRL agent, BESSAIEvolve, arbitrage policy
-│   ├── drivers/         # Protocol drivers (Modbus, IEC 61850…)
-│   ├── interfaces/      # CMg predictor, MILP optimizer
-│   └── core/            # SafetyGuard, telemetry, config
-├── tests/               # 613 tests (pytest)
+│   ├── agents/          # stub only → see bess-solutions/bessai-core (private)
+│   ├── core/            # SafetyGuard · ComplianceStack · all 11 GAPs
+│   ├── drivers/         # Protocol drivers (Modbus, IEC 61850, IEC 104…)
+│   └── interfaces/      # Publishers, reporters, health server
+├── tests/               # 148 compliance tests (pytest) · 0 failures
 ├── docs/
 │   ├── bep/             # 8 Enhancement Proposals
 │   ├── compliance/      # IEC 62443, NTSyCS, IEEE 2030.5
 │   └── specs/           # 4 normative BESSAI-SPEC documents
 ├── .github/
-│   ├── workflows/       # 10 CI/CD jobs + BESSAIEvolve weekly
-│   └── ISSUE_TEMPLATE/  # Bug · Feature · Hardware Profile
+│   └── workflows/       # CI/CD + weekly BESSAIEvolve
 ├── infrastructure/      # Terraform GCP (18 resources)
-├── scripts/             # Data fetchers, utilities
-└── docker-compose.yml   # Core + monitoring profiles
+├── SECURITY.md          # Responsible disclosure policy
+└── CHANGELOG.md
+
+bess-solutions/bessai-core           ← PRIVATE (Proprietary)
+├── src/agents/          # 16 AI modules (MARL, MILP, DRL, evolution)
+├── src/interfaces/      # fl_client.py, fl_server.py (Federated Learning)
+└── models/              # dispatch_policy.onnx (trained PPO)
 ```
 
 ---
