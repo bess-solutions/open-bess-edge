@@ -1,0 +1,24 @@
+# sec-bess-ingestor — Dependencias
+# ─────────────────────────────────────────────────────────────
+# Instalar: pip install -r requirements.txt
+
+# HTTP y scraping
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0          # parser HTML más rápido para BeautifulSoup
+
+# Configuración / credenciales
+python-dotenv>=1.0.0 # Carga .env automáticamente
+
+# Testing
+pytest>=8.0.0
+pytest-cov>=5.0.0
+responses>=0.25.0    # Mock de requests para tests
+
+# Utilidades
+python-dateutil>=2.9.0
+
+# Opcional — scraping de páginas con JavaScript (instalar si sec.cl lo requiere)
+# pip install playwright && python -m playwright install chromium
+# playwright>=1.40.0
+
