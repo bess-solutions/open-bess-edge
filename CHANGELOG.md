@@ -65,6 +65,9 @@
 > 5. **Scrollytelling Landing build** → `cd landing && npm install && npm run build` → desplegar en GitHub Pages
 
 
+### 🔐 Security
+- extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
+
 ### 🐛 Bug Fixes
 - **tariffs**: tarifas GDMTH reales DOF agosto 2025 - BASE 0.9649 INTER 1.8829 PUNTA 2.1757 MXN/kWh cargo demanda 102.05/kW (`7b388db1`, @BESS Solutions)
 - **quality**: remediacion completa Pyright 0 errores + Bandit 0 alertas Medium/High (`bbb366cc`, @BESS Solutions)
