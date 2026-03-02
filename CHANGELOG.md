@@ -91,6 +91,7 @@
 - remove deprecated fetch_cmg_evolution.py (superseded by bessai_data_scraper.py) (`1f734cd4`, @BESS Solutions)
 
 ### ✨ New Features
+- v2.12.0 — BEP-0300 write_tag + 24 ONNX reales + SETUP_GCP.md + PROJECT_STATUS (`f3ab9cf7`, @BESS Solutions)
 - **pilot**: compliance REST API + mTLS certs + pilot setup wizard (`c5bca2b9`, @BESSAI sec-ingestor)
 - **production**: wire ComplianceStack + NTSyCS env vars + .env.example (`e6be52a4`, @BESSAI sec-ingestor)
 - NTSyCS Full Compliance Sprint v2.12.0 — 11 GAPs, 148 tests, ComplianceStack (`d1fa7440`, @bess-solutions)
