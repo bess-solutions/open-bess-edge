@@ -154,11 +154,13 @@ Deberías ver valores reales (no el rango simulado 20-95% SOC):
 
 ## Paso 7 — Hardware no soportado
 
-Si tu inversor no está entre los 4 perfiles:
+Si tu inversor no está entre los perfiles existentes:
 
-1. Abre un issue con el template [`hardware_support.yml`](https://github.com/bess-solutions/open-bess-edge/issues/new?template=hardware_support.yml)
-2. Adjunta el Modbus register map del fabricante
-3. Si tienes acceso al inversor, puedes contribuir el perfil JSON y recibir un **bounty** (ver [bounty_program.md](bounty_program.md))
+1. Revisa si ya hay un issue abierto: [buscar en issues con etiqueta `hardware`](https://github.com/bess-solutions/open-bess-edge/issues?q=label%3Ahardware)
+2. Si no existe, abre uno con la etiqueta `hardware` describiendo tu inversor y adjunta el mapa de registros Modbus del fabricante
+3. Si tienes acceso al inversor físico, puedes contribuir el perfil JSON directamente: ver guía [hardware_profile_contribution.md](hardware_profile_contribution.md)
+
+> Las contribuciones de perfiles de hardware son las más valoradas por la comunidad — se mencionan explícitamente en las release notes.
 
 ---
 

@@ -170,15 +170,21 @@ graph LR
 
 ## ⚡ Quick Start
 
-### 1. Local (Python)
+### 0. Setup interactivo (recomendado)
 
 ```bash
 git clone https://github.com/bess-solutions/open-bess-edge.git
 cd open-bess-edge
-make dev                  # install all deps + pre-commit hooks
-cp .env.example .env      # edit with your BESS IP + credentials
-make simulate             # run with built-in hardware simulator
-make health               # verify all subsystems are up
+bash scripts/setup.sh   # 5 preguntas → genera config/.env listo
+```
+
+### 1. Local (Python)
+
+```bash
+make dev                  # instala dependencias + pre-commit hooks
+bash scripts/setup.sh     # genera config/.env
+make simulate             # arranca con simulador integrado
+make health               # verifica que todo está activo
 ```
 
 ### 2. Docker Compose (recommended)
@@ -186,12 +192,11 @@ make health               # verify all subsystems are up
 ```bash
 git clone https://github.com/bess-solutions/open-bess-edge.git
 cd open-bess-edge
-cp .env.example .env
-docker compose up -d                        # core gateway
-docker compose --profile monitoring up -d  # + Prometheus + Grafana
+bash scripts/setup.sh     # genera config/.env con parámetros de tu sitio
+docker compose -f infrastructure/docker/docker-compose.yml --profile simulator --profile monitoring up -d
 ```
 
-Grafana → http://localhost:3000 (admin / bessai)  
+Grafana → http://localhost:3000 (credenciales: ver `GF_SECURITY_ADMIN_PASSWORD` en `config/.env`)  
 Metrics → http://localhost:8000/metrics  
 Health  → http://localhost:8000/health
 

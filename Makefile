@@ -1,7 +1,7 @@
 # BESSAI Edge Gateway — Developer Makefile
 # Usage: make <target>   →   make help  for full list
 
-.PHONY: help dev install test test-cov test-compliance test-fast lint lint-fix type-check security audit \
+.PHONY: help dev install setup onboard test test-cov test-compliance test-fast lint lint-fix type-check security audit \
         all-checks simulate health up up-sim down logs build \
         gen-onnx export-cmg fetch-cmg evolve train-drl train-ppo \
         cert pilot compliance-report fleet \
@@ -32,6 +32,16 @@ dev: ## Install all dev dependencies + pre-commit hooks + security hooks
 
 install: ## Install runtime dependencies only
 	pip install -e "."
+
+setup: ## Interactive setup — generate config/.env for your site (5 questions)
+	@bash scripts/setup.sh
+
+onboard: setup ## Full onboarding: generate config/.env + activate PI hooks + verify Docker
+	@bash scripts/install_hooks.sh
+	@echo ""
+	@echo "✅ config/.env generated and PI hooks active."
+	@echo "📖 Next step: make up-sim   →  demo local con simulador"
+	@echo "📖 Full guide: docs/ONBOARDING_7DAYS.md"
 
 # ── Testing ────────────────────────────────────────────────────────────────────
 
