@@ -33,16 +33,23 @@ python --version          # ≥ 3.11 (opcional para desarrollo)
 git clone https://github.com/bess-solutions/open-bess-edge.git
 cd open-bess-edge
 
-# 2. Activar el hook de seguridad (protege archivos propietarios)
+# 2. Setup interactivo (genera config/.env con tus parámetros en 2 minutos)
+bash scripts/setup.sh
+# → Responde 5 preguntas → config/.env listo
+
+# 3. (O manualmente si prefieres)
+# cp .env.example config/.env && nano config/.env
+
+# 4. Activar el hook de seguridad (protege archivos propietarios)
 bash scripts/install_hooks.sh
 
-# 3. Levantar stack completo con simulador
+# 5. Levantar stack completo con simulador
 docker compose -f infrastructure/docker/docker-compose.yml \
   --profile simulator \
   --profile monitoring \
   up --build -d
 
-# 4. Esperar ~60 segundos y verificar
+# 6. Esperar ~60 segundos y verificar
 curl http://localhost:8000/health
 # Esperado: {"status": "ok", "site_id": "SITE-SIM-001", ...}
 ```

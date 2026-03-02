@@ -1,0 +1,120 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 👋 Bienvenido/a al programa Early Adopters de BESSAI
+
+        Completa esta presentación para postular al programa. El equipo la revisará en 5 días hábiles.
+
+        > **Antes de postular**, asegúrate de haber leído el [Adopter Hub](https://github.com/bess-solutions/open-bess-edge/blob/main/docs/ADOPTER_HUB.md) para entender qué ofrece el programa.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: "Categoría"
+      description: "¿Qué perfil describe mejor tu caso?"
+      options:
+        - "Integrador de sistemas (instalas BESS en proyectos de clientes)"
+        - "Operador de red / utility (gestionas múltiples puntos de almacenamiento)"
+        - "Empresa de energía (desarrollador de proyectos solar + storage)"
+        - "Investigador / Academia (universidad o centro de I+D)"
+        - "Fabricante de hardware (inversores, BMS, sistemas BESS)"
+        - "Otro"
+    validations:
+      required: true
+
+  - type: input
+    id: organization
+    attributes:
+      label: "Organización / Nombre"
+      placeholder: "Universidad de Chile / Empresa Energía SPA / John Doe"
+    validations:
+      required: true
+
+  - type: input
+    id: country
+    attributes:
+      label: "País / Ciudad"
+      placeholder: "Chile, Santiago"
+    validations:
+      required: true
+
+  - type: textarea
+    id: hardware
+    attributes:
+      label: "Hardware disponible"
+      description: "Describe tu BESS o setup de laboratorio"
+      placeholder: |
+        - Inversor: Huawei SUN2000-100KTL (o "sin hardware, solo laboratorio virtual")
+        - Batería: LUNA2000-150KWH
+        - Capacidad: 200 kWh / 100 kW
+        - Estado: producción / laboratorio / simulador
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: "Caso de uso"
+      description: "Describe brevemente qué quieres lograr con BESSAI"
+      placeholder: |
+        "Sistema solar + BESS de 200 kWh. Quiero optimizar el despacho contra precios
+        spot del mercado chileno y reportar telemetría al CEN."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: market
+    attributes:
+      label: "Mercado eléctrico"
+      options:
+        - "Chile (SEN/CEN)"
+        - "México (CENACE)"
+        - "España (REE/OMIE)"
+        - "Otro mercado"
+        - "Sin integración de mercado"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: tech_skills
+    attributes:
+      label: "Experiencia técnica"
+      description: "Marca todo lo que aplique"
+      options:
+        - label: "Python (básico o superior)"
+        - label: "Docker"
+        - label: "Modbus TCP / protocolos industriales"
+        - label: "Kubernetes / Helm"
+        - label: "GCP / AWS / Azure"
+        - label: "Redes OT / IT"
+
+  - type: dropdown
+    id: interest
+    attributes:
+      label: "¿Qué te interesa más de BESSAI?"
+      options:
+        - "Arbitraje / optimización económica (DRL)"
+        - "Interoperabilidad hardware (agregar mi inversor)"
+        - "Seguridad IEC 62443 / compliance"
+        - "VPP / respuesta de frecuencia"
+        - "Investigación / publicaciones"
+        - "Integración con mi plataforma existente"
+    validations:
+      required: true
+
+  - type: textarea
+    id: team
+    attributes:
+      label: "Equipo"
+      placeholder: "Solo / Equipo de 3 ingenieros / Con apoyo de integrador local"
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: "Confirmación"
+      options:
+        - label: "He leído la [licencia Apache 2.0](https://github.com/bess-solutions/open-bess-edge/blob/main/LICENSE)"
+          required: true
+        - label: "Acepto el [Código de Conducta](https://github.com/bess-solutions/open-bess-edge/blob/main/CODE_OF_CONDUCT.md)"
+          required: true
+        - label: "Puedo proporcionar feedback mensual durante los primeros 3 meses"
+          required: false

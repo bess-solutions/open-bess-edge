@@ -68,6 +68,12 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - "📍 Para Adopters":
+    - Adopter Hub (empieza aquí): ADOPTER_HUB.md
+    - Onboarding Día 0 → 7: ONBOARDING_7DAYS.md
+    - FAQ Técnica: FAQ.md
+    - Programa Early Adopters: early_adopters.md
+    - Pilot Guide (Chile/CEN): PILOT_GUIDE.md
   - Getting Started:
     - Quick Start (5 min): tutorials/quickstart_5min.md
     - Local Development: local_development.md
@@ -129,8 +135,10 @@ nav:
     - OpenFMB Adapter Guide: interoperability/openFMB_adapter.md
     - Battery Data Format (BDF): interoperability/BDF_alignment.md
   - Community:
+    - Adopter Hub: ADOPTER_HUB.md
     - Adopters: adopters.md
     - Early Adopters Program: early_adopters.md
+    - Good First Issues: GOOD_FIRST_ISSUES.md
     - Academic Collaboration: academic_collaboration.md
     - Research Topics: research_topics.md
   - Benchmarks:
