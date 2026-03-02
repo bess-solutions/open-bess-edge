@@ -68,7 +68,7 @@ Deberías ver el dashboard **BESSAI Main** con:
 - 🔍 AI-IDS anomaly score
 - 💰 Métricas de arbitraje
 
-![BESSAI Grafana Dashboard](../media/grafana_dashboard.png)
+> 📊 Verás paneles en tiempo real de SOC, potencia (kW), AI-IDS anomaly score y métricas de arbitraje actualizándose cada 15 s.
 
 ## Paso 5 — Detener el stack
 
