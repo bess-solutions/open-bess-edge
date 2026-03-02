@@ -24,10 +24,11 @@ help: ## Show this help
 
 # ── Development ────────────────────────────────────────────────────────────────
 
-dev: ## Install all dev dependencies + pre-commit hooks
+dev: ## Install all dev dependencies + pre-commit hooks + security hooks
 	pip install -e ".[dev]"
 	pre-commit install
-	@echo "✅ Dev environment ready. Run: make simulate"
+	git config core.hooksPath .githooks
+	@echo "✅ Dev environment ready (PI hooks active). Run: make simulate"
 
 install: ## Install runtime dependencies only
 	pip install -e "."
@@ -91,7 +92,7 @@ health: ## Check all subsystem health (requires running instance)
 up: ## Start gateway + Prometheus + Grafana
 	$(COMPOSE) --profile monitoring up -d
 	@echo "Gateway:    http://localhost:8000/health"
-	@echo "Grafana:    http://localhost:3000  (admin / bessai)"
+	@echo "Grafana:    http://localhost:3000  (admin / see GF_SECURITY_ADMIN_PASSWORD in config/.env)"
 	@echo "Prometheus: http://localhost:9090"
 
 up-sim: ## Start gateway + simulator + full monitoring stack

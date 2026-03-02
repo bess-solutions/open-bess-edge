@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+# =============================================================================
+# BESSAI Pre-commit hook — PI Protection Policy v1.2 — 2026-03-02
+# Blocks proprietary / sensitive files from being committed to the public repo.
+# Install: git config core.hooksPath .githooks
+# =============================================================================
+
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# ── Files that MUST NEVER be committed (exact paths) ──────────────────────────
+BLOCKED_EXACT=(
+  "config/.env"
+  "models/dispatch_policy.onnx"
+  "models/training_summary.json"
+)
+
+# ── Glob patterns that MUST NEVER be committed ─────────────────────────────────
+BLOCKED_PATTERNS=(
+  "models/*.onnx"
+  "models/*.ort"
+  "models/*.pt"
+  "models/*.pkl"
+  "models/*.joblib"
+  "src/analytics/tariffs/*.json"
+  "src/analytics/tariffs/*.csv"
+  "infrastructure/certs/*.key"
+  "infrastructure/certs/*.pem"
+  "infrastructure/certs/*.srl"
+  "docs/MANUAL_ACCIONES_RODRIGO.md"
+  "docs/PLAN_INMORTALIDAD.md"
+  "docs/MODULOS_Y_DATOS_SIMULADOS.md"
+  "docs/PENDIENTES.md"
+  "*.key"
+  "*.pem"
+  "*.pfx"
+  "*.p12"
+  "bessai-gcp-key.json"
+  "*service-account*.json"
+  "*credentials*.json"
+)
+
+FOUND=0
+
+# Get list of staged files
+STAGED=$(git diff --cached --name-only --diff-filter=ACM)
+
+# Check exact paths
+for blocked in "${BLOCKED_EXACT[@]}"; do
+  if echo "$STAGED" | grep -qxF "$blocked"; then
+    echo -e "${RED}[BESSAI SECURITY] BLOCKED: '$blocked' is proprietary/sensitive and cannot be committed.${NC}"
+    FOUND=1
+  fi
+done
+
+# Check glob patterns
+for pattern in "${BLOCKED_PATTERNS[@]}"; do
+  # Convert glob to grep regex (simple: * -> [^/]*)
+  regex=$(echo "$pattern" | sed 's/\./\\./g' | sed 's/\*\*/DOUBLESTAR/g' | sed 's/\*/[^\/]*/g' | sed 's/DOUBLESTAR/.*/g')
+  matches=$(echo "$STAGED" | grep -E "^${regex}$" || true)
+  if [ -n "$matches" ]; then
+    while IFS= read -r match; do
+      echo -e "${RED}[BESSAI SECURITY] BLOCKED: '$match' matches pattern '$pattern' — proprietary/sensitive file.${NC}"
+      FOUND=1
+    done <<< "$matches"
+  fi
+done
+
+# Check for accidentally staged content with real credentials
+if echo "$STAGED" | grep -q "\.env$"; then
+  echo -e "${RED}[BESSAI SECURITY] BLOCKED: .env file detected in staged files.${NC}"
+  FOUND=1
+fi
+
+if [ $FOUND -ne 0 ]; then
+  echo ""
+  echo -e "${YELLOW}────────────────────────────────────────────────────────${NC}"
+  echo -e "${YELLOW}  PI Protection Policy v1.2 — BESSAI Solutions SpA      ${NC}"
+  echo -e "${YELLOW}  Run: git restore --staged <file>  to unstage and retry ${NC}"
+  echo -e "${YELLOW}────────────────────────────────────────────────────────${NC}"
+  exit 1
+fi
+
+exit 0
