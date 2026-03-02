@@ -90,6 +90,7 @@
 - update README + CHANGELOG to v2.12.0 state (`4e5edbd1`, @BESSAI sec-ingestor)
 
 ### 🔐 Security
+- eradicate all admin/bessai references from the entire codebase (`f294f0a5`, @BESS Solutions)
 - final PI cleanup — remove hostname refs, admin/bessai, analysis artifacts (`3068d543`, @BESS Solutions)
 - add pre-commit PI protection hook + fix last hardcoded refs (`ad49e1c3`, @BESS Solutions)
 - remove hardcoded Grafana password + untrack proprietary AI artifacts (`f502d34c`, @BESS Solutions)
