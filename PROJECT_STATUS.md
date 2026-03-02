@@ -1,6 +1,6 @@
 ﻿# 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-03-02 v2.12.0 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-03-02 v2.12.0 · **Responsable:** BESS Solutions SpA  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -53,7 +53,7 @@ Landing: React scrollytelling v1.0 ✅ (i18n ES/EN, Lucide icons)
 bess_cycles_total{site_id="SITE-CL-001"}    39      ← ciclos completados
 bess_last_power_kw{site_id="SITE-CL-001"}   376.8   ← kW desde Modbus
 bess_publish_errors_total                   39      ← GCP no configurado (esperado)
-Grafana v10.4.2                             OK      ← localhost:3000 admin/bessai
+Grafana v10.4.2                             OK      ← localhost:3000 (ver GF_SECURITY_ADMIN_PASSWORD en config/.env)
 Prometheus v2.12.0                          OK      ← localhost:9090
 ```
 
@@ -149,7 +149,7 @@ curl http://localhost:8000/metrics   # prometheus metrics
 | `bessai-gateway-sim` | ✅ running — conectado al sim | **`8000`** (/health, /metrics) |
 | `bessai-otel-collector` | ✅ running | 4317, 4318, 8888 |
 | `bessai-prometheus` | ✅ **HTTP 200** | **`9090`** |
-| `bessai-grafana` | ✅ **database:ok** v10.4.2 | **`3000`** (admin/bessai) |
+| `bessai-grafana` | ✅ **database:ok** v10.4.2 | **`3000`** (ver `GF_SECURITY_ADMIN_PASSWORD` en `config/.env`) |
 
 ### Dashboard REST API (v0.9.0)
 

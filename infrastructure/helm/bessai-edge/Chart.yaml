@@ -16,7 +16,7 @@ sources:
   - https://github.com/bess-solutions/open-bess-edge
 
 maintainers:
-  - name: TCI-GECOMP
+  - name: BESS Solutions SpA
     email: ops@bess-solutions.cl
 
 keywords:
