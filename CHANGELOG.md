@@ -10,6 +10,16 @@
 
 ## [Unreleased]
 
+### 🔐 Security — PI Protection Policy v1.2 (2026-03-02)
+- **pre-commit hook**: `.githooks/pre-commit` bloquea ONNX, `.env`, certificados, tarifas y credenciales antes de cada commit
+- **git filter-repo**: historial completo purgado — `dispatch_policy.onnx`, `training_summary.json`, `gdmth_mexico.json` eliminados de todos los commits anteriores
+- **docker-compose.production.yml**: `GF_SECURITY_ADMIN_PASSWORD` movida a `config/.env` (no más valores hardcoded)
+- **models/training_summary.json**: agregado explícitamente a `.gitignore`
+- **Makefile**: `make dev` activa el hook de seguridad automáticamente; eliminada última referencia `admin/bessai`
+- **scripts/install_hooks.sh**: instalación de hooks en un comando para nuevos colaboradores
+
+---
+
 ## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-28T14:45 -03:00)
 
 ## v2.14.0 — Arquitectura Senior 5.0 (2026-02-28)
@@ -159,7 +169,7 @@ docker compose -f infrastructure/docker/docker-compose.yml --profile simulator -
 | `bessai-gateway-sim` | ✅ running | **8000 (/health, /metrics)** |
 | `bessai-otel-collector` | ✅ running | 4317, 4318, 8888 |
 | `bessai-prometheus` (monitoring) | disponible | **9090** |
-| `bessai-grafana` (monitoring) | disponible | **3000** (admin/bessai) |
+| `bessai-grafana` (monitoring) | disponible | **3000** (ver `GF_SECURITY_ADMIN_PASSWORD` en `config/.env`) |
 
 ### ✅ Sin Bloqueadores Activos
 
