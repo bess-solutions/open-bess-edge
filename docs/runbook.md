@@ -1,7 +1,7 @@
 # Runbook — BESSAI Edge Gateway Operations
 
 > **Audience:** Operations team and on-call engineers  
-> **Version:** v1.4.0 · **Updated:** 2026-02-21
+> **Version:** v2.14.0 · **Updated:** 2026-03-02
 
 ---
 
@@ -25,7 +25,7 @@ curl http://localhost:8000/health
 
 **Common causes:**
 - `INVERTER_IP` not reachable (check inverter network)
-- `GCP_PROJECT_ID` misconfigured (check .env)
+- `GCP_PROJECT_ID` misconfigured (check `config/.env`)
 - Port 502 blocked (check firewall)
 
 ---
@@ -114,3 +114,14 @@ docker compose stop bessai-gateway
 | 🟡 Medium (cloud disconnected) | < 4 hours | On-call engineer |
 
 See [SECURITY.md](../SECURITY.md) for security incident handling.
+
+---
+
+## Recursos para adopters
+
+| Recurso | Enlace |
+|---------|--------|
+| Hub de adopción | [ADOPTER_HUB.md](ADOPTER_HUB.md) |
+| Onboarding día 0 → 7 | [ONBOARDING_7DAYS.md](ONBOARDING_7DAYS.md) |
+| FAQ técnica | [FAQ.md](FAQ.md) |
+| Soporte (issue) | [GitHub Issues](https://github.com/bess-solutions/open-bess-edge/issues/new?template=adopter_support.yml) |

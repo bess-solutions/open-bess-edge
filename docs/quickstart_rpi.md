@@ -39,8 +39,11 @@ newgrp docker
 git clone https://github.com/bess-solutions/open-bess-edge.git
 cd open-bess-edge
 
-# Crea archivo de configuración local
-cp config/.env.example config/.env
+# Setup interactivo (recomendado) — genera config/.env en 2 min:
+bash scripts/setup.sh
+
+# O manualmente:
+# cp config/.env.example config/.env
 ```
 
 ---
@@ -156,6 +159,8 @@ sudo systemctl enable docker
 
 ## Próximos pasos
 
+- 📍 [Adopter Hub](ADOPTER_HUB.md) — si es tu primera instalación real
+- 📅 [Onboarding Día 0 → 7](ONBOARDING_7DAYS.md) — roadmap completo hasta producción
 - [Configura MQTT](./mqtt_integration.md) para publicar en Home Assistant, AWS IoT o un broker propio
 - [Arquitectura del sistema](./architecture.md)
 - [Runbook de operaciones](./runbook.md)

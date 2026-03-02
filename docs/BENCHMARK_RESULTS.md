@@ -147,4 +147,4 @@ cat results/benchmark_004_results.json
 ---
 
 *Generado automáticamente por BESSAI Pipeline · Datos: CEN Chile API oficial*  
-*Código y metodología: MIT License · Pull requests bienvenidos*
+*Código y metodología: Apache 2.0 License · Pull requests bienvenidos · [Reproducir benchmark](../Makefile)*

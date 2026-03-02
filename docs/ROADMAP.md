@@ -1,6 +1,6 @@
 # BESSAI Edge Gateway — Roadmap Oficial v2.10–3.0
 
-> **Versión:** 2026-02-25 · **Estado:** Activo  
+> **Versión:** 2026-03-02 · **Estado:** Activo  
 > **Sustituye:** `docs/bessai_v2_roadmap.md` (archivado — era pre-v2.6)
 
 ---
@@ -34,6 +34,7 @@
 | **Wave 4** | AI-IDS Mejorado | `src/core/alert_dispatcher.py` (Slack webhook + email SMTP + structured log) | ✅ |
 | **Wave 5** | Tutoriales Integradores | `hardware_profile_contribution.md` · `training_custom_drl.md` | ✅ |
 | **Wave 6** | Comunidad y Academia | `early_adopters.md` · `research_topics.md` (7 temas) · `academic_collaboration.md` | ✅ |
+| **Wave 7** | Adopción Expedita | `ADOPTER_HUB.md` (decision tree) · `ONBOARDING_7DAYS.md` (roadmap día 0→7) · `FAQ.md` · `CONTRIBUTING_ADOPTERS.md` · `scripts/setup.sh` (setup interactivo) · `.github/ISSUE_TEMPLATE/adopter_support.yml` · `.github/DISCUSSION_TEMPLATE/early_adopter_intro.yml` · mkdocs nav actualizado · Grafana password env var en docker-compose.yml | ✅ |
 
 **Registry total**: 7 perfiles de hardware (Fronius, Huawei, SMA, Victron + SolarEdge, BYD, Tesla)  
 **Benchmarks total**: 5 (latency, scale, security, DRL, edge-devices)  
@@ -229,6 +230,7 @@ Modelo híbrido física + IA que simula en tiempo real la degradación, temperat
 | Anunciar Hackathon 2026 | 🟡 Media | Discord + LinkedIn + GitHub Discussions (Mayo 15-17) |
 | Activar GitHub Pages (MkDocs site) | 🟢 Baja | Settings → Pages → branch `gh-pages` |
 | Conectar Codecov | 🟢 Baja | `codecov.io/gh/bess-solutions/open-bess-edge` |
+| Actualizar blog.html con hito Wave 7 | 🟢 Baja | Agregar `OBE-DOC-001` en `bessai-web/blog.html` |
 
 ---
 

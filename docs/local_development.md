@@ -1,6 +1,6 @@
 # Guía de Desarrollo Local — BESSAI Edge Gateway
 
-> Última actualización: 2026-02-19 · v0.4.1
+> Última actualización: 2026-03-02 · v2.14.0
 
 Esta guía explica cómo configurar, ejecutar y verificar el entorno de desarrollo local completo para el **BESSAI Edge Gateway**, incluyendo el simulador Modbus, los endpoints de observabilidad y el stack de monitoreo.
 
@@ -31,7 +31,10 @@ python -m venv .venv
 # Instalar dependencias
 pip install -r requirements.txt -r requirements-dev.txt
 
-# Crear archivo .env desde la plantilla
+# Setup interactivo (recomendado para nuevos adopters)
+bash scripts/setup.sh     # genera config/.env con tus parámetros en 2 minutos
+
+# O manualmente:
 Copy-Item config\.env.example config\.env
 # Editar config/.env si necesitas cambiar valores
 ```
