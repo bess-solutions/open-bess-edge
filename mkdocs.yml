@@ -80,7 +80,6 @@ nav:
     - Local Development: local_development.md
     - Raspberry Pi 4/5: quickstart_rpi.md
   - Tutorials:
-    - Deploy en 5 Minutos: tutorials/quickstart_5min.md
     - Conectar Hardware Real: tutorials/connecting_real_hardware.md
     - MQTT + Home Assistant: tutorials/integration_homeassistant.md
     - MQTT Integration (full): mqtt_integration.md
@@ -136,9 +135,7 @@ nav:
     - OpenFMB Adapter Guide: interoperability/openFMB_adapter.md
     - Battery Data Format (BDF): interoperability/BDF_alignment.md
   - Community:
-    - Adopter Hub: ADOPTER_HUB.md
     - Adopters: adopters.md
-    - Early Adopters Program: early_adopters.md
     - Good First Issues: GOOD_FIRST_ISSUES.md
     - Academic Collaboration: academic_collaboration.md
     - Research Topics: research_topics.md
@@ -153,8 +150,6 @@ nav:
     - Security Guide (Maintainer): security_guide_maintainer.md
     - Hardware Profile Tutorial: tutorials/hardware_profile_contribution.md
     - DRL Training Custom: tutorials/training_custom_drl.md
-  - Project Management:
-    - Release Process: release_process.md
 
 extra:
   social:
