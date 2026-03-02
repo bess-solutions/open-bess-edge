@@ -1,11 +1,12 @@
 # BESSAI Edge Gateway — Architecture Decision Records
 
 > Este documento registra las decisiones de arquitectura (ADRs) del sistema.  
-> Cada ADR explica **qué** se decidió, **por qué**, y qué alternativas se descartaron.
+> Cada ADR explica **qué** se decidió, **por qué**, y qué alternativas se descartaron.  
+> **Última actualización:** 2026-03-02 · v2.14.0
 
 ---
 
-## Diagrama de Arquitectura — v0.3.0
+## Diagrama de Arquitectura — v2.14.0
 
 ```mermaid
 graph TB

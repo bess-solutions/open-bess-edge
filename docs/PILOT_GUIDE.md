@@ -10,9 +10,9 @@
 git clone https://github.com/bess-solutions/open-bess-edge.git
 cd open-bess-edge
 
-# 2. Editar config/.env con los valores del sitio
-cp .env.example config/.env
-nano config/.env   # ver "Variables críticas" abajo
+# 2. Generar config/.env para el sitio (recomendado: setup interactivo)
+bash scripts/setup.sh
+# O manual: cp config/.env.example config/.env && nano config/.env
 
 # 3. Generar certificados mTLS para CEN (GAP-003)
 make cert SITE_ID=SITE-CL-001

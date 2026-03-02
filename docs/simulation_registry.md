@@ -1,6 +1,6 @@
 # 🧪 BESSAI — Registro de Simulaciones
 
-> **Última actualización:** 2026-02-21T16:58 · **Versión:** v1.7.0  
+> **Última actualización:** 2026-03-02 · **Versión:** v2.14.0  
 > *Documento vivo — actualizar en cada iteración cuando un componente pase de simulado a real.*
 
 ---
