@@ -105,6 +105,7 @@
 
 
 ### 📚 Documentation
+- final audit — fix license bug, update versions, complete CHANGELOG (`e0d64648`, @BESS Solutions)
 - mass update — version fixes, adopter links, security cleanup (`a5a80c46`, @BESS Solutions)
 - **adopters**: friction reduction — setup targets, contributing guide, README fixes (`9ebbd1d0`, @BESS Solutions)
 - complete early adopter documentation package (`ba4474e3`, @BESS Solutions)
