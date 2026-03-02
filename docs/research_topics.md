@@ -1,6 +1,6 @@
 # Temas de Investigación Abiertos — BESSAI Edge Gateway
 
-> **Última actualización**: Febrero 2026  
+> **Última actualización**: 2026-03-02  
 > **Contacto**: `research@bessai.io` o [GitHub Discussions](https://github.com/bess-solutions/open-bess-edge/discussions/categories/research)
 
 ---
@@ -144,4 +144,4 @@ BESSAI Edge Gateway es un proyecto open source real, con código en producción,
 
 ---
 
-*BESSAI cree en la ciencia abierta. Todas las publicaciones derivadas de colaboraciones con este proyecto pueden usar nuestro código y datos libremente bajo la licencia AGPL-3.0 y las condiciones de co-autoría acordadas.*
+*BESSAI cree en la ciencia abierta. Todas las publicaciones derivadas de colaboraciones con este proyecto pueden usar nuestro código y datos libremente bajo la licencia [Apache 2.0](../LICENSE) y las condiciones de co-autoría acordadas.*

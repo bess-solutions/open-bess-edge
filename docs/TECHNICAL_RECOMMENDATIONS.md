@@ -1,6 +1,6 @@
 # Technical Recommendations — BESSAI Edge Gateway
 
-**Status:** Living document · Last updated: 2026-02  
+**Status:** Living document · Last updated: 2026-03-02  
 **Scope:** Engineering improvements identified during production operation and code review.  
 **Priority:** P1 (critical) → P3 (nice to have).
 
