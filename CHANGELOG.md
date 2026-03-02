@@ -78,6 +78,7 @@
 - update README + CHANGELOG to v2.12.0 state (`4e5edbd1`, @BESSAI sec-ingestor)
 
 ### 🔐 Security
+- add pre-commit PI protection hook + fix last hardcoded refs (`ad49e1c3`, @BESS Solutions)
 - remove hardcoded Grafana password + untrack proprietary AI artifacts (`f502d34c`, @BESS Solutions)
 - **pi**: remove FL client/server — moved to bessai-core (private) (`9736306c`, @BESSAI sec-ingestor)
 - **pi**: migrate AI agents to private bessai-core repo (`a2e50533`, @BESSAI sec-ingestor)
