@@ -1,0 +1,97 @@
+name: "🤝 Adopter Support"
+description: "¿Problema durante el onboarding o deployment? Usa este template para obtener ayuda rápida."
+labels: ["adopter-support", "question"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por probar BESSAI Edge Gateway. Este template nos ayuda a darte soporte eficiente.
+        
+        > Para bugs de código, usa el template **Bug Report** en su lugar.
+
+  - type: dropdown
+    id: onboarding_stage
+    attributes:
+      label: "¿En qué paso del onboarding estás?"
+      description: "Ver [ONBOARDING_7DAYS.md](https://github.com/bess-solutions/open-bess-edge/blob/main/docs/ONBOARDING_7DAYS.md)"
+      options:
+        - "Día 0 — Demo local (Docker/simulador)"
+        - "Día 1 — Entendiendo arquitectura"
+        - "Día 2 — Configuración config/.env"
+        - "Día 3 — Conectar hardware real"
+        - "Día 4 — Certificados mTLS / registro CEN"
+        - "Día 5 — Validación make pilot"
+        - "Día 6 — Producción real"
+        - "Día 7+ — IA DRL / SC Bidder"
+        - "No estoy en el onboarding, es otro problema"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: "¿Modo de operación?"
+      options:
+        - "Simulador (sin hardware físico)"
+        - "Hardware real conectado"
+        - "No lo sé todavía"
+    validations:
+      required: true
+
+  - type: input
+    id: hardware
+    attributes:
+      label: "Hardware BESS (si aplica)"
+      description: "Marca/modelo de tu inversor o BESS"
+      placeholder: "Ej: Huawei SUN2000-100KTL + LUNA2000-150KWH"
+
+  - type: textarea
+    id: os_env
+    attributes:
+      label: "Entorno"
+      description: "SO, versión Docker, hardware del gateway"
+      placeholder: |
+        OS: Ubuntu 24.04 LTS / Raspberry Pi OS / Windows 11
+        Docker: 27.x
+        Hardware gateway: Raspberry Pi 5 8GB / Intel NUC / PC
+        Versión BESSAI: v2.14.0 (git rev-parse HEAD)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "¿Qué está pasando?"
+      description: "Describe el problema de forma concisa"
+      placeholder: "Al ejecutar `make pilot` el GAP-003 siempre falla aunque los certs existen..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: "Logs relevantes"
+      description: "Pega aquí los logs relacionados con el error"
+      placeholder: |
+        docker logs bessai-edge 2>&1 | tail -30
+        # o el output del comando que falla
+      render: shell
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: "¿Qué has intentado hasta ahora?"
+      placeholder: "Revisé la sección FAQ.md → ..., intenté..., el output fue..."
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "Checklist"
+      options:
+        - label: "Revisé el [FAQ.md](https://github.com/bess-solutions/open-bess-edge/blob/main/docs/FAQ.md) y no encontré respuesta"
+          required: true
+        - label: "Busqué en Issues existentes y no hay duplicados"
+          required: true
+        - label: "Mi `config/.env` existe (basado en `.env.example`)"

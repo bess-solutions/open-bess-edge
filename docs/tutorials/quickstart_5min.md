@@ -59,7 +59,8 @@ curl http://localhost:8000/metrics | grep bess_cycles_total
 Navega a **http://localhost:3000** en tu navegador.
 
 - **Usuario:** `admin`
-- **Contraseña:** `bessai`
+- **Contraseña:** valor de `GF_SECURITY_ADMIN_PASSWORD` en tu `config/.env`
+  > Si es la primera vez, el valor por defecto del `.env.example` está indicado ahí como guía.
 
 Deberías ver el dashboard **BESSAI Main** con:
 - 📊 SOC (State of Charge) en tiempo real

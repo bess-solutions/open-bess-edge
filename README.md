@@ -153,6 +153,21 @@ graph LR
 
 ---
 
+## 🤝 Para Early Adopters
+
+> ¿Quieres desplegar BESSAI en una instalación real?
+
+| Quiero... | Recurso |
+|-----------|---------|
+| 🗺️ Elegir mi camino de adopción | [**ADOPTER_HUB.md**](docs/ADOPTER_HUB.md) |
+| ⚡ Demo en 5 min (sin hardware) | [tutorials/quickstart_5min.md](docs/tutorials/quickstart_5min.md) |
+| 📅 Roadmap Día 0 → Producción | [ONBOARDING_7DAYS.md](docs/ONBOARDING_7DAYS.md) |
+| ❓ FAQ técnica (hw, mercados, licencia) | [FAQ.md](docs/FAQ.md) |
+| 🛡️ Programa Early Adopters (soporte prioritario) | [early_adopters.md](docs/early_adopters.md) |
+| 🆘 Soporte durante el onboarding | [Abrir issue](https://github.com/bess-solutions/open-bess-edge/issues/new?template=adopter_support.yml) |
+
+---
+
 ## ⚡ Quick Start
 
 ### 1. Local (Python)

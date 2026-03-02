@@ -61,6 +61,20 @@ graph TD
 
 ---
 
+## 🚀 Para Early Adopters
+
+> ¿Quieres desplegar BESSAI en una instalación real? Empieza aquí.
+
+| Quiero... | Recurso |
+|-----------|--------|
+| Elegir mi camino (probar / desplegar / contribuir) | [ADOPTER_HUB.md](ADOPTER_HUB.md) |
+| Demo local en 5 min (sin hardware) | [tutorials/quickstart_5min.md](tutorials/quickstart_5min.md) |
+| Roadmap día 0 → producción | [ONBOARDING_7DAYS.md](ONBOARDING_7DAYS.md) |
+| FAQ técnica (hw alternativo, mercados, licencia) | [FAQ.md](FAQ.md) |
+| Programa Early Adopters (soporte prioritario) | [early_adopters.md](early_adopters.md) |
+
+---
+
 ## Quick Start
 
 ```bash
@@ -117,7 +131,9 @@ The gateway runs a **single async event loop** with three concurrent tasks:
 
 ## Community
 
+- 🤝 **Early Adopters:** [ADOPTER_HUB.md](ADOPTER_HUB.md) — empieza por aquí
 - 🐛 **Bug reports:** [GitHub Issues](https://github.com/bess-solutions/open-bess-edge/issues/new?template=bug_report.yml)
+- 🆘 **Adopter support:** [GitHub Issues](https://github.com/bess-solutions/open-bess-edge/issues/new?template=adopter_support.yml)
 - ✨ **Feature requests:** [GitHub Issues](https://github.com/bess-solutions/open-bess-edge/issues/new?template=feature_request.yml)
 - 🔒 **Security vulnerabilities:** See [SECURITY.md](https://github.com/bess-solutions/open-bess-edge/blob/main/SECURITY.md)
 - 📖 **Contributing:** See [CONTRIBUTING.md](https://github.com/bess-solutions/open-bess-edge/blob/main/CONTRIBUTING.md)
