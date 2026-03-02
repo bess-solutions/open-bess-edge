@@ -1,6 +1,6 @@
 ﻿# 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-02-25 v2.11.0 · **Responsable:** Equipo TCI-GECOMP  
+> **Actualizado:** 2026-03-02 v2.12.0 · **Responsable:** Equipo TCI-GECOMP  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -37,10 +37,15 @@ Landing: React scrollytelling v1.0 ✅ (i18n ES/EN, Lucide icons)
 
 | Prioridad | Gap | Archivo | Acción | Target |
 |---|---|---|---|---|
-| 🔵 Baja | BEP-0200 DRL en modo observe-only | `main.py:Step5e` | BEP-0300: activar `write_tag()` tras staging | v2.11.0 |
-| 🔵 Baja | mypy `modbus_driver.py:179` | Múltiple | type-ignore + guards | v2.11.0 |
-| 🔮 Baja | MILP optimizer sin tests de integración | `milp_optimizer.py` | `tests/agents/test_milp_optimizer.py` | v2.11.0 |
+| ✅ **CERRADO** | BEP-0200→0300 DRL observe→write | `main.py:Step4c` | `BESSAI_DRL_WRITE=true` implementado con doble guard | v2.12.0 |
+| ✅ **CERRADO** | ONNX dummy→real (8 nodos CEN) | `models/` | 24 ONNX (Ridge v2, R²~0.79) entrenados con datos reales | v2.12.0 |
+| ✅ **CERRADO** | DuckDB Polpaico 0 filas | `bessai-cen-data/db` | rebuild —  3.496 filas, 8 nodos completos | v2.12.0 |
+| ✅ **CERRADO** | GCP no documentado | `docs/SETUP_GCP.md` | Guía completa: SA, roles, topic, terraform | v2.12.0 |
+| 🔵 Baja | mypy `modbus_driver.py:179` | Múltiple | type-ignore + guards | v2.12.0 |
+| 🔮 Baja | MILP optimizer sin tests de integración | `milp_optimizer.py` | `tests/agents/test_milp_optimizer.py` | v2.12.0 |
 | 🔵 Baja | cosign keypair sin configurar | `release.yml` | Rodrigo: `cosign generate-keypair` + Secrets GH | Manual |
+| 🟡 Pendiente | GCP Pub/Sub producción | `.env` | Configurar `GCP_PROJECT_ID` + service account | Piloto |
+| 🟡 Pendiente | DRL write activo (staging) | `.env` | 2 sem. observe → `BESSAI_DRL_WRITE=true` | Piloto |
 
 
 ### Stack Docker — Métricas en vivo (confirmado 2026-02-19)
@@ -379,3 +384,5 @@ pytest tests/ -v --tb=short
 | 2026-02-24 | **v2.8.0-dev** | **541/547** | **Superset 6 Waves**: BENCHMARK-004/005 · 3 perfiles HW (SolarEdge/BYD/Tesla) · `lightweight_mode.py` · `alert_dispatcher.py` · 51 tests registry · early_adopters/research_topics/academic_collaboration |
 | 2026-02-24 | **v2.9.0-dev** | **590/590** | **AI Environment Devoration**: Fix MARL `rewards[__all__]` · Fix C901 `handle_der_control` refactor · Fix SSL mTLS validation order · **WatchdogManager** self-healing autónomo · 19 tests nuevos |
 | 2026-02-25 | **v2.10.0** | **613/613** | **Scrollytelling Landing** (React + Vite): i18n ES/EN, Lucide icons, FAQ/Features refactored, scrollytelling animations · **360° doc sync** · **BEPs 0300/0301/0302** Draft · Archivos propietarios removidos del repo público |
+| 2026-02-27 | **v2.11.0** | **685/685** | **BESSAIEvolve v2** (CMAESMutator+NSGA-II+EliteArchive 24/24) · **BEP-0200 F3** env CMg real CEN (23/23) · MILP + Degradation + Watchdog · NTSyCS ComplianceStack 11 GAPs · 685 tests |
+| 2026-03-02 | **v2.12.0** | **685/685** | **BEP-0300 activado**: `BESSAI_DRL_WRITE=true` opt-in con doble guard safety+clamp · **24 modelos ONNX reales** (Ridge v2 R²~0.79, 8 nodos CEN) en `models/` · **DuckDB rebuild** 3.496 filas 8 nodos · **docs/SETUP_GCP.md** guía completa |

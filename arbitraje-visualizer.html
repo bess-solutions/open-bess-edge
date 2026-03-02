@@ -1,0 +1,2736 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>BESSAI — Arbitraje Visualizer · SEN Chile</title>
+    <meta name="description"
+        content="Dashboard de arbitraje BESS en tiempo real. Costos marginales del SEN chileno, algoritmos de sliding window y análisis IA con Gemini.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@300;600;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+    <style>
+        :root {
+            --bg0: #020408;
+            --bg1: #050c18;
+            --bg2: #0a1628;
+            --acc: #06b6d4;
+            --acc2: #00e5ff;
+            --violet: #7c3aed;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --charge: rgba(16, 185, 129, .18);
+            --discharge: rgba(239, 68, 68, .18);
+            --t0: #f9fafb;
+            --t1: #9ca3af;
+            --t2: #6b7280;
+            --border: rgba(255, 255, 255, .07);
+            --sans: 'Inter', system-ui, sans-serif;
+            --display: 'Sora', var(--sans);
+            --mono: 'JetBrains Mono', 'Courier New', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        html {
+            scroll-behavior: smooth
+        }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg0);
+            color: var(--t0);
+            line-height: 1.6;
+            overflow-x: hidden
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(0, 200, 212, .012) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 200, 212, .012) 1px, transparent 1px);
+            background-size: 52px 52px;
+            pointer-events: none;
+            z-index: 0
+        }
+
+        /* NAV */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            background: rgba(2, 4, 8, .92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border)
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            text-decoration: none
+        }
+
+        .nav-logo svg {
+            color: var(--acc)
+        }
+
+        .nav-logo span {
+            font-family: var(--display);
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--t0)
+        }
+
+        .nav-logo small {
+            font-weight: 300;
+            color: var(--t1);
+            margin-left: .25rem
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem
+        }
+
+        .nav-links {
+            display: flex;
+            gap: .25rem
+        }
+
+        .nav-link {
+            font-size: .75rem;
+            color: var(--t2);
+            text-decoration: none;
+            padding: .3rem .6rem;
+            border-radius: 6px;
+            transition: all .2s;
+            font-family: var(--mono)
+        }
+
+        .nav-link:hover {
+            color: var(--acc);
+            background: rgba(6, 182, 212, .08)
+        }
+
+        .api-badge {
+            font-size: .72rem;
+            padding: .25rem .7rem;
+            border-radius: 20px;
+            font-family: var(--mono);
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem
+        }
+
+        .api-live {
+            background: rgba(16, 185, 129, .12);
+            border: 1px solid rgba(16, 185, 129, .3);
+            color: var(--green)
+        }
+
+        .api-demo {
+            background: rgba(245, 158, 11, .12);
+            border: 1px solid rgba(245, 158, 11, .3);
+            color: var(--amber)
+        }
+
+        .api-err {
+            background: rgba(239, 68, 68, .12);
+            border: 1px solid rgba(239, 68, 68, .3);
+            color: var(--red)
+        }
+
+        .blink {
+            animation: blink 2s infinite
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .2
+            }
+        }
+
+        /* SECTIONS */
+        .sec {
+            position: relative;
+            z-index: 1;
+            padding: 4rem 2rem
+        }
+
+        .sec-alt {
+            background: var(--bg1)
+        }
+
+        .wrap {
+            max-width: 1200px;
+            margin: 0 auto
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            font-size: .72rem;
+            font-family: var(--mono);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--acc);
+            margin-bottom: .75rem
+        }
+
+        .eyebrow::before {
+            content: '';
+            width: 18px;
+            height: 1px;
+            background: var(--acc)
+        }
+
+        .sec-title {
+            font-family: var(--display);
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: .4rem;
+            background: linear-gradient(135deg, var(--t0) 60%, var(--acc));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .sec-sub {
+            color: var(--t1);
+            max-width: 620px;
+            margin-bottom: 2rem
+        }
+
+        /* HERO KPI CARDS */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 2rem
+        }
+
+        @media(max-width:900px) {
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+        }
+
+        .kpi-card {
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: border-color .2s, transform .2s
+        }
+
+        .kpi-card:hover {
+            border-color: rgba(6, 182, 212, .3);
+            transform: translateY(-2px)
+        }
+
+        .kpi-val {
+            font-family: var(--display);
+            font-size: 2rem;
+            font-weight: 800;
+            display: block;
+            margin-bottom: .2rem
+        }
+
+        .kpi-label {
+            font-size: .72rem;
+            color: var(--t2);
+            font-family: var(--mono)
+        }
+
+        .kpi-sub {
+            font-size: .7rem;
+            color: var(--t2);
+            margin-top: .3rem
+        }
+
+        /* BESS CONFIG */
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem
+        }
+
+        @media(max-width:900px) {
+            .config-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+        }
+
+        .cfg-card {
+            background: rgba(255, 255, 255, .025);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem
+        }
+
+        .cfg-label-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: .4rem
+        }
+
+        .cfg-label {
+            font-size: .82rem;
+            font-weight: 600
+        }
+
+        .cfg-val {
+            font-family: var(--mono);
+            font-size: .85rem
+        }
+
+        .bessai-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, .1);
+            border-radius: 2px;
+            outline: none;
+            margin: .5rem 0 .3rem;
+            cursor: pointer
+        }
+
+        .bessai-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--acc);
+            cursor: pointer;
+            box-shadow: 0 0 6px rgba(6, 182, 212, .5);
+            transition: box-shadow .2s
+        }
+
+        .bessai-slider::-webkit-slider-thumb:hover {
+            box-shadow: 0 0 14px rgba(6, 182, 212, .8)
+        }
+
+        .cfg-range {
+            display: flex;
+            justify-content: space-between;
+            font-size: .68rem;
+            color: var(--t2)
+        }
+
+        /* BARRAS GRID */
+        .filter-row {
+            display: flex;
+            gap: .5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            align-items: center
+        }
+
+        .filter-btn {
+            font-size: .75rem;
+            padding: .3rem .8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--t2);
+            font-family: var(--sans);
+            transition: all .2s
+        }
+
+        .filter-btn.active {
+            background: var(--acc);
+            color: #020408;
+            border-color: var(--acc);
+            font-weight: 600
+        }
+
+        .sort-select {
+            font-size: .75rem;
+            padding: .3rem .8rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, .04);
+            color: var(--t1);
+            font-family: var(--mono);
+            cursor: pointer;
+            margin-left: auto
+        }
+
+        .barras-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1rem
+        }
+
+        .barra-card {
+            background: rgba(255, 255, 255, .028);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all .2s
+        }
+
+        .barra-card:hover {
+            border-color: rgba(6, 182, 212, .4);
+            background: rgba(6, 182, 212, .04);
+            transform: translateY(-1px)
+        }
+
+        .barra-card.selected {
+            border-color: var(--acc);
+            background: rgba(6, 182, 212, .06)
+        }
+
+        .barra-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: .75rem
+        }
+
+        .barra-name {
+            font-family: var(--display);
+            font-size: 1rem;
+            font-weight: 700
+        }
+
+        .barra-tension {
+            font-size: .7rem;
+            color: var(--t2);
+            font-family: var(--mono);
+            margin-top: .1rem
+        }
+
+        .risk-badge {
+            font-size: .68rem;
+            font-family: var(--mono);
+            font-weight: 700;
+            padding: .2rem .55rem;
+            border-radius: 20px;
+            white-space: nowrap
+        }
+
+        .risk-c {
+            background: rgba(16, 185, 129, .15);
+            border: 1px solid rgba(16, 185, 129, .3);
+            color: var(--green)
+        }
+
+        .risk-e {
+            background: rgba(245, 158, 11, .15);
+            border: 1px solid rgba(245, 158, 11, .3);
+            color: var(--amber)
+        }
+
+        .risk-a {
+            background: rgba(239, 68, 68, .15);
+            border: 1px solid rgba(239, 68, 68, .3);
+            color: var(--red)
+        }
+
+        .barra-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: .4rem .75rem;
+            font-size: .78rem;
+            margin-bottom: .75rem
+        }
+
+        .bm-label {
+            color: var(--t2);
+            font-size: .7rem
+        }
+
+        .bm-val {
+            font-family: var(--mono);
+            font-weight: 600
+        }
+
+        .barra-window {
+            display: flex;
+            gap: .5rem;
+            margin-bottom: .75rem;
+            font-size: .72rem;
+            font-family: var(--mono)
+        }
+
+        .win-chip {
+            padding: .2rem .55rem;
+            border-radius: 6px;
+            flex: 1;
+            text-align: center
+        }
+
+        .win-charge {
+            background: rgba(16, 185, 129, .1);
+            border: 1px solid rgba(16, 185, 129, .2);
+            color: var(--green)
+        }
+
+        .win-discharge {
+            background: rgba(239, 68, 68, .1);
+            border: 1px solid rgba(239, 68, 68, .2);
+            color: var(--red)
+        }
+
+        .barra-actions {
+            display: flex;
+            gap: .5rem
+        }
+
+        .btn-sm {
+            font-size: .75rem;
+            padding: .35rem .8rem;
+            border-radius: 7px;
+            cursor: pointer;
+            border: none;
+            font-family: var(--sans);
+            font-weight: 600;
+            transition: all .2s
+        }
+
+        .btn-chart {
+            background: rgba(6, 182, 212, .15);
+            color: var(--acc);
+            border: 1px solid rgba(6, 182, 212, .3)
+        }
+
+        .btn-chart:hover {
+            background: rgba(6, 182, 212, .25)
+        }
+
+        .btn-ai {
+            background: rgba(124, 58, 237, .15);
+            color: #a78bfa;
+            border: 1px solid rgba(124, 58, 237, .3)
+        }
+
+        .btn-ai:hover {
+            background: rgba(124, 58, 237, .25)
+        }
+
+        /* DISPATCH CHART */
+        .dispatch-wrap {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 1.5rem;
+            margin-top: 1.5rem
+        }
+
+        @media(max-width:1024px) {
+            .dispatch-wrap {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .chart-card {
+            background: rgba(255, 255, 255, .025);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem
+        }
+
+        .chart-title {
+            font-size: .75rem;
+            font-family: var(--mono);
+            color: var(--t2);
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .dispatch-legend {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: .75rem;
+            font-size: .72rem
+        }
+
+        .leg-item {
+            display: flex;
+            align-items: center;
+            gap: .35rem
+        }
+
+        .leg-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px
+        }
+
+        /* DISPATCH SIDE PANEL */
+        .dispatch-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem
+        }
+
+        .dp-card {
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center
+        }
+
+        .dp-val {
+            font-family: var(--display);
+            font-size: 1.4rem;
+            font-weight: 800;
+            display: block;
+            margin-bottom: .15rem
+        }
+
+        .dp-label {
+            font-size: .7rem;
+            color: var(--t2);
+            font-family: var(--mono)
+        }
+
+        .no-sel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 260px;
+            color: var(--t2);
+            font-size: .88rem;
+            gap: .5rem
+        }
+
+        /* AI PANEL */
+        .ai-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem
+        }
+
+        @media(max-width:1024px) {
+            .ai-wrap {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .ai-panel {
+            background: rgba(124, 58, 237, .04);
+            border: 1px solid rgba(124, 58, 237, .15);
+            border-radius: 16px;
+            padding: 1.5rem;
+            min-height: 300px
+        }
+
+        .ai-panel-title {
+            font-family: var(--display);
+            font-size: .95rem;
+            font-weight: 700;
+            color: #a78bfa;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem
+        }
+
+        .api-key-wrap {
+            display: flex;
+            gap: .5rem;
+            margin-bottom: 1rem
+        }
+
+        .api-key-input {
+            flex: 1;
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: .5rem .75rem;
+            color: var(--t0);
+            font-family: var(--mono);
+            font-size: .78rem;
+            outline: none;
+            transition: border-color .2s
+        }
+
+        .api-key-input:focus {
+            border-color: var(--acc)
+        }
+
+        .btn-key {
+            background: var(--acc);
+            color: #020408;
+            font-weight: 700;
+            font-size: .78rem;
+            border: none;
+            padding: .5rem .85rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: var(--sans);
+            transition: background .2s
+        }
+
+        .btn-key:hover {
+            background: var(--acc2)
+        }
+
+        .ai-content {
+            font-size: .82rem;
+            line-height: 1.7;
+            color: var(--t1)
+        }
+
+        .ai-content h3 {
+            font-family: var(--display);
+            color: var(--t0);
+            font-size: .95rem;
+            margin: .75rem 0 .25rem
+        }
+
+        .ai-content strong {
+            color: var(--t0)
+        }
+
+        .ai-content p {
+            margin-bottom: .5rem
+        }
+
+        .ai-loading {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            color: var(--t2);
+            font-size: .82rem;
+            padding: 1rem 0
+        }
+
+        .ai-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(124, 58, 237, .2);
+            border-top-color: var(--violet);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+            flex-shrink: 0
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .ai-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 220px;
+            color: var(--t2);
+            font-size: .82rem;
+            gap: .75rem;
+            text-align: center
+        }
+
+        .ai-placeholder svg {
+            opacity: .3
+        }
+
+        /* HEATMAP */
+        .heatmap-container {
+            margin-top: 1.5rem;
+            overflow-x: auto
+        }
+
+        .heatmap-head {
+            display: flex;
+            gap: .5rem;
+            margin-bottom: .5rem
+        }
+
+        .hm-barra-label {
+            width: 140px;
+            flex-shrink: 0;
+            font-size: .68rem;
+            color: var(--t2);
+            font-family: var(--mono)
+        }
+
+        .hm-hours {
+            display: flex;
+            gap: 2px;
+            flex: 1
+        }
+
+        .hm-hour-label {
+            width: 26px;
+            text-align: center;
+            font-size: .6rem;
+            color: var(--t2);
+            font-family: var(--mono)
+        }
+
+        .heatmap-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 3px
+        }
+
+        .hm-row {
+            display: flex;
+            align-items: center;
+            gap: .5rem
+        }
+
+        .hm-label {
+            width: 140px;
+            flex-shrink: 0;
+            font-size: .72rem;
+            font-family: var(--mono);
+            color: var(--t1);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            transition: color .2s
+        }
+
+        .hm-label:hover {
+            color: var(--acc)
+        }
+
+        .hm-cells {
+            display: flex;
+            gap: 2px
+        }
+
+        .hm-cell {
+            width: 26px;
+            height: 22px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: transform .1s, opacity .2s;
+            position: relative
+        }
+
+        .hm-cell:hover {
+            transform: scale(1.3);
+            z-index: 10;
+            opacity: 1 !important
+        }
+
+        .hm-legend {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            margin-top: .75rem;
+            font-size: .7rem;
+            color: var(--t2);
+            font-family: var(--mono)
+        }
+
+        .hm-legend-bar {
+            width: 120px;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #050c18, #7c3aed, #ef4444)
+        }
+
+        /* CHATBOT */
+        .chat-wrap {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 1.5rem;
+            margin-top: 1.5rem
+        }
+
+        @media(max-width:1024px) {
+            .chat-wrap {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .chat-box {
+            background: rgba(255, 255, 255, .025);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            height: 480px
+        }
+
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: .75rem
+        }
+
+        .chat-history::-webkit-scrollbar {
+            width: 4px
+        }
+
+        .chat-history::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, .1);
+            border-radius: 2px
+        }
+
+        .chat-msg {
+            max-width: 85%;
+            padding: .65rem 1rem;
+            border-radius: 12px;
+            font-size: .83rem;
+            line-height: 1.6
+        }
+
+        .chat-msg.user {
+            background: rgba(6, 182, 212, .12);
+            border: 1px solid rgba(6, 182, 212, .2);
+            margin-left: auto;
+            color: var(--t0)
+        }
+
+        .chat-msg.model {
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid var(--border);
+            color: var(--t1)
+        }
+
+        .chat-input-row {
+            display: flex;
+            gap: .5rem;
+            padding: 1rem;
+            border-top: 1px solid var(--border)
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: .6rem .9rem;
+            color: var(--t0);
+            font-family: var(--sans);
+            font-size: .82rem;
+            outline: none;
+            resize: none;
+            transition: border-color .2s;
+            height: 42px
+        }
+
+        .chat-input:focus {
+            border-color: var(--acc)
+        }
+
+        .btn-send {
+            background: var(--acc);
+            color: #020408;
+            font-weight: 700;
+            border: none;
+            padding: .6rem 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: var(--sans);
+            transition: background .2s
+        }
+
+        .btn-send:hover {
+            background: var(--acc2)
+        }
+
+        .chat-suggestions {
+            display: flex;
+            flex-direction: column;
+            gap: .5rem
+        }
+
+        .sug-title {
+            font-size: .72rem;
+            color: var(--t2);
+            font-family: var(--mono);
+            margin-bottom: .25rem
+        }
+
+        .sug-btn {
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: .5rem .75rem;
+            font-size: .75rem;
+            color: var(--t1);
+            cursor: pointer;
+            text-align: left;
+            font-family: var(--sans);
+            transition: all .2s
+        }
+
+        .sug-btn:hover {
+            border-color: var(--acc);
+            color: var(--acc);
+            background: rgba(6, 182, 212, .05)
+        }
+
+        .chat-ctx {
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: .75rem
+        }
+
+        .ctx-title {
+            font-family: var(--mono);
+            font-size: .68rem;
+            color: var(--t2);
+            margin-bottom: .5rem;
+            text-transform: uppercase;
+            letter-spacing: .08em
+        }
+
+        .ctx-row {
+            display: flex;
+            justify-content: space-between;
+            padding: .2rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, .04)
+        }
+
+        .ctx-row:last-child {
+            border-bottom: none
+        }
+
+        .ctx-key {
+            color: var(--t2)
+        }
+
+        .ctx-v {
+            font-family: var(--mono);
+            color: var(--t0);
+            font-size: .72rem
+        }
+
+        /* FOOTER */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--t2);
+            font-size: .78rem;
+            border-top: 1px solid var(--border);
+            position: relative;
+            z-index: 1
+        }
+
+        footer a {
+            color: var(--acc);
+            text-decoration: none
+        }
+
+        /* EMPTY / LOADING STATES */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255, 255, 255, .04) 25%, rgba(255, 255, 255, .08) 50%, rgba(255, 255, 255, .04) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0
+            }
+
+            100% {
+                background-position: -200% 0
+            }
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--t2);
+            gap: .75rem;
+            font-size: .88rem
+        }
+
+        /* TOOLTIP */
+        .hm-tooltip {
+            position: fixed;
+            background: #0a1628;
+            border: 1px solid rgba(6, 182, 212, .3);
+            border-radius: 8px;
+            padding: .5rem .75rem;
+            font-size: .72rem;
+            font-family: var(--mono);
+            pointer-events: none;
+            z-index: 9999;
+            color: var(--t0);
+            display: none
+        }
+
+        /* SCROLLBAR global */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, .08);
+            border-radius: 3px
+        }
+
+        /* ── ONBOARDING MODAL ─────────────────────────────── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 4, 8, .92);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            transition: opacity .3s
+        }
+
+        .modal-overlay.hidden {
+            opacity: 0;
+            pointer-events: none
+        }
+
+        .modal-box {
+            background: var(--bg1);
+            border: 1px solid rgba(6, 182, 212, .25);
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 560px;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 0 60px rgba(6, 182, 212, .12)
+        }
+
+        .modal-slide {
+            display: none
+        }
+
+        .modal-slide.active {
+            display: block
+        }
+
+        .modal-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            font-size: 1.8rem
+        }
+
+        .modal-icon-1 {
+            background: rgba(6, 182, 212, .12);
+            border: 1px solid rgba(6, 182, 212, .25)
+        }
+
+        .modal-icon-2 {
+            background: rgba(16, 185, 129, .12);
+            border: 1px solid rgba(16, 185, 129, .25)
+        }
+
+        .modal-icon-3 {
+            background: rgba(124, 58, 237, .12);
+            border: 1px solid rgba(124, 58, 237, .25)
+        }
+
+        .modal-title {
+            font-family: var(--display);
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: .5rem
+        }
+
+        .modal-body {
+            color: var(--t1);
+            font-size: .9rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem
+        }
+
+        .modal-body strong {
+            color: var(--t0)
+        }
+
+        .modal-dots {
+            display: flex;
+            gap: .5rem;
+            margin-bottom: 1.5rem
+        }
+
+        .modal-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .12);
+            transition: background .3s
+        }
+
+        .modal-dot.active {
+            background: var(--acc)
+        }
+
+        .modal-btns {
+            display: flex;
+            gap: .75rem;
+            justify-content: flex-end
+        }
+
+        .btn-skip {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--t2);
+            font-size: .82rem;
+            padding: .5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: var(--sans);
+            transition: all .2s
+        }
+
+        .btn-skip:hover {
+            border-color: var(--t2);
+            color: var(--t0)
+        }
+
+        .btn-next {
+            background: var(--acc);
+            color: #020408;
+            font-weight: 700;
+            font-size: .85rem;
+            padding: .5rem 1.25rem;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            font-family: var(--sans);
+            transition: background .2s
+        }
+
+        .btn-next:hover {
+            background: var(--acc2)
+        }
+
+        .modal-analogy {
+            background: rgba(6, 182, 212, .06);
+            border: 1px solid rgba(6, 182, 212, .15);
+            border-radius: 10px;
+            padding: .75rem 1rem;
+            font-size: .8rem;
+            margin-top: .75rem;
+            color: var(--t1);
+            font-family: var(--mono)
+        }
+
+        /* ── SEMANTIC TOOLTIPS ────────────────────────────── */
+        .tip {
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dashed rgba(6, 182, 212, .4)
+        }
+
+        .tip::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0a1628;
+            border: 1px solid rgba(6, 182, 212, .25);
+            border-radius: 8px;
+            padding: .5rem .75rem;
+            font-size: .72rem;
+            font-family: var(--sans);
+            color: var(--t1);
+            white-space: normal;
+            min-width: 200px;
+            max-width: 280px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity .2s;
+            z-index: 500;
+            line-height: 1.5;
+            text-align: left
+        }
+
+        .tip:hover::after {
+            opacity: 1
+        }
+
+        /* ── FAVORITES ────────────────────────────────────── */
+        .fav-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: .1rem .25rem;
+            transition: transform .2s;
+            line-height: 1
+        }
+
+        .fav-btn:hover {
+            transform: scale(1.3)
+        }
+
+        .fav-btn.active {
+            filter: drop-shadow(0 0 4px rgba(245, 158, 11, .8))
+        }
+
+        .fav-bar {
+            display: none;
+            background: rgba(245, 158, 11, .06);
+            border: 1px solid rgba(245, 158, 11, .2);
+            border-radius: 8px;
+            padding: .5rem .75rem;
+            font-size: .75rem;
+            color: var(--amber);
+            margin-bottom: 1rem;
+            align-items: center;
+            gap: .5rem
+        }
+
+        .fav-bar.show {
+            display: flex
+        }
+
+        /* ── ANNUAL PROJECTION ────────────────────────────── */
+        .annual-row {
+            margin-top: .5rem;
+            padding: .4rem .6rem;
+            background: rgba(16, 185, 129, .06);
+            border: 1px solid rgba(16, 185, 129, .15);
+            border-radius: 6px;
+            font-size: .72rem;
+            color: var(--t1);
+            font-family: var(--mono)
+        }
+
+        .annual-val {
+            color: var(--green);
+            font-weight: 700
+        }
+
+        .tir-badge {
+            display: inline-block;
+            font-size: .65rem;
+            font-weight: 700;
+            padding: .1rem .4rem;
+            border-radius: 4px;
+            vertical-align: middle;
+            background: rgba(16, 185, 129, .2);
+            color: var(--green);
+            border: 1px solid rgba(16, 185, 129, .3);
+            margin-left: .25rem
+        }
+
+        /* ── INVESTMENT SIMULATOR ─────────────────────────── */
+        .inv-sim {
+            background: rgba(124, 58, 237, .04);
+            border: 1px solid rgba(124, 58, 237, .2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 1.5rem
+        }
+
+        .inv-sim-title {
+            font-family: var(--display);
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: .25rem;
+            color: var(--t0)
+        }
+
+        .inv-sim-sub {
+            font-size: .82rem;
+            color: var(--t1);
+            margin-bottom: 1.25rem
+        }
+
+        .inv-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem
+        }
+
+        @media(max-width:700px) {
+            .inv-grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .inv-input-wrap label {
+            font-size: .75rem;
+            color: var(--t2);
+            font-family: var(--mono);
+            display: block;
+            margin-bottom: .35rem
+        }
+
+        .inv-input {
+            width: 100%;
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: .55rem .75rem;
+            color: var(--t0);
+            font-family: var(--mono);
+            font-size: .9rem;
+            outline: none;
+            transition: border-color .2s
+        }
+
+        .inv-input:focus {
+            border-color: var(--acc)
+        }
+
+        .inv-results {
+            margin-top: 1.25rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: .75rem
+        }
+
+        @media(max-width:700px) {
+            .inv-results {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .inv-r-card {
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: .85rem;
+            text-align: center
+        }
+
+        .inv-r-val {
+            font-family: var(--display);
+            font-size: 1.3rem;
+            font-weight: 800;
+            display: block;
+            margin-bottom: .15rem
+        }
+
+        .inv-r-label {
+            font-size: .68rem;
+            color: var(--t2);
+            font-family: var(--mono)
+        }
+
+        .inv-compare {
+            margin-top: 1rem;
+            padding: .75rem 1rem;
+            background: rgba(245, 158, 11, .05);
+            border: 1px solid rgba(245, 158, 11, .15);
+            border-radius: 8px;
+            font-size: .8rem;
+            color: var(--t1)
+        }
+
+        .inv-compare strong {
+            color: var(--amber)
+        }
+
+        /* ── GUIDED STEPS  ─────────────────────────────────── */
+        .guide-strip {
+            background: rgba(6, 182, 212, .04);
+            border-bottom: 1px solid rgba(6, 182, 212, .1);
+            padding: .4rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            justify-content: center;
+            position: relative;
+            z-index: 99
+        }
+
+        .guide-step {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            font-size: .72rem;
+            font-family: var(--mono);
+            color: var(--t2);
+            text-decoration: none;
+            transition: color .2s;
+            padding: .2rem 0
+        }
+
+        .guide-step.done {
+            color: var(--green)
+        }
+
+        .guide-step.active {
+            color: var(--acc)
+        }
+
+        .guide-num {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 1px solid currentColor;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .6rem;
+            font-weight: 700;
+            flex-shrink: 0
+        }
+
+        .guide-sep {
+            width: 20px;
+            height: 1px;
+            background: rgba(255, 255, 255, .1)
+        }
+
+        /* ── EXEC VIEW TOGGLE ─────────────────────────────── */
+        .exec-toggle {
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: .3rem .7rem;
+            font-size: .72rem;
+            font-family: var(--mono);
+            color: var(--t2);
+            cursor: pointer;
+            transition: all .2s;
+            margin-left: auto
+        }
+
+        .exec-toggle.on {
+            background: rgba(124, 58, 237, .15);
+            border-color: rgba(124, 58, 237, .4);
+            color: #a78bfa
+        }
+
+        .exec-only {
+            display: none
+        }
+
+        .exec-mode .exec-only {
+            display: grid
+        }
+
+        .exec-mode .detail-only {
+            display: none
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TOOLTIP GLOBAL -->
+    <div class="hm-tooltip" id="hmTooltip"></div>
+
+    <!-- ONBOARDING MODAL -->
+    <div class="modal-overlay" id="onboardModal">
+        <div class="modal-box">
+            <div class="modal-slide active" id="slide1">
+                <div class="modal-icon modal-icon-1">⚡</div>
+                <div class="modal-title">Bienvenido al Arbitraje BESS</div>
+                <div class="modal-body">Un <strong>BESS</strong> es una batería industrial grande. En Chile, el precio
+                    de la electricidad <strong>cambia cada hora</strong>. Esta herramienta detecta automáticamente
+                    cuándo comprar barato y cuándo vender caro.<div class="modal-analogy">💡 Como comprar dólares cuando
+                        están baratos y venderlos cuando suben — pero con electricidad.</div>
+                </div>
+            </div>
+            <div class="modal-slide" id="slide2">
+                <div class="modal-icon modal-icon-2">📈</div>
+                <div class="modal-title">¿Cómo funciona el negocio?</div>
+                <div class="modal-body">El sistema analiza las barras eléctricas del SEN chileno y calcula:<ul
+                        style="margin:.75rem 0 .75rem 1.5rem;line-height:2.2">
+                        <li><strong>Cuándo cargar</strong> la batería (precio bajo)</li>
+                        <li><strong>Cuándo vender</strong> esa energía (precio alto)</li>
+                        <li><strong>Ganancia neta</strong> por ciclo diario</li>
+                    </ul>Un BESS de <strong>20 MWh</strong> puede generar <strong>$50K–$180K USD/año</strong> en buena
+                    ubicación.</div>
+            </div>
+            <div class="modal-slide" id="slide3">
+                <div class="modal-icon modal-icon-3">🚀</div>
+                <div class="modal-title">3 pasos para explorar</div>
+                <div class="modal-body">
+                    <ol style="margin:.5rem 0 .75rem 1.5rem;line-height:2.2">
+                        <li><strong>Configura tu BESS</strong> — cuántos MWh querés instalar</li>
+                        <li><strong>Explora las barras</strong> — ve cuál da más ganancia</li>
+                        <li><strong>Usa el Simulador</strong> — calcula tu retorno con tu capital real</li>
+                    </ol>Los análisis de IA con Gemini exigen API key de <a href="https://aistudio.google.com"
+                        target="_blank" style="color:var(--acc)">AI Studio</a> (gratuita).
+                </div>
+            </div>
+            <div class="modal-dots">
+                <div class="modal-dot active" id="dot1"></div>
+                <div class="modal-dot" id="dot2"></div>
+                <div class="modal-dot" id="dot3"></div>
+            </div>
+            <div class="modal-btns"><button class="btn-skip" id="btnSkipModal">Saltar intro</button><button
+                    class="btn-next" id="btnNextModal">Siguiente &rarr;</button></div>
+        </div>
+    </div>
+
+    <!-- NAV -->
+    <nav class="nav">
+        <a href="#" class="nav-logo">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span>BESS<small>Solutions</small></span>
+        </a>
+        <div class="nav-right">
+            <nav class="nav-links" id="navLinks">
+                <a href="#kpis" class="nav-link">KPIs</a>
+                <a href="#config" class="nav-link">Config</a>
+                <a href="#barras" class="nav-link">Barras</a>
+                <a href="#despacho" class="nav-link">Despacho</a>
+                <a href="#simulador" class="nav-link">Simulador 💰</a>
+                <a href="#heatmap" class="nav-link">Heatmap</a>
+                <a href="#chatbot" class="nav-link">Chat IA</a>
+            </nav>
+            <button class="exec-toggle" id="execToggle" title="Vista simplificada para presentaciones">👔
+                Ejecutiva</button>
+            <span class="api-badge api-demo" id="apiBadge">
+                <span class="blink">◉</span> <span id="apiStatus">Cargando…</span>
+            </span>
+        </div>
+    </nav>
+    <!-- GUIDE STRIP -->
+    <div class="guide-strip">
+        <a href="#config" class="guide-step done" id="gs1">
+            <div class="guide-num">1</div> Configura BESS
+        </a>
+        <div class="guide-sep"></div>
+        <a href="#barras" class="guide-step" id="gs2">
+            <div class="guide-num">2</div> Explora barras
+        </a>
+        <div class="guide-sep"></div>
+        <a href="#despacho" class="guide-step" id="gs3">
+            <div class="guide-num">3</div> Ver despacho
+        </a>
+        <div class="guide-sep"></div>
+        <a href="#simulador" class="guide-step" id="gs4">
+            <div class="guide-num">4</div> Simula tu inversión
+        </a>
+        <div class="guide-sep"></div>
+        <a href="#ai" class="guide-step" id="gs5">
+            <div class="guide-num">5</div> Análisis IA
+        </a>
+    </div>
+
+    <!-- ══ HERO / KPIs ══════════════════════════════════════════════════════ -->
+    <section id="kpis" class="sec" style="padding-top:6rem">
+        <div class="wrap">
+            <span class="eyebrow">Mercado Eléctrico — SEN Chile</span>
+            <h1 class="sec-title">Arbitraje BESS — Visualizer</h1>
+            <p class="sec-sub">Costos marginales en tiempo real del Coordinador Eléctrico Nacional. Algoritmos de
+                sliding window identifican las ventanas óptimas de carga y descarga para maximizar el retorno del BESS.
+            </p>
+            <div class="kpi-grid" id="kpiGrid">
+                <div class="kpi-card">
+                    <span class="kpi-val" style="color:var(--acc)" id="kpiOps">—</span>
+                    <div class="kpi-label">Barras rentables</div>
+                    <div class="kpi-sub">con ganancia neta &gt; $0 USD</div>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-val" style="color:var(--green)" id="kpiGain">—</span>
+                    <div class="kpi-label">Ganancia total estimada</div>
+                    <div class="kpi-sub">USD/ciclo · todas las barras</div>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-val" style="color:var(--violet)" id="kpiTop">—</span>
+                    <div class="kpi-label">Top barra · mayor ganancia</div>
+                    <div class="kpi-sub" id="kpiTopSub">—</div>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-val" style="color:var(--amber)" id="kpiSpread">—</span>
+                    <div class="kpi-label">Spread máximo neto</div>
+                    <div class="kpi-sub">USD/MWh · mejor oportunidad</div>
+                </div>
+            </div>
+            <p style="font-size:.72rem;color:var(--t2);font-family:var(--mono);margin-top:1rem" id="dataTimestamp">
+                Cargando datos…</p>
+        </div>
+    </section>
+
+    <!-- ══ BESS CONFIG ════════════════════════════════════════════════════════ -->
+    <section id="config" class="sec sec-alt">
+        <div class="wrap">
+            <span class="eyebrow">Parámetros del activo</span>
+            <h2 class="sec-title">Configuración BESS</h2>
+            <p class="sec-sub">Ajusta los parámetros del activo para recalcular todas las oportunidades en tiempo real.
+            </p>
+            <div class="config-grid">
+                <div class="cfg-card">
+                    <div class="cfg-label-row">
+                        <span class="cfg-label">Capacidad</span>
+                        <span class="cfg-val" style="color:var(--acc)"><span id="vCap">20</span> MWh</span>
+                    </div>
+                    <input type="range" class="bessai-slider" id="sCap" min="1" max="200" value="20" step="1">
+                    <div class="cfg-range"><span>1 MWh</span><span>200 MWh</span></div>
+                </div>
+                <div class="cfg-card">
+                    <div class="cfg-label-row">
+                        <span class="cfg-label">Potencia</span>
+                        <span class="cfg-val" style="color:var(--green)"><span id="vPow">10</span> MW</span>
+                    </div>
+                    <input type="range" class="bessai-slider" id="sPow" min="1" max="100" value="10" step="1">
+                    <div class="cfg-range"><span>1 MW</span><span>100 MW</span></div>
+                </div>
+                <div class="cfg-card">
+                    <div class="cfg-label-row">
+                        <span class="cfg-label">Eficiencia RTE</span>
+                        <span class="cfg-val" style="color:var(--amber)"><span id="vEff">92</span>%</span>
+                    </div>
+                    <input type="range" class="bessai-slider" id="sEff" min="70" max="99" value="92" step="1">
+                    <div class="cfg-range"><span>70%</span><span>99%</span></div>
+                </div>
+                <div class="cfg-card">
+                    <div class="cfg-label-row">
+                        <span class="cfg-label">Costo degradación</span>
+                        <span class="cfg-val" style="color:var(--red)">$<span id="vDeg">4.5</span>/MWh</span>
+                    </div>
+                    <input type="range" class="bessai-slider" id="sDeg" min="0" max="20" value="4.5" step="0.5">
+                    <div class="cfg-range"><span>$0</span><span>$20/MWh</span></div>
+                </div>
+            </div>
+            <div
+                style="margin-top:1rem;padding:.6rem 1rem;background:rgba(6,182,212,.05);border:1px solid rgba(6,182,212,.1);border-radius:8px;font-size:.75rem;color:var(--t2);font-family:var(--mono)">
+                chargeTime = ⌈capacidad / potencia⌉ = <strong id="cfgChargeTime" style="color:var(--acc)">2</strong> h
+                &nbsp;·&nbsp; efficiencyFactor = <strong id="cfgEffFactor" style="color:var(--green)">0.92</strong>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ BARRAS GRID ════════════════════════════════════════════════════════ -->
+    <section id="barras" class="sec">
+        <div class="wrap">
+            <span class="eyebrow">Oportunidades detectadas</span>
+            <h2 class="sec-title">Barras del SEN</h2>
+            <p class="sec-sub">Solo se muestran barras con ganancia neta positiva, ordenadas por retorno potencial.</p>
+            <div class="filter-row">
+                <button class="filter-btn active" data-risk="all">Todos</button>
+                <button class="filter-btn" data-risk="Conservador">🟢 Conservador</button>
+                <button class="filter-btn" data-risk="Equilibrado">🟡 Equilibrado</button>
+                <button class="filter-btn" data-risk="Agresivo">🔴 Agresivo</button>
+                <select class="sort-select" id="sortSelect">
+                    <option value="gain">Ganancia neta ↓</option>
+                    <option value="spread">Spread neto ↓</option>
+                    <option value="vol">Volatilidad ↑</option>
+                    <option value="roi">ROI ↓</option>
+                </select>
+            </div>
+            <div class="barras-grid" id="barrasGrid">
+                <div class="empty-state" style="grid-column:1/-1">
+                    <div class="ai-spinner"></div>
+                    <span>Cargando datos del mercado…</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ DESPACHO ═══════════════════════════════════════════════════════════ -->
+    <section id="despacho" class="sec sec-alt">
+        <div class="wrap">
+            <span class="eyebrow">Análisis de despacho</span>
+            <h2 class="sec-title">Curva de Costos Marginales</h2>
+            <p class="sec-sub">Selecciona una barra para ver las ventanas óptimas de carga y descarga calculadas con
+                sliding window.</p>
+            <div class="dispatch-wrap">
+                <div class="chart-card">
+                    <div class="chart-title">
+                        <span id="chartBarraTitle">— Selecciona una barra en el grid</span>
+                        <span style="font-size:.68rem;color:var(--t2)">USD/MWh · hora UTC</span>
+                    </div>
+                    <div id="chartPlaceholder" class="no-sel">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5" style="opacity:.3">
+                            <path d="M3 3v18h18" />
+                            <path d="m19 9-5 5-4-4-3 3" />
+                        </svg>
+                        <span>Haz click en "Ver despacho" en cualquier barra</span>
+                    </div>
+                    <canvas id="chartDispatch" height="260" style="display:none"></canvas>
+                    <div class="dispatch-legend" id="dispatchLegend" style="display:none">
+                        <div class="leg-item">
+                            <div class="leg-dot" style="background:rgba(16,185,129,.7)"></div><span
+                                style="color:var(--green)">Carga (compra)</span>
+                        </div>
+                        <div class="leg-item">
+                            <div class="leg-dot" style="background:rgba(239,68,68,.7)"></div><span
+                                style="color:var(--red)">Descarga (venta)</span>
+                        </div>
+                        <div class="leg-item">
+                            <div class="leg-dot" style="background:rgba(6,182,212,.5)"></div><span
+                                style="color:var(--acc)">Precio promedio</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="dispatch-panel" id="dispatchPanel">
+                    <div class="dp-card">
+                        <span class="dp-val" style="color:var(--green)" id="dpGain">—</span>
+                        <div class="dp-label">Ganancia neta / ciclo</div>
+                    </div>
+                    <div class="dp-card">
+                        <span class="dp-val" style="color:var(--amber)" id="dpSpread">—</span>
+                        <div class="dp-label">Spread neto (USD/MWh)</div>
+                    </div>
+                    <div class="dp-card">
+                        <span class="dp-val" style="color:var(--acc)" id="dpRoi">—</span>
+                        <div class="dp-label">ROI por ciclo</div>
+                    </div>
+                    <div class="dp-card">
+                        <span class="dp-val" style="color:var(--t1)" id="dpVol">—</span>
+                        <div class="dp-label">Volatilidad (σ)</div>
+                    </div>
+                    <div class="dp-card" style="padding:.75rem 1rem;text-align:left">
+                        <div style="font-size:.68rem;color:var(--t2);font-family:var(--mono);margin-bottom:.4rem">
+                            VENTANA CARGA</div>
+                        <div style="font-size:.88rem;font-family:var(--mono);color:var(--green)" id="dpChargeWin">—
+                        </div>
+                        <div
+                            style="font-size:.68rem;color:var(--t2);margin-top:.75rem;font-family:var(--mono);margin-bottom:.4rem">
+                            VENTANA DESCARGA</div>
+                        <div style="font-size:.88rem;font-family:var(--mono);color:var(--red)" id="dpDischargeWin">—
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ SIMULADOR DE INVERSIÓN ══════════════════════════════════════════ -->
+    <section id="simulador" class="sec sec-alt">
+        <div class="wrap">
+            <span class="eyebrow">¿Cuánto necesito invertir?</span>
+            <h2 class="sec-title">Simulador de Inversión BESS</h2>
+            <p class="sec-sub">Ingresa tu capital disponible y el mercado donde querés operar. El simulador proyecta tu
+                retorno anual y lo compara con inversiones tradicionales.</p>
+            <div class="inv-sim">
+                <div class="inv-sim-title">🧮 Calcula tu retorno</div>
+                <div class="inv-sim-sub">Basado en los datos reales del mercado SEN y la configuración actual de tu
+                    BESS.</div>
+                <div class="inv-grid">
+                    <div class="inv-input-wrap">
+                        <label>Capital disponible (USD)</label>
+                        <input type="number" class="inv-input" id="invCapital" value="500000" min="10000" step="10000"
+                            placeholder="500000">
+                    </div>
+                    <div class="inv-input-wrap">
+                        <label>Ciclos de arbitraje / año</label>
+                        <input type="number" class="inv-input" id="invCiclos" value="250" min="50" max="365" step="10"
+                            placeholder="250">
+                    </div>
+                    <div class="inv-input-wrap">
+                        <label>Costo BESS estimado (USD/MWh)</label>
+                        <input type="number" class="inv-input" id="invCostPerMwh" value="250000" min="80000"
+                            max="600000" step="10000" placeholder="250000">
+                    </div>
+                    <div class="inv-input-wrap">
+                        <label>Barra seleccionada para calcular</label>
+                        <select class="inv-input" id="invBarraSelect" style="cursor:pointer">
+                            <option value="_best">— La más rentable del mercado —</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="inv-results" id="invResults">
+                    <div class="inv-r-card">
+                        <span class="inv-r-val" style="color:var(--acc)" id="invMwh">— MWh</span>
+                        <div class="inv-r-label">Capacidad instalable</div>
+                    </div>
+                    <div class="inv-r-card">
+                        <span class="inv-r-val" style="color:var(--green)" id="invAnual">— USD/año</span>
+                        <div class="inv-r-label">Ganancia neta anual estimada</div>
+                    </div>
+                    <div class="inv-r-card">
+                        <span class="inv-r-val" style="color:var(--amber)" id="invTIR">— %</span>
+                        <div class="inv-r-label">TIR simple anualizada</div>
+                    </div>
+                </div>
+                <div class="inv-compare" id="invCompare" style="display:none">
+                    📊 <strong id="invCompareText">Cargando comparación…</strong>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ AI ANALYSIS ═══════════════════════════════════════════════════════ -->
+    <section id="ai" class="sec">
+        <div class="wrap">
+            <span class="eyebrow">Inteligencia Artificial</span>
+            <h2 class="sec-title">Análisis BESSAI Platinum</h2>
+            <p class="sec-sub">Análisis estratégico por barra generado con Gemini. Ingresa tu API key de <a
+                    href="https://aistudio.google.com" target="_blank" style="color:var(--acc)">Google AI Studio</a>
+                (gratuita).</p>
+            <div class="api-key-wrap">
+                <input type="password" class="api-key-input" id="geminiKey"
+                    placeholder="AIza… — API Key de Google AI Studio">
+                <button class="btn-key" id="btnSaveKey">Guardar</button>
+            </div>
+            <div class="ai-wrap">
+                <div class="ai-panel">
+                    <div class="ai-panel-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 16v-4m0-4h.01" />
+                        </svg>
+                        Análisis de Barra
+                    </div>
+                    <div id="aiContent">
+                        <div class="ai-placeholder">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
+                                <path d="M12 6v6l4 2" />
+                            </svg>
+                            <span>Selecciona una barra y haz click en "Analizar con IA"</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="ai-panel">
+                    <div class="ai-panel-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+                        </svg>
+                        Resumen de mercado IA
+                    </div>
+                    <div id="aiReport">
+                        <div class="ai-placeholder">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                <path d="M3 9h18M9 21V9" />
+                            </svg>
+                            <span>Se genera automáticamente al cargar los datos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ HEATMAP ════════════════════════════════════════════════════════════ -->
+    <section id="heatmap" class="sec sec-alt">
+        <div class="wrap">
+            <span class="eyebrow">Vista de mercado</span>
+            <h2 class="sec-title">Heatmap — Spread por Barra × Hora</h2>
+            <p class="sec-sub">Top-10 barras con mayor ganancia. Color = costo marginal (azul oscuro = barato → rojo =
+                caro). Haz click en una barra para ver su despacho.</p>
+            <div class="heatmap-container" id="heatmapContainer">
+                <div class="empty-state">
+                    <div class="ai-spinner"></div><span>Generando heatmap…</span>
+                </div>
+            </div>
+            <div class="hm-legend" style="margin-top:.75rem">
+                <span>Costo bajo</span>
+                <div class="hm-legend-bar"></div>
+                <span>Costo alto</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ CHATBOT ════════════════════════════════════════════════════════════ -->
+    <section id="chatbot" class="sec">
+        <div class="wrap">
+            <span class="eyebrow">IA Conversacional</span>
+            <h2 class="sec-title">Chat con BESSAI</h2>
+            <p class="sec-sub">Pregúntale al agente sobre el mercado actual, estrategias de arbitraje o configuración
+                óptima del BESS.</p>
+            <div class="chat-wrap">
+                <div class="chat-box">
+                    <div class="chat-history" id="chatHistory">
+                        <div class="chat-msg model">👋 Hola. Soy BESSAI, tu agente experto en arbitraje de
+                            almacenamiento energético en el SEN chileno. ¿En qué te puedo ayudar hoy?</div>
+                    </div>
+                    <div class="chat-input-row">
+                        <textarea class="chat-input" id="chatInput" placeholder="Escribe tu pregunta…"
+                            rows="1"></textarea>
+                        <button class="btn-send" id="btnSend">↑</button>
+                    </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:1rem">
+                    <div class="chat-suggestions">
+                        <div class="sug-title">SUGERENCIAS RÁPIDAS</div>
+                        <button class="sug-btn" data-q="¿Cuál es la mejor barra para arbitraje hoy y por qué?">¿Cuál es
+                            la mejor barra hoy?</button>
+                        <button class="sug-btn"
+                            data-q="¿En qué horario debería cargar el BESS para maximizar el retorno?">¿Cuándo cargar el
+                            BESS?</button>
+                        <button class="sug-btn"
+                            data-q="Explícame el perfil de riesgo Conservador vs Agresivo en arbitraje BESS">¿Qué
+                            significa perfil de riesgo?</button>
+                        <button class="sug-btn" data-q="¿Cómo afecta la eficiencia del BESS a la ganancia neta?">Impacto
+                            de la eficiencia RTE</button>
+                        <button class="sug-btn"
+                            data-q="¿Cuántos ciclos diarios debería operar el BESS para maximizar el ROI anual?">Ciclos
+                            diarios óptimos</button>
+                    </div>
+                    <div class="chat-ctx" id="chatCtx">
+                        <div class="ctx-title">Contexto inyectado al agente</div>
+                        <div class="ctx-row"><span class="ctx-key">Barras rentables</span><span class="ctx-v"
+                                id="ctxOps">—</span></div>
+                        <div class="ctx-row"><span class="ctx-key">Ganancia total</span><span class="ctx-v"
+                                id="ctxGain">—</span></div>
+                        <div class="ctx-row"><span class="ctx-key">Top barra</span><span class="ctx-v"
+                                id="ctxTop">—</span></div>
+                        <div class="ctx-row"><span class="ctx-key">Config BESS</span><span class="ctx-v"
+                                id="ctxCfg">—</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ FOOTER ══════════════════════════════════════════════════════════════ -->
+    <footer>
+        <p>© 2025-2026 BESS Solutions · <a href="../bessai-web/index.html">bess-solutions.cl</a> · Arbitraje Visualizer
+            v1.0 · Datos: <a href="https://www.coordinador.cl" target="_blank">CEN Chile</a> · <a
+                href="https://github.com/bess-solutions/open-bess-edge" target="_blank">GitHub</a></p>
+        <p style="margin-top:.3rem">Análisis con fines demostrativos · No constituye asesoría de inversión ·
+            Metodología: <a href="arbitrage_algorithms.json">arbitrage_algorithms.json</a></p>
+    </footer>
+
+    <!-- ════ JAVASCRIPT ════ -->
+    <script>
+        'use strict';
+
+        // ── 1. STATE ─────────────────────────────────────────────────────────────
+        var S = {
+            rawBarras: [], processed: [], filtered: [],
+            sel: null, filterRisk: 'all', sortKey: 'gain',
+            geminiKey: localStorage.getItem('bessai_gk') || '',
+            aiCache: {}, chatHistory: [], isLive: false,
+            cfg: { capacity: 20, power: 10, efficiency: 92, degradationCost: 4.5 },
+            chartDispatch: null
+        };
+
+        // ── 2. DEMO DATA — 15 barras SEN Chile ───────────────────────────────────
+        function makeDemoBarras() {
+            var P = [
+                { n: 'Alto Jahuel', t: '500 kV', v: [18, 16, 14, 13, 12, 11, 13, 20, 35, 42, 48, 50, 50, 49, 52, 55, 58, 60, 55, 48, 40, 32, 25, 20] },
+                { n: 'Pan de Azúcar', t: '220 kV', v: [20, 18, 15, 13, 12, 10, 12, 22, 38, 45, 52, 55, 54, 53, 56, 60, 65, 68, 62, 52, 42, 34, 26, 21] },
+                { n: 'Polpaico', t: '500 kV', v: [15, 13, 11, 10, 9, 8, 10, 18, 32, 40, 46, 48, 47, 46, 49, 52, 55, 58, 52, 44, 36, 28, 22, 17] },
+                { n: 'Cardones', t: '220 kV', v: [8, 7, 6, 5, 4, 4, 5, 10, 18, 22, 26, 28, 27, 27, 29, 32, 35, 38, 34, 28, 22, 16, 12, 9] },
+                { n: 'Crucero', t: '220 kV', v: [10, 9, 7, 6, 5, 5, 6, 12, 22, 28, 33, 35, 34, 34, 37, 40, 44, 47, 42, 35, 28, 20, 15, 11] },
+                { n: 'Los Vilos', t: '220 kV', v: [22, 20, 17, 15, 14, 13, 15, 25, 42, 50, 58, 62, 61, 60, 64, 68, 73, 76, 69, 58, 47, 37, 29, 23] },
+                { n: 'Quillota', t: '220 kV', v: [17, 15, 13, 11, 10, 9, 11, 20, 35, 42, 49, 52, 51, 50, 53, 57, 62, 65, 58, 49, 40, 31, 24, 18] },
+                { n: 'Charrúa', t: '500 kV', v: [25, 22, 19, 17, 16, 15, 17, 28, 46, 55, 63, 67, 66, 65, 69, 74, 79, 83, 75, 63, 51, 41, 32, 26] },
+                { n: 'Temuco', t: '220 kV', v: [12, 11, 9, 8, 7, 6, 8, 14, 24, 30, 35, 37, 36, 36, 38, 41, 45, 47, 42, 36, 29, 22, 17, 13] },
+                { n: 'Nueva Encuentro', t: '220 kV', v: [9, 8, 7, 6, 5, 5, 5, 11, 20, 25, 30, 32, 31, 31, 33, 36, 39, 42, 38, 31, 25, 19, 14, 10] },
+                { n: 'Ancoa', t: '500 kV', v: [30, 27, 23, 20, 19, 18, 20, 34, 56, 67, 77, 82, 81, 79, 84, 90, 96, 101, 91, 76, 62, 49, 38, 31] },
+                { n: 'Diego de Almagro', t: '220 kV', v: [6, 5, 4, 4, 3, 3, 4, 8, 14, 18, 21, 22, 22, 21, 23, 25, 28, 30, 27, 22, 18, 13, 10, 7] },
+                { n: 'Mejillones', t: '220 kV', v: [14, 12, 11, 9, 8, 8, 9, 16, 28, 34, 40, 42, 41, 41, 43, 47, 51, 53, 48, 40, 33, 25, 20, 15] },
+                { n: 'Atacama', t: '220 kV', v: [7, 6, 5, 4, 3, 3, 4, 9, 16, 20, 24, 26, 25, 25, 26, 29, 32, 34, 31, 26, 21, 15, 11, 8] },
+                { n: 'Punta Arenas', t: '220 kV', v: [19, 17, 14, 12, 11, 10, 12, 21, 36, 44, 51, 54, 53, 52, 55, 59, 64, 67, 60, 51, 41, 32, 25, 20] }
+            ];
+            var rnd = function (v) { return Math.max(1, v + (Math.random() - .5) * v * .18); };
+            return P.map(function (p, i) {
+                var ts = p.v.map(function (v, h) { return { hour: h, cost: parseFloat(rnd(v).toFixed(2)) }; });
+                return { id: p.n.toLowerCase().replace(/\s+/g, '-') + '-' + i, name: p.n, tension: p.t, timeSeries: ts };
+            });
+        }
+
+        // ── 3. ALGORITHMS ─────────────────────────────────────────────────────────
+        function stdDev(a) {
+            if (a.length < 2) return 0;
+            var m = a.reduce(function (x, y) { return x + y; }, 0) / a.length;
+            return Math.sqrt(a.map(function (x) { return Math.pow(x - m, 2); }).reduce(function (x, y) { return x + y; }, 0) / (a.length - 1));
+        }
+        function swMin(costs, w) {
+            var best = { start: 0, end: w - 1, avg: Infinity };
+            for (var i = 0; i <= costs.length - w; i++) {
+                var avg = costs.slice(i, i + w).reduce(function (a, b) { return a + b; }, 0) / w;
+                if (avg < best.avg) best = { start: i, end: i + w - 1, avg: parseFloat(avg.toFixed(4)) };
+            } return best;
+        }
+        function swMax(costs, w, xS, xE) {
+            var best = { start: 0, end: w - 1, avg: -Infinity };
+            for (var i = 0; i <= costs.length - w; i++) {
+                var e = i + w - 1;
+                if (Math.max(xS, i) <= Math.min(xE, e)) continue;
+                var avg = costs.slice(i, i + w).reduce(function (a, b) { return a + b; }, 0) / w;
+                if (avg > best.avg) best = { start: i, end: e, avg: parseFloat(avg.toFixed(4)) };
+            } return best;
+        }
+        function pad(n) { return String(n).padStart(2, '0'); }
+
+        function calcBarra(b, cfg) {
+            var costs = b.timeSeries.map(function (p) { return p.cost; });
+            var ct = Math.ceil(cfg.capacity / cfg.power);
+            if (costs.length < ct * 2) return null;
+            var cMin = Math.min.apply(null, costs), cMax = Math.max.apply(null, costs);
+            var vol = parseFloat(stdDev(costs).toFixed(4));
+            var eff = cfg.efficiency / 100;
+            var cW = swMin(costs, ct);
+            var dW = swMax(costs, ct, cW.start, cW.end);
+            if (dW.avg === -Infinity) return null;
+            var sB = parseFloat((dW.avg - cW.avg).toFixed(4));
+            var sN = parseFloat((dW.avg * eff - cW.avg - cfg.degradationCost).toFixed(4));
+            var gN = sN > 0 ? parseFloat((sN * cfg.capacity).toFixed(2)) : 0;
+            if (gN <= 0) return null;
+            var inv = cW.avg * cfg.capacity;
+            var roi = inv > 0 ? parseFloat((gN / inv * 100).toFixed(2)) : null;
+            var rrr = vol > 0 ? gN / vol : gN * 1000;
+            var risk = rrr > 30 ? 'Conservador' : rrr >= 15 ? 'Equilibrado' : 'Agresivo';
+            return Object.assign({}, b, {
+                costMin: cMin, costMax: cMax, volatilidad: vol,
+                spreadBruto: sB, spreadNeto: sN, gananciaNeta: gN,
+                costoPerdidasOp: parseFloat(((sB * cfg.capacity) - gN).toFixed(2)),
+                roiPorCiclo: roi, perfilRiesgo: risk,
+                ventanaCarga: { inicio: pad(cW.start) + ':00', fin: pad(cW.end + 1) + ':00', costoProm: cW.avg },
+                ventanaDescarga: { inicio: pad(dW.start) + ':00', fin: pad(dW.end + 1) + ':00', precioProm: dW.avg },
+                cSH: cW.start, cEH: cW.end, dSH: dW.start, dEH: dW.end
+            });
+        }
+        function calcAll() {
+            S.processed = S.rawBarras.map(function (b) { return calcBarra(b, S.cfg); }).filter(Boolean);
+        }
+
+        // ── 4. API FETCH ──────────────────────────────────────────────────────────
+        var _cache = null;
+        var CEN = 'https://sipub.api.coordinador.cl/costos-marginales-online-8b/v4/findAll?user_key=2b44048b9df6f8c42f3ff9aa1c153f32';
+        var PROXY = 'https://corsproxy.io/?' + encodeURIComponent(CEN);
+
+        function transformApi(json) {
+            if (!json || !json.barras) return [];
+            return json.barras.map(function (ab, i) {
+                var by = {};
+                (ab.valores || []).forEach(function (v) { var h = new Date(v.fecha).getUTCHours(); if (!by[h]) by[h] = []; by[h].push(v.valor); });
+                var ts = [];
+                for (var h = 0; h < 24; h++) { var a = by[h] || []; if (a.length) ts.push({ hour: h, cost: parseFloat((a.reduce(function (x, y) { return x + y; }, 0) / a.length).toFixed(2)) }); }
+                if (ts.length < 4) return null;
+                var tm = (ab.nombre || '').match(/(\d+)\s?kv/i);
+                var nm = (ab.nombre || 'Barra ' + i).replace(/\s+\d+\s?kv/i, '').trim();
+                return { id: nm.toLowerCase().replace(/\s+/g, '-') + '-' + i, name: nm, tension: tm ? tm[1] + ' kV' : undefined, timeSeries: ts };
+            }).filter(Boolean);
+        }
+        function retryFetch(url, n, ms) {
+            return fetch(url).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+                .catch(function (e) { if (n <= 0) throw e; return new Promise(function (r) { setTimeout(r, ms); }).then(function () { return retryFetch(url, n - 1, ms * 2); }); });
+        }
+        function setApiBadge(type, text) {
+            var b = document.getElementById('apiBadge'), l = document.getElementById('apiStatus');
+            b.className = 'api-badge ' + (type === 'live' ? 'api-live' : type === 'err' ? 'api-err' : 'api-demo');
+            l.textContent = text;
+        }
+        function loadData() {
+            if (_cache) { S.rawBarras = _cache; S.isLive = true; return Promise.resolve(); }
+            setApiBadge('demo', 'Conectando CEN…');
+            return retryFetch(PROXY, 3, 1000).then(function (json) {
+                var b = transformApi(json);
+                if (b.length) {
+                    _cache = b; S.rawBarras = b; S.isLive = true; setApiBadge('live', 'LIVE · CEN Chile');
+                    document.getElementById('dataTimestamp').textContent = '● Tiempo real · ' + new Date().toLocaleString('es-CL') + ' · ' + b.length + ' barras';
+                }
+                else throw new Error('empty');
+            }).catch(function () {
+                S.rawBarras = makeDemoBarras(); S.isLive = false;
+                setApiBadge('demo', 'DEMO · datos sintéticos');
+                document.getElementById('dataTimestamp').textContent = '⚠ Datos sintéticos — API CEN no disponible vía browser (CORS). Algoritmos idénticos a producción.';
+            });
+        }
+    </script>
+
+    <!-- ════ JAVASCRIPT BLOQUE 3 — UI RENDERING ════ -->
+    <script>
+        'use strict';
+        // ── 5. KPI + FILTER + SORT ────────────────────────────────────────────────
+        function applyFilterSort() {
+            var f = S.processed.filter(function (b) { return S.filterRisk === 'all' || b.perfilRiesgo === S.filterRisk; });
+            f.sort(function (a, b) {
+                if (S.sortKey === 'gain') return b.gananciaNeta - a.gananciaNeta;
+                if (S.sortKey === 'spread') return b.spreadNeto - a.spreadNeto;
+                if (S.sortKey === 'vol') return a.volatilidad - b.volatilidad;
+                if (S.sortKey === 'roi') return (b.roiPorCiclo || 0) - (a.roiPorCiclo || 0);
+                return 0;
+            });
+            S.filtered = f;
+        }
+        function countUp(el, target, dur, fmt) {
+            var t0 = performance.now();
+            (function step(now) {
+                var p = Math.min((now - t0) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+                el.textContent = fmt(target * e);
+                if (p < 1) requestAnimationFrame(step);
+            })(t0);
+        }
+        function renderKPIs() {
+            var ops = S.processed.length;
+            var gain = S.processed.reduce(function (a, b) { return a + b.gananciaNeta; }, 0);
+            var top = S.processed[0];
+            var maxSpread = S.processed.length ? Math.max.apply(null, S.processed.map(function (b) { return b.spreadNeto; })) : 0;
+            document.getElementById('kpiOps').textContent = ops;
+            countUp(document.getElementById('kpiGain'), gain, 1200, function (v) { return '$' + v.toFixed(0) + ' USD'; });
+            document.getElementById('kpiTop').textContent = top ? top.name : '—';
+            document.getElementById('kpiTopSub').textContent = top ? '$' + top.gananciaNeta.toFixed(2) + ' USD/ciclo' : '—';
+            countUp(document.getElementById('kpiSpread'), maxSpread, 1000, function (v) { return v.toFixed(2) + ' USD/MWh'; });
+            var c = document.getElementById('ctxOps'); if (c) c.textContent = ops;
+            var g = document.getElementById('ctxGain'); if (g) g.textContent = '$' + gain.toFixed(2) + ' USD';
+            var t = document.getElementById('ctxTop'); if (t) t.textContent = top ? top.name : '—';
+            var cfg = S.cfg;
+            var cc = document.getElementById('ctxCfg'); if (cc) cc.textContent = cfg.capacity + 'MWh / ' + cfg.power + 'MW / ' + cfg.efficiency + '%';
+        }
+
+        // ── 6. BARRAS GRID ────────────────────────────────────────────────────────
+        function riskClass(r) { return r === 'Conservador' ? 'risk-c' : r === 'Equilibrado' ? 'risk-e' : 'risk-a'; }
+        function riskEmoji(r) { return r === 'Conservador' ? '🟢' : r === 'Equilibrado' ? '🟡' : '🔴'; }
+
+        function renderBarrasGrid() {
+            var grid = document.getElementById('barrasGrid');
+            if (!S.filtered.length) {
+                grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><span>No se encontraron barras rentables con esta configuración.</span></div>';
+                return;
+            }
+            grid.innerHTML = S.filtered.map(function (b) {
+                var sel = S.sel && S.sel.id === b.id ? ' selected' : '';
+                return '<div class="barra-card' + sel + '" data-id="' + b.id + '">' +
+                    '<div class="barra-header">' +
+                    '<div><div class="barra-name">' + b.name + '</div>' +
+                    (b.tension ? '<div class="barra-tension">' + b.tension + '</div>' : '') +
+                    '</div>' +
+                    '<span class="risk-badge ' + riskClass(b.perfilRiesgo) + '">' + riskEmoji(b.perfilRiesgo) + ' ' + b.perfilRiesgo + '</span>' +
+                    '</div>' +
+                    '<div class="barra-metrics">' +
+                    '<div><div class="bm-label">Ganancia neta</div><div class="bm-val" style="color:var(--green)">$' + b.gananciaNeta.toFixed(2) + ' USD</div></div>' +
+                    '<div><div class="bm-label">ROI/ciclo</div><div class="bm-val" style="color:var(--amber)">' + (b.roiPorCiclo !== null ? b.roiPorCiclo.toFixed(1) + '%' : '—') + '</div></div>' +
+                    '<div><div class="bm-label">Spread neto</div><div class="bm-val">' + b.spreadNeto.toFixed(2) + ' USD/MWh</div></div>' +
+                    '<div><div class="bm-label">Volatilidad σ</div><div class="bm-val">' + b.volatilidad.toFixed(2) + '</div></div>' +
+                    '</div>' +
+                    '<div class="barra-window">' +
+                    '<div class="win-chip win-charge">▼ Carga: ' + b.ventanaCarga.inicio + '–' + b.ventanaCarga.fin + ' · $' + b.ventanaCarga.costoProm.toFixed(1) + '</div>' +
+                    '<div class="win-chip win-discharge">▲ Venta: ' + b.ventanaDescarga.inicio + '–' + b.ventanaDescarga.fin + ' · $' + b.ventanaDescarga.precioProm.toFixed(1) + '</div>' +
+                    '</div>' +
+                    '<div class="barra-actions">' +
+                    '<button class="btn-sm btn-chart" data-action="chart" data-id="' + b.id + '">📈 Ver despacho</button>' +
+                    '<button class="btn-sm btn-ai" data-action="ai" data-id="' + b.id + '">✦ Analizar IA</button>' +
+                    '</div>' +
+                    '</div>';
+            }).join('');
+        }
+
+        // ── 7. DISPATCH CHART ─────────────────────────────────────────────────────
+        function showDispatch(barra) {
+            S.sel = barra;
+            document.getElementById('chartBarraTitle').textContent = barra.name + (barra.tension ? ' · ' + barra.tension : '');
+            document.getElementById('chartPlaceholder').style.display = 'none';
+            var canvas = document.getElementById('chartDispatch');
+            canvas.style.display = 'block';
+            document.getElementById('dispatchLegend').style.display = 'flex';
+
+            // Panel
+            document.getElementById('dpGain').textContent = '$' + barra.gananciaNeta.toFixed(2) + ' USD';
+            document.getElementById('dpSpread').textContent = barra.spreadNeto.toFixed(2) + ' USD/MWh';
+            document.getElementById('dpRoi').textContent = barra.roiPorCiclo !== null ? barra.roiPorCiclo.toFixed(1) + '%' : '—';
+            document.getElementById('dpVol').textContent = barra.volatilidad.toFixed(3);
+            document.getElementById('dpChargeWin').textContent = barra.ventanaCarga.inicio + ' – ' + barra.ventanaCarga.fin + ' · avg $' + barra.ventanaCarga.costoProm.toFixed(2) + '/MWh';
+            document.getElementById('dpDischargeWin').textContent = barra.ventanaDescarga.inicio + ' – ' + barra.ventanaDescarga.fin + ' · avg $' + barra.ventanaDescarga.precioProm.toFixed(2) + '/MWh';
+
+            var ts = barra.timeSeries;
+            var hours = ts.map(function (p) { return pad(p.hour) + ':00'; });
+            var costs = ts.map(function (p) { return p.cost; });
+            var avg = costs.reduce(function (a, b) { return a + b; }, 0) / costs.length;
+            var chargeCosts = ts.map(function (p) { return (p.hour >= barra.cSH && p.hour <= barra.cEH) ? p.cost : null; });
+            var dischCosts = ts.map(function (p) { return (p.hour >= barra.dSH && p.hour <= barra.dEH) ? p.cost : null; });
+
+            if (S.chartDispatch) S.chartDispatch.destroy();
+            S.chartDispatch = new Chart(canvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: hours, datasets: [
+                        { label: 'Costo marginal', data: costs, borderColor: 'rgba(156,163,175,.6)', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, pointBackgroundColor: costs.map(function (_, i) { return i >= barra.cSH && i <= barra.cEH ? 'rgba(16,185,129,.9)' : i >= barra.dSH && i <= barra.dEH ? 'rgba(239,68,68,.9)' : 'rgba(156,163,175,.4)'; }), tension: .3, fill: false },
+                        { label: 'Ventana Carga', data: chargeCosts, borderColor: 'transparent', backgroundColor: 'rgba(16,185,129,.18)', fill: true, pointRadius: 0, tension: .3 },
+                        { label: 'Ventana Descarga', data: dischCosts, borderColor: 'transparent', backgroundColor: 'rgba(239,68,68,.18)', fill: true, pointRadius: 0, tension: .3 },
+                        { label: 'Promedio', data: costs.map(function () { return parseFloat(avg.toFixed(2)); }), borderColor: 'rgba(6,182,212,.5)', backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [6, 4], pointRadius: 0, tension: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0a1628', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1, callbacks: { label: function (c) { var h = c.dataIndex; var z = h >= barra.cSH && h <= barra.cEH ? '▼ CARGA' : h >= barra.dSH && h <= barra.dEH ? '▲ DESCARGA' : ''; return ' ' + c.dataset.label + ': $' + (c.parsed.y || 0).toFixed(2) + '/MWh ' + (z ? z : ''); } } } },
+                    scales: { x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7280', font: { size: 10 } } }, y: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7280', font: { size: 10 }, callback: function (v) { return '$' + v.toFixed(1); } } } }
+                }
+            });
+
+            // Scroll to section
+            document.getElementById('despacho').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Update card highlights
+            document.querySelectorAll('.barra-card').forEach(function (el) {
+                el.classList.toggle('selected', el.dataset.id === barra.id);
+            });
+        }
+
+        // ── 8. HEATMAP ────────────────────────────────────────────────────────────
+        function renderHeatmap() {
+            var top = S.processed.slice(0, 10);
+            var container = document.getElementById('heatmapContainer');
+            if (!top.length) { container.innerHTML = '<div class="empty-state"><span>Sin datos para el heatmap.</span></div>'; return; }
+
+            var allCosts = [];
+            top.forEach(function (b) { b.timeSeries.forEach(function (p) { allCosts.push(p.cost); }); });
+            var minC = Math.min.apply(null, allCosts), maxC = Math.max.apply(null, allCosts);
+            function costToColor(c) {
+                var t = (c - minC) / (maxC - minC || 1);
+                var r = Math.round(t * 239 + (1 - t) * 5);
+                var g = Math.round(t * 68 + (1 - t) * 12);
+                var b2 = Math.round(t * 68 + (1 - t) * 24);
+                return 'rgb(' + r + ',' + g + ',' + b2 + ')';
+            }
+
+            var html = '<div class="heatmap-head"><div class="hm-barra-label">BARRA</div><div class="hm-hours">';
+            for (var h = 0; h < 24; h++)html += '<div class="hm-hour-label">' + pad(h) + '</div>';
+            html += '</div></div><div class="heatmap-rows">';
+
+            top.forEach(function (b) {
+                var byH = {};
+                b.timeSeries.forEach(function (p) { byH[p.hour] = p.cost; });
+                html += '<div class="hm-row"><div class="hm-label" data-barraidx="' + b.id + '" title="' + b.name + '">' + b.name + '</div><div class="hm-cells">';
+                for (var h2 = 0; h2 < 24; h2++) {
+                    var cost = byH[h2] !== undefined ? byH[h2] : minC;
+                    var isC = h2 >= b.cSH && h2 <= b.cEH, isD = h2 >= b.dSH && h2 <= b.dEH;
+                    var outline = isC ? 'box-shadow:inset 0 0 0 2px rgba(16,185,129,.8)' : isD ? 'box-shadow:inset 0 0 0 2px rgba(239,68,68,.8)' : '';
+                    html += '<div class="hm-cell" style="background:' + costToColor(cost) + ';' + outline + '" data-barraid="' + b.id + '" data-hour="' + h2 + '" data-cost="' + cost + '" data-name="' + b.name + '"></div>';
+                }
+                html += '</div></div>';
+            });
+            html += '</div>';
+            container.innerHTML = html;
+
+            // Tooltip
+            var tip = document.getElementById('hmTooltip');
+            container.addEventListener('mousemove', function (e) {
+                var cell = e.target.closest('.hm-cell');
+                if (!cell) { tip.style.display = 'none'; return; }
+                tip.style.display = 'block';
+                tip.style.left = (e.clientX + 12) + 'px';
+                tip.style.top = (e.clientY - 28) + 'px';
+                var h3 = parseInt(cell.dataset.hour);
+                var isC = false, isD = false;
+                var barraObj = S.processed.find(function (b) { return b.id === cell.dataset.barraid; });
+                if (barraObj) { isC = h3 >= barraObj.cSH && h3 <= barraObj.cEH; isD = h3 >= barraObj.dSH && h3 <= barraObj.dEH; }
+                tip.textContent = cell.dataset.name + ' · ' + pad(h3) + ':00 · $' + parseFloat(cell.dataset.cost).toFixed(2) + '/MWh' + (isC ? ' ▼CARGA' : isD ? ' ▲DESCARGA' : '');
+            });
+            container.addEventListener('mouseleave', function () { tip.style.display = 'none'; });
+            container.addEventListener('click', function (e) {
+                var cell = e.target.closest('.hm-cell');
+                if (!cell) return;
+                var b = S.processed.find(function (b) { return b.id === cell.dataset.barraid; });
+                if (b) showDispatch(b);
+            });
+            document.querySelectorAll('.hm-label[data-barraidx]').forEach(function (el) {
+                el.addEventListener('click', function () {
+                    var b = S.processed.find(function (b) { return b.id === el.dataset.barraidx; });
+                    if (b) showDispatch(b);
+                });
+            });
+        }
+
+        // ── MAIN RENDER ───────────────────────────────────────────────────────────
+        function renderAll() {
+            calcAll(); applyFilterSort(); renderKPIs(); renderBarrasGrid(); renderHeatmap();
+            updateCfgDisplay();
+        }
+        function updateCfgDisplay() {
+            var ct = Math.ceil(S.cfg.capacity / S.cfg.power);
+            var ef = (S.cfg.efficiency / 100).toFixed(2);
+            document.getElementById('cfgChargeTime').textContent = ct;
+            document.getElementById('cfgEffFactor').textContent = ef;
+        }
+    </script>
+
+    <!-- ════ JAVASCRIPT BLOQUE 4 — AI + CHAT + EVENTS ════ -->
+    <script>
+        'use strict';
+        // ── 9. GEMINI ANALYSIS ────────────────────────────────────────────────────
+        function getGeminiKey() { return document.getElementById('geminiKey').value.trim() || S.geminiKey; }
+
+        function buildBarraPrompt(barra) {
+            var cfg = S.cfg;
+            return 'Eres BESSAI Analista Platinum v4.2. Analiza esta oportunidad de arbitraje BESS en el SEN chileno y genera un informe conciso en español con exactamente 3 secciones en Markdown:\n\n## Estrategia de Operación\n## Mitigación de Degradación\n## Veredicto de Inversión\n\n**Datos:**\n- Barra: ' + barra.name + (barra.tension ? ' (' + barra.tension + ')' : '') + '\n- BESS: ' + cfg.capacity + ' MWh / ' + cfg.power + ' MW / ' + cfg.efficiency + '% eficiencia\n- Costo degradación: $' + cfg.degradationCost + ' USD/MWh\n- Ganancia neta/ciclo: $' + barra.gananciaNeta.toFixed(2) + ' USD\n- Spread neto: ' + barra.spreadNeto.toFixed(2) + ' USD/MWh\n- Volatilidad σ: ' + barra.volatilidad.toFixed(3) + '\n- Ventana carga: ' + barra.ventanaCarga.inicio + '-' + barra.ventanaCarga.fin + ' @ $' + barra.ventanaCarga.costoProm.toFixed(2) + '/MWh\n- Ventana descarga: ' + barra.ventanaDescarga.inicio + '-' + barra.ventanaDescarga.fin + ' @ $' + barra.ventanaDescarga.precioProm.toFixed(2) + '/MWh\n- Perfil de riesgo: ' + barra.perfilRiesgo + '\n\nSé conciso y específico. Máximo 250 palabras.';
+        }
+
+        function callGemini(prompt, isChat, history) {
+            var key = getGeminiKey();
+            if (!key) return Promise.reject(new Error('NO_KEY'));
+            var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + key;
+            var contents = isChat ? history.concat([{ role: 'user', parts: [{ text: prompt }] }]) : [{ role: 'user', parts: [{ text: prompt }] }];
+            return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: contents, generationConfig: { temperature: 0.2, maxOutputTokens: 600 } }) })
+                .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                .then(function (d) {
+                    var text = d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts[0] ? d.candidates[0].content.parts[0].text : 'Sin respuesta.';
+                    return text;
+                });
+        }
+
+        function analyzeBarraAI(barra) {
+            var key = getGeminiKey();
+            var panel = document.getElementById('aiContent');
+            if (!key) {
+                panel.innerHTML = '<div class="ai-placeholder"><span>⚠ Ingresa tu API key de <a href="https://aistudio.google.com" target="_blank" style="color:var(--acc)">Google AI Studio</a> arriba para usar análisis IA.</span></div>';
+                document.getElementById('ai').scrollIntoView({ behavior: 'smooth', block: 'start' }); return;
+            }
+            var cacheKey = barra.id + '|' + JSON.stringify(S.cfg);
+            if (S.aiCache[cacheKey]) {
+                panel.innerHTML = '<div class="ai-content">' + marked.parse(S.aiCache[cacheKey]) + '</div>';
+                document.getElementById('ai').scrollIntoView({ behavior: 'smooth', block: 'start' }); return;
+            }
+            panel.innerHTML = '<div class="ai-loading"><div class="ai-spinner"></div><span>BESSAI Analista Platinum analizando ' + barra.name + '…</span></div>';
+            document.getElementById('ai').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            callGemini(buildBarraPrompt(barra), false, [])
+                .then(function (text) { S.aiCache[cacheKey] = text; panel.innerHTML = '<div class="ai-content">' + marked.parse(text) + '</div>'; })
+                .catch(function (e) { panel.innerHTML = '<div class="ai-placeholder"><span>Error: ' + (e.message === 'NO_KEY' ? 'Ingresa tu API key' : 'No se pudo conectar con Gemini. ' + e.message) + '</span></div>'; });
+        }
+
+        function generateMarketReport() {
+            var key = getGeminiKey();
+            var panel = document.getElementById('aiReport');
+            if (!key || !S.processed.length) return;
+            var top = S.processed[0];
+            var total = S.processed.reduce(function (a, b) { return a + b.gananciaNeta; }, 0);
+            var prompt = 'Eres BESSAI. Genera un resumen ejecutivo en español del mercado eléctrico chileno hoy, máximo 120 palabras. Datos: ' + S.processed.length + ' barras rentables, ganancia total $' + total.toFixed(2) + ' USD/ciclo, mejor barra: ' + top.name + ' con $' + top.gananciaNeta.toFixed(2) + ' USD. Perfil dominante: ' + S.processed.reduce(function (acc, b) { acc[b.perfilRiesgo] = (acc[b.perfilRiesgo] || 0) + 1; return acc; }, {}) + '. Sé conciso y usa formato Markdown.';
+            panel.innerHTML = '<div class="ai-loading"><div class="ai-spinner"></div><span>Generando resumen de mercado…</span></div>';
+            callGemini(prompt, false, [])
+                .then(function (t) { panel.innerHTML = '<div class="ai-content">' + marked.parse(t) + '</div>'; })
+                .catch(function () { panel.innerHTML = '<div class="ai-placeholder"><span>Resumen IA no disponible sin API key.</span></div>'; });
+        }
+
+        // ── 10. CHATBOT ───────────────────────────────────────────────────────────
+        function buildChatSystem() {
+            var top = S.processed[0];
+            var total = S.processed.reduce(function (a, b) { return a + b.gananciaNeta; }, 0);
+            return 'Eres BESSAI v4.2, experto en arbitraje de sistemas de almacenamiento de energía (BESS) en el SEN chileno. Contexto actual del mercado: ' + S.processed.length + ' barras rentables, ganancia total $' + total.toFixed(2) + ' USD/ciclo, mejor barra: ' + (top ? top.name : 'N/A') + (top ? ' ($' + top.gananciaNeta.toFixed(2) + ' USD, perfil ' + top.perfilRiesgo + ')' : '') + '. Config BESS: ' + S.cfg.capacity + ' MWh / ' + S.cfg.power + ' MW / ' + S.cfg.efficiency + '% eficiencia. Responde en español, de forma concisa y experta.';
+        }
+
+        function addChatMsg(role, text) {
+            var div = document.createElement('div');
+            div.className = 'chat-msg ' + role;
+            div.innerHTML = role === 'model' ? marked.parse(text) : text;
+            document.getElementById('chatHistory').appendChild(div);
+            div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            S.chatHistory.push({ role: role === 'user' ? 'user' : 'model', parts: [{ text: text }] });
+        }
+
+        function sendChat(text) {
+            if (!text.trim()) return;
+            addChatMsg('user', text);
+            document.getElementById('chatInput').value = '';
+            var key = getGeminiKey();
+            if (!key) { addChatMsg('model', '⚠ Para respuestas IA necesito tu API key de Google AI Studio (ingresala arriba en la sección de análisis).'); return; }
+            var sysPrompt = buildChatSystem();
+            var fullPrompt = sysPrompt + '\n\nUsuario: ' + text;
+            var thinkEl = document.createElement('div');
+            thinkEl.className = 'chat-msg model'; thinkEl.innerHTML = '<div class="ai-loading"><div class="ai-spinner"></div><span>Pensando…</span></div>';
+            document.getElementById('chatHistory').appendChild(thinkEl); thinkEl.scrollIntoView({ behavior: 'smooth' });
+            callGemini(fullPrompt, false, []).then(function (t) { thinkEl.remove(); addChatMsg('model', t); }).catch(function (e) { thinkEl.remove(); addChatMsg('model', 'Error: ' + e.message); });
+        }
+
+        // ── 11. EVENT LISTENERS ───────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // BESS config sliders
+            [['sCap', 'vCap', 'capacity', 1], ['sPow', 'vPow', 'power', 1], ['sEff', 'vEff', 'efficiency', 1], ['sDeg', 'vDeg', 'degradationCost', 0.5]]
+                .forEach(function (cfg) {
+                    var sl = document.getElementById(cfg[0]), vl = document.getElementById(cfg[1]);
+                    sl.addEventListener('input', function () {
+                        var v = parseFloat(sl.value);
+                        vl.textContent = cfg[3] < 1 ? v.toFixed(1) : Math.round(v);
+                        S.cfg[cfg[2]] = v; S.aiCache = {}; renderAll();
+                        if (S.sel) showDispatch(S.processed.find(function (b) { return b.id === S.sel.id; }) || S.sel);
+                    });
+                });
+
+            // Filters
+            document.querySelectorAll('.filter-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    document.querySelectorAll('.filter-btn').forEach(function (b) { b.classList.remove('active'); });
+                    btn.classList.add('active'); S.filterRisk = btn.dataset.risk; applyFilterSort(); renderBarrasGrid();
+                });
+            });
+
+            // Sort
+            document.getElementById('sortSelect').addEventListener('change', function () {
+                S.sortKey = this.value; applyFilterSort(); renderBarrasGrid();
+            });
+
+            // Grid delegation
+            document.getElementById('barrasGrid').addEventListener('click', function (e) {
+                var btn = e.target.closest('[data-action]');
+                if (!btn) return;
+                var b = S.processed.find(function (b) { return b.id === btn.dataset.id; });
+                if (!b) return;
+                if (btn.dataset.action === 'chart') showDispatch(b);
+                else if (btn.dataset.action === 'ai') analyzeBarraAI(b);
+            });
+
+            // Gemini key save
+            document.getElementById('geminiKey').value = S.geminiKey;
+            document.getElementById('btnSaveKey').addEventListener('click', function () {
+                var k = document.getElementById('geminiKey').value.trim();
+                if (k) { localStorage.setItem('bessai_gk', k); S.geminiKey = k; generateMarketReport(); alert('✓ API key guardada en localStorage.'); }
+                else alert('Ingresa una API key válida.');
+            });
+
+            // Chat
+            document.getElementById('btnSend').addEventListener('click', function () { sendChat(document.getElementById('chatInput').value); });
+            document.getElementById('chatInput').addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(this.value); } });
+            document.querySelectorAll('.sug-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () { sendChat(btn.dataset.q); });
+            });
+
+            // INIT
+            loadData().then(function () { renderAll(); if (S.geminiKey) generateMarketReport(); });
+        });
+    </script>
+
+    <!-- ════ JAVASCRIPT UX FEATURES ════ -->
+    <script>
+        'use strict';
+        // ── ONBOARDING MODAL ─────────────────────────────────────────────────────
+        (function () {
+            var modal = document.getElementById('onboardModal');
+            var nextBtn = document.getElementById('btnNextModal');
+            var skipBtn = document.getElementById('btnSkipModal');
+            var slide = 1, totalSlides = 3;
+            if (localStorage.getItem('bessai_onboarded')) { modal.classList.add('hidden'); return; }
+            function goTo(n) {
+                document.getElementById('slide' + slide).classList.remove('active');
+                document.getElementById('dot' + slide).classList.remove('active');
+                slide = n;
+                document.getElementById('slide' + slide).classList.add('active');
+                document.getElementById('dot' + slide).classList.add('active');
+                nextBtn.textContent = slide === totalSlides ? '¡Empezar! →' : 'Siguiente →';
+            }
+            nextBtn.addEventListener('click', function () {
+                if (slide < totalSlides) { goTo(slide + 1); }
+                else { localStorage.setItem('bessai_onboarded', '1'); modal.classList.add('hidden'); }
+            });
+            skipBtn.addEventListener('click', function () { localStorage.setItem('bessai_onboarded', '1'); modal.classList.add('hidden'); });
+        })();
+
+        // ── EXECUTIVE VIEW TOGGLE ────────────────────────────────────────────────
+        document.getElementById('execToggle').addEventListener('click', function () {
+            var on = document.body.classList.toggle('exec-mode');
+            this.classList.toggle('on', on);
+            this.textContent = on ? '👔 Ejecutiva ✓' : '👔 Ejecutiva';
+        });
+
+        // ── GUIDED STEPS SCROLL TRACKER ──────────────────────────────────────────
+        (function () {
+            var sections = ['config', 'barras', 'despacho', 'simulador', 'ai'];
+            var labels = ['gs1', 'gs2', 'gs3', 'gs4', 'gs5'];
+            function update() {
+                sections.forEach(function (id, i) {
+                    var el = document.getElementById(id);
+                    if (!el) return;
+                    var rect = el.getBoundingClientRect();
+                    var gs = document.getElementById(labels[i]);
+                    if (!gs) return;
+                    if (rect.top < window.innerHeight * 0.6) { gs.classList.add('done'); gs.classList.remove('active'); }
+                    else if (i === 0 || document.getElementById(labels[i - 1]).classList.contains('done')) { gs.classList.add('active'); gs.classList.remove('done'); }
+                });
+            }
+            window.addEventListener('scroll', update, { passive: true });
+            update();
+        })();
+
+        // ── FAVORITES ────────────────────────────────────────────────────────────
+        var FAVS = {};
+        function loadFavs() { try { FAVS = JSON.parse(localStorage.getItem('bessai_favs') || '{}') } catch (e) { FAVS = {}; } }
+        function saveFavs() { localStorage.setItem('bessai_favs', JSON.stringify(FAVS)); }
+        function toggleFav(barraId) { FAVS[barraId] = !FAVS[barraId]; if (!FAVS[barraId]) delete FAVS[barraId]; saveFavs(); }
+        function isFav(barraId) { return !!FAVS[barraId]; }
+        loadFavs();
+
+        // ── ANNUAL PROJECTION HELPERS ─────────────────────────────────────────────
+        var CYCLES_PER_YEAR = 250;
+        var CAPEX_PER_MWH = 250000; // USD default
+        var UF_TO_USD = 32.5; // aprox. 1 UF = 32.5 USD (2025)
+
+        function annualProjection(barra) {
+            var ann = barra.gananciaNeta * CYCLES_PER_YEAR;
+            var tir = ann > 0 && S.cfg.capacity > 0 ? (ann / (S.cfg.capacity * CAPEX_PER_MWH) * 100) : 0;
+            return { annualGain: ann, tir: tir };
+        }
+
+        function ufEquivalent(annualUSD) {
+            // Compare: departamento 2D Santiago = aprox. UF 5000 = $162,500 USD, renta 0.35% mensual = ~$568/mes = $6,820/año
+            var referencePropAnnual = 6820;
+            if (annualUSD > referencePropAnnual) {
+                var ratio = (annualUSD / referencePropAnnual).toFixed(1);
+                return 'Este BESS genera el equivalente a la renta de \u2248' + ratio + ' departamentos 2D en Santiago.';
+            } else {
+                var depPct = (annualUSD / referencePropAnnual * 100).toFixed(0);
+                return 'Equivale al ' + depPct + '% de la renta anual de un departamento 2D en Santiago.';
+            }
+        }
+
+        // Patch renderBarrasGrid to add favorites + annual projection
+        var _origRenderBarrasGrid = typeof renderBarrasGrid === 'function' ? renderBarrasGrid : null;
+        function renderBarrasGrid() {
+            var grid = document.getElementById('barrasGrid');
+            if (!S.filtered.length) {
+                grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><span>No se encontraron barras rentables con esta configuración.</span></div>';
+                return;
+            }
+            grid.innerHTML = S.filtered.map(function (b) {
+                var sel = S.sel && S.sel.id === b.id ? ' selected' : '';
+                var fav = isFav(b.id) ? 'active' : '';
+                var proj = annualProjection(b);
+                var annFmt = '$' + Math.round(proj.annualGain).toLocaleString('en-US') + ' USD/año';
+                var tirFmt = proj.tir.toFixed(1) + '%';
+                return '<div class="barra-card' + sel + '" data-id="' + b.id + '">' +
+                    '<div class="barra-header">' +
+                    '<div>' +
+                    '<div class="barra-name">' + b.name + '</div>' +
+                    (b.tension ? '<div class="barra-tension">' + b.tension + '</div>' : '') +
+                    '</div>' +
+                    '<div style="display:flex;align-items:center;gap:.35rem">' +
+                    '<button class="fav-btn ' + fav + '" data-fav="' + b.id + '" title="Guardar en favoritos">' + (isFav(b.id) ? '★' : '☆') + '</button>' +
+                    '<span class="risk-badge ' + riskClass(b.perfilRiesgo) + '">' + riskEmoji(b.perfilRiesgo) + ' ' + b.perfilRiesgo + '</span>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="barra-metrics">' +
+                    '<div><div class="bm-label"><span class="tip" data-tip="Cuánto ganás neto por cada ciclo completo de carga+descarga, descontando pérdidas por eficiencia y desgaste.">Ganancia neta</span></div><div class="bm-val" style="color:var(--green)">$' + b.gananciaNeta.toFixed(2) + ' USD</div></div>' +
+                    '<div><div class="bm-label"><span class="tip" data-tip="Retorno sobre la inversión por cada ciclo. Un ROI de 5% significa que ganás 5% del capital invertido en energía cada ciclo.">ROI/ciclo</span></div><div class="bm-val" style="color:var(--amber)">' + (b.roiPorCiclo !== null ? b.roiPorCiclo.toFixed(1) + '%' : '—') + '</div></div>' +
+                    '<div><div class="bm-label"><span class="tip" data-tip="Diferencia de precio entre compra y venta, ya descontando pérdidas por eficiencia de la batería y costo de desgaste.">Spread neto</span></div><div class="bm-val">' + b.spreadNeto.toFixed(2) + ' USD/MWh</div></div>' +
+                    '<div><div class="bm-label"><span class="tip" data-tip="Variabilidad del precio en esta barra. Alta volatilidad = más oportunidad pero más riesgo de que las ventanas cambien.">Volatilidad σ</span></div><div class="bm-val">' + b.volatilidad.toFixed(2) + '</div></div>' +
+                    '</div>' +
+                    '<div class="annual-row">📅 ' + CYCLES_PER_YEAR + ' ciclos/año → <span class="annual-val">' + annFmt + '</span> <span class="tir-badge">TIR ' + tirFmt + '</span></div>' +
+                    '<div class="barra-window">' +
+                    '<div class="win-chip win-charge">▼ Carga: ' + b.ventanaCarga.inicio + '–' + b.ventanaCarga.fin + ' · $' + b.ventanaCarga.costoProm.toFixed(1) + '</div>' +
+                    '<div class="win-chip win-discharge">▲ Venta: ' + b.ventanaDescarga.inicio + '–' + b.ventanaDescarga.fin + ' · $' + b.ventanaDescarga.precioProm.toFixed(1) + '</div>' +
+                    '</div>' +
+                    '<div class="barra-actions">' +
+                    '<button class="btn-sm btn-chart" data-action="chart" data-id="' + b.id + '">📈 Ver despacho</button>' +
+                    '<button class="btn-sm btn-ai" data-action="ai" data-id="' + b.id + '">✦ Analizar IA</button>' +
+                    '</div>' +
+                    '</div>';
+            }).join('');
+
+            // Favorites delegation
+            grid.querySelectorAll('.fav-btn').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    var id = btn.dataset.fav;
+                    toggleFav(id);
+                    btn.textContent = isFav(id) ? '★' : '☆';
+                    btn.classList.toggle('active', isFav(id));
+                });
+            });
+        }
+
+        // ── INVESTMENT SIMULATOR ──────────────────────────────────────────────────
+        function runInvSimulator() {
+            var capital = parseFloat(document.getElementById('invCapital').value) || 500000;
+            var ciclos = parseInt(document.getElementById('invCiclos').value) || 250;
+            var costPerMwh = parseFloat(document.getElementById('invCostPerMwh').value) || 250000;
+            CYCLES_PER_YEAR = ciclos;
+            CAPEX_PER_MWH = costPerMwh;
+
+            var sel = document.getElementById('invBarraSelect').value;
+            var barra = null;
+            if (sel === '_best') { barra = S.processed[0] || null; }
+            else { barra = S.processed.find(function (b) { return b.id === sel; }) || null; }
+
+            if (!barra) { document.getElementById('invMwh').textContent = 'Sin datos'; return; }
+
+            var installMwh = Math.floor(capital / costPerMwh * 1000) / 1000;
+            if (installMwh < 0.1) installMwh = 0.1;
+            var gainPerCycle = barra.spreadNeto * installMwh;
+            var annualGain = gainPerCycle > 0 ? gainPerCycle * ciclos : 0;
+            var tir = capital > 0 ? (annualGain / capital * 100) : 0;
+
+            document.getElementById('invMwh').textContent = installMwh.toFixed(1) + ' MWh';
+            document.getElementById('invAnual').textContent = '$' + Math.round(annualGain).toLocaleString('en-US') + ' USD/año';
+            document.getElementById('invTIR').textContent = tir.toFixed(1) + '%';
+
+            var cmp = document.getElementById('invCompare');
+            var cmpTxt = document.getElementById('invCompareText');
+            cmp.style.display = 'block';
+            var ufMsg = ufEquivalent(annualGain);
+            var colComment = tir > 20 ? '🔥 Retorno excepcional — supera ampliamente la renta fija y el mercado inmobiliario.' : tir > 10 ? '✅ Retorno atractivo — comparable a fondos de private equity en infraestructura.' : tir > 5 ? '📊 Retorno moderado — mejor que plazo fijo, similar a renta inmobiliaria.' : '⚠️ Retorno bajo con esta configuración — considera ajustar el BESS o la barra.';
+            cmpTxt.innerHTML = ufMsg + '<br><span style="opacity:.7">' + colComment + '</span>';
+
+            // Update barra cards annual projection
+            renderBarrasGrid();
+        }
+
+        // Populate selector and wire inputs
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(function () {
+                var sel = document.getElementById('invBarraSelect');
+                S.processed.forEach(function (b) {
+                    var opt = document.createElement('option');
+                    opt.value = b.id; opt.textContent = b.name + (b.tension ? ' (' + b.tension + ')' : '');
+                    sel.appendChild(opt);
+                });
+                runInvSimulator();
+            }, 800);
+
+            ['invCapital', 'invCiclos', 'invCostPerMwh', 'invBarraSelect'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) el.addEventListener('input', runInvSimulator);
+                if (el) el.addEventListener('change', runInvSimulator);
+            });
+        });
+
+        // Re-populate simulator select when data loads (may be after DOMContentLoaded)
+        var _origRenderAll = typeof renderAll === 'function' ? renderAll : null;
+        var renderAll = function () {
+            if (_origRenderAll) _origRenderAll();
+            // Repopulate simulator barra select
+            var sel = document.getElementById('invBarraSelect');
+            if (!sel) return;
+            while (sel.options.length > 1) sel.remove(1);
+            S.processed.forEach(function (b) {
+                var opt = document.createElement('option');
+                opt.value = b.id; opt.textContent = b.name + (b.tension ? ' (' + b.tension + ')' : '');
+                sel.appendChild(opt);
+            });
+            runInvSimulator();
+        };
+    </script>
+</body>
+
+</html>

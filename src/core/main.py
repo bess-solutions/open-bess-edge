@@ -122,6 +122,10 @@ log: structlog.BoundLogger = structlog.get_logger(__name__)
 # ---------------------------------------------------------------------------
 _DRL_MODEL_PATH: str = os.getenv("BESSAI_DRL_MODEL_PATH", "models/drl_arbitrage_v1.onnx")
 _DRL_ENABLED: bool = os.getenv("BESSAI_DRL_ENABLED", "false").lower() == "true"
+# BEP-0300: activar escritura de setpoints DRL al inversor (opt-in explícito)
+# Requiere BESSAI_DRL_ENABLED=true + BESSAI_DRL_WRITE=true.
+# La escritura solo ocurre si SafetyGuard aprueba el ciclo.
+_DRL_WRITE_ENABLED: bool = os.getenv("BESSAI_DRL_WRITE", "false").lower() == "true"
 _WATCHDOG_MANAGER_ENABLED: bool = os.getenv("BESSAI_WATCHDOG_ENABLED", "true").lower() == "true"
 
 # ---------------------------------------------------------------------------
@@ -550,7 +554,9 @@ async def main() -> None:  # noqa: C901
                             error=str(exc),
                             action="continuing_without_mqtt_this_cycle",
                         )
-                # ── STEP 4c: DRL Arbitrage setpoint (BEP-0200, observe-only) ─
+                # ── STEP 4c: DRL Arbitrage setpoint (BEP-0200 / BEP-0300) ────
+                # BEP-0200: observe-only mode  (BESSAI_DRL_WRITE=false, default)
+                # BEP-0300: active dispatch     (BESSAI_DRL_WRITE=true, opt-in)
                 if _drl_agent is not None and "soc" in telemetry:
                     import numpy as np  # local import — optional for edge
 
@@ -573,21 +579,51 @@ async def main() -> None:  # noqa: C901
                         dtype=np.float32,
                     )
                     _p_pu, _drl_info = _drl_agent.predict(_obs)
-                    _p_kw = (
-                        _p_pu * _cfg.MAX_CONTINUOUS_DISCHARGE_KW  # type: ignore[attr-defined]
+                    _max_kw: float = (
+                        float(_cfg.MAX_CONTINUOUS_DISCHARGE_KW)  # type: ignore[attr-defined]
                         if hasattr(_cfg, "MAX_CONTINUOUS_DISCHARGE_KW")  # type: ignore[attr-defined]
-                        else _p_pu * 100.0
+                        else 100.0
                     )
-                    log.info(
-                        "drl_agent.setpoint",
-                        cycle=cycle,
-                        p_pu=round(_p_pu, 3),
-                        p_kw=round(_p_kw, 1),
-                        source=_drl_info.get("source", "unknown"),
-                        rule=_drl_info.get("rule", ""),
-                        soc_pct=round(_soc * 100, 1),
-                        note="observe-only — write_tag integration in BEP-0200 Phase 4",
-                    )
+                    _p_kw = _p_pu * _max_kw
+
+                    if _DRL_WRITE_ENABLED and is_safe:
+                        # BEP-0300: active dispatch — write setpoint to inverter
+                        # Guard: clamp to [-max_kw, +max_kw] before writing
+                        _p_kw_clamped = max(-_max_kw, min(_max_kw, _p_kw))
+                        try:
+                            await driver.write_tag("active_power_setpoint", _p_kw_clamped)
+                            log.info(
+                                "drl_agent.setpoint_written",
+                                cycle=cycle,
+                                p_pu=round(_p_pu, 3),
+                                p_kw=round(_p_kw_clamped, 1),
+                                source=_drl_info.get("source", "unknown"),
+                                rule=_drl_info.get("rule", ""),
+                                soc_pct=round(_soc * 100, 1),
+                                bep="BEP-0300-active",
+                            )
+                        except Exception as _write_exc:
+                            log.error(
+                                "drl_agent.write_tag_failed",
+                                cycle=cycle,
+                                error=str(_write_exc),
+                                action="setpoint_not_applied",
+                            )
+                    else:
+                        # BEP-0200: observe-only — log setpoint but do NOT write
+                        log.info(
+                            "drl_agent.setpoint",
+                            cycle=cycle,
+                            p_pu=round(_p_pu, 3),
+                            p_kw=round(_p_kw, 1),
+                            source=_drl_info.get("source", "unknown"),
+                            rule=_drl_info.get("rule", ""),
+                            soc_pct=round(_soc * 100, 1),
+                            bep="BEP-0200-observe-only",
+                            tip="Set BESSAI_DRL_WRITE=true in .env for BEP-0300 active dispatch"
+                            if not _DRL_WRITE_ENABLED
+                            else "Not writing: safety guard blocked this cycle",
+                        )
 
                 CYCLES_TOTAL.labels(site_id=_cfg.SITE_ID).inc()
                 LAST_CYCLE_DURATION_S.labels(site_id=_cfg.SITE_ID).set(
