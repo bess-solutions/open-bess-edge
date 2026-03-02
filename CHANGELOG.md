@@ -43,9 +43,36 @@
 - **docs/adopters.md**: fecha actualizada 2026-03-02; link a ADOPTER_HUB
 
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-28T14:45 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-03-02T19:05 -03:00)
 
-## v2.14.0 — Arquitectura Senior 5.0 (2026-02-28)
+> [!IMPORTANT]
+> **Sprint 2026-03-02 — Adopter Documentation Wave 7 + Auditoría de Seguridad Completa**
+>
+> El repositorio `open-bess-edge` completó un sprint enfocado en **reducir la fricción de adopción** y asegurar el repositorio público. Todo empujado a `main`.
+
+### ✅ Completado en esta sesión (commit range: `2d48b0c` → `1a03abc`)
+
+| Área | Entregables | Commit |
+|------|-------------|--------|
+| **Setup** | `scripts/setup.sh` — config/.env interactivo en 2 min; `make setup` + `make onboard` | `9ebbd1d` |
+| **Docs Adopción** | `ADOPTER_HUB.md` · `ONBOARDING_7DAYS.md` · `FAQ.md` · `CONTRIBUTING_ADOPTERS.md` | `4d91dd2` |
+| **Templates** | `.github/ISSUE_TEMPLATE/adopter_support.yml` · `.github/DISCUSSION_TEMPLATE/early_adopter_intro.yml` | `4d91dd2` |
+| **Navegación** | mkdocs.yml: `Para Adopters` como primera sección (6 docs) | `9ebbd1d` |
+| **Seguridad** | docker-compose.yml: `GF_SECURITY_ADMIN_PASSWORD` env var; erradicación total `admin/bessai` | `f294f0a` |
+| **Auditoría docs** | 79 docs auditados · fix 2×AGPL-3.0 bug · fix 2×`cp .env.example` roto · 12+ versiones sincronizadas | `1a03abc` |
+| **Blog** | `bessai-web/blog.html`: OBE-DOC-001 agregado (push manual pendiente por workspace) | local |
+
+### 🔜 Próximas prioridades (v2.15.0)
+
+1. `src/interfaces/server.py` → mount en `main.py` reemplazando `HealthServer`
+2. `src/core/cen_sc_bidder.py` → integrar en main loop post-ComplianceStack
+3. Datos reales CEN → entrenar PPO 500k steps → `models/dispatch_policy.onnx` real
+4. Activar `CENSCBidder` en producción (`dry_run=False` post-registro CEN)
+5. FleetOrchestrator: añadir sitios 2+3 (VPP multi-site activo)
+6. **Push blog.html**: `cd bessai-web && git add blog.html && git commit -m "blog: OBE-DOC-001" && git push`
+
+---
+
 
 > [!IMPORTANT]
 > **Sprint v2.14.0 — BESSAIServer unificado, SC bidder automático CEN, BEP-0200 Phase 3 PPO**
