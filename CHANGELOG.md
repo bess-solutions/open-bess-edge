@@ -82,6 +82,7 @@
 
 
 ### 📚 Documentation
+- complete early adopter documentation package (`ba4474e3`, @BESS Solutions)
 - **edge**: v2.12.0 PROJECT_STATUS sync 2026-03-02 (`738010a4`, @BESS Solutions)
 - add BENCHMARK_RESULTS.md with complete benchmark data, CEN correlation Maitencillo_220, methodology and SHAP explainability (`43725aff`, @BESS Solutions)
 - expand PILOT_GUIDE.md to v2.14.0 — hardware reqs, SC bidder, PPO training, timeline (`50481c51`, @BESSAI sec-ingestor)
