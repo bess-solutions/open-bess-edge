@@ -151,7 +151,7 @@ Contenedores adicionales:
 | Contenedor | URL | Credenciales |
 |---|---|---|
 | Prometheus | http://localhost:9090 | — |
-| Grafana | http://localhost:3000 | admin / bessai |
+| Grafana | http://localhost:3000 | ver `GF_SECURITY_ADMIN_PASSWORD` en `config/.env` |
 
 ### En Grafana:
 1. Abre http://localhost:3000

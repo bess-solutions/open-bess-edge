@@ -77,7 +77,7 @@ docker compose -f infrastructure/docker/docker-compose.yml \
 # Verify
 curl http://localhost:8000/health      # Gateway health
 curl http://localhost:8000/metrics     # Prometheus metrics
-# Grafana: http://localhost:3000 (admin / bessai)
+# Grafana: http://localhost:3000 (credenciales: ver GF_SECURITY_ADMIN_PASSWORD en config/.env)
 ```
 
 ---

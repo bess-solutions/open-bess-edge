@@ -138,7 +138,7 @@ docker compose -f infrastructure/docker/docker-compose.yml --profile simulator -
 # Verificar:
 curl http://localhost:8000/health    # gateway health
 curl http://localhost:8000/metrics   # prometheus metrics
-# Grafana:    http://localhost:3000   (admin / bessai)
+# Grafana:    http://localhost:3000   (ver GF_SECURITY_ADMIN_PASSWORD en config/.env)
 # Prometheus: http://localhost:9090
 ```
 

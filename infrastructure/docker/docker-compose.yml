@@ -36,7 +36,7 @@
 #   #   /health    → http://localhost:8000/health
 #   #   /metrics   → http://localhost:8000/metrics
 #   #   Prometheus → http://localhost:9090
-#   #   Grafana    → http://localhost:3000  (admin / bessai)
+#   #   Grafana    → http://localhost:3000  (credenciales: ver GF_SECURITY_ADMIN_PASSWORD en config/.env)
 # =============================================================================
 
 version: "3.9"
@@ -192,7 +192,7 @@ services:
     restart: unless-stopped
     environment:
       GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: bessai
+      GF_SECURITY_ADMIN_PASSWORD: "${GF_SECURITY_ADMIN_PASSWORD:-changeme_on_first_login}"
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
     volumes:
