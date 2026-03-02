@@ -105,6 +105,7 @@
 
 
 ### 📚 Documentation
+- final deep-audit — fix AGPL bug in research_topics, date sync (`1a03abc5`, @BESS Solutions)
 - deep audit batch — version sync, setup.sh, arch diagram (`f541687a`, @BESS Solutions)
 - final audit — fix license bug, update versions, complete CHANGELOG (`e0d64648`, @BESS Solutions)
 - mass update — version fixes, adopter links, security cleanup (`a5a80c46`, @BESS Solutions)
