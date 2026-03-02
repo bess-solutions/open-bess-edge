@@ -42,4 +42,4 @@ Organizations using BESSAI in academic or R&D contexts.
 
 ---
 
-*Last updated: 2026-02-22*
+*Last updated: 2026-03-02 · [Adopter Hub →](ADOPTER_HUB.md)*

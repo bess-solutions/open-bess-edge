@@ -1,6 +1,6 @@
 # Programa Early Adopters — BESSAI Edge Gateway
 
-> **Última actualización**: Febrero 2026 · **Estado**: 🟢 Activo — aceptando postulaciones
+> **Última actualización**: Marzo 2026 · **Estado**: 🟢 Activo — aceptando postulaciones
 
 ---
 
@@ -52,7 +52,7 @@ Para ser aceptado como Early Adopter, se requiere:
 - [ ] Disponibilidad para proporcionar feedback estructurado mínimo 1 vez al mes
 - [ ] Acuerdo de no utilizar el proyecto en entornos críticos sin las debidas precauciones y validaciones locales
 
-> ⚠️ BESSAI Edge Gateway es un proyecto **open source en desarrollo activo**. El programa Early Adopters implica aceptar las condiciones de la [Licencia AGPL-3.0](../LICENSE) y el [Código de Conducta](../CODE_OF_CONDUCT.md).
+> ⚠️ BESSAI Edge Gateway es un proyecto **open source en desarrollo activo**. El programa Early Adopters implica aceptar las condiciones de la [Licencia Apache 2.0](../LICENSE) y el [Código de Conducta](../CODE_OF_CONDUCT.md).
 
 ---
 
@@ -60,37 +60,14 @@ Para ser aceptado como Early Adopter, se requiere:
 
 ### Opción A: GitHub Discussion (recomendado)
 
-1. Ir a [GitHub Discussions → Early Adopters](https://github.com/bess-solutions/open-bess-edge/discussions/categories/early-adopters)
-2. Crear una nueva Discussion con el siguiente template:
+1. Ve a [GitHub Discussions → Early Adopters](https://github.com/bess-solutions/open-bess-edge/discussions/new?category=early-adopters)
+2. Usa el template **"Early Adopter Introduction"** — te guiará con preguntas estructuradas sobre tu hardware, caso de uso y mercado.
 
-```markdown
-**Organización / Nombre:**
-**País / Ciudad:**
-**Categoría:** (Integrador / Utilities / Empresa energía / Academia / Fabricante)
-
-**Hardware disponible:**
-- Marca/modelo inversor:
-- Capacidad BESS (kWh):
-- ¿Hardware en producción o laboratorio?:
-
-**Caso de uso:**
-(Breve descripción del escenario donde usarías BESSAI — ej: "Sistema solar + BESS de 100 kWh,
-quiero optimizar el despacho против precios spot del mercado chileno")
-
-**Experiencia técnica:**
-- Python: (básico / intermedio / avanzado)
-- Docker: (sí / no)
-- Modbus / protocolos industriales: (sí / no)
-
-**¿Qué te interesa más de BESSAI?**
-(DRL arbitrage / interoperabilidad / seguridad IEC 62443 / VPP / otro)
-
-**¿Tienes equipo técnico propio o trabajarías solo?**
-```
+> 💡 El template está en `.github/DISCUSSION_TEMPLATE/early_adopter_intro.yml` — cubre organización, hardware, mercado, experiencia técnica y caso de uso.
 
 ### Opción B: Email directo
 
-Escríbenos a `early-adopters@bessai.io` con el mismo template.
+Escríbenos a `early-adopters@bessai.io` describiendo brevemente tu hardware y caso de uso.
 
 ---
 

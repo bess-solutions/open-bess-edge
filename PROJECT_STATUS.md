@@ -1,6 +1,6 @@
 ﻿# 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-03-02 v2.12.0 · **Responsable:** BESS Solutions SpA  
+> **Actualizado:** 2026-03-02 v2.14.0 · **Responsable:** BESS Solutions SpA  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---

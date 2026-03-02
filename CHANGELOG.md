@@ -17,8 +17,31 @@
 - **models/training_summary.json**: agregado explícitamente a `.gitignore`
 - **Makefile**: `make dev` activa el hook de seguridad automáticamente; eliminada última referencia `admin/bessai`
 - **scripts/install_hooks.sh**: instalación de hooks en un comando para nuevos colaboradores
+- **infrastructure/docker/docker-compose.yml**: `GF_SECURITY_ADMIN_PASSWORD` ahora usa variable de entorno con fallback `changeme_on_first_login`
+- **Eradicación total**: `admin/bessai` eliminado de `CONTRIBUTING.md`, `PROJECT_STATUS.md`, `docs/local_development.md`, `README.md`
 
----
+### 📚 Docs — Wave 7: Adopter Documentation Package (2026-03-02)
+- **docs/ADOPTER_HUB.md** (NEW): Hub central de adopción con decision tree — probar / desplegar / contribuir
+- **docs/ONBOARDING_7DAYS.md** (NEW): Roadmap día 0 → producción con hardware real + IA activa
+- **docs/FAQ.md** (NEW): FAQ técnica — hardware alternativo, mercados LATAM/globales, licencia, troubleshooting
+- **docs/CONTRIBUTING_ADOPTERS.md** (NEW): Guía del primer PR para adopters (perfiles hw, bug reports, docs)
+- **scripts/setup.sh** (NEW): Setup interactivo — 5 preguntas → `config/.env` generado con password Grafana auto
+- **.github/ISSUE_TEMPLATE/adopter_support.yml** (NEW): Template soporte onboarding
+- **.github/DISCUSSION_TEMPLATE/early_adopter_intro.yml** (NEW): Formulario postulación Early Adopters
+- **mkdocs.yml**: sección `Para Adopters` como primera pestaña de navegación (6 docs)
+- **Makefile**: targets `make setup` y `make onboard` — setup interactivo + hooks en un comando
+- **README.md**: sección `Para Early Adopters` visible al tope + Quick Start con `setup.sh` como paso 0
+- **docs/index.md**: sección Early Adopters con tabla de rutas de adopción
+- **docs/early_adopters.md**: fix licencia AGPL-3.0 → Apache 2.0 (bug); template → link a DISCUSSION_TEMPLATE
+- **docs/tutorials/quickstart_5min.md**: eliminada referencia hardcoded `admin/bessai`
+- **docs/tutorials/connecting_real_hardware.md**: link roto `bounty_program.md` corregido
+- **docs/quickstart_rpi.md**: `setup.sh` como paso de configuración; links adopción en próximos pasos
+- **docs/runbook.md**: versión v1.4.0 → v2.14.0; sección Recursos para adopters
+- **docs/local_development.md**: versión v0.4.1 → v2.14.0; `setup.sh` como primer paso
+- **docs/BENCHMARK_RESULTS.md**: licencia MIT → Apache 2.0
+- **docs/ROADMAP.md**: Wave 7 documentada; pendientes actualizados
+- **docs/adopters.md**: fecha actualizada 2026-03-02; link a ADOPTER_HUB
+
 
 ## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-02-28T14:45 -03:00)
 
