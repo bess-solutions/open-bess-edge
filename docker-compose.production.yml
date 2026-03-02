@@ -55,7 +55,8 @@ services:
     container_name: bessai-grafana
     restart: unless-stopped
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=bessai2026
+      # ⚠️  Set GF_SECURITY_ADMIN_PASSWORD in config/.env — NEVER hardcode here
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana_data:/var/lib/grafana
