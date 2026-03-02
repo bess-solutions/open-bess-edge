@@ -82,6 +82,7 @@
 
 
 ### 📚 Documentation
+- mass update — version fixes, adopter links, security cleanup (`a5a80c46`, @BESS Solutions)
 - **adopters**: friction reduction — setup targets, contributing guide, README fixes (`9ebbd1d0`, @BESS Solutions)
 - complete early adopter documentation package (`ba4474e3`, @BESS Solutions)
 - **edge**: v2.12.0 PROJECT_STATUS sync 2026-03-02 (`738010a4`, @BESS Solutions)
