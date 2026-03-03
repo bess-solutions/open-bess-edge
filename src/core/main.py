@@ -14,7 +14,7 @@ Entry point for the async acquisition loop.  Brings together:
 4. ``SafetyGuard``      — validates telemetry before forwarding.
 5. ``PubSubPublisher``  — publishes safe telemetry to GCP Pub/Sub.
 6. ``watchdog_loop``    — background heartbeat task (auto-restarted if it dies).
-7. ``HealthServer``     — HTTP /health + /metrics endpoints on port 8000.
+7. ``BESSAIServer``     — Unified HTTP server: /health, /metrics, /compliance/*, /fleet/*, /api/v1/* on port 8000.
 8. ``WatchdogManager``  — autonomous self-healing reconnection loop (Plan Inmortalidad Eje 1).
 
 Lifecycle
@@ -54,7 +54,7 @@ from src.core.safety import SafetyGuard
 from src.drivers.base import DataProvider
 from src.drivers.modbus_driver import UniversalDriver
 from src.drivers.simulator_driver import SimMode, SimulatorDriver
-from src.interfaces.health import HealthServer
+from src.interfaces.server import BESSAIServer
 from src.interfaces.metrics import (
     CYCLES_TOTAL,
     GATEWAY_INFO,
@@ -294,8 +294,8 @@ async def main() -> None:  # noqa: C901
     else:
         log.debug("watchdog_manager.disabled", tip="Set BESSAI_WATCHDOG_ENABLED=true to enable")
 
-    # ── Step 5b — Health & Metrics server ────────────────────────────────
-    health_server = HealthServer(
+    # ── Step 5b — Unified API Server (v2.15.0 — BESSAIServer replaces HealthServer) ──
+    health_server = BESSAIServer(
         site_id=_cfg.SITE_ID,
         version=_GATEWAY_VERSION,
         port=_cfg.HEALTH_PORT,
@@ -487,16 +487,22 @@ async def main() -> None:  # noqa: C901
                         action="HALTING_PUBLISH — manual intervention required",
                     )
                     SAFETY_BLOCKS_TOTAL.labels(site_id=_cfg.SITE_ID, reason="out_of_range").inc()
-                    health_server.safety_status = "BLOCKED"
-                    health_server.last_cycle_ok = False
+                    health_server.set_cycle(cycle, ok=False, safety_status="BLOCKED")
                     await asyncio.sleep(_cfg.WATCHDOG_TIMEOUT)
                     continue
 
-                # ── STEP 2b: NTSyCS Compliance (v2.12.0) ──────────────────
+                # ── STEP 2b: NTSyCS Compliance (v2.15.0) ──────────────────
                 if _compliance_stack is not None:
                     try:
                         _compliance_result = _compliance_stack.run_cycle(telemetry)
                         span.set_attribute("compliance_ok", _compliance_result.all_ok)
+                        # Feed compliance state into BESSAIServer (/compliance/* endpoints)
+                        health_server.set_compliance_state(
+                            all_ok=_compliance_result.all_ok,
+                            score=getattr(_compliance_result, "score", 100.0 if _compliance_result.all_ok else 0.0),
+                            violations=list(getattr(_compliance_result, "violations", [])),
+                            cycle=cycle,
+                        )
                         if not _compliance_result.all_ok:
                             log.warning(
                                 "compliance.violations",
@@ -511,7 +517,7 @@ async def main() -> None:  # noqa: C901
                             action="continuing — compliance non-blocking",
                         )
 
-                health_server.safety_status = "ok"
+                health_server.set_cycle(cycle, ok=True, safety_status="ok")
 
                 # ── STEP 3: Watchdog ──────────────────────────────────────
                 _ensure_watchdog(guard, driver, watchdog_ref)
@@ -629,8 +635,14 @@ async def main() -> None:  # noqa: C901
                 LAST_CYCLE_DURATION_S.labels(site_id=_cfg.SITE_ID).set(
                     time.monotonic() - cycle_start
                 )
-                health_server.last_cycle = cycle
-                health_server.last_cycle_ok = True
+                # Feed telemetry into BESSAIServer (/api/v1/telemetry endpoint)
+                health_server.set_telemetry({
+                    "site_id": _cfg.SITE_ID,
+                    "soc_pct": float(telemetry.get("soc", 0.0)),
+                    "p_kw": float(telemetry.get("active_power", 0.0)) / 1000.0,
+                    "temp_c": float(telemetry.get("temp_c", 25.0)),
+                    "safety_ok": is_safe,
+                })
 
                 # ── STEP 5: Ritmo ─────────────────────────────────────────
                 await asyncio.sleep(_cfg.WATCHDOG_TIMEOUT)
