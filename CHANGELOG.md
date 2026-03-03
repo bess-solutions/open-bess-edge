@@ -154,6 +154,7 @@
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
+- repair 6 broken internal links (exhaustive link scan) (`1790f17e`, @BESS Solutions)
 - remove broken image in quickstart_5min.md (`aeedafdb`, @BESS Solutions)
 - **mkdocs**: remove nav duplicates found in pre-close review (`434f394f`, @BESS Solutions)
 - **tariffs**: tarifas GDMTH reales DOF agosto 2025 - BASE 0.9649 INTER 1.8829 PUNTA 2.1757 MXN/kWh cargo demanda 102.05/kW (`7b388db1`, @BESS Solutions)
