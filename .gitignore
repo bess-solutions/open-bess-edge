@@ -117,6 +117,11 @@ infrastructure/certs/ca.key
 # Public certs are safe to commit (no secret material)
 # infrastructure/certs/*.crt  ← intentionally NOT ignored
 
+# Kubernetes secrets — MUST NOT be committed (Agente del Orden)
+infrastructure/k8s/secrets.yaml
+infrastructure/k8s/secrets.yaml.template
+infrastructure/k8s/*-secret*.yaml
+
 # ---------------------------------------------------------------------------
 # BESS Solutions proprietary files — MUST NOT be in the public repo
 # PI Protection Policy v1.1 — 2026-02-28
