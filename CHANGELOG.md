@@ -144,6 +144,7 @@
 
 
 ### 📚 Documentation
+- **edge**: v2.12.0 PROJECT_STATUS sync 2026-03-03 (`95ce9a5d`, @BESS Solutions)
 - final deep-audit — fix AGPL bug in research_topics, date sync (`1a03abc5`, @BESS Solutions)
 - deep audit batch — version sync, setup.sh, arch diagram (`f541687a`, @BESS Solutions)
 - final audit — fix license bug, update versions, complete CHANGELOG (`e0d64648`, @BESS Solutions)
