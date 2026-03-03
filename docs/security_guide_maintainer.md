@@ -246,8 +246,8 @@ Complete this checklist before your first merge:
 ## References
 
 - [OpenSSF Best Practices — Gold Badge](https://bestpractices.dev/en/criteria/2)
-- [IEC 62443-3-3 Security Level 2](docs/compliance/iec_62443_sl2_certification_path.md)
-- [PSIRT Process](docs/compliance/psirt_process.md)
-- [OpenSSF Gold Checklist](openssf_gold_checklist.md)
+- [IEC 62443-3-3 Security Level 2](compliance/iec_62443_sl2_certification_path.md)
+- [PSIRT Process](compliance/psirt_process.md)
+- [OpenSSF Gold Checklist](https://bestpractices.dev/en/criteria/2#criteria_met)
 - [SLSA Framework](https://slsa.dev/)
 - [Sigstore / cosign](https://docs.sigstore.dev/)

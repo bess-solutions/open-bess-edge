@@ -43,7 +43,7 @@ Certification means:
 
 ### 🎯 Wanted — Open for Community Contribution (Hackathon 2026)
 
-The following devices are high-priority targets for the [BESSAI Hackathon 2026](../outreach/HACKATHON_BESSAI_2026.md). Open a PR to add them!
+The following devices are high-priority targets for the [BESSAI Community Hackathon](https://github.com/bess-solutions/open-bess-edge/discussions). Open a PR to add them!
 
 | Device | Manufacturer | Protocol | Complexity | Issue |
 |---|---|---|---|---|

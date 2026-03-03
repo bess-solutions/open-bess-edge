@@ -94,7 +94,7 @@ curl http://localhost:8000/health
 # → {"status": "healthy", "site_id": "SITE-CL-001", "uptime_s": 12.3}
 ```
 
-→ See the full [Quick Start guide](quickstart.md)
+→ See the full [Quick Start guide](tutorials/quickstart_5min.md)
 
 ---
 

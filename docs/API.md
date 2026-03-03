@@ -155,7 +155,7 @@ The gateway acts as a SEP 2.0 **DER** end device and accepts:
 - `PricingProgram` signals (for arbitrage)
 - `MessagingProgram` notifications
 
-See [`docs/SEP2.md`](SEP2.md) for full endpoint and resource documentation.
+See [`bep/BEP-0100.md`](bep/BEP-0100.md) (IEEE 2030.5 Adapter BEP) for full endpoint and resource documentation.
 
 ---
 
