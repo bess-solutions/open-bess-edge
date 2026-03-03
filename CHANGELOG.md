@@ -10,6 +10,18 @@
 
 ## [Unreleased]
 
+### 🚀 Feat — v2.15.0: BESSAIServer integrado en main.py (2026-03-02)
+- **src/core/main.py**: `HealthServer` reemplazado por `BESSAIServer` — 8 endpoints activos en el loop productivo
+  - `GET /health` → liveness + safety + compliance_score por ciclo
+  - `GET /compliance/status` + `GET /compliance/report` → NTSyCS estado en tiempo real (fed desde `ComplianceStack.run_cycle()`)
+  - `GET /fleet/summary` + `GET /fleet/sites` → KPIs VPP multi-sitio listos para FleetOrchestrator
+  - `GET /api/v1/telemetry` → snapshot SOC, P(kW), T(°C) último ciclo
+  - `set_cycle(cycle, ok, safety_status)` — actualiza cada ciclo (incluyendo SAFETY_BLOCK path)
+  - `set_compliance_state(all_ok, score, violations, cycle)` — compliance en tiempo real en `/compliance/status`
+  - `set_telemetry({soc_pct, p_kw, temp_c, safety_ok})` — telemetría REST viva en `/api/v1/telemetry`
+- **Commit:** `420a93d` — `feat(v2.15.0): mount BESSAIServer in main.py — 8 endpoints active`
+- **Backwards compatible:** `HealthServer` sigue activo para `tests/test_health.py` (unit tests intactos)
+
 ### 🔐 Security — PI Protection Policy v1.2 (2026-03-02)
 - **pre-commit hook**: `.githooks/pre-commit` bloquea ONNX, `.env`, certificados, tarifas y credenciales antes de cada commit
 - **git filter-repo**: historial completo purgado — `dispatch_policy.onnx`, `training_summary.json`, `gdmth_mexico.json` eliminados de todos los commits anteriores
