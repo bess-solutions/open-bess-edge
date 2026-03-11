@@ -36,11 +36,14 @@ Usage::
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import structlog
 
 from .cmg_predictor import PriceForecast
+
+if TYPE_CHECKING:
+    from .ancillary_services import AncillaryStack
 
 __all__ = ["ArbitrageEngine", "ArbitrageSchedule", "DispatchSlot"]
 
@@ -117,6 +120,15 @@ class ArbitrageSchedule:
     n_discharge_hours: int = 0
     capacity_kwh: float = 1000.0
     efficiency: float = 0.92
+    # Revenue Stacking fields (v2.15)
+    ancillary_revenue_clp: float = 0.0
+    total_stacked_revenue_clp: float = 0.0
+    revenue_breakdown: dict = None  # type: ignore[assignment]
+    ancillary_stack: object = None  # AncillaryStack | None
+
+    def __post_init__(self):
+        if self.revenue_breakdown is None:
+            self.revenue_breakdown = {}
 
     def summary(self) -> str:
         lines = [
@@ -126,11 +138,14 @@ class ArbitrageSchedule:
             f"  Cost:      CLP {self.projected_cost_clp:,.0f}",
             f"  Net:       CLP {self.projected_net_clp:,.0f}",
         ]
+        if self.ancillary_revenue_clp:
+            lines.append(f"  Ancillary: CLP {self.ancillary_revenue_clp:,.0f}")
+            lines.append(f"  STACKED:   CLP {self.total_stacked_revenue_clp:,.0f}")
         return "\n".join(lines)
 
     def to_api_dict(self) -> dict:
         """Serializable dict for REST API /api/v1/schedule endpoint."""
-        return {
+        base = {
             "node": self.node,
             "capacity_kwh": self.capacity_kwh,
             "efficiency": self.efficiency,
@@ -143,6 +158,11 @@ class ArbitrageSchedule:
                 slot.to_dict() for slot in sorted(self.slots, key=lambda s: s.hour)
             ],
         }
+        if self.ancillary_revenue_clp or self.revenue_breakdown:
+            base["ancillary_revenue_clp"] = round(self.ancillary_revenue_clp)
+            base["total_stacked_revenue_clp"] = round(self.total_stacked_revenue_clp)
+            base["revenue_breakdown"] = self.revenue_breakdown
+        return base
 
 
 class ArbitrageEngine:
@@ -171,6 +191,8 @@ class ArbitrageEngine:
         node: str = "unknown",
         min_confidence: float = 0.4,
         min_spread_clp: float = 30.0,
+        enable_revenue_stacking: bool = False,
+        usd_clp_rate: float = 950.0,
     ) -> None:
         self.capacity_kwh = capacity_kwh
         self.max_power_kw = max_power_kw
@@ -181,8 +203,10 @@ class ArbitrageEngine:
         self.max_discharge_hours = max_discharge_hours
         self.node = node
         # v2 uncertainty controls
-        self.min_confidence = min_confidence  # skip hours below this confidence
-        self.min_spread_clp = min_spread_clp  # min price spread to trade (p90_max - p10_min)
+        self.min_confidence = min_confidence
+        self.min_spread_clp = min_spread_clp
+        self.enable_revenue_stacking = enable_revenue_stacking
+        self.usd_clp_rate = usd_clp_rate
 
     # ── Core computation ──────────────────────────────────────────────────────
 
@@ -316,7 +340,7 @@ class ArbitrageEngine:
             effective_spread=round(effective_spread, 1),
         )
 
-        return ArbitrageSchedule(
+        schedule = ArbitrageSchedule(
             node=self.node,
             slots=slots,
             projected_revenue_clp=round(total_revenue * 1000),
@@ -327,6 +351,34 @@ class ArbitrageEngine:
             capacity_kwh=self.capacity_kwh,
             efficiency=self.efficiency,
         )
+        if self.enable_revenue_stacking:
+            schedule = self._apply_revenue_stacking(
+                schedule=schedule,
+                current_soc_pct=current_soc_pct,
+                arbitrage_peak_kw=float(self.max_power_kw * len(discharge_hours) / max(len(slots), 1)),
+            )
+        return schedule
+
+    def _apply_revenue_stacking(self, schedule, current_soc_pct, arbitrage_peak_kw):
+        """Allocate residual capacity to ancillary services and annotate schedule."""
+        from .ancillary_services import CapacityAllocator
+        allocator = CapacityAllocator(
+            capacity_kwh=self.capacity_kwh,
+            max_power_kw=self.max_power_kw,
+            usd_clp_rate=self.usd_clp_rate,
+        )
+        stack = allocator.allocate(
+            soc_pct=current_soc_pct,
+            arbitrage_reserved_kw=arbitrage_peak_kw,
+        )
+        ancillary_daily_clp = stack.total_revenue_clp_per_hour * 24
+        breakdown = {"arbitrage": round(schedule.projected_net_clp)}
+        breakdown.update({k: round(v * 24) for k, v in stack.revenue_breakdown.items()})
+        schedule.ancillary_revenue_clp = round(ancillary_daily_clp)
+        schedule.total_stacked_revenue_clp = round(schedule.projected_net_clp + ancillary_daily_clp)
+        schedule.revenue_breakdown = breakdown
+        schedule.ancillary_stack = stack
+        return schedule
 
     def _all_hold_schedule(
         self,
