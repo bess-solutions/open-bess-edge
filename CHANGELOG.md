@@ -175,6 +175,7 @@
 - **quality**: remediacion completa Pyright 0 errores + Bandit 0 alertas Medium/High (`bbb366cc`, @BESS Solutions)
 
 ### 🔧 Maintenance
+- **release**: transversal BESSAI ecosystem iteration (`70015031`, @BESS Solutions)
 - untrack secrets.yaml.template, add k8s secrets pattern to .gitignore - Agente del Orden (`b271c549`, @BESS Solutions)
 - remove mypy_output_v2.txt analysis artifact from tracking (`c1bd7c0b`, @BESS Solutions)
 - **repo**: remover website/ del tracking + actualizar .gitignore (`6bfc2eae`, @BESS Solutions)
