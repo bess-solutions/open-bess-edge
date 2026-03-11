@@ -1,6 +1,6 @@
 ﻿# 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-03-02 v2.14.0 · **Responsable:** BESS Solutions SpA  
+> **Actualizado:** 2026-03-11 v2.14.0 · **Responsable:** BESS Solutions SpA  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -20,7 +20,7 @@ Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivad
 
 ### Tests
 ```
-685 passed ✅  · 0 failed · 6 skipped · ~32s              mypy: 0 errores ✅
+526 passed ✅  · 0 failed · 8 skipped
 Nuevo: test_bessai_evolve_v2.py — 24/24 CMAESMutator + NSGA-II + EliteArchive ✅
 Nuevo: test_bess_rl_env_cen.py — 23/23 BEP-0200 F3 (env CMg real CEN) ✅
 Nuevo: test_milp_optimizer.py — 14/14 MILP optimizer ✅
