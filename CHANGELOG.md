@@ -144,6 +144,7 @@
 
 
 ### 📚 Documentation
+- **edge**: v2.14.0 PROJECT_STATUS sync 2026-03-11 (`3eed376f`, @BESS Solutions)
 - **edge**: v2.14.0 PROJECT_STATUS sync 2026-03-04 (`4ef8fd8d`, @BESS Solutions)
 - **edge**: v2.12.0 PROJECT_STATUS sync 2026-03-03 (`95ce9a5d`, @BESS Solutions)
 - final deep-audit — fix AGPL bug in research_topics, date sync (`1a03abc5`, @BESS Solutions)
