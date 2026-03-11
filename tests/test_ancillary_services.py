@@ -14,14 +14,12 @@ Coverage:
 from __future__ import annotations
 
 import pytest
-
 from src.interfaces.ancillary_services import (
+    SEN_SERVICES,
     AncillaryServiceCapacity,
     AncillaryStack,
     CapacityAllocator,
-    SEN_SERVICES,
 )
-
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 

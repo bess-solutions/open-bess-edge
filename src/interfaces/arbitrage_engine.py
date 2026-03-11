@@ -43,7 +43,7 @@ import structlog
 from .cmg_predictor import PriceForecast
 
 if TYPE_CHECKING:
-    from .ancillary_services import AncillaryStack
+    pass
 
 __all__ = ["ArbitrageEngine", "ArbitrageSchedule", "DispatchSlot"]
 

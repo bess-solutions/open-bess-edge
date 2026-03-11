@@ -10,9 +10,7 @@ from __future__ import annotations
 import time
 
 import pytest
-
-from src.interfaces.fleet_coordinator import FleetCoordinator, FleetSiteState, SiteSetpoint
-
+from src.interfaces.fleet_coordinator import FleetCoordinator, FleetSiteState
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 

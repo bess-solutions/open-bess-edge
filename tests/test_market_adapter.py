@@ -8,9 +8,7 @@ Test suite for MarketAdapter protocol and all market implementations.
 from __future__ import annotations
 
 import pytest
-
 from src.core.market_adapter import (
-    AncillaryServiceDef,
     CENACEAdapter,
     COESAdapter,
     DispatchRules,
@@ -20,7 +18,6 @@ from src.core.market_adapter import (
     SpotPrice,
     XMAdapter,
 )
-
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 

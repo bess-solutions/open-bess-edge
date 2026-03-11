@@ -7,14 +7,10 @@ Test suite for BESSAIFLClient and FedAvg aggregation (Phase 2 — FL).
 """
 from __future__ import annotations
 
-from pathlib import Path
-
 import numpy as np
 import pytest
-
 from src.interfaces.fl_client import BESSAIFLClient, FLClientConfig
 from src.interfaces.fl_server import BESSAIFLServer, FedAvgAggregator
-
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -75,7 +71,7 @@ class TestBESSAIFLClient:
     def test_set_parameters_updates_internal_state(self, client, dummy_weights):
         new_weights = [np.zeros_like(w) for w in dummy_weights]
         client.set_parameters(new_weights)
-        for a, b in zip(client._weights, new_weights):
+        for a, b in zip(client._weights, new_weights, strict=False):
             assert np.allclose(a, b)
 
     def test_fit_returns_correct_types(self, client, dummy_weights):
@@ -87,7 +83,7 @@ class TestBESSAIFLClient:
 
     def test_fit_returns_same_layer_shapes(self, client, dummy_weights):
         updated, _, _ = client.fit(dummy_weights, {})
-        for orig, upd in zip(dummy_weights, updated):
+        for orig, upd in zip(dummy_weights, updated, strict=False):
             assert orig.shape == upd.shape
 
     def test_evaluate_returns_float_loss(self, client, dummy_weights):
@@ -142,7 +138,7 @@ class TestFedAvgAggregator:
         w1 = [np.random.randn(*s).astype(np.float32) for s in shapes]
         w2 = [np.random.randn(*s).astype(np.float32) for s in shapes]
         result = FedAvgAggregator.aggregate([w1, w2], [50, 50])
-        for r, s in zip(result, shapes):
+        for r, s in zip(result, shapes, strict=False):
             assert r.shape == s
 
 

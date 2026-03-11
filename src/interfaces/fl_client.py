@@ -26,7 +26,6 @@ Usage::
 """
 from __future__ import annotations
 
-import logging
 import os
 from pathlib import Path
 from typing import Any
@@ -135,10 +134,9 @@ class BESSAIFLClient:
         # Simulated local gradient steps
         updated: list[np.ndarray] = []
         for epoch in range(self.local_epochs):
-            for layer in self._weights:
+            for _layer in self._weights:
                 # Placeholder: in production, compute real policy gradient
-                noise = np.random.randn(*layer.shape) * learning_rate * 0.1
-                layer = layer + noise
+                pass  # gradient update applied below
             log.debug("fl_client.epoch", site_id=self.site_id,
                       epoch=epoch + 1, total=self.local_epochs)
 

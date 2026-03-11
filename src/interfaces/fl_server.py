@@ -114,7 +114,7 @@ class FedAvgAggregator:
 
         for layer_idx in range(n_layers):
             weighted_sum = np.zeros_like(client_weights[0][layer_idx], dtype=np.float64)
-            for client_w, n_samples in zip(client_weights, client_samples):
+            for client_w, n_samples in zip(client_weights, client_samples, strict=False):
                 if layer_idx < len(client_w):
                     weight = n_samples / total_samples
                     weighted_sum += weight * client_w[layer_idx].astype(np.float64)
@@ -183,7 +183,7 @@ class BESSAIFLServer:
 
         # Weighted average loss
         total = sum(client_samples) or 1
-        avg_loss = sum(l * n for l, n in zip(client_losses, client_samples)) / total
+        avg_loss = sum(loss_i * n_i for loss_i, n_i in zip(client_losses, client_samples, strict=False)) / total
 
         result = FLRoundResult(
             round_num=self._current_round,
@@ -237,8 +237,6 @@ class BESSAIFLServer:
         """Launch Flower FL server if flwr is installed."""
         try:
             import flwr as fl
-
-            server = self
 
             class _FedAvgStrategy(fl.server.strategy.FedAvg):
                 def aggregate_fit(self, server_round, results, failures):
