@@ -1,5 +1,6 @@
 # Minimal stub for flwr (Flower Federated Learning) — optional dep
 from __future__ import annotations
+
 from typing import Any
 
 class server:  # noqa: N801

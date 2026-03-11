@@ -130,7 +130,7 @@ def _get(url: str, params: dict[str, Any] | None = None, timeout: int = 30) -> A
     return None
 
 
-def _save(df: "pd.DataFrame", name: str, label: str) -> Path | None:
+def _save(df: pd.DataFrame, name: str, label: str) -> Path | None:
     """Save DataFrame to data/raw/<name>/today.parquet."""
     if not _PD or df is None or df.empty:
         return None
@@ -150,7 +150,7 @@ def _date_range(n_days: int) -> tuple[str, str]:
 
 # ── Source 1: CMg — Spot Price ─────────────────────────────────────────────────
 
-def scrape_cmg(n_days: int = 30) -> "pd.DataFrame | None":
+def scrape_cmg(n_days: int = 30) -> pd.DataFrame | None:
     """CMg (Costo Marginal de Gestión) — hourly spot price in USD/MWh."""
     print("📡 [CMg] Fetching spot price...")
     if not _PD or not _REQ:
@@ -194,7 +194,7 @@ def scrape_cmg(n_days: int = 30) -> "pd.DataFrame | None":
 
 # ── Source 2: ERNC — Renewable Generation ─────────────────────────────────────
 
-def scrape_ernc(n_days: int = 30) -> "pd.DataFrame | None":
+def scrape_ernc(n_days: int = 30) -> pd.DataFrame | None:
     """ERNC generation: solar PV + wind + mini-hydro (in MWh)."""
     print("🌞 [ERNC] Fetching renewable generation...")
     if not _PD or not _REQ:
@@ -223,7 +223,7 @@ def scrape_ernc(n_days: int = 30) -> "pd.DataFrame | None":
 
 # ── Source 3: Gross Demand ─────────────────────────────────────────────────────
 
-def scrape_demand(n_days: int = 30) -> "pd.DataFrame | None":
+def scrape_demand(n_days: int = 30) -> pd.DataFrame | None:
     """SEN system gross demand (MWh)."""
     print("⚡ [Demand] Fetching SEN gross demand...")
     if not _PD or not _REQ:
@@ -255,7 +255,7 @@ def scrape_weather(
     n_days: int = 30,
     lat: float = DEFAULT_LAT,
     lon: float = DEFAULT_LON,
-) -> "pd.DataFrame | None":
+) -> pd.DataFrame | None:
     """Hourly weather data: temperature, direct+diffuse radiation, wind speed."""
     print(f"🌤️  [Weather] Fetching Open-Meteo ({lat:.2f}°, {lon:.2f}°)...")
     if not _PD or not _REQ:
@@ -303,7 +303,7 @@ def scrape_weather(
 
 # ── Source 5: Grid Frequency from CEN Excel ───────────────────────────────────
 
-def scrape_frequency(n_days: int = 30) -> "pd.DataFrame | None":
+def scrape_frequency(n_days: int = 30) -> pd.DataFrame | None:
     """SEN grid frequency (Hz) — 5-minute resolution from CEN public Excel."""
     print("📊 [Frequency] Fetching grid frequency from CEN Excel...")
     if not _PD or not _REQ:
@@ -351,7 +351,7 @@ def scrape_frequency(n_days: int = 30) -> "pd.DataFrame | None":
 
 # ── Source 6: Battery Degradation Reference ───────────────────────────────────
 
-def scrape_degradation_ref() -> "pd.DataFrame | None":
+def scrape_degradation_ref() -> pd.DataFrame | None:
     """NREL Li-ion battery capacity fade reference data (used for cost calibration)."""
     print("🔬 [Degradation] Fetching NREL degradation reference...")
     if not _PD or not _REQ:
@@ -386,7 +386,7 @@ def scrape_degradation_ref() -> "pd.DataFrame | None":
 
 # ── Merge: Build Training Dataset ─────────────────────────────────────────────
 
-def build_training_dataset(frames: dict[str, "pd.DataFrame"]) -> "pd.DataFrame | None":
+def build_training_dataset(frames: dict[str, pd.DataFrame]) -> pd.DataFrame | None:
     """Merge all time-series sources into a single wide training dataset."""
     if not _PD:
         return None
@@ -486,7 +486,7 @@ def main() -> int:
     print(f"🚀 BESSAI Data Scraper — fetching {len(sources)} sources ({args.days} days)")
     print(f"   Sources: {', '.join(sources)}\n")
 
-    results: dict[str, "pd.DataFrame"] = {}
+    results: dict[str, pd.DataFrame] = {}
     start_ts = time.time()
 
     for src in sources:

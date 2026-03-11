@@ -17,14 +17,19 @@ import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
 import requests
-
 from config import (
-    GITHUB_API_URL, GITHUB_BASE_BRANCH, GITHUB_COMMITTER_EMAIL,
-    GITHUB_COMMITTER_NAME, GITHUB_OWNER, GITHUB_RAW_DATA_PATH,
-    GITHUB_REPO, GITHUB_REPORT_PATH, GITHUB_SUMMARY_PATH, GITHUB_TOKEN,
+    GITHUB_API_URL,
+    GITHUB_BASE_BRANCH,
+    GITHUB_COMMITTER_EMAIL,
+    GITHUB_COMMITTER_NAME,
+    GITHUB_OWNER,
+    GITHUB_RAW_DATA_PATH,
+    GITHUB_REPO,
+    GITHUB_REPORT_PATH,
+    GITHUB_SUMMARY_PATH,
+    GITHUB_TOKEN,
 )
 
 logger = logging.getLogger(__name__)
@@ -43,7 +48,7 @@ class GitHubPublisher:
         pub.publish(full_report_path, summary_path)
     """
 
-    def __init__(self, dry_run: bool = False, token: Optional[str] = None):
+    def __init__(self, dry_run: bool = False, token: str | None = None):
         self.dry_run = dry_run
         self._token = token or GITHUB_TOKEN
         if not self._token and not dry_run:
@@ -53,7 +58,7 @@ class GitHubPublisher:
                 "o set GITHUB_TOKEN=ghp_xxxx (cmd)"
             )
         self._session = self._build_session()
-        self._branch: Optional[str] = None
+        self._branch: str | None = None
 
     # ── Sesión HTTP ─────────────────────────────────────────────────────────
 
@@ -119,7 +124,7 @@ class GitHubPublisher:
 
     # ── Upsert de archivo ───────────────────────────────────────────────────
 
-    def _get_file_sha(self, path: str, branch: str) -> Optional[str]:
+    def _get_file_sha(self, path: str, branch: str) -> str | None:
         """Obtiene el SHA del archivo si ya existe en el repo."""
         try:
             data = self._api(
@@ -196,7 +201,7 @@ class GitHubPublisher:
         self,
         full_report_path: str,
         summary_path: str,
-        sec_raw_path: Optional[str] = None,
+        sec_raw_path: str | None = None,
     ) -> dict:
         """
         Flujo completo de publicación:

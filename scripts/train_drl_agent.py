@@ -138,7 +138,7 @@ def _run_benchmark(
         drl = results["drl_onnx"]
         uplift = ((drl - rb) / abs(rb) * 100) if rb != 0 else 0.0
         print(f"\n  DRL uplift vs rule-based: {uplift:+.1f}%")
-        print(f"  Target: +25 to +35%")
+        print("  Target: +25 to +35%")
     print("=" * 60 + "\n")
 
 

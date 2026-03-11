@@ -8,10 +8,8 @@ implementación de open-bess-edge para detectar brechas regulatorias.
 from __future__ import annotations
 
 import logging
-import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Optional
 
 from analysis.bess_context import IMPLEMENTATION_STATUS_MATRIX, load_all_bess_docs
 

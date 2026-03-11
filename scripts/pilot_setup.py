@@ -19,9 +19,8 @@ Or interactively:
 
 import argparse
 import os
-import sys
 import socket
-import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 

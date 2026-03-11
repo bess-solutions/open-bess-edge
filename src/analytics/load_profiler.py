@@ -18,11 +18,9 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
-from importlib import resources
 from pathlib import Path
-from typing import Optional
 
 import pandas as pd
 
@@ -50,7 +48,7 @@ class LoadSummary:
     peak_demand_punta_kw: float                 # demanda máxima en periodo Punta
     energy_kwh_total: float
     energy_kwh_by_period: dict[str, float]      # {"BASE": x, "INTERMEDIA": y, "PUNTA": z}
-    estimated_monthly_cost_mxn: Optional[float] = None   # si hay precios en config
+    estimated_monthly_cost_mxn: float | None = None   # si hay precios en config
 
     def __str__(self) -> str:
         lines = [
@@ -85,7 +83,7 @@ class LoadProfiler:
     Etiqueta periodos tarifarios según config JSON (CFE GDMTH, extensible).
     """
 
-    def __init__(self, market: str = "mexico", tariff_config_path: Optional[Path] = None) -> None:
+    def __init__(self, market: str = "mexico", tariff_config_path: Path | None = None) -> None:
         """
         Args:
             market: Mercado objetivo. "mexico" usa CFE GDMTH por defecto.
@@ -93,12 +91,12 @@ class LoadProfiler:
         """
         self._market = market.lower()
         self._config = self._load_tariff_config(tariff_config_path)
-        self._df: Optional[pd.DataFrame] = None  # datos crudos / procesados
-        self._resolution: Optional[str] = None
+        self._df: pd.DataFrame | None = None  # datos crudos / procesados
+        self._resolution: str | None = None
 
     # ── Config ────────────────────────────────────────────────────────────────
 
-    def _load_tariff_config(self, custom_path: Optional[Path]) -> dict:
+    def _load_tariff_config(self, custom_path: Path | None) -> dict:
         if custom_path is not None:
             with open(custom_path, encoding="utf-8") as f:
                 return json.load(f)
@@ -122,8 +120,8 @@ class LoadProfiler:
         timestamp_col: str = "timestamp",
         kw_col: str = "kw",
         sep: str = ",",
-        datetime_format: Optional[str] = None,
-    ) -> "LoadProfiler":
+        datetime_format: str | None = None,
+    ) -> LoadProfiler:
         """
         Carga datos desde CSV de medidor.
 
@@ -172,7 +170,7 @@ class LoadProfiler:
         market: str = "mexico",
         timestamp_col: str = "timestamp",
         kw_col: str = "kw",
-    ) -> "LoadProfiler":
+    ) -> LoadProfiler:
         """Carga datos desde un DataFrame de pandas existente."""
         profiler = cls(market=market)
         data = df[[timestamp_col, kw_col]].copy()
@@ -189,7 +187,7 @@ class LoadProfiler:
         fill_method: str = "linear",
         zero_threshold_kw: float = 0.0,
         max_gap_minutes: int = 120,
-    ) -> "LoadProfiler":
+    ) -> LoadProfiler:
         """
         Limpia el perfil de carga:
         - Elimina duplicados de timestamp.
@@ -241,7 +239,7 @@ class LoadProfiler:
 
     # ── Resampleo ─────────────────────────────────────────────────────────────
 
-    def resample(self, resolution: str = "15min") -> "LoadProfiler":
+    def resample(self, resolution: str = "15min") -> LoadProfiler:
         """
         Ajusta el perfil a la resolución temporal requerida.
 
@@ -287,7 +285,7 @@ class LoadProfiler:
 
         return "BASE"   # fallback seguro
 
-    def tag_periods(self) -> "LoadProfiler":
+    def tag_periods(self) -> LoadProfiler:
         """
         Agrega columna `tariff_period` (BASE / INTERMEDIA / PUNTA) al DataFrame.
 

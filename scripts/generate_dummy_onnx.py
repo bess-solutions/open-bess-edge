@@ -68,7 +68,7 @@ def generate_dummy_onnx(output_path: Path) -> bool:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         onnx.save(model, str(output_path))
         print(f"✅ Dummy ONNX model saved → {output_path}")
-        print(f"   Input: obs [batch, 3] → Output: action [batch, 1]")
+        print("   Input: obs [batch, 3] → Output: action [batch, 1]")
         return True
 
     except ImportError as e:

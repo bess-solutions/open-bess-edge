@@ -16,19 +16,17 @@ Uso:
 
 from __future__ import annotations
 
+import hashlib
 import io
 import logging
-import hashlib
-from pathlib import Path
-from typing import Optional
-from datetime import datetime, timezone
 
 import requests
-
 from config import (
-    RAW_DIR, SEC_REQUEST_TIMEOUT, SEC_USER_AGENT,
-    BESS_KEYWORDS,
+    RAW_DIR,
+    SEC_REQUEST_TIMEOUT,
+    SEC_USER_AGENT,
 )
+
 from scraper.utils import bess_relevance_score, is_bess_relevant
 
 logger = logging.getLogger(__name__)
@@ -83,7 +81,7 @@ class PDFExtractor:
 
     # ── Extracción por URL ───────────────────────────────────────────────────
 
-    def extract_url(self, url: str) -> Optional[str]:
+    def extract_url(self, url: str) -> str | None:
         """
         Descarga el PDF de la URL y extrae su texto completo.
         Retorna el texto extraído o None si falla.
@@ -163,7 +161,7 @@ class PDFExtractor:
 
     # ── Helpers ─────────────────────────────────────────────────────────────
 
-    def _download(self, url: str) -> Optional[bytes]:
+    def _download(self, url: str) -> bytes | None:
         """Descarga el PDF y retorna bytes."""
         try:
             resp = self._session.get(
@@ -182,7 +180,7 @@ class PDFExtractor:
             logger.warning(f"No se pudo descargar PDF {url}: {exc}")
             return None
 
-    def _extract_bytes(self, pdf_bytes: bytes) -> Optional[str]:
+    def _extract_bytes(self, pdf_bytes: bytes) -> str | None:
         """Extrae texto de bytes PDF usando el backend disponible."""
         if self._pypdf:
             return self._extract_pypdf(pdf_bytes)
@@ -190,7 +188,7 @@ class PDFExtractor:
             return self._extract_pdfminer(pdf_bytes)
         return None
 
-    def _extract_pypdf(self, pdf_bytes: bytes) -> Optional[str]:
+    def _extract_pypdf(self, pdf_bytes: bytes) -> str | None:
         try:
             reader = self._pypdf.PdfReader(io.BytesIO(pdf_bytes))
             texts = []
@@ -207,7 +205,7 @@ class PDFExtractor:
             logger.debug(f"pypdf error: {exc}")
             return None
 
-    def _extract_pdfminer(self, pdf_bytes: bytes) -> Optional[str]:
+    def _extract_pdfminer(self, pdf_bytes: bytes) -> str | None:
         extract_fn, LAParams = self._pdfminer
         try:
             output = io.StringIO()

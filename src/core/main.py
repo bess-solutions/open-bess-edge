@@ -54,7 +54,6 @@ from src.core.safety import SafetyGuard
 from src.drivers.base import DataProvider
 from src.drivers.modbus_driver import UniversalDriver
 from src.drivers.simulator_driver import SimMode, SimulatorDriver
-from src.interfaces.server import BESSAIServer
 from src.interfaces.metrics import (
     CYCLES_TOTAL,
     GATEWAY_INFO,
@@ -68,6 +67,7 @@ from src.interfaces.mqtt_publisher import MQTTConnectionError, MQTTPublisher
 from src.interfaces.otel_setup import configure_otel, get_tracer, shutdown_otel
 from src.interfaces.pubsub_publisher import PubSubPublisher
 from src.interfaces.sep2_adapter import SEP2Error, build_adapter_from_env
+from src.interfaces.server import BESSAIServer
 
 # BEP-0200 — DRL Arbitrage Agent (optional, fail-safe)
 try:

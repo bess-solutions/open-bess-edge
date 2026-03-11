@@ -99,7 +99,7 @@ def _interpret_action(action: float) -> str:
     for (lo, hi), desc in ACTION_MAP.items():
         if lo <= action < hi:
             return desc
-    return f"⚡ DISCHARGE (max)" if action < -0.5 else "🔋 CHARGE (max)"
+    return "⚡ DISCHARGE (max)" if action < -0.5 else "🔋 CHARGE (max)"
 
 
 def explain_observation(
@@ -163,8 +163,8 @@ def _build_narrative(
 
     lines = [
         f"The agent decided to **{_interpret_action(action)}** (action={action:+.3f}).",
-        f"",
-        f"Key reasoning:",
+        "",
+        "Key reasoning:",
         f"  1. Primary driver: **{top_feat}** (SHAP={top_val:+.3f}) — "
         f"{FEATURE_DESCRIPTIONS[top_feat]}",
     ]
@@ -174,7 +174,7 @@ def _build_narrative(
         lines.append(f"  2. Secondary: **{f2}** (SHAP={v2:+.3f})")
 
     lines += [
-        f"",
+        "",
         f"Context: SOC={soc:.0%}, Price={cmg*100:.1f} USD/MWh, Hour={hour:02d}:00",
     ]
 
@@ -207,7 +207,7 @@ def _rule_based_explanation(obs: np.ndarray, action: float) -> str:
 
 def batch_explain(
     session: Any,
-    data: "pd.DataFrame",
+    data: pd.DataFrame,
     n_samples: int = 100,
 ) -> list[dict[str, Any]]:
     """Explain N random samples from the dataset."""

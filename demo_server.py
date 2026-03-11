@@ -18,7 +18,6 @@ Endpoints disponibles:
 """
 import asyncio
 import math
-import random
 import time
 
 from src.interfaces.server import BESSAIServer

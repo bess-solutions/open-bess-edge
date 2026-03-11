@@ -234,9 +234,9 @@ def _write_markdown(results: dict[str, Any], output: Path) -> None:
         "",
         "## Overall Score",
         "",
-        f"```",
+        "```",
         f"[{bar}]  {score:.1f}/20  ({imp}/{total} features implemented)",
-        f"```",
+        "```",
         "",
         "## Feature Checklist 20/10",
         "",
@@ -291,7 +291,7 @@ def _write_markdown(results: dict[str, Any], output: Path) -> None:
     lines += [
         "",
         "---",
-        f"_Score interpretation: ≥15/20 = World Class | ≥10/20 = Solid | <10/20 = Needs work_",
+        "_Score interpretation: ≥15/20 = World Class | ≥10/20 = Solid | <10/20 = Needs work_",
     ]
 
     output.parent.mkdir(parents=True, exist_ok=True)

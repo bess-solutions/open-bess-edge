@@ -4,7 +4,6 @@ from __future__ import annotations
 from typing import Any, SupportsFloat
 
 # Import spaces from the sub-stub (no circular import — this is a stub file)
-from gymnasium.spaces import Space  # type: ignore[import-untyped]
 
 __version__: str
 

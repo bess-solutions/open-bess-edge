@@ -30,7 +30,7 @@ if sys.platform == "win32":
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from analysis.gap_analyzer import GapAnalyzer, GapItem, REGULATORY_RULES
+from analysis.gap_analyzer import GapAnalyzer, GapItem
 from scraper.sec_scraper import SECScraper
 
 logger = logging.getLogger(__name__)
@@ -136,7 +136,6 @@ def run(output_dir: Path, data_file: Optional[str] = None) -> list[str]:
     Genera BEPs para todas las brechas críticas.
     Retorna lista de rutas de BEPs generados.
     """
-    from typing import Optional
 
     output_dir.mkdir(parents=True, exist_ok=True)
 

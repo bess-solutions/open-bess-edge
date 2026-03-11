@@ -13,23 +13,25 @@ import hashlib
 import logging
 import re
 import time
-from typing import Optional
 from urllib.parse import urljoin, urlparse
 from urllib.robotparser import RobotFileParser
 
 import requests
-from bs4 import BeautifulSoup, Tag
-
+from bs4 import BeautifulSoup
 from config import (
-    BESS_KEYWORDS, SEC_BASE_URL, SEC_MAX_RETRIES,
-    SEC_REQUEST_DELAY, SEC_REQUEST_TIMEOUT, SEC_USER_AGENT,
+    BESS_KEYWORDS,
+    SEC_BASE_URL,
+    SEC_MAX_RETRIES,
+    SEC_REQUEST_DELAY,
+    SEC_REQUEST_TIMEOUT,
+    SEC_USER_AGENT,
 )
 
 logger = logging.getLogger(__name__)
 
 # ─── robots.txt ──────────────────────────────────────────────────────────────
 
-_rp: Optional[RobotFileParser] = None
+_rp: RobotFileParser | None = None
 
 
 def get_robots_parser() -> RobotFileParser:
@@ -77,7 +79,7 @@ def rate_limited_get(
     url: str,
     delay: float = SEC_REQUEST_DELAY,
     timeout: int = SEC_REQUEST_TIMEOUT,
-) -> Optional[requests.Response]:
+) -> requests.Response | None:
     """GET con rate-limiting y reintentos exponenciales."""
     global _last_request_time
 
@@ -213,7 +215,7 @@ _MONTH_MAP = {
 }
 
 
-def extract_date(text: str) -> Optional[str]:
+def extract_date(text: str) -> str | None:
     """Extrae la primera fecha encontrada en el texto (formato ISO 8601)."""
     for pattern in _DATE_PATTERNS:
         m = pattern.search(text)

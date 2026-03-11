@@ -9,10 +9,10 @@ Ejecutar con:
 """
 import json
 import sys
-import time
 import threading
-import urllib.request
+import time
 import urllib.error
+import urllib.request
 from dataclasses import dataclass
 
 # Forzar UTF-8 en stdout para Windows

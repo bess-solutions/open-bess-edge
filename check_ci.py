@@ -1,4 +1,6 @@
-import urllib.request, json, sys
+import json
+import sys
+import urllib.request
 
 sys.stdout.reconfigure(encoding='utf-8')
 

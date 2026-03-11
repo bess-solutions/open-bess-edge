@@ -15,13 +15,12 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Optional
 
 from config import SEC_REQUEST_DELAY, SEC_USER_AGENT
 
 logger = logging.getLogger(__name__)
 
-_playwright_available: Optional[bool] = None
+_playwright_available: bool | None = None
 
 
 def is_playwright_available() -> bool:
@@ -40,7 +39,7 @@ def is_playwright_available() -> bool:
     return _playwright_available
 
 
-def fetch_with_playwright(url: str, wait_for: str = "networkidle") -> Optional[str]:
+def fetch_with_playwright(url: str, wait_for: str = "networkidle") -> str | None:
     """
     Renderiza una página con Playwright (Chromium headless) y retorna el HTML
     final después de que el JS termina de ejecutar.
@@ -56,7 +55,8 @@ def fetch_with_playwright(url: str, wait_for: str = "networkidle") -> Optional[s
         return None
 
     try:
-        from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
+        from playwright.sync_api import TimeoutError as PWTimeout
+        from playwright.sync_api import sync_playwright
 
         with sync_playwright() as pw:
             browser = pw.chromium.launch(headless=True)
@@ -106,7 +106,8 @@ def scrape_sec_search(query: str) -> list[dict]:
         return []
 
     from bs4 import BeautifulSoup
-    from scraper.utils import extract_links, is_bess_relevant
+
+    from scraper.utils import is_bess_relevant
 
     soup = BeautifulSoup(html, "html.parser")
     results = []

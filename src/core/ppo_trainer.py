@@ -35,7 +35,6 @@ Usage::
 from __future__ import annotations
 
 import json
-import logging
 import os
 import time
 from dataclasses import dataclass, field
@@ -62,7 +61,7 @@ except ImportError:
 
 try:
     from stable_baselines3 import PPO
-    from stable_baselines3.common.callbacks import EvalCallback, CheckpointCallback
+    from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
     _HAS_SB3 = True
 except ImportError:
     _HAS_SB3 = False
@@ -182,6 +181,7 @@ class BESSDispatchEnv:
         if not _HAS_NUMPY:
             return [0.0] * 8
         import math
+
         import numpy as np  # noqa: F811
         i = self._step % len(self._cmg)
         cmg_now = self._cmg[i]
@@ -378,7 +378,8 @@ class PPOTrainer:
     def _run_sb3_training(self, env: BESSDispatchEnv, steps: int) -> TrainingResult:
         """Full PPO training with Stable Baselines 3."""
         from stable_baselines3.common.callbacks import (  # noqa: F401
-            CheckpointCallback, EvalCallback,
+            CheckpointCallback,
+            EvalCallback,
         )
 
         # Wrap env for SB3

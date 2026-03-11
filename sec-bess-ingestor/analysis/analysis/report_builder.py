@@ -9,11 +9,10 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
-from pathlib import Path
-from typing import Optional
 
-from analysis.gap_analyzer import GapItem, GapAnalyzer, STATUS, PRIORITY
 from config import REPORTS_DIR
+
+from analysis.gap_analyzer import GapAnalyzer, GapItem
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +27,7 @@ def _now_tag() -> str:
 class ReportBuilder:
     """Genera reportes Markdown de brechas normativas."""
 
-    def __init__(self, analyzer: Optional[GapAnalyzer] = None):
+    def __init__(self, analyzer: GapAnalyzer | None = None):
         self.analyzer = analyzer or GapAnalyzer()
 
     def build_full_report(
@@ -48,8 +47,8 @@ class ReportBuilder:
             f"> **Generado:** {_now_iso()}  ",
             f"> **Datos SEC:** {total_records} documentos scraped,",
             f"> {bess_relevant} relevantes a BESS  ",
-            f"> **Repo analizado:** [bess-solutions/open-bess-edge](https://github.com/bess-solutions/open-bess-edge)  ",
-            f"> **Fuente:** [Superintendencia de Electricidad y Combustibles](https://www.sec.cl)  ",
+            "> **Repo analizado:** [bess-solutions/open-bess-edge](https://github.com/bess-solutions/open-bess-edge)  ",
+            "> **Fuente:** [Superintendencia de Electricidad y Combustibles](https://www.sec.cl)  ",
             "",
             "---",
             "",
@@ -173,8 +172,8 @@ class ReportBuilder:
         lines += [
             "### 📊 Estadísticas",
             "",
-            f"| Prioridad | Brechas | Estado más común |",
-            f"|---|---|---|",
+            "| Prioridad | Brechas | Estado más común |",
+            "|---|---|---|",
             f"| 🔴 Crítico | {stats['by_priority']['critical']} | 🔄 Planificado |",
             f"| 🟡 Medio | {stats['by_priority']['medium']} | ⚠️ Parcial |",
             f"| 🟢 Bajo | {stats['by_priority']['low']} | 🔄 Planificado |",
@@ -199,14 +198,14 @@ class ReportBuilder:
             "#### Estado Actual en open-bess-edge",
             "",
             f"> {g.bess_current_state}",
-            f">",
+            ">",
             f"> *Referencia de código:* `{g.bess_code_ref}`",
             "",
             "#### Acción Técnica Recomendada",
             "",
-            f"```",
+            "```",
             g.technical_action,
-            f"```",
+            "```",
             "",
         ]
         if g.relevant_sec_text:

@@ -81,8 +81,9 @@ def cmd_scrape(args: argparse.Namespace) -> str:
 def _scrape_aggressive(args: argparse.Namespace, concurrency: int) -> str:
     """Pipeline agresivo: async SEC + multi-fuente + PDF extraction."""
     import json
-    from config import RAW_DIR
     from datetime import datetime, timezone
+
+    from config import RAW_DIR
 
     all_records: list[dict] = []
 
@@ -171,9 +172,10 @@ def cmd_scrape_all(args: argparse.Namespace) -> str:
 
 def cmd_extract_pdfs(args: argparse.Namespace) -> None:
     """Extrae texto de los PDFs del último scraping."""
-    from scraper.sec_scraper import SECScraper
-    from scraper.pdf_extractor import PDFExtractor
     import json
+
+    from scraper.pdf_extractor import PDFExtractor
+    from scraper.sec_scraper import SECScraper
 
     data_file = getattr(args, "data_file", None)
     if data_file:
@@ -196,8 +198,9 @@ def cmd_extract_pdfs(args: argparse.Namespace) -> None:
     sec_data["pdf_extracted"] = True
 
     # Sobreescribir el mismo archivo con datos enriquecidos
-    from config import RAW_DIR
     from datetime import datetime, timezone
+
+    from config import RAW_DIR
     out = RAW_DIR / f"sec_pdf_enriched_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.json"
     out.write_text(json.dumps(sec_data, ensure_ascii=False, indent=2), encoding="utf-8")
     logger.info(f"✅ PDFs extraídos. Guardado: {out}")
@@ -206,8 +209,8 @@ def cmd_extract_pdfs(args: argparse.Namespace) -> None:
 
 def cmd_analyze(args: argparse.Namespace) -> tuple[list, dict]:
     """Analiza brechas normativas contra open-bess-edge."""
-    from scraper.sec_scraper import SECScraper
     from analysis.gap_analyzer import GapAnalyzer
+    from scraper.sec_scraper import SECScraper
 
     # Cargar datos SEC
     if args.data_file:
@@ -258,8 +261,8 @@ def cmd_report(args: argparse.Namespace) -> tuple[str, str]:
 
 def cmd_publish(args: argparse.Namespace) -> None:
     """Publica reportes al repositorio open-bess-edge."""
+    from config import RAW_DIR, REPORTS_DIR
     from publisher.github_publisher import GitHubPublisher
-    from config import REPORTS_DIR, RAW_DIR
 
     # Buscar reportes más recientes
     full_reports = sorted(REPORTS_DIR.glob("gap_analysis_*.md"), reverse=True)
@@ -336,8 +339,8 @@ def cmd_update(args: argparse.Namespace) -> None:
     # 4. BEPs para críticas
     logger.info("\n[4/5] Generando BEPs para brechas críticas...")
     try:
-        from scripts.bep_generator import run as bep_run
         from config import RAW_DIR
+        from scripts.bep_generator import run as bep_run
         bep_out = RAW_DIR.parent / "data" / "beps"
         bep_run(bep_out, raw_path)
     except Exception as exc:

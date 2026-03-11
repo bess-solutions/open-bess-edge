@@ -11,12 +11,12 @@ Unit ID: 1   (gateway-sim usa slave_id=1, gateway usa 3)
 from __future__ import annotations
 
 import asyncio
-import struct
 import logging
-from pymodbus.datastore import ModbusSlaveContext, ModbusServerContext
-from pymodbus.datastore import ModbusSequentialDataBlock
-from pymodbus.server import StartAsyncTcpServer
+import struct
+
+from pymodbus.datastore import ModbusSequentialDataBlock, ModbusServerContext, ModbusSlaveContext
 from pymodbus.device import ModbusDeviceIdentification
+from pymodbus.server import StartAsyncTcpServer
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("bessai-sim")

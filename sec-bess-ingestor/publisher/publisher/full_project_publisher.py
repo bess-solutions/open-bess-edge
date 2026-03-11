@@ -15,18 +15,20 @@ independientemente de lo que esté o no esté en el repo en el momento de public
 from __future__ import annotations
 
 import base64
-import json
 import logging
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
 import requests
-
 from config import (
-    GITHUB_OWNER, GITHUB_REPO, GITHUB_API_URL, GITHUB_BASE_BRANCH,
-    GITHUB_TOKEN, REPORTS_DIR, RAW_DIR,
+    GITHUB_API_URL,
+    GITHUB_BASE_BRANCH,
+    GITHUB_OWNER,
+    GITHUB_REPO,
+    GITHUB_TOKEN,
+    RAW_DIR,
+    REPORTS_DIR,
 )
 
 # Aliases para compatibilidad interna
@@ -167,14 +169,14 @@ class FullProjectPublisher:
     def __init__(
         self,
         dry_run: bool = True,
-        token: Optional[str] = None,
+        token: str | None = None,
         repo: str = BESS_EDGE_REPO,
     ):
         self.dry_run = dry_run
         self._token = token or GITHUB_TOKEN
         self._repo = repo
         self._api_base = f"{GITHUB_API_URL}/repos/{repo}"
-        self._branch: Optional[str] = None
+        self._branch: str | None = None
 
 
         if not self._token and not dry_run:
@@ -326,7 +328,7 @@ class FullProjectPublisher:
             status = resp.status_code if resp else "N/A"
             results["errors"].append({"path": remote_path, "status": status})
 
-    def _get_file_sha(self, path: str) -> Optional[str]:
+    def _get_file_sha(self, path: str) -> str | None:
         resp = self._api("GET", f"/contents/{path}", params={"ref": self._branch})
         if resp and resp.status_code == 200:
             data = resp.json()
@@ -395,7 +397,7 @@ class FullProjectPublisher:
             logger.error(f"  ❌ No se pudo abrir PR: {resp.status_code if resp else 'N/A'}")
             return {}
 
-    def _api(self, method: str, path: str, **kwargs) -> Optional[requests.Response]:
+    def _api(self, method: str, path: str, **kwargs) -> requests.Response | None:
         url = self._api_base + path
         try:
             resp = self._session.request(method, url, timeout=30, **kwargs)

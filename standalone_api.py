@@ -46,7 +46,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 import structlog
-
 from src.interfaces.dashboard_api import DashboardAPI, DashboardState
 
 logging.basicConfig(level=logging.INFO)

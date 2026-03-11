@@ -31,8 +31,8 @@ if str(_REPO_ROOT) not in sys.path:
 
 async def _run_bench_001_cycle(driver_kwargs: dict) -> dict[str, float]:
     """Run one gateway cycle and return sub-phase timings in milliseconds."""
-    from src.drivers.simulator_driver import SimulatorDriver
     from src.core.safety import SafetyGuard
+    from src.drivers.simulator_driver import SimulatorDriver
     from src.interfaces.onnx_dispatcher import OnnxDispatcher
 
     driver = SimulatorDriver()
@@ -123,7 +123,6 @@ async def benchmark_002(max_sites: int = 50, cycles_per_count: int = 20) -> dict
     print(f"\n📊 Benchmark 002 — Fleet Scalability (up to {max_sites} sites)")
 
     from src.drivers.simulator_driver import SimulatorDriver
-    from src.core.fleet_orchestrator import FleetOrchestrator
 
     site_counts = [1, 5, 10, 25, 50]
     site_counts = [s for s in site_counts if s <= max_sites]

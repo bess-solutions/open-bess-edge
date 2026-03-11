@@ -8,10 +8,6 @@ from __future__ import annotations
 
 import io
 import json
-from http.server import HTTPServer
-from unittest.mock import patch
-
-import pytest
 
 # Import directly (bypasses interfaces/__init__.py which has VPP deps)
 from src.interfaces.compliance_api import (
@@ -19,7 +15,6 @@ from src.interfaces.compliance_api import (
     make_compliance_handler,
     update_compliance_state,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

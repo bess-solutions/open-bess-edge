@@ -113,7 +113,7 @@ class ServiciosComplementarios:
         )
 
     @classmethod
-    def from_env(cls) -> "ServiciosComplementarios":
+    def from_env(cls) -> ServiciosComplementarios:
         return cls(
             p_nom_kw=float(os.getenv("BESSAI_P_NOM_KW", "1000.0")),
             q_max_kvar=float(os.getenv("BESSAI_Q_MAX_KVAR", "484.0")),

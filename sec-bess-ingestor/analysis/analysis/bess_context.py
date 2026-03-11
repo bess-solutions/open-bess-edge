@@ -10,19 +10,20 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Optional
 
 import requests
-
 from config import (
-    BESS_COMPLIANCE_DOCS, BESS_EDGE_GITHUB_RAW, BESS_EDGE_LOCAL,
-    SEC_REQUEST_TIMEOUT, SEC_USER_AGENT,
+    BESS_COMPLIANCE_DOCS,
+    BESS_EDGE_GITHUB_RAW,
+    BESS_EDGE_LOCAL,
+    SEC_REQUEST_TIMEOUT,
+    SEC_USER_AGENT,
 )
 
 logger = logging.getLogger(__name__)
 
 
-def _read_local(doc_path: str) -> Optional[str]:
+def _read_local(doc_path: str) -> str | None:
     local = Path(BESS_EDGE_LOCAL) / doc_path
     if local.exists():
         logger.debug(f"Leyendo local: {local}")
@@ -30,7 +31,7 @@ def _read_local(doc_path: str) -> Optional[str]:
     return None
 
 
-def _read_remote(doc_path: str) -> Optional[str]:
+def _read_remote(doc_path: str) -> str | None:
     url = BESS_EDGE_GITHUB_RAW + doc_path
     try:
         resp = requests.get(
@@ -46,7 +47,7 @@ def _read_remote(doc_path: str) -> Optional[str]:
         return None
 
 
-def load_bess_doc(doc_path: str) -> Optional[str]:
+def load_bess_doc(doc_path: str) -> str | None:
     """Carga un doc desde local o GitHub raw."""
     content = _read_local(doc_path)
     if content is None:

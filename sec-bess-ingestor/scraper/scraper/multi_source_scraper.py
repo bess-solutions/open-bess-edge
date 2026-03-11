@@ -19,19 +19,23 @@ import logging
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
-from typing import Optional
 from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
-
 from config import (
-    BESS_KEYWORDS, RAW_DIR, SEC_REQUEST_DELAY,
-    SEC_REQUEST_TIMEOUT, SEC_USER_AGENT,
+    RAW_DIR,
+    SEC_REQUEST_TIMEOUT,
+    SEC_USER_AGENT,
 )
+
 from scraper.utils import (
-    bess_relevance_score, content_hash, extract_date,
-    extract_pdf_links, html_to_clean_text, is_bess_relevant,
+    bess_relevance_score,
+    content_hash,
+    extract_date,
+    extract_pdf_links,
+    html_to_clean_text,
+    is_bess_relevant,
 )
 
 logger = logging.getLogger(__name__)
@@ -119,7 +123,7 @@ class MultiSourceScraper:
         return s
 
     def scrape_all_sources(
-        self, sources: Optional[list[str]] = None
+        self, sources: list[str] | None = None
     ) -> list[dict]:
         """
         Raspa todas las fuentes en paralelo.
@@ -228,7 +232,7 @@ class MultiSourceScraper:
 
         return records
 
-    def _get(self, url: str) -> Optional[requests.Response]:
+    def _get(self, url: str) -> requests.Response | None:
         for attempt in range(1, 4):
             try:
                 time.sleep(self.delay)
@@ -245,7 +249,7 @@ class MultiSourceScraper:
                 time.sleep(self.delay * attempt)
         return None
 
-    def _get_title(self, soup) -> Optional[str]:
+    def _get_title(self, soup) -> str | None:
         for tag in ("h1", "h2", "title"):
             el = soup.find(tag)
             if el:

@@ -3,15 +3,10 @@
 """Tests para src/analytics/load_profiler.py — Mercado México (CFE GDMTH)."""
 from __future__ import annotations
 
-import io
-from datetime import datetime
-
 import numpy as np
 import pandas as pd
 import pytest
-
 from src.analytics import LoadProfiler, LoadSummary
-
 
 # ── Helpers / Fixtures ────────────────────────────────────────────────────────
 

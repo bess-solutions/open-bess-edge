@@ -11,20 +11,27 @@ import json
 import logging
 import re
 from datetime import datetime, timezone
-from typing import Optional
-from urllib.parse import urljoin, urlparse, urlencode, parse_qs
+from urllib.parse import urljoin, urlparse
 
-import requests
 from bs4 import BeautifulSoup
-
 from config import (
-    DATA_DIR, RAW_DIR, SEC_BASE_URL, SEC_MAX_PAGES,
-    SEC_REQUEST_DELAY, SEC_SECTIONS,
+    RAW_DIR,
+    SEC_MAX_PAGES,
+    SEC_REQUEST_DELAY,
+    SEC_SECTIONS,
 )
+
 from scraper.utils import (
-    bess_relevance_score, build_session, content_hash,
-    extract_date, extract_links, extract_meta, extract_pdf_links,
-    html_to_clean_text, is_bess_relevant, is_same_domain,
+    bess_relevance_score,
+    build_session,
+    content_hash,
+    extract_date,
+    extract_links,
+    extract_meta,
+    extract_pdf_links,
+    html_to_clean_text,
+    is_bess_relevant,
+    is_same_domain,
     rate_limited_get,
 )
 
@@ -41,11 +48,11 @@ def make_record(
     section_key: str,
     title: str,
     url: str,
-    date: Optional[str] = None,
-    number: Optional[str] = None,
+    date: str | None = None,
+    number: str | None = None,
     body_text: str = "",
-    pdf_links: Optional[list[dict]] = None,
-    metadata: Optional[dict] = None,
+    pdf_links: list[dict] | None = None,
+    metadata: dict | None = None,
     bess_relevant: bool = False,
     relevance_score: int = 0,
 ) -> DocumentRecord:
@@ -273,7 +280,7 @@ class SECScraper:
 
     def _fetch_document(
         self, link: dict, section: dict
-    ) -> Optional[DocumentRecord]:
+    ) -> DocumentRecord | None:
         """Visita un enlace individual y extrae su contenido."""
         url = link["url"]
         title_hint = link.get("text", "")
@@ -318,7 +325,7 @@ class SECScraper:
 
     # ── Helpers ────────────────────────────────────────────────────────────
 
-    def _extract_title(self, soup: BeautifulSoup) -> Optional[str]:
+    def _extract_title(self, soup: BeautifulSoup) -> str | None:
         for tag in ("h1", "h2", "title"):
             el = soup.find(tag)
             if el:
@@ -345,7 +352,7 @@ class SECScraper:
         r"(?:\s*/\s*(\d{4}))?"
     )
 
-    def _extract_document_number(self, text: str) -> Optional[str]:
+    def _extract_document_number(self, text: str) -> str | None:
         m = self._NUMBER_RE.search(text[:500])
         if m:
             num = m.group(1)
@@ -383,7 +390,7 @@ class SECScraper:
         return str(output_path)
 
     @staticmethod
-    def load_latest() -> Optional[dict]:
+    def load_latest() -> dict | None:
         """Carga el archivo JSON más reciente de data/raw/."""
         files = sorted(RAW_DIR.glob("sec_*.json"), reverse=True)
         if not files:

@@ -16,20 +16,25 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-import re
-import time
 from datetime import datetime, timezone
-from typing import Optional
 from urllib.parse import urljoin
 
 from config import (
-    BESS_KEYWORDS, RAW_DIR, SEC_BASE_URL,
-    SEC_MAX_PAGES, SEC_MAX_RETRIES, SEC_REQUEST_DELAY,
-    SEC_REQUEST_TIMEOUT, SEC_SECTIONS, SEC_USER_AGENT,
+    RAW_DIR,
+    SEC_MAX_PAGES,
+    SEC_MAX_RETRIES,
+    SEC_REQUEST_TIMEOUT,
+    SEC_SECTIONS,
+    SEC_USER_AGENT,
 )
+
 from scraper.utils import (
-    bess_relevance_score, content_hash, extract_date,
-    extract_pdf_links, html_to_clean_text, is_bess_relevant,
+    bess_relevance_score,
+    content_hash,
+    extract_date,
+    extract_pdf_links,
+    html_to_clean_text,
+    is_bess_relevant,
     is_same_domain,
 )
 
@@ -192,7 +197,7 @@ class AsyncSECScraper:
 
     # ── Fetch con rate-limit y semáforo ─────────────────────────────────────
 
-    async def _fetch(self, url: str) -> Optional[str]:
+    async def _fetch(self, url: str) -> str | None:
         """GET asíncrono con semáforo de concurrencia y delay."""
         async with self._sem:
             await asyncio.sleep(self.delay_between)
@@ -214,7 +219,7 @@ class AsyncSECScraper:
                     await asyncio.sleep(self.delay_between * attempt)
             return None
 
-    async def _fetch_doc(self, link: dict, section: dict) -> Optional[dict]:
+    async def _fetch_doc(self, link: dict, section: dict) -> dict | None:
         url = link["url"]
         title_hint = link.get("text", "")
 
@@ -274,7 +279,7 @@ class AsyncSECScraper:
         }
         return base
 
-    def _get_title(self, soup) -> Optional[str]:
+    def _get_title(self, soup) -> str | None:
         for tag in ("h1", "h2", "title"):
             el = soup.find(tag)
             if el:

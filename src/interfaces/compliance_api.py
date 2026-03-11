@@ -17,7 +17,6 @@ Integrated into the existing HealthServer on the same port (HEALTH_PORT).
 from __future__ import annotations
 
 import json
-import time
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler
 from typing import Any

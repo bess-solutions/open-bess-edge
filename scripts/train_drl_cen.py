@@ -217,7 +217,6 @@ def train(args: argparse.Namespace) -> None:
     """Run PPO training and export ONNX model."""
     import ray
     from ray.rllib.algorithms.ppo import PPOConfig
-
     from src.agents.bess_rl_env_cen import BESSArbitrageEnvCEN
 
     # Pre-validate dataset
@@ -317,8 +316,8 @@ def train(args: argparse.Namespace) -> None:
 
 def _export_to_onnx(algo, output_path: str) -> None:
     """Export trained PPO policy to ONNX for edge deployment."""
-    import torch
     import onnx
+    import torch
 
     policy = algo.get_policy()
     model = policy.model

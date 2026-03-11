@@ -10,12 +10,11 @@ from __future__ import annotations
 import asyncio
 
 import pytest
-
 from src.core.cen_sc_bidder import (
+    BidResult,
     CENSCBidder,
     SCBid,
     SCType,
-    BidResult,
 )
 
 

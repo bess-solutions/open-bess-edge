@@ -8,11 +8,9 @@ Esto enriquece el análisis de brechas con evidencia de código real.
 
 from __future__ import annotations
 
-import ast
 import logging
 import re
 from pathlib import Path
-from typing import Optional
 
 from config import BESS_EDGE_LOCAL
 
@@ -73,7 +71,7 @@ class CodeScanner:
     de features relacionados con las brechas normativas.
     """
 
-    def __init__(self, bess_root: Optional[str] = None):
+    def __init__(self, bess_root: str | None = None):
         self.bess_root = Path(bess_root or BESS_EDGE_LOCAL)
         self._available = self.bess_root.exists()
         if not self._available:
@@ -84,7 +82,7 @@ class CodeScanner:
         else:
             logger.info(f"CodeScanner listo: {self.bess_root}")
 
-    def scan_all(self) -> dict[str, "FeatureEvidence"]:
+    def scan_all(self) -> dict[str, FeatureEvidence]:
         """
         Escanea todos los .py del repo y retorna evidencia por feature.
         """
@@ -122,7 +120,7 @@ class CodeScanner:
         self,
         path: Path,
         source: str,
-        evidence: dict[str, "FeatureEvidence"],
+        evidence: dict[str, FeatureEvidence],
     ) -> None:
         source_lower = source.lower()
         rel_str = str(path.relative_to(self.bess_root))
@@ -139,7 +137,7 @@ class CodeScanner:
     @staticmethod
     def enrich_gaps(
         gaps: list,
-        evidence: dict[str, "FeatureEvidence"],
+        evidence: dict[str, FeatureEvidence],
     ) -> list:
         """
         Enriquece GapItems con evidencia de código real.

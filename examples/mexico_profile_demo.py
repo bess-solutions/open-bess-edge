@@ -153,7 +153,7 @@ def main() -> None:
     print(f"  Demanda punta máxima   : {peak_kw:.1f} kW")
     print(f"  Demanda promedio       : {avg_kw:.1f} kW")
     print(f"  Target Peak Shaving    : {target_shaving_kw:.1f} kW (potencia mínima BESS)")
-    print(f"  Duración ventana Punta : 4 h (18:00-22:00)")
+    print("  Duración ventana Punta : 4 h (18:00-22:00)")
     print(f"  Capacidad BESS mínima  : {target_shaving_kw * 4:.0f} kWh @ C1  "
           f"({target_shaving_kw * 2:.0f} kWh @ C2 recomendado)")
     print("=" * 60)
