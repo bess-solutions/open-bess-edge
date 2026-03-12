@@ -20,7 +20,8 @@ Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivad
 
 ### Tests
 ```
-723 passed ✅  · 0 failed · 1 xfailed · 8 skipped
+749 passed ✅  · 0 failed · 1 xfailed · 8 skipped
+Nuevo: test_vpp_fleet_manager.py — 26/26 BEP-0500 VPPFleetManager (fleet+VPP+DRL coordinator) ✅
 Nuevo: test_drl_agent.py — 17/17 BEP-0200 P3 (PPO PyTorch, ONNX 8 nodos CEN) ✅
 Nuevo: test_market_adapter_global.py — 62/62 CAISO+ERCOT+ENTSO-E (7 mercados) ✅
 Nuevo: test_bessai_evolve_v2.py — 24/24 CMAESMutator + NSGA-II + EliteArchive ✅
