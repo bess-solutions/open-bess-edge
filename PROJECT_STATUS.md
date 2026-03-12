@@ -1,4 +1,4 @@
-﻿# 📊 BESSAI Edge Gateway — Estado del Proyecto
+# 📊 BESSAI Edge Gateway — Estado del Proyecto
 
 > **Actualizado:** 2026-03-12 v2.15.2 · **Responsable:** BESS Solutions SpA  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
@@ -20,14 +20,16 @@ Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivad
 
 ### Tests
 ```
-633 passed ✅  · 0 failed · 8 skipped
+723 passed ✅  · 0 failed · 1 xfailed · 8 skipped
+Nuevo: test_drl_agent.py — 17/17 BEP-0200 P3 (PPO PyTorch, ONNX 8 nodos CEN) ✅
+Nuevo: test_market_adapter_global.py — 62/62 CAISO+ERCOT+ENTSO-E (7 mercados) ✅
 Nuevo: test_bessai_evolve_v2.py — 24/24 CMAESMutator + NSGA-II + EliteArchive ✅
 Nuevo: test_bess_rl_env_cen.py — 23/23 BEP-0200 F3 (env CMg real CEN) ✅
 Nuevo: test_milp_optimizer.py — 14/14 MILP optimizer ✅
 Nuevo: test_degradation_model.py — 15/15 DegradationModel ✅
 Nuevo: test_watchdog_manager.py — 19/19 WatchdogManager ✅
 Registry: 7 perfiles hardware (Fronius, Huawei, SMA, Victron + SolarEdge, BYD, Tesla)
-CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · helm ✅
+CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · helm ✅ · drl-market-tests ✅
 Landing: React scrollytelling v1.0 ✅ (i18n ES/EN, Lucide icons)
 ```
 
@@ -101,7 +103,13 @@ Prometheus v2.15.2                          OK      ← localhost:9090
 | Terraform GCP | `infrastructure/terraform/` | v0.5 | ✅ 18 recursos |
 | Registro Modbus | `registry/huawei_sun2000.json` | **v2.0** | ✅ 28 registros reales |
 | Modbus Simulator | `infrastructure/docker/modbus_sim/` | **v1.0.1** | ✅ pymodbus server, 22 registros |
-| GitHub Actions CI/CD | `.github/workflows/ci.yml` | v2.15.2 | ✅ **10 jobs**: lint+typecheck+test+interop+security+terraform+helm+docker+trivy+push |
+| GitHub Actions CI/CD | `.github/workflows/ci.yml` | v2.15.2 | ✅ **11 jobs**: lint+typecheck+test+interop+security+terraform+helm+docker+trivy+push+**drl-market-tests** |
+| **DRL CEN Env (BEP-0200 P3)** | `src/agents/bess_rl_env_cen.py` | **v1.0** | ✅ **NUEVO v2.15.2** — Gymnasium env 8-dim obs, datos reales CEN/SEN (8 nodos) |
+| **PPO Standalone Trainer** | `scripts/train_cen_standalone.py` | **v1.0** | ✅ **NUEVO v2.15.2** — PyTorch PPO sin Ray, export ONNX automático |
+| **8× CEN ONNX DRL** | `models/*_drl_cen_v1.onnx` | **v1.0** | ✅ **NUEVO v2.15.2** — p95 < 0.1ms, best_reward=374 USD (Maitencillo), 2.1KB/modelo |
+| **CAISOAdapter** | `src/core/market_adapter.py` | **v1.0** | ✅ **NUEVO v2.15.2** — OASIS 5-min LMP, CA (NP15/SP15/ZP26), fallback Duck Curve |
+| **ERCOTAdapter** | `src/core/market_adapter.py` | **v1.0** | ✅ **NUEVO v2.15.2** — API 15-min SPP, TX (5 hubs), fallback Duck Curve |
+| **ENTSOEAdapter** | `src/core/market_adapter.py` | **v1.0** | ✅ **NUEVO v2.15.2** — Transparency DA 1h, 9 zonas EU, EUR→USD, XML parsing |
 | OpenSSF Scorecard CI | `.github/workflows/scorecard.yml` | v1.0 | ✅ Supply chain security automático — badge Scorecard activo |
 | Mutation Testing | `.github/workflows/mutation-test.yml` | v1.0 | ✅ mutmut semanal — safety.py + config.py |
 | K8s Manifests | `infrastructure/k8s/` | v1.0 | ✅ 6 manifests: namespace+configmap+service+deployment+netpol+kustomize |
@@ -386,3 +394,4 @@ pytest tests/ -v --tb=short
 | 2026-02-25 | **v2.15.2** | **613/613** | **Scrollytelling Landing** (React + Vite): i18n ES/EN, Lucide icons, FAQ/Features refactored, scrollytelling animations · **360° doc sync** · **BEPs 0300/0301/0302** Draft · Archivos propietarios removidos del repo público |
 | 2026-02-27 | **v2.15.2** | **685/685** | **BESSAIEvolve v2** (CMAESMutator+NSGA-II+EliteArchive 24/24) · **BEP-0200 F3** env CMg real CEN (23/23) · MILP + Degradation + Watchdog · NTSyCS ComplianceStack 11 GAPs · 685 tests |
 | 2026-03-02 | **v2.15.2** | **685/685** | **BEP-0300 activado**: `BESSAI_DRL_WRITE=true` opt-in con doble guard safety+clamp · **24 modelos ONNX reales** (Ridge v2 R²~0.79, 8 nodos CEN) en `models/` · **DuckDB rebuild** 3.496 filas 8 nodos · **docs/SETUP_GCP.md** guía completa |
+| 2026-03-12 | **v2.15.2** | **723/723** | **🚀 BEP-0200 Phase 3 (Autopilot session)**: `bess_rl_env_cen.py` Gymnasium env CEN real · `train_cen_standalone.py` PPO PyTorch sin Ray · **8× ONNX DRL** (p95 < 0.1ms, best_reward=374 USD Maitencillo) · **`CAISOAdapter`** OASIS 5-min · **`ERCOTAdapter`** 15-min SPP · **`ENTSOEAdapter`** 9 zonas EU · **62/62 market adapter tests** · **CI Job 11** `drl-market-tests` (Py 3.12+torch-CPU) · `pyproject.toml` 2.10.0→**2.15.2** · `drl-standalone` dep group · `pilot.html` actualizado: 7 mercados, FAQ DRL, form USA+Europa · `sync_ecosystem.py --push v2.15.2` ejecutado |
