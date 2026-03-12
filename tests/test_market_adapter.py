@@ -4,8 +4,11 @@
 tests/test_market_adapter.py
 ==============================
 Test suite for MarketAdapter protocol and all market implementations.
+Includes HTTP mock tests for COES, XM, and CENACE live data paths.
 """
 from __future__ import annotations
+
+from unittest.mock import MagicMock, patch
 
 import pytest
 from src.core.market_adapter import (
@@ -91,9 +94,10 @@ class TestSENAdapter:
         assert len(d["zones"]) > 0
 
 
-# ── Stub adapter tests ────────────────────────────────────────────────────────
+# ── Latam adapter tests (fallback + HTTP mock) ────────────────────────────────
 
-class TestStubAdapters:
+class TestLatamAdaptersFallback:
+    """Verify that COES/XM/CENACE fall back to Duck Curve when API is unreachable."""
 
     @pytest.mark.parametrize("adapter_cls,expected_market,expected_country", [
         (COESAdapter, "COES", "Peru"),
@@ -106,18 +110,21 @@ class TestStubAdapters:
         assert a.country == expected_country
 
     @pytest.mark.parametrize("adapter_cls", [COESAdapter, XMAdapter, CENACEAdapter])
-    def test_stub_returns_24_zero_prices(self, adapter_cls):
-        prices = adapter_cls().get_spot_prices("2026-03-11")
+    def test_fallback_returns_24_nonzero_prices(self, adapter_cls):
+        """With no HTTP (requests not available or network down) Duck Curve kicks in."""
+        with patch("src.core.market_adapter._HAS_REQUESTS", False):
+            prices = adapter_cls().get_spot_prices("2026-03-11")
         assert len(prices) == 24
-        assert all(p.price_usd_mwh == 0.0 for p in prices)
+        # Duck Curve fallback uses base ≥ 35 USD/MWh — never zero
+        assert all(p.price_usd_mwh > 0 for p in prices)
 
     @pytest.mark.parametrize("adapter_cls", [COESAdapter, XMAdapter, CENACEAdapter])
-    def test_stub_has_ancillary_services(self, adapter_cls):
+    def test_fallback_has_ancillary_services(self, adapter_cls):
         services = adapter_cls().get_ancillary_services()
-        assert len(services) >= 1
+        assert len(services) >= 2
 
     @pytest.mark.parametrize("adapter_cls", [COESAdapter, XMAdapter, CENACEAdapter])
-    def test_stub_has_dispatch_rules(self, adapter_cls):
+    def test_fallback_has_dispatch_rules(self, adapter_cls):
         rules = adapter_cls().get_dispatch_rules()
         assert isinstance(rules, DispatchRules)
         assert rules.min_soc_pct >= 5.0
@@ -130,6 +137,96 @@ class TestStubAdapters:
 
     def test_cenace_uses_mxn(self):
         assert CENACEAdapter().get_dispatch_rules().currency == "MXN"
+
+    def test_coes_market_zones_includes_lima(self):
+        assert "LIMA_SUR" in COESAdapter().get_market_zones()
+
+    def test_xm_market_zones_includes_bogota(self):
+        assert "BOGOTA" in XMAdapter().get_market_zones()
+
+    def test_cenace_market_zones_includes_main_node(self):
+        zones = CENACEAdapter().get_market_zones()
+        assert len(zones) >= 3
+
+
+class TestLatamAdaptersHTTP:
+    """Verify real HTTP parsing when API responds correctly."""
+
+    def _mock_response(self, json_data: object) -> MagicMock:
+        resp = MagicMock()
+        resp.json.return_value = json_data
+        resp.raise_for_status.return_value = None
+        return resp
+
+    def test_coes_live_parses_24_prices(self):
+        """COES returns [{hora:1..24, precio:X, barra:LIMA_SUR}] → 24 SpotPrices."""
+        fake_data = [
+            {"hora": h + 1, "precio": 38.5 + h * 0.5, "barra": "LIMA_SUR"}
+            for h in range(24)
+        ]
+        mock_resp = self._mock_response(fake_data)
+        with patch("src.core.market_adapter._requests") as mock_req:
+            mock_req.get.return_value = mock_resp
+            with patch("src.core.market_adapter._HAS_REQUESTS", True):
+                prices = COESAdapter().get_spot_prices("2026-03-11", "LIMA_SUR")
+        assert len(prices) == 24
+        assert all(p.price_usd_mwh > 0 for p in prices)
+        assert all(p.market == "COES" for p in prices)
+
+    def test_coes_api_failure_activates_fallback(self):
+        """COES HTTP failure → Duck Curve fallback, still 24 prices > 0."""
+        with patch("src.core.market_adapter._requests") as mock_req:
+            mock_req.get.side_effect = ConnectionError("timeout")
+            with patch("src.core.market_adapter._HAS_REQUESTS", True):
+                prices = COESAdapter().get_spot_prices("2026-03-11")
+        assert len(prices) == 24
+        assert all(p.price_usd_mwh > 0 for p in prices)
+
+    def test_xm_live_parses_24_prices(self):
+        """XM BIXI returns {Items:[{Hour:1..24, Values:{PrecioOfertaBolsaEscasez:X}}]}."""
+        items = [
+            {"Hour": h + 1, "Values": {"PrecioOfertaBolsaEscasez": 120000.0 + h * 500}}
+            for h in range(24)
+        ]
+        mock_resp = self._mock_response({"Items": items})
+        with patch("src.core.market_adapter._requests") as mock_req:
+            mock_req.get.return_value = mock_resp
+            with patch("src.core.market_adapter._HAS_REQUESTS", True):
+                prices = XMAdapter().get_spot_prices("2026-03-11")
+        assert len(prices) == 24
+        assert all(p.price_usd_mwh > 0 for p in prices)
+        assert all(p.market == "XM" for p in prices)
+
+    def test_xm_api_failure_activates_fallback(self):
+        with patch("src.core.market_adapter._requests") as mock_req:
+            mock_req.get.side_effect = ConnectionError("timeout")
+            with patch("src.core.market_adapter._HAS_REQUESTS", True):
+                prices = XMAdapter().get_spot_prices("2026-03-11")
+        assert len(prices) == 24
+        assert all(p.price_usd_mwh > 0 for p in prices)
+
+    def test_cenace_live_parses_24_prices(self):
+        """CENACE returns {Resultados:[{Hora:'01'..,'24', PML:X}]}."""
+        resultados = [
+            {"Hora": str(h + 1).zfill(2), "PML": 850.0 + h * 10}
+            for h in range(24)
+        ]
+        mock_resp = self._mock_response({"Resultados": resultados})
+        with patch("src.core.market_adapter._requests") as mock_req:
+            mock_req.get.return_value = mock_resp
+            with patch("src.core.market_adapter._HAS_REQUESTS", True):
+                prices = CENACEAdapter().get_spot_prices("2026-03-11")
+        assert len(prices) == 24
+        assert all(p.price_usd_mwh > 0 for p in prices)
+        assert all(p.market == "CENACE" for p in prices)
+
+    def test_cenace_api_failure_activates_fallback(self):
+        with patch("src.core.market_adapter._requests") as mock_req:
+            mock_req.get.side_effect = ConnectionError("timeout")
+            with patch("src.core.market_adapter._HAS_REQUESTS", True):
+                prices = CENACEAdapter().get_spot_prices("2026-03-11")
+        assert len(prices) == 24
+        assert all(p.price_usd_mwh > 0 for p in prices)
 
 
 # ── MarketAdapterRegistry tests ───────────────────────────────────────────────
