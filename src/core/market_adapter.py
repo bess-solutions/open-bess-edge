@@ -55,6 +55,10 @@ __all__ = [
     "COESAdapter",
     "XMAdapter",
     "CENACEAdapter",
+    # Global markets
+    "CAISOAdapter",
+    "ERCOTAdapter",
+    "ENTSOEAdapter",
     "MarketAdapterRegistry",
 ]
 
@@ -565,14 +569,383 @@ class CENACEAdapter(MarketAdapter):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# CAISO — California (USA)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class CAISOAdapter(MarketAdapter):
+    """California ISO market adapter — OASIS API, 5-min real-time LMP.
+
+    API: CAISO OASIS (Open Access Same-Time Information System)
+    Endpoint: http://oasis.caiso.com/oasisapi/SingleZip
+    Documentation: https://www.caiso.com/Documents/OASIS-InterfaceSpecification.pdf
+    Interval: 5-minute Real-Time Dispatch prices (RTD)
+    Fallback: Duck Curve (base_usd=45, California peak 15-21h)
+    """
+
+    _OASIS_URL = "http://oasis.caiso.com/oasisapi/SingleZip"
+    _DEFAULT_NODE = "TH_NP15_GEN-APND"
+
+    CAISO_NODES = [
+        "TH_NP15_GEN-APND",  # NorCal
+        "TH_SP15_GEN-APND",  # SoCal
+        "TH_ZP26_GEN-APND",  # Central Valley
+    ]
+
+    @property
+    def market_id(self) -> str:
+        return "CAISO"
+
+    @property
+    def country(self) -> str:
+        return "USA"
+
+    def get_spot_prices(self, date_str: str, node: str = _DEFAULT_NODE) -> list[SpotPrice]:
+        """Fetch CAISO OASIS RTD LMP; fall back to Duck Curve on any failure."""
+        prices = self._fetch_caiso(date_str, node)
+        if prices:
+            log.info("caiso_adapter.live", date=date_str, node=node, points=len(prices))
+            return prices
+        log.warning("caiso_adapter.fallback", date=date_str, reason="OASIS unavailable")
+        return _duck_curve_fallback(date_str, node, "CAISO",
+                                    base_usd=45.0, peak_amp=55.0)
+
+    def _fetch_caiso(self, date_str: str, node: str) -> list[SpotPrice]:
+        """Fetch hourly LMP from OASIS and bucket 5-min intervals into hourly averages."""
+        try:
+            dt = datetime.strptime(date_str, "%Y-%m-%d")
+            start = dt.strftime("%Y%m%dT00:00-0000")
+            end   = (dt + timedelta(days=1)).strftime("%Y%m%dT00:00-0000")
+            params = {
+                "queryname": "PRC_RTPD_LMP",
+                "startdatetime": start,
+                "enddatetime": end,
+                "market_run_id": "RTD",
+                "node": node,
+                "version": "1",
+                "resultformat": "6",  # JSON
+            }
+            resp = _http_get(self._OASIS_URL, params=params)
+            if resp is None:
+                return []
+            data = resp.json()
+            # OASIS JSON: {"OASISReport": {"MessagePayload": {"RTO": {"REPORT_DATA": [...]}}}}
+            report_data = (
+                data.get("OASISReport", {})
+                    .get("MessagePayload", {})
+                    .get("RTO", {})
+                    .get("REPORT_DATA", [])
+            )
+            # Bucket 5-min intervals into hours (simple average)
+            hourly: dict[int, list[float]] = {h: [] for h in range(24)}
+            for row in report_data:
+                try:
+                    interval_start = str(row.get("INTERVAL_START_GMT", ""))
+                    lmp = float(row.get("VALUE", 0.0))
+                    # Parse hour from interval timestamp
+                    h = int(interval_start[11:13]) if len(interval_start) >= 13 else -1
+                    if 0 <= h <= 23:
+                        hourly[h].append(lmp)
+                except (ValueError, IndexError):
+                    continue
+            prices = []
+            for h in range(24):
+                vals = hourly[h]
+                avg = sum(vals) / len(vals) if vals else 0.0
+                prices.append(SpotPrice(h, round(avg, 2), node, "CAISO", date_str))
+            return prices if all(p.price_usd_mwh >= 0 for p in prices) else []
+        except Exception as exc:  # noqa: BLE001
+            log.warning("caiso_adapter.parse_error", error=str(exc)[:120])
+            return []
+
+    def get_ancillary_services(self) -> list[AncillaryServiceDef]:
+        return [
+            AncillaryServiceDef("REG_UP",   "Regulation Up",         10.0, 12.0, 4),
+            AncillaryServiceDef("REG_DN",   "Regulation Down",       10.0, 10.0, 4),
+            AncillaryServiceDef("SPIN_RES", "Spinning Reserve",      30.0,  8.0, 10),
+            AncillaryServiceDef("NSPIN",    "Non-Spinning Reserve",  30.0,  5.0, 600),
+            AncillaryServiceDef("FLEX_UP",  "Flexible Ramping Up",   20.0,  6.0, 300),
+        ]
+
+    def get_dispatch_rules(self) -> DispatchRules:
+        return DispatchRules(
+            min_soc_pct=10.0, max_soc_pct=95.0,
+            max_daily_cycles=3,           # California allows more cycling
+            peak_hours=list(range(15, 22)),  # Solar duck curve peak
+            currency="USD", usd_local_rate=1.0,
+            grid_frequency_hz=60.0,
+        )
+
+    def get_market_zones(self) -> list[str]:
+        return self.CAISO_NODES
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ERCOT — Texas (USA)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class ERCOTAdapter(MarketAdapter):
+    """ERCOT Texas market adapter — Public API, 15-min Settlement Point Prices.
+
+    API: ERCOT Public API
+    Endpoint: https://api.ercot.com/api/public-reports/np6-788-cd/spp_node_zone_hub
+    Interval: 15-minute Settlement Point Prices (SPP)
+    Fallback: Duck Curve (base_usd=40, Texas peak 16-21h summer)
+    Authentication: None (public endpoint)
+    """
+
+    _API_BASE = "https://api.ercot.com/api/public-reports/np6-788-cd/spp_node_zone_hub"
+    _DEFAULT_NODE = "HB_NORTH"  # North Hub — benchmark node
+
+    ERCOT_HUBS = [
+        "HB_NORTH",   # North Hub
+        "HB_SOUTH",   # South Hub
+        "HB_WEST",    # West Hub (wind-heavy)
+        "HB_HOUSTON", # Houston Hub
+        "HB_PAN",     # Panhandle (wind)
+    ]
+
+    @property
+    def market_id(self) -> str:
+        return "ERCOT"
+
+    @property
+    def country(self) -> str:
+        return "USA"
+
+    def get_spot_prices(self, date_str: str, node: str = _DEFAULT_NODE) -> list[SpotPrice]:
+        """Fetch ERCOT SPP; fall back to Duck Curve on any failure."""
+        prices = self._fetch_ercot(date_str, node)
+        if prices:
+            log.info("ercot_adapter.live", date=date_str, node=node, points=len(prices))
+            return prices
+        log.warning("ercot_adapter.fallback", date=date_str, reason="ERCOT API unavailable")
+        return _duck_curve_fallback(date_str, node, "ERCOT",
+                                    base_usd=40.0, peak_amp=80.0)  # Texas scarcity spikes
+
+    def _fetch_ercot(self, date_str: str, node: str) -> list[SpotPrice]:
+        """Fetch 15-min SPP and aggregate to hourly averages."""
+        try:
+            dt = datetime.strptime(date_str, "%Y-%m-%d")
+            params = {
+                "deliveryDateFrom": dt.strftime("%Y-%m-%d"),
+                "deliveryDateTo": dt.strftime("%Y-%m-%d"),
+                "settlementPoint": node,
+                "size": "9999",
+            }
+            resp = _http_get(self._API_BASE, params=params,
+                             headers={"accept": "application/json"})
+            if resp is None:
+                return []
+            data = resp.json()
+            # ERCOT returns: {"data": [["deliveryDate","deliveryHour","deliveryInterval","spp"], ...]}
+            rows = data.get("data", [])
+            # data[0] may be column headers in some versions
+            if rows and isinstance(rows[0], list) and isinstance(rows[0][0], str):
+                # First row is header
+                header = rows[0]
+                rows = rows[1:]
+                hour_idx = header.index("deliveryHour") if "deliveryHour" in header else 1
+                spp_idx  = header.index("spp") if "spp" in header else 3
+            else:
+                hour_idx, spp_idx = 1, 3
+
+            hourly: dict[int, list[float]] = {h: [] for h in range(24)}
+            for row in rows:
+                try:
+                    h = int(row[hour_idx]) - 1  # ERCOT hours are 1-indexed
+                    spp = float(row[spp_idx])
+                    if 0 <= h <= 23:
+                        hourly[h].append(spp)
+                except (IndexError, ValueError):
+                    continue
+
+            prices = []
+            for h in range(24):
+                vals = hourly[h]
+                avg = sum(vals) / len(vals) if vals else 0.0
+                prices.append(SpotPrice(h, round(avg, 2), node, "ERCOT", date_str))
+            return prices if sum(1 for p in prices if p.price_usd_mwh > 0) >= 12 else []
+        except Exception as exc:  # noqa: BLE001
+            log.warning("ercot_adapter.parse_error", error=str(exc)[:120])
+            return []
+
+    def get_ancillary_services(self) -> list[AncillaryServiceDef]:
+        return [
+            AncillaryServiceDef("REGUP",   "Regulation Up",           10.0, 15.0,  5),
+            AncillaryServiceDef("REGDN",   "Regulation Down",         10.0, 12.0,  5),
+            AncillaryServiceDef("RRS",     "Responsive Reserve",      30.0,  9.0, 10),
+            AncillaryServiceDef("ECRS",    "ERCOT Contingency Reserve",50.0,  7.0, 600),
+            AncillaryServiceDef("NSPNRES", "Non-Spinning Reserve",    30.0,  5.0, 600),
+        ]
+
+    def get_dispatch_rules(self) -> DispatchRules:
+        return DispatchRules(
+            min_soc_pct=10.0, max_soc_pct=95.0,
+            max_daily_cycles=4,               # ERCOT rewards frequent cycling
+            peak_hours=list(range(14, 21)),   # Summer afternoon peak
+            currency="USD", usd_local_rate=1.0,
+            grid_frequency_hz=60.0,
+        )
+
+    def get_market_zones(self) -> list[str]:
+        return self.ERCOT_HUBS
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ENTSO-E — Europe
+# ─────────────────────────────────────────────────────────────────────────────
+
+class ENTSOEAdapter(MarketAdapter):
+    """ENTSO-E pan-European market adapter — Transparency Platform, 1h Day-Ahead.
+
+    API: ENTSO-E Transparency Platform RESTful API
+    Endpoint: https://web-api.tp.entsoe.eu/api
+    Document: A44 (Day-Ahead Market Prices)
+    Interval: 1-hour resolution
+    Fallback: Duck Curve (base_usd=80, EU industrial peak 8-20h)
+    Authentication: API token via BESSAI_ENTSOE_TOKEN env var (free registration)
+
+    Coverage:
+      - Germany (DE-LU): 10YDE-EON------1 / 10YDE-RWENET---I
+      - France (FR):     10YFR-RTE------C
+      - Spain (ES):      10YES-REE------0
+      - Italy (IT-NORD): 10YIT-GRTN-----B
+    """
+
+    _API = "https://web-api.tp.entsoe.eu/api"
+    _DEFAULT_NODE = "DE-LU"   # Germany-Luxembourg bidding zone
+
+    # ENTSO-E EIC area codes for bidding zones
+    ENTSOE_ZONES: dict[str, str] = {
+        "DE-LU":   "10Y1001A1001A82H",   # Germany-Luxembourg
+        "FR":      "10YFR-RTE------C",   # France
+        "ES":      "10YES-REE------0",   # Spain
+        "IT-NORD": "10YIT-GRTN-----B",   # Italy North
+        "GB":      "10YGB----------A",   # Great Britain
+        "NL":      "10YNL----------L",   # Netherlands
+        "PT":      "10YPT-REN------W",   # Portugal
+        "PL":      "10YPL-AREA-----S",   # Poland
+        "NO-NO1":  "10YNO-1--------2",   # Norway NO1
+    }
+
+    @property
+    def market_id(self) -> str:
+        return "ENTSOE"
+
+    @property
+    def country(self) -> str:
+        return "Europe"
+
+    def get_spot_prices(self, date_str: str, node: str = _DEFAULT_NODE) -> list[SpotPrice]:
+        """Fetch ENTSO-E DA prices (EUR/MWh → USD/MWh); fallback to Duck Curve."""
+        prices = self._fetch_entsoe(date_str, node)
+        if prices:
+            log.info("entsoe_adapter.live", date=date_str, node=node, points=len(prices))
+            return prices
+        log.warning("entsoe_adapter.fallback", date=date_str, reason="Transparency Platform unavailable")
+        return _duck_curve_fallback(date_str, node, "ENTSOE",
+                                    base_usd=80.0, overnight_amp=-20.0, peak_amp=40.0)
+
+    def _fetch_entsoe(self, date_str: str, node: str) -> list[SpotPrice]:
+        """Fetch Day-Ahead prices from ENTSO-E Transparency Platform."""
+        try:
+            token = os.getenv("BESSAI_ENTSOE_TOKEN", "")
+            if not token:
+                log.warning("entsoe_adapter.no_token",
+                            hint="Set BESSAI_ENTSOE_TOKEN env var (register at transparency.entsoe.eu)")
+                return []
+
+            eic = self.ENTSOE_ZONES.get(node, self.ENTSOE_ZONES["DE-LU"])
+            dt = datetime.strptime(date_str, "%Y-%m-%d")
+            dt_next = dt + timedelta(days=1)
+            # ENTSO-E expects UTC timestamps in YYYYMMDDHHmm format
+            period_start = dt.strftime("%Y%m%d0000")
+            period_end   = dt_next.strftime("%Y%m%d0000")
+
+            params = {
+                "securityToken": token,
+                "documentType": "A44",       # Day-ahead prices
+                "in_Domain": eic,
+                "out_Domain": eic,
+                "periodStart": period_start,
+                "periodEnd": period_end,
+            }
+            resp = _http_get(self._API, params=params)
+            if resp is None:
+                return []
+
+            # ENTSO-E returns XML — parse with stdlib
+            import xml.etree.ElementTree as ET
+            root = ET.fromstring(resp.text)
+            ns = {"ns": "urn:iec62325.351:tc57wg16:451-3:publicationdocument:7:0"}
+
+            # EUR to USD conversion (reference rate)
+            eur_usd = float(os.getenv("BESSAI_EUR_USD_RATE", "1.08"))
+
+            hourly: dict[int, list[float]] = {h: [] for h in range(24)}
+            for ts in root.findall(".//ns:TimeSeries", ns):
+                for period in ts.findall("ns:Period", ns):
+                    resolution = period.findtext("ns:resolution", "", ns)
+                    if resolution not in ("PT60M", "PT30M", "PT15M"):
+                        continue
+                    pt_min = {"PT60M": 60, "PT30M": 30, "PT15M": 15}.get(resolution, 60)
+                    for point in period.findall("ns:Point", ns):
+                        pos  = int(point.findtext("ns:position", "0", ns))
+                        eur  = float(point.findtext("ns:price.amount", "0", ns))
+                        usd  = eur * eur_usd
+                        # Convert position to hour
+                        h = ((pos - 1) * pt_min) // 60
+                        if 0 <= h <= 23:
+                            hourly[h].append(usd)
+
+            prices = []
+            for h in range(24):
+                vals = hourly[h]
+                avg = sum(vals) / len(vals) if vals else 0.0
+                prices.append(SpotPrice(h, round(avg, 2), node, "ENTSOE", date_str))
+            return prices if sum(1 for p in prices if p.price_usd_mwh > 0) >= 12 else []
+        except Exception as exc:  # noqa: BLE001
+            log.warning("entsoe_adapter.parse_error", error=str(exc)[:160])
+            return []
+
+    def get_ancillary_services(self) -> list[AncillaryServiceDef]:
+        # ENTSO-E common services (vary by TSO, these are representative)
+        return [
+            AncillaryServiceDef("FCR",   "Frequency Containment Reserve",  6.0, 10.0,  30),
+            AncillaryServiceDef("aFRR",  "Automatic Frequency Restoration", 10.0, 8.0, 300),
+            AncillaryServiceDef("mFRR",  "Manual Frequency Restoration",   20.0, 5.0, 900),
+            AncillaryServiceDef("RR",    "Replacement Reserve",            30.0, 3.0, 3600),
+            AncillaryServiceDef("DMAS",  "Day-Ahead Market Balancing",     50.0, 4.0, 1800),
+        ]
+
+    def get_dispatch_rules(self) -> DispatchRules:
+        return DispatchRules(
+            min_soc_pct=10.0, max_soc_pct=95.0,
+            max_daily_cycles=2,
+            peak_hours=list(range(8, 20)),   # EU industrial day profile
+            currency="EUR", usd_local_rate=0.92,  # EUR per USD
+            grid_frequency_hz=50.0,
+        )
+
+    def get_market_zones(self) -> list[str]:
+        return list(self.ENTSOE_ZONES.keys())
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Registry — resolve adapter from env
 # ─────────────────────────────────────────────────────────────────────────────
 
 _ADAPTERS: dict[str, type[MarketAdapter]] = {
+    # Latam
     "SEN": SENAdapter,
     "COES": COESAdapter,
     "XM": XMAdapter,
     "CENACE": CENACEAdapter,
+    # USA
+    "CAISO": CAISOAdapter,
+    "ERCOT": ERCOTAdapter,
+    # Europe
+    "ENTSOE": ENTSOEAdapter,
 }
 
 
@@ -583,7 +956,8 @@ class MarketAdapterRegistry:
 
     Usage::
         adapter = MarketAdapterRegistry.get()           # from env
-        adapter = MarketAdapterRegistry.get("COES")     # explicit
+        adapter = MarketAdapterRegistry.get("CAISO")    # explicit
+        adapter = MarketAdapterRegistry.get("ENTSOE")   # Europe
     """
 
     _instance: dict[str, MarketAdapter] = {}

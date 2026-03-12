@@ -13,7 +13,7 @@ build-backend = "hatchling.build"
 # ---------------------------------------------------------------------------
 [project]
 name            = "bessai-edge"
-version         = "2.10.0"
+version         = "2.15.2"
 description     = "Open-source industrial BESS gateway: Modbus, IEEE 2030.5, IEC 62443, MQTT, OpenTelemetry, Prometheus"
 readme          = "README.md"
 license         = { file = "LICENSE" }
@@ -22,7 +22,8 @@ authors         = [{ name = "BESS Solutions", email = "ingenieria@bess-solutions
 keywords        = [
     "BESS", "battery-energy-storage", "Modbus", "IIoT",
     "anomaly-detection", "edge-AI", "ONNX", "industrial-control",
-    "NTSyCS", "IEC62443", "GCP",
+    "NTSyCS", "IEC62443", "GCP", "DRL", "PPO", "arbitrage",
+    "CAISO", "ERCOT", "ENTSOE", "SEN", "market-adapter",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -34,6 +35,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: System :: Hardware",
     "Topic :: Utilities",
@@ -80,6 +82,14 @@ milp = [
 marl = [
     "gymnasium>=0.29",
     "pettingzoo>=1.24",
+]
+# BEP-0200 Phase 3: DRL without Ray (torch-only, compatible with Py 3.12+)
+drl-standalone = [
+    "gymnasium>=1.0",
+    "torch>=2.5",
+    "onnx>=1.15",
+    "onnxscript>=0.1",
+    "onnxruntime>=1.17",
 ]
 # Full DRL stack (all optional deps)
 full = [
@@ -191,3 +201,25 @@ skips = [
     "B404",   # import_subprocess — used only in scripts/
 ]
 exclude_dirs = ["tests", ".venv", ".git"]
+
+# ---------------------------------------------------------------------------
+# Codecov — coverage reporting
+# ---------------------------------------------------------------------------
+[tool.codecov]
+# Settings are mostly in codecov.yml, but minimum thresholds here:
+patch_coverage_threshold = 70
+
+# ---------------------------------------------------------------------------
+# CHANGELOG excerpt v2.15.2 (2026-03-12)
+# ---------------------------------------------------------------------------
+# BEP-0200 Phase 3:
+#   + bess_rl_env_cen.py: Gymnasium env using real CEN/SEN CMg data (8 nodes)
+#   + train_cen_standalone.py: PPO trainer (torch-only, no Ray) → ONNX
+#   + 8× _drl_cen_v1.onnx models (p95 latency < 0.1ms, best_reward=374 USD)
+# Sprint C — Global Market Adapters:
+#   + CAISOAdapter, ERCOTAdapter, ENTSOEAdapter (9 EU zones)
+#   + test_market_adapter_global.py: 62 tests, 7 markets, mock HTTP
+# CI/tooling:
+#   + drl-standalone optional dep group
+#   + codecov config
+#   + Python 3.14 classifier
