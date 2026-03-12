@@ -10,6 +10,9 @@
 
 ## [Unreleased]
 
+### 🤖 CI/CD
+- add BEP-0200 drl-market-tests job (Job 11) to CI pipeline (`635fead6`, @BESS Solutions)
+
 ### 🚀 Feat — v2.15.0: BESSAIServer integrado en main.py (2026-03-02)
 - **src/core/main.py**: `HealthServer` reemplazado por `BESSAIServer` — 8 endpoints activos en el loop productivo
   - `GET /health` → liveness + safety + compliance_score por ciclo
