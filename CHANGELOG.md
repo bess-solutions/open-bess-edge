@@ -152,6 +152,7 @@
 
 
 ### 📚 Documentation
+- **status**: 773 tests, FLCoordinator BEP-0600 Sprint H (`74903fee`, @BESS Solutions)
 - **edge**: v2.16.0 PROJECT_STATUS sync 2026-03-12 (`d827186c`, @BESS Solutions)
 - **status**: 749 tests, VPPFleetManager BEP-0500 (26 tests, DRL wiring, market_price_fn) (`53699141`, @BESS Solutions)
 - **status**: 2026-03-12 — 723 tests, BEP-0200-P3 ONNX DRL, CAISO/ERCOT/ENTSO-E, CI Job 11 (`6e8fdace`, @BESS Solutions)
