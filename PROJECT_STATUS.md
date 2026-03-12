@@ -14,13 +14,14 @@ Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivad
 
 ---
 
-## ✅ Estado Actual — v2.16.0 (VPPFleetManager BEP-0500 + FL BEP-0600 + Sync)
+## ✅ Estado Actual — v2.16.0 (VPPFleetManager BEP-0500 + FL BEP-0600 + HVDC BEP-0700)
 
 > Ver: [`docs/PENDIENTES.md`](docs/PENDIENTES.md) · [`docs/MODULOS_Y_DATOS_SIMULADOS.md`](docs/MODULOS_Y_DATOS_SIMULADOS.md)
 
 ### Tests
 ```
-773 passed ✅  · 0 failed · 1 xfailed · 8 skipped
+799 passed ✅  · 0 failed · 1 xfailed · 8 skipped
+Nuevo: test_hvdc_scheduler.py — 26/26 BEP-0700 HVDCScheduler (DC flow, arbitrage, losses) ✅
 Nuevo: test_fl_coordinator.py — 24/24 BEP-0600 FLCoordinator (FedAvg, L2, sessions) ✅
 Nuevo: test_sen_market_feed.py — 15/15 BEP-0500 P2 SENMarketFeed (DuckDB+duck-curve) ✅
 Nuevo: test_vpp_fleet_manager.py — 26/26 BEP-0500 VPPFleetManager (fleet+VPP+DRL coordinator) ✅
