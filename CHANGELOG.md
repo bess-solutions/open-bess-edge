@@ -178,6 +178,7 @@
 - **quality**: remediacion completa Pyright 0 errores + Bandit 0 alertas Medium/High (`bbb366cc`, @BESS Solutions)
 
 ### 🔧 Maintenance
+- 360Deg consolidation 2026-03-12 v2.15.1 (`3be19636`, @BESS Solutions)
 - 360Deg consolidation 2026-03-11 v2.14.0 (`d23612da`, @BESS Solutions)
 - 360Deg consolidation 2026-03-11 v2.14.0 (`a44a45bd`, @BESS Solutions)
 - 360Deg consolidation 2026-03-11 v2.14.0 (`a76c3304`, @BESS Solutions)
