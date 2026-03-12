@@ -13,7 +13,7 @@ build-backend = "hatchling.build"
 # ---------------------------------------------------------------------------
 [project]
 name            = "bessai-edge"
-version         = "2.15.2"
+version         = "2.16.0"
 description     = "Open-source industrial BESS gateway: Modbus, IEEE 2030.5, IEC 62443, MQTT, OpenTelemetry, Prometheus"
 readme          = "README.md"
 license         = { file = "LICENSE" }
