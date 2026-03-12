@@ -151,6 +151,7 @@
 
 
 ### 📚 Documentation
+- **status**: 749 tests, VPPFleetManager BEP-0500 (26 tests, DRL wiring, market_price_fn) (`53699141`, @BESS Solutions)
 - **status**: 2026-03-12 — 723 tests, BEP-0200-P3 ONNX DRL, CAISO/ERCOT/ENTSO-E, CI Job 11 (`6e8fdace`, @BESS Solutions)
 - **edge**: v2.15.2 PROJECT_STATUS sync 2026-03-12 (`25d12482`, @BESS Solutions)
 - **edge**: v2.15.1 PROJECT_STATUS sync 2026-03-12 (`aa16c354`, @BESS Solutions)
