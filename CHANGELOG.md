@@ -58,33 +58,37 @@
 - **docs/adopters.md**: fecha actualizada 2026-03-02; link a ADOPTER_HUB
 
 
-## 🤖 AGENT HANDOFF — Estado actual del proyecto (2026-03-02T19:05 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual (2026-03-12T14:30 -03:00)
 
 > [!IMPORTANT]
-> **Sprint 2026-03-02 — Adopter Documentation Wave 7 + Auditoría de Seguridad Completa**
+> **Sprint 2026-03-12 — BEP-0200 Phase 3 ONNX DRL + Global Market Adapters (Autopilot)**
 >
-> El repositorio `open-bess-edge` completó un sprint enfocado en **reducir la fricción de adopción** y asegurar el repositorio público. Todo empujado a `main`.
+> Sprint completo ejecutado en modo autopiloto: DRL training, ONNX export, market adapters globales, CI ampliado, web actualizada.
 
-### ✅ Completado en esta sesión (commit range: `2d48b0c` → `1a03abc`)
+### ✅ Completado en esta sesión (commit range: `18e51e3` → `635fead`)
 
 | Área | Entregables | Commit |
 |------|-------------|--------|
-| **Setup** | `scripts/setup.sh` — config/.env interactivo en 2 min; `make setup` + `make onboard` | `9ebbd1d` |
-| **Docs Adopción** | `ADOPTER_HUB.md` · `ONBOARDING_7DAYS.md` · `FAQ.md` · `CONTRIBUTING_ADOPTERS.md` | `4d91dd2` |
-| **Templates** | `.github/ISSUE_TEMPLATE/adopter_support.yml` · `.github/DISCUSSION_TEMPLATE/early_adopter_intro.yml` | `4d91dd2` |
-| **Navegación** | mkdocs.yml: `Para Adopters` como primera sección (6 docs) | `9ebbd1d` |
-| **Seguridad** | docker-compose.yml: `GF_SECURITY_ADMIN_PASSWORD` env var; erradicación total `admin/bessai` | `f294f0a` |
-| **Auditoría docs** | 79 docs auditados · fix 2×AGPL-3.0 bug · fix 2×`cp .env.example` roto · 12+ versiones sincronizadas | `1a03abc` |
-| **Blog** | `bessai-web/blog.html`: OBE-DOC-001 agregado (push manual pendiente por workspace) | local |
+| **DRL Training (Sprint B)** | `bess_rl_env_cen.py` Gymnasium env + `train_cen_standalone.py` PPO PyTorch (sin Ray) | `18e51e3` |
+| **8× ONNX CEN** | `models/*_drl_cen_v1.onnx` — p95 < 0.1ms, best_reward=374 USD (Maitencillo), 2.1KB/modelo | `18e51e3` |
+| **test_drl_agent.py** | 17/17 tests: ONNX latency auto-detect shape, env obs shape, dataset stats | `18e51e3` |
+| **Market Adapters (Sprint C)** | `CAISOAdapter` (OASIS 5-min), `ERCOTAdapter` (SPP 15-min), `ENTSOEAdapter` (9 EU zonas) | `18e51e3` |
+| **test_market_adapter_global.py** | 62/62 tests — mock HTTP, 7 mercados, XML ENTSO-E | `18e51e3` |
+| **CI Job 11** | `drl-market-tests`: Python 3.12 + torch-CPU + gymnasium + onnxruntime | `635fead` |
+| **pyproject.toml** | 2.10.0→2.15.2, `drl-standalone` dep group, codecov config, Py3.14 | `18e51e3` |
+| **pilot.html** | 723 tests, v2.15.2, stat 374 USD/día, 7 mercados en FAQ+form (USA+Europa), FAQ DRL | local push |
+| **PROJECT_STATUS.md** | +7 módulos nuevos, historial 2026-03-12 completo | local push |
+| **sync_ecosystem.py** | v2.15.2 — 3,496 pts CEN, bessai-web + open-bess-edge pusheados | — |
 
-### 🔜 Próximas prioridades (v2.15.0)
+### Estado de tests: **723 passed · 1 xfailed · 0 failed**
 
-1. `src/interfaces/server.py` → mount en `main.py` reemplazando `HealthServer`
-2. `src/core/cen_sc_bidder.py` → integrar en main loop post-ComplianceStack
-3. Datos reales CEN → entrenar PPO 500k steps → `models/dispatch_policy.onnx` real
-4. Activar `CENSCBidder` en producción (`dry_run=False` post-registro CEN)
-5. FleetOrchestrator: añadir sitios 2+3 (VPP multi-site activo)
-6. **Push blog.html**: `cd bessai-web && git add blog.html && git commit -m "blog: OBE-DOC-001" && git push`
+### 🔜 Próximas prioridades
+
+1. **Activar DRL write** en staging: `BESSAI_DRL_WRITE=true` con datos ONNX CEN v1
+2. **FleetOrchestrator multi-site**: añadir sitios 2+3 para VPP real con SC Chile
+3. **Federated Learning real**: conectar Flower server con N≥2 sitios
+4. **CHANGELOG bot**: actualizar auto-changelog con commits del sprint
+5. **Blog post**: OBE-DOC-002 sobre BEP-0200 Phase 3 resultados (374 USD/día, 7 mercados)
 
 ---
 
