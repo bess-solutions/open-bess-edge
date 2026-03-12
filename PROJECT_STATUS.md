@@ -20,7 +20,7 @@ Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivad
 
 ### Tests
 ```
-624 passed ✅  · 0 failed · 8 skipped
+633 passed ✅  · 0 failed · 8 skipped
 Nuevo: test_bessai_evolve_v2.py — 24/24 CMAESMutator + NSGA-II + EliteArchive ✅
 Nuevo: test_bess_rl_env_cen.py — 23/23 BEP-0200 F3 (env CMg real CEN) ✅
 Nuevo: test_milp_optimizer.py — 14/14 MILP optimizer ✅

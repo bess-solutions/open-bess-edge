@@ -47,21 +47,21 @@ log = structlog.get_logger(__name__)
 
 # Optional dependencies — fail-safe imports
 try:
-    import numpy as np
+    import numpy as np  # noqa: F401
     _HAS_NUMPY = True
 except ImportError:
     _HAS_NUMPY = False
 
 try:
-    import gymnasium as gym
-    from gymnasium import spaces
+    import gymnasium as gym  # noqa: F401
+    from gymnasium import spaces  # noqa: F401
     _HAS_GYM = True
 except ImportError:
     _HAS_GYM = False
 
 try:
-    from stable_baselines3 import PPO
-    from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
+    from stable_baselines3 import PPO  # noqa: F401
+    from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback  # noqa: F401
     _HAS_SB3 = True
 except ImportError:
     _HAS_SB3 = False
@@ -452,7 +452,6 @@ class PPOTrainer:
             ckpt = self._result.checkpoints[-1]
             model = PPO.load(ckpt)
 
-            obs_dim = self._cfg.__class__.__name__  # placeholder
             dummy_input = torch.zeros(1, 8)
             traced = torch.jit.trace(model.policy, dummy_input)  # type: ignore[arg-type]
 

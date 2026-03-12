@@ -266,7 +266,7 @@ _HTTP_TIMEOUT = 8  # seconds
 _HTTP_RETRIES = 2
 
 
-def _http_get(url: str, **kwargs: Any) -> "_requests.Response | None":
+def _http_get(url: str, **kwargs: Any) -> _requests.Response | None:
     """GET with timeout + retries. Returns None on any failure."""
     if not _HAS_REQUESTS:
         return None
