@@ -147,6 +147,7 @@
 
 
 ### 📚 Documentation
+- **edge**: v2.15.2 PROJECT_STATUS sync 2026-03-12 (`25d12482`, @BESS Solutions)
 - **edge**: v2.15.1 PROJECT_STATUS sync 2026-03-12 (`aa16c354`, @BESS Solutions)
 - **edge**: v2.15.1 PROJECT_STATUS sync 2026-03-12 (`79af26d4`, @BESS Solutions)
 - **edge**: v2.14.0 PROJECT_STATUS sync 2026-03-11 (`3eed376f`, @BESS Solutions)
