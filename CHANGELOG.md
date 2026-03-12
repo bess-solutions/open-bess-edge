@@ -58,37 +58,38 @@
 - **docs/adopters.md**: fecha actualizada 2026-03-02; link a ADOPTER_HUB
 
 
-## 🤖 AGENT HANDOFF — Estado actual (2026-03-12T14:30 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual (2026-03-12T18:50 -03:00)
 
 > [!IMPORTANT]
-> **Sprint 2026-03-12 — BEP-0200 Phase 3 ONNX DRL + Global Market Adapters (Autopilot)**
+> **Sprint 2026-03-12 (Autopilot) — BEP-0500 VPPFleetManager + Market Live Feed + v2.16.0**
 >
-> Sprint completo ejecutado en modo autopiloto: DRL training, ONNX export, market adapters globales, CI ampliado, web actualizada.
+> Continuación del autopilot: VPPFleetManager coordinador fleet+VPP+DRL, live market feed, sync v2.16.0.
 
-### ✅ Completado en esta sesión (commit range: `18e51e3` → `635fead`)
+### ✅ Completado en esta sesión (commit range: `18e51e3` → `HEAD`)
 
 | Área | Entregables | Commit |
 |------|-------------|--------|
-| **DRL Training (Sprint B)** | `bess_rl_env_cen.py` Gymnasium env + `train_cen_standalone.py` PPO PyTorch (sin Ray) | `18e51e3` |
-| **8× ONNX CEN** | `models/*_drl_cen_v1.onnx` — p95 < 0.1ms, best_reward=374 USD (Maitencillo), 2.1KB/modelo | `18e51e3` |
-| **test_drl_agent.py** | 17/17 tests: ONNX latency auto-detect shape, env obs shape, dataset stats | `18e51e3` |
-| **Market Adapters (Sprint C)** | `CAISOAdapter` (OASIS 5-min), `ERCOTAdapter` (SPP 15-min), `ENTSOEAdapter` (9 EU zonas) | `18e51e3` |
-| **test_market_adapter_global.py** | 62/62 tests — mock HTTP, 7 mercados, XML ENTSO-E | `18e51e3` |
-| **CI Job 11** | `drl-market-tests`: Python 3.12 + torch-CPU + gymnasium + onnxruntime | `635fead` |
-| **pyproject.toml** | 2.10.0→2.15.2, `drl-standalone` dep group, codecov config, Py3.14 | `18e51e3` |
-| **pilot.html** | 723 tests, v2.15.2, stat 374 USD/día, 7 mercados en FAQ+form (USA+Europa), FAQ DRL | local push |
-| **PROJECT_STATUS.md** | +7 módulos nuevos, historial 2026-03-12 completo | local push |
-| **sync_ecosystem.py** | v2.15.2 — 3,496 pts CEN, bessai-web + open-bess-edge pusheados | — |
+| **DRL Training (Sprint B)** | `bess_rl_env_cen.py` + `train_cen_standalone.py` PPO PyTorch | `18e51e3` |
+| **8× ONNX CEN** | `models/*_drl_cen_v1.onnx` — p95 < 0.1ms, 374 USD/día (Maitencillo) | `18e51e3` |
+| **Market Adapters (Sprint C)** | `CAISOAdapter`, `ERCOTAdapter`, `ENTSOEAdapter` — 62/62 tests | `18e51e3` |
+| **CI Job 11** | `drl-market-tests` job en `ci.yml` | `635fead` |
+| **pyproject.toml** | 2.15.2 → **2.16.0** | latest |
+| **VPPFleetManager BEP-0500 (Sprint E)** | `src/core/vpp_fleet_manager.py` — FleetOrchestrator+VPP+DRL coordinator | `9437e55` |
+| **DRL + Market wiring (Sprint F)** | `_drl_setpoint_for_site()` ONNX per-site, `set_market_price_fn()`, `has_drl` | `f97cc6a` |
+| **SENMarketFeed BEP-0500 P2 (Sprint G)** | `src/core/sen_market_feed.py` — DuckDB→SENAdapter→duck-curve, 15min TTL | latest |
+| **Tests totales** | **749 passed** (26 VPPFleetManager + 15 SENMarketFeed + 723 previos) | — |
+| **sync_ecosystem v2.16.0** | bessai-web + open-bess-edge — 3,496 pts CEN publicados | — |
+| **PROJECT_STATUS.md** | 749 tests, VPPFleetManager+SENMarketFeed módulos | latest |
 
-### Estado de tests: **723 passed · 1 xfailed · 0 failed**
+### Estado de tests: **749 passed · 1 xfailed · 0 failed**
 
 ### 🔜 Próximas prioridades
 
-1. **Activar DRL write** en staging: `BESSAI_DRL_WRITE=true` con datos ONNX CEN v1
-2. **FleetOrchestrator multi-site**: añadir sitios 2+3 para VPP real con SC Chile
-3. **Federated Learning real**: conectar Flower server con N≥2 sitios
-4. **CHANGELOG bot**: actualizar auto-changelog con commits del sprint
-5. **Blog post**: OBE-DOC-002 sobre BEP-0200 Phase 3 resultados (374 USD/día, 7 mercados)
+1. **Federated Learning scaffold**: Flower stub + `FLCoordinator` para N≥2 sitios
+2. **HVDC Virtual Dispatch**: `src/core/hvdc_scheduler.py` — despacho intercontinental simulado
+3. **Blog post**: OBE-DOC-003 sobre BEP-0500 VPP multi-site launch (749 tests, 7 mercados)
+4. **Activar DRL write** en staging: `BESSAI_DRL_WRITE=true` con datos ONNX CEN v1
+5. **VPPFleetManager Phase 2**: HTTP real dispatch a SiteProxy endpoints (mTLS)
 
 ---
 
