@@ -204,6 +204,7 @@
 - remove deprecated fetch_cmg_evolution.py (superseded by bessai_data_scraper.py) (`1f734cd4`, @BESS Solutions)
 
 ### ✨ New Features
+- **bep0700**: HVDCScheduler — DC power flow, 500MW, losses, price arbitrage, 26 tests, ruff clean (`4268a404`, @BESS Solutions)
 - **bep0600**: FLCoordinator — FedAvg FL scaffold, 24 tests, BEP-0600, ruff clean (`0c733e34`, @BESS Solutions)
 - **bep0500-p2**: SENMarketFeed — DuckDB+SEN+duck-curve live price feed, 15 tests, v2.16.0 (`9085f3d3`, @BESS Solutions)
 - **bep0500**: VPPFleetManager v2 — DRL per-site ONNX wiring + market_price_fn, 26 tests, ruff clean (`f97cc6ac`, @BESS Solutions)
