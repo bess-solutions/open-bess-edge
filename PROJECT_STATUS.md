@@ -14,24 +14,23 @@ Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivad
 
 ---
 
-## ✅ Estado Actual — v2.16.0 (BESSAIEvolve v2 Fase 1 + Consolidación Cuántica)
+## ✅ Estado Actual — v2.16.0 (VPPFleetManager BEP-0500 + FL BEP-0600 + Sync)
 
 > Ver: [`docs/PENDIENTES.md`](docs/PENDIENTES.md) · [`docs/MODULOS_Y_DATOS_SIMULADOS.md`](docs/MODULOS_Y_DATOS_SIMULADOS.md)
 
 ### Tests
 ```
-749 passed ✅  · 0 failed · 1 xfailed · 8 skipped
+773 passed ✅  · 0 failed · 1 xfailed · 8 skipped
+Nuevo: test_fl_coordinator.py — 24/24 BEP-0600 FLCoordinator (FedAvg, L2, sessions) ✅
+Nuevo: test_sen_market_feed.py — 15/15 BEP-0500 P2 SENMarketFeed (DuckDB+duck-curve) ✅
 Nuevo: test_vpp_fleet_manager.py — 26/26 BEP-0500 VPPFleetManager (fleet+VPP+DRL coordinator) ✅
 Nuevo: test_drl_agent.py — 17/17 BEP-0200 P3 (PPO PyTorch, ONNX 8 nodos CEN) ✅
 Nuevo: test_market_adapter_global.py — 62/62 CAISO+ERCOT+ENTSO-E (7 mercados) ✅
 Nuevo: test_bessai_evolve_v2.py — 24/24 CMAESMutator + NSGA-II + EliteArchive ✅
 Nuevo: test_bess_rl_env_cen.py — 23/23 BEP-0200 F3 (env CMg real CEN) ✅
-Nuevo: test_milp_optimizer.py — 14/14 MILP optimizer ✅
-Nuevo: test_degradation_model.py — 15/15 DegradationModel ✅
-Nuevo: test_watchdog_manager.py — 19/19 WatchdogManager ✅
 Registry: 7 perfiles hardware (Fronius, Huawei, SMA, Victron + SolarEdge, BYD, Tesla)
 CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · helm ✅ · drl-market-tests ✅
-Landing: React scrollytelling v1.0 ✅ (i18n ES/EN, Lucide icons)
+Version: v2.16.0 · 3,496 pts CEN reales · bessai-web sync OK
 ```
 
 ### 🔍 Audit 360° — Gaps Conocidos y Plan de Acción
