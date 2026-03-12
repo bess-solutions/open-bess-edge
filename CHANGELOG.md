@@ -171,6 +171,7 @@
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
+- **tests**: ONNX latency auto-detect input shape, dry-run xfail for Py3.14 venv (`b38cc423`, @BESS Solutions)
 - repair 6 broken internal links (exhaustive link scan) (`1790f17e`, @BESS Solutions)
 - remove broken image in quickstart_5min.md (`aeedafdb`, @BESS Solutions)
 - **mkdocs**: remove nav duplicates found in pre-close review (`434f394f`, @BESS Solutions)
