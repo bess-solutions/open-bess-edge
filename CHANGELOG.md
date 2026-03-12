@@ -200,6 +200,7 @@
 - remove deprecated fetch_cmg_evolution.py (superseded by bessai_data_scraper.py) (`1f734cd4`, @BESS Solutions)
 
 ### ✨ New Features
+- **bep0400**: VPPFleetManager — fleet+VPP+DRL dispatch coordinator, 26 tests (`9437e557`, @BESS Solutions)
 - **bep0200-p3**: PPO DRL trainer + 8 CEN ONNX models + global market adapters v2.15.2 (`18e51e30`, @BESS Solutions)
 - **v2.15.0**: mount BESSAIServer in main.py — 8 endpoints active (`fb29fdae`, @BESS Solutions)
 - **adopters**: setup interactivo + mkdocs nav + discussion template (`4d91dd22`, @BESS Solutions)
