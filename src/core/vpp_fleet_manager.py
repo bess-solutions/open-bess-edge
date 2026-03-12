@@ -4,7 +4,7 @@
 """
 src/core/vpp_fleet_manager.py
 ================================
-BESSAI Edge Gateway — VPP Fleet Manager (BEP-0400).
+BESSAI Edge Gateway — VPP Fleet Manager (BEP-0500).
 
 Coordinates FleetOrchestrator + VPPPublisher + ONNX DRL dispatch in a
 single control loop. This is the "brain" that bridges per-site telemetry
@@ -26,8 +26,8 @@ Architecture::
     │  SiteSetpoints: per-site kW allocation          │
     └─────────────────────────────────────────────────┘
 
-BEP-0400 spec reference:
-  docs/bep/BEP-0400.md (to be created)
+BEP-0500 spec reference:
+  docs/bep/BEP-0500.md
 
 Usage::
 
@@ -53,6 +53,7 @@ from typing import Any
 import structlog
 
 from src.core.fleet_orchestrator import FleetOrchestrator, FleetSummary, SiteProxy
+from src.interfaces.onnx_dispatcher import ONNXDispatcher
 from src.interfaces.vpp_publisher import OpenADREvent, SiteCapacity, VPPPublisher
 
 __all__ = [
@@ -153,6 +154,7 @@ class VPPFleetManager:
         min_soc_pct: float = 15.0,  # safety floor
         max_soc_pct: float = 95.0,  # safety ceiling
         min_fleet_sites: int = 1,
+        market_price_fn: Any | None = None,
     ) -> None:
         self._fleet = fleet or FleetOrchestrator()
         self._vpp = vpp or VPPPublisher()
@@ -163,6 +165,8 @@ class VPPFleetManager:
         self.min_soc_pct = min_soc_pct
         self.max_soc_pct = max_soc_pct
         self.min_fleet_sites = min_fleet_sites
+        self._market_price_fn = market_price_fn  # callable() -> float
+        self._onnx_dispatchers: dict[str, ONNXDispatcher] = {}  # site_id → ONNXDispatcher
         self._cycle_count: int = 0
         self._last_result: CycleResult | None = None
 
@@ -170,16 +174,55 @@ class VPPFleetManager:
     # Site management (delegates to fleet orchestrator)
     # ------------------------------------------------------------------
 
-    def add_site(self, site_id: str, proxy: SiteProxy) -> None:
-        """Register a site with the fleet orchestrator."""
+    def add_site(
+        self,
+        site_id: str,
+        proxy: SiteProxy,
+        onnx_model_path: str | None = None,
+    ) -> None:
+        """Register a site with the fleet orchestrator.
+
+        Args:
+            site_id:          Unique site identifier.
+            proxy:            SiteProxy for telemetry polling.
+            onnx_model_path:  Optional path to a CEN DRL ONNX model for this site.
+                              When provided, enables DispatchStrategy.DRL for this site.
+        """
         self._fleet.register_site(site_id, proxy)
+        if onnx_model_path:
+            dispatcher = ONNXDispatcher(model_path=onnx_model_path, site_id=site_id)
+            dispatcher._load()  # noqa: SLF001
+            self._onnx_dispatchers[site_id] = dispatcher
+            log.info(
+                "vpp_fleet.onnx_loaded",
+                site_id=site_id,
+                model=onnx_model_path,
+                loaded=dispatcher.is_loaded,
+            )
         log.info("vpp_fleet.site_added", site_id=site_id, n_sites=self._fleet.n_sites)
 
     def remove_site(self, site_id: str) -> None:
         """Remove a site from the fleet."""
         self._fleet.remove_site(site_id)
         self._vpp.remove_site(site_id)
+        self._onnx_dispatchers.pop(site_id, None)
         log.info("vpp_fleet.site_removed", site_id=site_id)
+
+    def set_market_price_fn(self, fn: Any) -> None:
+        """Set a callable that returns the current market price (USD/MWh).
+
+        This connects the VPPFleetManager to a live MarketAdapterRegistry feed.
+        When set, ``run_cycle()`` will call ``fn()`` instead of using the
+        ``market_price_usd_mwh`` argument.
+
+        Example::
+
+            from src.core.market_adapter import MarketAdapterRegistry, MarketRegion
+            registry = MarketAdapterRegistry()
+            mgr.set_market_price_fn(lambda: registry.get_current_price_usd_mwh(MarketRegion.SEN_CL))
+        """
+        self._market_price_fn = fn
+        log.info("vpp_fleet.market_price_fn_registered")
 
     @property
     def n_sites(self) -> int:
@@ -204,8 +247,93 @@ class VPPFleetManager:
         return DispatchStrategy.HOLD  # price in neutral band → hold
 
     # ------------------------------------------------------------------
-    # Setpoint computation
     # ------------------------------------------------------------------
+    # Setpoint helpers (extracted for C901 compliance)
+    # ------------------------------------------------------------------
+
+    def _drl_setpoint_for_site(
+        self,
+        t: object,
+        current_hour: float,
+    ) -> SiteSetpoint | None:
+        """Attempt DRL inference for a single site.
+
+        Returns a SiteSetpoint if inference succeeds, None if fallback needed.
+        """
+        from src.core.fleet_orchestrator import SiteTelemetry  # noqa: PLC0415
+
+        if not isinstance(t, SiteTelemetry):  # pragma: no cover
+            return None
+        dispatcher = self._onnx_dispatchers.get(t.site_id)
+        if not (dispatcher and dispatcher.is_loaded):
+            return None
+        result = dispatcher.infer(
+            soc_pct=t.soc_pct,
+            power_kw=t.power_kw,
+            temp_c=t.temp_c,
+            hour_of_day=current_hour,
+        )
+        if result is None:
+            return None
+        raw = result.target_kw
+        # SOC safety guards on DRL output
+        if raw > 0 and t.soc_pct <= self.min_soc_pct:
+            raw = 0.0
+        elif raw < 0 and t.soc_pct >= self.max_soc_pct:
+            raw = 0.0
+        return SiteSetpoint(
+            site_id=t.site_id,
+            target_kw=round(raw, 2),
+            strategy=DispatchStrategy.DRL,
+            rationale=f"drl inference_ms={result.inference_ms:.2f} model={result.model_path}",
+        )
+
+    def _price_setpoint_for_site(
+        self,
+        t: object,
+        strategy: DispatchStrategy,
+        market_price: float,
+    ) -> SiteSetpoint:
+        """Compute a price-arbitrage setpoint for a single site."""
+        from src.core.fleet_orchestrator import SiteTelemetry  # noqa: PLC0415
+
+        if not isinstance(t, SiteTelemetry):  # pragma: no cover
+            return SiteSetpoint(site_id="unknown", target_kw=0.0, strategy=DispatchStrategy.HOLD)
+
+        discharging = market_price >= self.discharge_threshold
+        if discharging:
+            if t.soc_pct <= self.min_soc_pct:
+                return SiteSetpoint(
+                    site_id=t.site_id,
+                    target_kw=0.0,
+                    strategy=strategy,
+                    rationale=f"SOC {t.soc_pct:.1f}% at floor {self.min_soc_pct}%",
+                )
+            return SiteSetpoint(
+                site_id=t.site_id,
+                target_kw=round(t.available_kw * self.max_discharge_pct, 2),
+                strategy=strategy,
+                rationale=(
+                    f"discharge price={market_price:.1f} > "
+                    f"threshold={self.discharge_threshold:.1f} USD/MWh"
+                ),
+            )
+        # Charging path
+        if t.soc_pct >= self.max_soc_pct:
+            return SiteSetpoint(
+                site_id=t.site_id,
+                target_kw=0.0,
+                strategy=strategy,
+                rationale=f"SOC {t.soc_pct:.1f}% at ceiling {self.max_soc_pct}%",
+            )
+        return SiteSetpoint(
+            site_id=t.site_id,
+            target_kw=round(-t.available_kw * 0.6, 2),
+            strategy=strategy,
+            rationale=(
+                f"charge price={market_price:.1f} < threshold={self.charge_threshold:.1f} USD/MWh"
+            ),
+        )
 
     def _compute_setpoints(
         self,
@@ -215,11 +343,14 @@ class VPPFleetManager:
     ) -> tuple[list[SiteSetpoint], float]:
         """Compute per-site setpoints and total dispatch kW.
 
+        When strategy is DRL, uses ONNX model per site (falls back to
+        PRICE_ARBITRAGE if no model is available for a given site).
+
         Returns:
             (setpoints, total_dispatch_kw)
         """
         if strategy == DispatchStrategy.HOLD or not fleet_telemetries:
-            setpoints = [
+            return [
                 SiteSetpoint(
                     site_id=t.site_id,
                     target_kw=0.0,
@@ -227,16 +358,16 @@ class VPPFleetManager:
                     rationale="hold — neutral price band or alarm",
                 )
                 for t in fleet_telemetries
-            ]
-            return setpoints, 0.0
+            ], 0.0
 
-        discharging = market_price >= self.discharge_threshold
+        import datetime  # noqa: PLC0415
+
+        current_hour = float(datetime.datetime.now().hour)
         setpoints: list[SiteSetpoint] = []
         total_kw = 0.0
 
         for t in fleet_telemetries:
             if t.anomaly_score > 0.7:
-                # Site in alarm — always hold
                 setpoints.append(
                     SiteSetpoint(
                         site_id=t.site_id,
@@ -247,39 +378,14 @@ class VPPFleetManager:
                 )
                 continue
 
-            if discharging:
-                # Price-driven discharge
-                if t.soc_pct <= self.min_soc_pct:
-                    target = 0.0
-                    rationale = f"SOC {t.soc_pct:.1f}% at floor {self.min_soc_pct}%"
-                else:
-                    target = t.available_kw * self.max_discharge_pct
-                    rationale = (
-                        f"discharge price={market_price:.1f} > "
-                        f"threshold={self.discharge_threshold:.1f} USD/MWh"
-                    )
-            else:
-                # Price-driven charge
-                if t.soc_pct >= self.max_soc_pct:
-                    target = 0.0
-                    rationale = f"SOC {t.soc_pct:.1f}% at ceiling {self.max_soc_pct}%"
-                else:
-                    # Charge at 60% of available capacity (avoid grid overload)
-                    target = -t.available_kw * 0.6
-                    rationale = (
-                        f"charge price={market_price:.1f} < "
-                        f"threshold={self.charge_threshold:.1f} USD/MWh"
-                    )
+            sp: SiteSetpoint | None = None
+            if strategy == DispatchStrategy.DRL:
+                sp = self._drl_setpoint_for_site(t, current_hour)
+            if sp is None:
+                sp = self._price_setpoint_for_site(t, strategy, market_price)
 
-            setpoints.append(
-                SiteSetpoint(
-                    site_id=t.site_id,
-                    target_kw=round(target, 2),
-                    strategy=strategy,
-                    rationale=rationale,
-                )
-            )
-            total_kw += target
+            setpoints.append(sp)
+            total_kw += sp.target_kw
 
         return setpoints, round(total_kw, 2)
 
@@ -301,6 +407,11 @@ class VPPFleetManager:
     # ------------------------------------------------------------------
     # Main control cycle
     # ------------------------------------------------------------------
+
+    @property
+    def has_drl(self) -> bool:
+        """True if at least one site has a loaded ONNX DRL model."""
+        return any(d.is_loaded for d in self._onnx_dispatchers.values())
 
     def run_cycle(
         self,
@@ -325,6 +436,13 @@ class VPPFleetManager:
         Returns:
             CycleResult with fleet summary, setpoints, and OpenADR event.
         """
+        # Resolve market price: live feed (if registered) overrides the argument
+        if self._market_price_fn is not None:
+            try:
+                market_price_usd_mwh = float(self._market_price_fn())
+            except Exception as exc:  # noqa: BLE001
+                log.warning("vpp_fleet.market_price_fn_error", error=str(exc))
+
         t0 = time.perf_counter()
         self._cycle_count += 1
 
