@@ -15,7 +15,9 @@
 [![IEC 62443](https://img.shields.io/badge/IEC_62443-SL--2_Compliant-orange)](docs/compliance/iec62443_mapping.md)
 [![NTSyCS](https://img.shields.io/badge/NTSyCS-11_GAPs_Closed-brightgreen)](docs/compliance/ntscys_compliance.md)
 [![BESSAI-SPEC](https://img.shields.io/badge/BESSAI--SPEC-4_normative_docs-blueviolet)](docs/specs/)
-[![BEP Process](https://img.shields.io/badge/BEPs-8_proposals-lightblue)](docs/bep/BEP-0001.md)
+[![BEP Process](https://img.shields.io/badge/BEPs-10_proposals-lightblue)](docs/bep/BEP-0001.md)
+[![Tests](https://img.shields.io/badge/tests-799_passing-brightgreen)](tests/)
+[![Version](https://img.shields.io/badge/version-v2.16.0-blue)](.)
 [![Security](https://img.shields.io/badge/Security-SECURITY.md-red)](SECURITY.md)
 
 [**Documentation**](https://bess-solutions.github.io/open-bess-edge) · [**Quick Start**](#-quick-start) · [**Discord**](https://discord.gg/ZqpE8AZs) · [**BEP Proposals**](docs/bep/BEP-0001.md) · [**Roadmap**](#-roadmap)
@@ -228,14 +230,18 @@ Open in VS Code → **Reopen in Container** — all dependencies, pre-commit hoo
 | **Hardware profiles** | 7 certified profiles (Huawei, SMA, Victron, BYD, Tesla…) | – |
 | **SafetyGuard** | SOC/thermal/power bounds — blocks unsafe commands | – |
 | **AI-IDS** | Real-time anomaly detection (IsolationForest + z-score) | – |
-| **DRL Arbitrage Agent** | PPO ONNX inference — no cloud required | BEP-0200 |
+| **DRL Arbitrage Agent** | PPO + 8 CEN ONNX models — <0.1ms, no cloud required | BEP-0200 |
 | **BESSAIEvolve** | AlphaEvolve-inspired weekly self-improvement loop | BEP-0303 |
+| **VPP Fleet Manager** | Multi-site VPP: FleetOrchestrator + DRL per-site | BEP-0500 |
+| **SENMarketFeed** | Live CEN prices: DuckDB → HTTP → Duck Curve fallback (TTL 15min) | BEP-0500 |
+| **FL Coordinator** | Federated Learning FedAvg (capacity-weighted), L2 convergence | BEP-0600 |
+| **HVDC Scheduler** | Inter-regional DC power flow arbitrage (500MW, 1.8% losses) | BEP-0700 |
 | **CMg Live Feed** | Real-time Chilean SEN spot price ingestion | BEP-0302 |
 | **Explainable AI (XAI)** | SHAP-based decision explanations | BEP-0301 |
 | **OpenTelemetry** | Distributed traces + metrics to GCP / Datadog / Grafana | – |
+| **Global Market Adapters** | CAISO · ERCOT · ENTSO-E · SEN · COES · XM · CENACE | – |
 | **Multi-arch Docker** | amd64 + arm64 (Raspberry Pi 4/5 native) | – |
-| **Terraform GCP** | 18 resources: Pub/Sub, Cloud Run, Artifact Registry | – |
-| **IEC 62443 SL-1** | Full control mapping — SL-2 path documented | – |
+| **IEC 62443 SL-1/2** | Full control mapping — SL-2 compliant | – |
 
 ---
 
@@ -263,12 +269,14 @@ Open in VS Code → **Reopen in Container** — all dependencies, pre-commit hoo
 
 | Status | What | Version |
 |---|---|---|
-| ✅ Done | IEC 62443 SL-1 · OpenSSF · BEPs 0100–0303 · BESSAIEvolve v1 | v2.10.0 |
-| ✅ Done | AI-IDS · WatchdogManager · MILP Optimizer · Alert Dispatcher | v2.9.0 |
-| ✅ Done | DRL Agent (PPO ONNX) · 7 Hardware Profiles · CMg CEN Live Feed | v2.8.0 |
-| ✅ Done | **11 GAPs NTSyCS** · ComplianceStack · SecurityNotifier · ServComplementarios · PI migración | **v2.12.0** |
-| 🔵 Planned | PPO training con datos reales CEN · IEC104 producción · VPP Fleet | v2.13.0 |
-| 🔵 Planned | VPP · P2P Energy Trading · LCA Engine · Carbon Dashboard | 2027 |
+| ✅ Done | IEC 62443 SL-1/2 · OpenSSF · BEPs 0100–0303 · BESSAIEvolve v1 | v2.10.0–v2.12.0 |
+| ✅ Done | **8 CEN DRL ONNX models** · PPO trainer · Global Market Adapters (CAISO, ERCOT, ENTSO-E) | v2.14.0 |
+| ✅ Done | **VPP Fleet Manager (BEP-0500)** · SENMarketFeed CEN live · Multi-site ONNX DRL dispatch | v2.15.0 |
+| ✅ Done | **FL Coordinator (BEP-0600)** · FedAvg capacity-weighted · L2 convergence · 799 CI tests | **v2.16.0** |
+| ✅ Done | **HVDC Scheduler (BEP-0700)** · DC power flow · 500MW · inter-regional price arbitrage | v2.16.0 |
+| 🔵 Planned | Flower (flwr) integration for FL · gRPC + mTLS FL protocol | v2.17.0 |
+| 🔵 Planned | VPP HTTP real dispatch (mTLS SiteProxy) · HVDC TSO integration | v2.18.0 |
+| 🔵 Planned | P2P Energy Trading · LCA Engine · Carbon Dashboard | 2027 |
 
 See full roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
 
@@ -296,20 +304,20 @@ Every Monday 00:00 UTC:
 
 ```
 open-bess-edge/                      ← PUBLIC (Apache 2.0)
-├── src/
-│   ├── agents/          # stub only → see bess-solutions/bessai-core (private)
-│   ├── core/            # SafetyGuard · ComplianceStack · all 11 GAPs
-│   ├── drivers/         # Protocol drivers (Modbus, IEC 61850, IEC 104…)
-│   └── interfaces/      # Publishers, reporters, health server
-├── tests/               # 148 compliance tests (pytest) · 0 failures
-├── docs/
-│   ├── bep/             # 8 Enhancement Proposals
-│   ├── compliance/      # IEC 62443, NTSyCS, IEEE 2030.5
-│   └── specs/           # 4 normative BESSAI-SPEC documents
-├── .github/
-│   └── workflows/       # CI/CD + weekly BESSAIEvolve
+├── src/core/
+│   ├── safety_guard.py          # IEC 62443 SL-1/2 SOC/thermal guardrail
+│   ├── compliance_stack.py      # 11 GAPs NTSyCS
+│   ├── vpp_fleet_manager.py     # BEP-0500: VPP multi-site + ONNX DRL dispatch
+│   ├── sen_market_feed.py       # BEP-0500 P2: CEN live price (DuckDB → duck-curve)
+│   ├── fl_coordinator.py        # BEP-0600: Federated Learning FedAvg coordinator
+│   ├── hvdc_scheduler.py        # BEP-0700: HVDC inter-regional DC power flow
+│   ├── market_adapter.py        # 7 global markets (SEN, CAISO, ERCOT, ENTSO-E…)
+│   └── ...                      # SafetyGuard, AI-IDS, BESSAIEvolve, XAI…
+├── tests/               # 799 tests (pytest) · 0 failures · CI/CD
+├── docs/bep/            # BEP-0001 → BEP-0700 (10 proposals)
+├── docs/compliance/     # IEC 62443, NTSyCS, IEEE 2030.5
+├── .github/workflows/   # CI/CD + weekly BESSAIEvolve
 ├── infrastructure/      # Terraform GCP (18 resources)
-├── SECURITY.md          # Responsible disclosure policy
 └── CHANGELOG.md
 
 bess-solutions/bessai-core           ← PRIVATE (Proprietary)
