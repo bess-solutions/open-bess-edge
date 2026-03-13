@@ -152,6 +152,7 @@
 
 
 ### 📚 Documentation
+- **readme**: v2.16.0 — 799 tests, BEP-0700 HVDC, VPP fleet, FL coordinator, real roadmap + structure (`d26fe72d`, @BESS Solutions)
 - **status**: 799 tests, HVDCScheduler BEP-0700 Sprint J (`3d31cf10`, @BESS Solutions)
 - **status**: 773 tests, FLCoordinator BEP-0600 Sprint H (`74903fee`, @BESS Solutions)
 - **edge**: v2.16.0 PROJECT_STATUS sync 2026-03-12 (`d827186c`, @BESS Solutions)
