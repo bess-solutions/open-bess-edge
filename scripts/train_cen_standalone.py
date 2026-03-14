@@ -211,7 +211,7 @@ def ppo_update(policy, optimizer, obs, actions, old_logp, returns, values,
 # ONNX Export
 # ---------------------------------------------------------------------------
 
-def export_onnx(policy, output_path: str) -> None:
+def export_onnx(policy, output_path: str, obs_dim: int = 12) -> None:
     """Export the policy actor to ONNX (obs input → action output)."""
     import onnx
     import torch
@@ -228,7 +228,7 @@ def export_onnx(policy, output_path: str) -> None:
             return mean  # deterministic action = mean
 
     actor = ActorOnly(policy)
-    dummy = torch.zeros(1, 8, dtype=torch.float32)
+    dummy = torch.zeros(1, obs_dim, dtype=torch.float32)
     out = Path(output_path)
     out.parent.mkdir(parents=True, exist_ok=True)
 
@@ -242,7 +242,8 @@ def export_onnx(policy, output_path: str) -> None:
         dynamic_axes={"obs": {0: "batch"}, "action": {0: "batch"}},
     )
     onnx.checker.check_model(str(out))
-    print(f"[PPO] ONNX exported: {out}")
+    print(f"[PPO] ONNX exported: {out} (obs_dim={obs_dim})")
+
 
 
 # ---------------------------------------------------------------------------
@@ -266,9 +267,13 @@ def train_node(
         node=node,
         capacity_kwh=args.capacity_kwh,
         max_power_kw=args.max_power_kw,
+        use_weather=True,  # 12-dim obs when cmg_weather_features.json is available
     )
 
-    policy = build_policy_net(obs_dim=8, act_dim=1, hidden=args.hidden).to(device)
+    obs_dim = env.observation_space.shape[0]  # 12 with weather, 8 without
+    print(f"  obs_dim={obs_dim} ({'weather-enriched' if obs_dim == 12 else 'base'})")
+    policy = build_policy_net(obs_dim=obs_dim, act_dim=1, hidden=args.hidden).to(device)
+
     optimizer = torch.optim.Adam(policy.parameters(), lr=args.lr)
 
     t0 = time.monotonic()
@@ -309,13 +314,13 @@ def train_node(
         f"total={elapsed_total:.0f}s"
     )
 
-    export_onnx(policy, output_path)
+    export_onnx(policy, output_path, obs_dim=obs_dim)
 
     # Quick latency check
     import torch
     import onnxruntime as ort
     sess = ort.InferenceSession(output_path)
-    dummy = np.random.rand(1, 8).astype(np.float32)
+    dummy = np.random.rand(1, obs_dim).astype(np.float32)
     latencies = []
     for _ in range(50):
         t0l = time.perf_counter()
