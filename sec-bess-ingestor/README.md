@@ -1,177 +1,124 @@
 # 🇨🇱 sec-bess-ingestor
-## Mega-Scraper SEC Chile + Analizador de Brechas Normativas para open-bess-edge
 
-> Sistema autónomo que raspa la Superintendencia de Electricidad y Combustibles
-> (SEC Chile), identifica brechas regulatorias entre la normativa nacional y el
-> repositorio [open-bess-edge](https://github.com/bess-solutions/open-bess-edge),
-> y publica los reportes automáticamente vía Pull Request.
+> [!WARNING]
+> **MÓDULO DEPRECADO — Marzo 2026**
+>
+> Este módulo ha sido superado por el pipeline de datos CEN production-grade
+> en [`bessai-cen-data`](https://github.com/bess-solutions/bessai-cen-data).
+>
+> **Los GAPs normativos listados abajo están todos cerrados en v2.16.0.**
+> La herramienta SEC scraper sigue siendo funcional para monitoreo de cambios
+> normativos, pero ya no es el motor principal del sistema de compliance.
 
 ---
 
-## ⚡ Quick Start
+## Estado actual del compliance (v2.16.0)
+
+Todos los GAPs identificados originalmente por este módulo han sido cerrados
+en sucesivas versiones de `open-bess-edge`. El módulo `compliance_stack.py`
+en `src/core/` es el motor de compliance activo.
+
+| GAP | Norma | Prioridad | Estado v2.16.0 |
+|-----|-------|-----------|----------------|
+| GAP-001 | NTSyCS Cap. 4.2 — Ramp Rate Limiting | 🔴 Crítico | ✅ Cerrado — `SafetyGuard` ≤10%/min |
+| GAP-002 | NTSyCS Cap. 4.3 — PFR Droop Curve | 🔴 Crítico | ✅ Cerrado — `FrequencyResponseAgent` <2s |
+| GAP-003 | NTSyCS Cap. 6.1 — Telemetría CEN | 🔴 Crítico | ✅ Cerrado — `CENPublisher` mTLS |
+| GAP-004 | NTSyCS Cap. 6.2 — IEC 60870-5-104 SCADA | 🔴 Crítico | ✅ Cerrado — `IEC104Driver` |
+| GAP-005 | NTSyCS 2024 — Canal TLS mTLS→CEN | 🟡 Medio | ✅ Cerrado — `SecurityNotifier` |
+| GAP-006 | IEEE 2030.5 — DER en distribución | 🟡 Medio | ✅ Cerrado — BEP-0100, 10 endpoints |
+| GAP-007 | Decreto 88/2023 — PMGD con BESS | 🟡 Medio | ✅ Cerrado — `PMGDComplianceEngine` |
+| GAP-008 | Ley 21.185 — ERNC almacenamiento | 🟢 Bajo | ✅ Cerrado — `ERNCRegistry` |
+| GAP-009 | Res. SEC 2024 — IEC 62443 SL-2 | 🟡 Medio | ✅ Cerrado — `SL2SecurityGate` HMAC-SHA256 |
+| GAP-010 | NTCSE — Calidad de Energía THD/Flicker | 🟡 Medio | ✅ Cerrado — `PowerQualityMonitor` |
+| GAP-011 | NTSyCS Cap. 4.4 — Control Potencia Reactiva | 🟡 Medio | ✅ Cerrado — `ReactiveController` |
+
+→ Evidencia en [`docs/compliance/`](../docs/compliance/)
+
+---
+
+## Stack actual de datos de mercado
+
+El pipeline de datos de mercado ha evolucionado significativamente desde
+que este módulo fue creado. El sistema actual:
+
+```
+CEN API (oficial)
+    ↓ ingest_all_cen_data.py
+bessai_cen.db (DuckDB)
+    ├── cmg_historico      ← 111,100 pts horarios (4 nodos, 2023-2026)
+    ├── prediction_log     ← log inmutable append-only (SHA-256 encadenado)
+    └── cmg_programado     ← day-ahead CEN (pendiente token)
+         ↓ write_prediction_log.py (cada hora, schtasks)
+         ↓ train_price_model.py (Ridge/LightGBM/Ensemble, 22 features)
+         ↓ api/predictions_latest.json → terminal en vivo en bessai-web
+```
+
+**Repositorios activos:**
+- [`bess-solutions/bessai-cen-data`](https://github.com/bess-solutions/bessai-cen-data) — pipeline de datos privado
+- [`bess-solutions/bessai-academic`](https://github.com/bess-solutions/bessai-academic) — dataset CC-BY 4.0 (111,100 pts)
+
+---
+
+## Dataset académico público (CC-BY 4.0)
+
+Para investigación y publicaciones, el dataset de CMg horario está disponible
+públicamente en `bessai-academic`:
+
+```python
+import pandas as pd
+df = pd.read_parquet("cmg_4nodos_2023_2026.parquet")
+# 111,100 filas | 4 nodos | Ene 2023 — Mar 2026
+```
+
+**Citar como:**
+```bibtex
+@dataset{bessai_cmg_2026,
+  author  = {BESS Solutions},
+  title   = {BESSAI CMg Dataset — SEN Chile 2023-2026},
+  year    = {2026},
+  version = {v1.0.0},
+  url     = {https://github.com/bess-solutions/bessai-academic},
+  license = {CC-BY 4.0}
+}
+```
+
+---
+
+## Uso del SEC scraper (referencia histórica)
+
+El módulo sigue siendo funcional para monitorear cambios normativos en la SEC.
+Si necesitas ejecutarlo para tracking de nuevas resoluciones:
 
 ```bash
-# 1. Clonar e instalar
 cd sec-bess-ingestor
 pip install -r requirements.txt
 
-# 2. Raspar SEC Chile
-python cli.py scrape
+# Raspar SEC Chile (solo lectura)
+python cli.py scrape --bess-only
 
-# 3. Analizar brechas normativas
+# Analizar brechas vs normativa actual
 python cli.py analyze
 
-# 4. Generar reporte Markdown
+# Ver reporte
 python cli.py report --print
-
-# 5. Publicar al repo (requiere GITHUB_TOKEN)
-$env:GITHUB_TOKEN = "ghp_xxxxxxxxxxxx"   # PowerShell
-python cli.py publish --no-dry-run
-
-# --- o todo en uno ---
-python cli.py update --no-dry-run
 ```
 
----
-
-## 📋 Comandos CLI
-
-| Comando | Descripción |
-|---|---|
-| `python cli.py scrape` | Raspa SEC Chile y guarda JSON en `data/raw/` |
-| `python cli.py scrape --section normativa` | Solo raspa una sección |
-| `python cli.py scrape --bess-only` | Solo guarda documentos BESS relevantes |
-| `python cli.py analyze` | Analiza brechas usando último scraping |
-| `python cli.py analyze --data-file <path>` | Analiza un archivo JSON específico |
-| `python cli.py report` | Genera reporte Markdown en `data/reports/` |
-| `python cli.py report --print` | Adicionalmente imprime resumen en pantalla |
-| `python cli.py publish` | Publica al repo (**dry-run por defecto**) |
-| `python cli.py publish --no-dry-run` | Publica de verdad (requiere `GITHUB_TOKEN`) |
-| `python cli.py update` | Flujo completo: scrape→analyze→report→publish |
-| `python cli.py update --no-dry-run` | Flujo completo con push real |
-| `python cli.py --verbose <cmd>` | Logging detallado (DEBUG) |
+> **Nota:** Para publicar al repo vía PR se requiere `GITHUB_TOKEN` con scope `repo`.
 
 ---
 
-## 🔍 Secciones Raspadas de SEC Chile
+## Marco normativo cubierto
 
-| Key | Sección |
-|---|---|
-| `normativa` | Normativa y Legislación |
-| `resoluciones_exentas` | Resoluciones Exentas |
-| `circulares` | Circulares |
-| `reglamentos` | Reglamentos |
-| `energias_renovables` | Energías Renovables y Electromovilidad |
-| `noticias` | Noticias (filtradas por BESS relevance) |
-| `fiscalizacion` | Fiscalización |
-| `sanciones` | Sanciones y Expedientes |
-
----
-
-## 🚨 Brechas Normativas Detectadas (Snapshot 2026-02)
-
-| ID | Norma | Prioridad | Estado BESSAI |
-|---|---|---|---|
-| GAP-001 | NTSyCS Cap. 4.2 — Ramp Rate Limiting | 🔴 Crítico | 🔄 Planificado v2.0 |
-| GAP-002 | NTSyCS Cap. 4.3 — PFR Droop Curve | 🔴 Crítico | 🔄 Planificado v2.0 |
-| GAP-003 | NTSyCS Cap. 6.1 — Telemetría CEN | 🔴 Crítico | ⚠️ Parcial |
-| GAP-004 | NTSyCS Cap. 6.2 — IEC 60870-5-104 SCADA | 🔴 Crítico | 🔄 Planificado v2.0 |
-| GAP-005 | NTSyCS 2024 — Canal TLS mTLS→CEN | 🟡 Medio | 🔄 Planificado v1.5 |
-| GAP-006 | IEEE 2030.5 — DER en distribución | 🟡 Medio | ⚠️ Parcial |
-| GAP-007 | Decreto 88/2023 — PMGD con BESS | 🟡 Medio | 🔄 Planificado |
-| GAP-008 | Ley 21.185 — ERNC almacenamiento | 🟢 Bajo | 🔄 Planificado |
-| GAP-009 | Res. SEC 2024 — IEC 62443 SL-2 | 🟡 Medio | 🔄 Planificado |
-| GAP-010 | NTCSE — Calidad de Energía THD/Flicker | 🟡 Medio | ⚠️ Parcial |
-| GAP-011 | NTSyCS Cap. 4.4 — Control Potencia Reactiva | 🟡 Medio | ⚠️ Parcial |
-
----
-
-## 🏗️ Arquitectura del Proyecto
-
-```
-sec-bess-ingestor/
-├── scraper/
-│   ├── sec_scraper.py        # Motor principal (paginación, dispatcher, persistencia)
-│   └── utils.py              # robots.txt, rate-limiting, HTML→text, BESS relevance
-├── analysis/
-│   ├── bess_context.py       # Carga docs open-bess-edge (local o GitHub raw)
-│   ├── gap_analyzer.py       # 11 reglas normativas → GapItem list
-│   └── report_builder.py     # Genera Markdown completo + resumen ejecutivo
-├── publisher/
-│   └── github_publisher.py   # GitHub API: branch → upsert → PR
-├── tests/
-│   ├── fixtures/             # sample_sec_data.json
-│   ├── test_scraper_utils.py
-│   ├── test_gap_analyzer.py
-│   └── test_publisher.py
-├── data/
-│   ├── raw/                  # JSONs de scraping (generados en runtime)
-│   └── reports/              # Reportes Markdown (generados en runtime)
-├── cli.py                    # CLI principal (argparse)
-├── config.py                 # Configuración centralizada
-├── pyproject.toml            # pytest config
-└── requirements.txt
-```
-
----
-
-## 🔐 Configuración variables de entorno
-
-| Variable | Descripción | Requerida |
-|---|---|---|
-| `GITHUB_TOKEN` | PAT con scope `repo` en `bess-solutions/open-bess-edge` | Solo para `publish --no-dry-run` |
-| `BESS_EDGE_LOCAL` | Ruta local a clone de open-bess-edge (optimiza lectura de docs) | Opcional |
-| `LOG_LEVEL` | Nivel de logging (`DEBUG`, `INFO`, `WARNING`) | Opcional |
-
-```powershell
-# PowerShell
-$env:GITHUB_TOKEN = "ghp_xxxxxxxxxxxxxxxxxx"
-$env:BESS_EDGE_LOCAL = "C:\repos\open-bess-edge"
-```
-
----
-
-## 🧪 Ejecutar Tests
-
-```bash
-pip install -r requirements.txt
-python -m pytest tests/ -v
-```
-
----
-
-## 📚 Marco Normativo Cubierto
-
-- **NTSyCS 2022** — Norma Técnica de Seguridad y Calidad del Servicio (CEN)
+- **NTSyCS 2022/2024** — Norma Técnica de Seguridad y Calidad del Servicio (CEN)
 - **Decreto N°88/2020** (mod. 2023) — Reglamento PMGD
 - **Ley N°21.185** — ERNC y almacenamiento
 - **Resolución Exenta SEC 2024** — Ciberseguridad infraestructura crítica
 - **IEC 62443 SL-1/SL-2** — Ciberseguridad sistemas industriales
-- **IEC 60870-5-104** — Protocolo SCADA para generación/almacenamiento
-- **IEEE 2030.5** — Comunicación DER en distribución
+- **IEC 60870-5-104** — Protocolo SCADA
+- **IEEE 2030.5 / SEP 2.0** — Comunicación DER en distribución
 - **NTCSE** — Norma Técnica de Calidad de Servicio Eléctrico
+- **Ley 21.663/2024** — Ciberseguridad infraestructura crítica (CSIRT ≤3h)
 
 ---
 
-## 🔄 Flujo de Actualización Automática
-
-```
-SEC Chile   →   scrape   →   data/raw/sec_YYYYMMDD.json
-                               ↓
-open-bess-edge docs  →   analyze  →   11 GapItems con prioridad
-                               ↓
-                          report   →   data/reports/gap_analysis_*.md
-                               ↓
-                          publish  →   branch: sec-update/YYYYMMDD
-                                       ↓
-                               PUT docs/compliance/sec_gap_analysis.md
-                                       ↓
-                               Pull Request → main (¡para revisión humana!)
-```
-
-> **Nota de seguridad:** El paso `publish` siempre crea un PR (no hace merge directo).  
-> Un humano debe revisar y aprobar antes de que los cambios entren a `main`.
-
----
-
-*Proyecto generado por [BESSAI / Antigravity](https://github.com/bess-solutions/open-bess-edge) — 2026*
+*Módulo histórico de BESSAI Edge Gateway · Estado: Mantenimiento pasivo desde v2.16.0 · 2026*
