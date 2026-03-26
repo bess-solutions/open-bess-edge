@@ -190,6 +190,7 @@
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
+- **math**: align USD/CLP factor with 871.0 SSoT (`e48ddc81`, @BESS Solutions)
 - **audit**: F14 FL BEP-0600 v2.16.0 score 9.6/20 + resolve merge conflicts (`f03b4dfe`, @BESS Solutions)
 - **tests**: ONNX latency auto-detect input shape, dry-run xfail for Py3.14 venv (`b38cc423`, @BESS Solutions)
 - repair 6 broken internal links (exhaustive link scan) (`1790f17e`, @BESS Solutions)
