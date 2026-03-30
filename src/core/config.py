@@ -1,4 +1,4 @@
-﻿# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 # Copyright 2024-2026 BESS Solutions SpA
 
 """
@@ -113,6 +113,24 @@ class Settings(BaseSettings):
         default=5,
         ge=1,
         description="Seconds between watchdog heartbeat writes.",
+    )
+    SAFETY_SOC_MIN: float = Field(
+        default=5.0,
+        ge=0.0,
+        le=100.0,
+        description="Minimum State of Charge (%) safe operating limit.",
+    )
+    SAFETY_SOC_MAX: float = Field(
+        default=98.0,
+        ge=0.0,
+        le=100.0,
+        description="Maximum State of Charge (%) safe operating limit.",
+    )
+    SAFETY_TEMP_MAX: float = Field(
+        default=45.0,
+        ge=-20.0,
+        le=80.0,
+        description="Maximum Temperature (°C) safe operating limit.",
     )
 
     # ------------------------------------------------------------------

@@ -21,10 +21,22 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from src.core.safety import SafetyGuard
+from src.core.safety import SafetyGuard
+from src.core.config import get_settings, settings
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
+@pytest.fixture(autouse=True)
+def mock_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("SITE_ID", "TEST-SITE")
+    monkeypatch.setenv("INVERTER_IP", "127.0.0.1")
+    get_settings.cache_clear()
+    settings._instance = None
+    yield
+    get_settings.cache_clear()
+    settings._instance = None
 
 
 @pytest.fixture()
@@ -79,6 +91,57 @@ class TestCheckSafetyBlock:
 
     def test_soc_bad_temp_ok(self, guard: SafetyGuard) -> None:
         assert guard.check_safety({"soc": 1.0, "temp": 30.0}) is False
+
+
+# ---------------------------------------------------------------------------
+# check_safety — dynamic limits (configuration injection)
+# ---------------------------------------------------------------------------
+
+class TestDynamicSafetyLimits:
+    def test_custom_soc_min(self) -> None:
+        guard = SafetyGuard(watchdog_interval_s=0.01, soc_min=10.0)
+        assert guard.check_safety({"soc": 15.0}) is True
+        assert guard.check_safety({"soc": 9.99}) is False
+
+    def test_custom_soc_max(self) -> None:
+        guard = SafetyGuard(watchdog_interval_s=0.01, soc_max=90.0)
+        assert guard.check_safety({"soc": 89.0}) is True
+        assert guard.check_safety({"soc": 90.1}) is False
+
+    def test_custom_temp_max(self) -> None:
+        guard = SafetyGuard(watchdog_interval_s=0.01, temp_max=50.0)
+        assert guard.check_safety({"temp": 49.0}) is True
+        assert guard.check_safety({"temp": 50.1}) is False
+
+
+class TestPydanticSafetySettings:
+    def test_settings_loaded_from_env(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("SAFETY_SOC_MIN", "12.5")
+        monkeypatch.setenv("SAFETY_SOC_MAX", "95.0")
+        monkeypatch.setenv("SAFETY_TEMP_MAX", "40.0")
+        get_settings.cache_clear()
+        settings._instance = None
+        
+        guard = SafetyGuard(watchdog_interval_s=0.01)
+        assert guard.SOC_MIN == 12.5
+        assert guard.SOC_MAX == 95.0
+        assert guard.TEMP_MAX == 40.0
+        assert guard.check_safety({"soc": 13.0}) is True
+        assert guard.check_safety({"soc": 12.0}) is False
+        assert guard.check_safety({"soc": 94.0}) is True
+        assert guard.check_safety({"soc": 96.0}) is False
+        assert guard.check_safety({"temp": 39.0}) is True
+        assert guard.check_safety({"temp": 41.0}) is False
+    
+    def test_settings_fallback_defaults(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        get_settings.cache_clear()
+        settings._instance = None
+        guard = SafetyGuard(watchdog_interval_s=0.01)
+        assert guard.SOC_MIN == 5.0
+        assert guard.SOC_MAX == 98.0
+        assert guard.TEMP_MAX == 45.0
+
+
 
 
 # ---------------------------------------------------------------------------
