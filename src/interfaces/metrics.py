@@ -60,6 +60,10 @@ __all__ = [
     "ENERGY_CREDITS_KWH",
     # v0.8.0 — DataLake Publisher
     "DATALAKE_ROWS_PUBLISHED_TOTAL",
+    # v2.17.0 — SS.CC.
+    "BESS_SSCC_RESERVED_KW",
+    "GRID_FREQUENCY_HZ",
+    "GRID_VOLTAGE_V",
 ]
 
 # ---------------------------------------------------------------------------
@@ -214,6 +218,25 @@ GATEWAY_INFO: Gauge = Gauge(
     "bess_gateway_info",
     "Static information labels about this gateway instance.",
     ["site_id", "version"],
+)
+
+# v2.17.0 — SS.CC. and Grid Telemetry
+BESS_SSCC_RESERVED_KW: Gauge = Gauge(
+    "bess_sscc_reserved_kw",
+    "Capacity allocated for NTSyCS ancillary services (CSF, RP, etc.).",
+    ["site_id"],
+)
+
+GRID_FREQUENCY_HZ: Gauge = Gauge(
+    "bess_grid_frequency_hz",
+    "Grid frequency measured by the inverter in Hz.",
+    ["site_id"],
+)
+
+GRID_VOLTAGE_V: Gauge = Gauge(
+    "bess_grid_voltage_v",
+    "Grid AC line voltage measured by the inverter in V.",
+    ["site_id"],
 )
 
 

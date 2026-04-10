@@ -55,8 +55,11 @@ from src.drivers.base import DataProvider
 from src.drivers.modbus_driver import UniversalDriver
 from src.drivers.simulator_driver import SimMode, SimulatorDriver
 from src.interfaces.metrics import (
+    BESS_SSCC_RESERVED_KW,
     CYCLES_TOTAL,
     GATEWAY_INFO,
+    GRID_FREQUENCY_HZ,
+    GRID_VOLTAGE_V,
     LAST_CYCLE_DURATION_S,
     LAST_POWER_KW,
     LAST_SOC_PERCENT,
@@ -68,6 +71,7 @@ from src.interfaces.otel_setup import configure_otel, get_tracer, shutdown_otel
 from src.interfaces.pubsub_publisher import PubSubPublisher
 from src.interfaces.sep2_adapter import SEP2Error, build_adapter_from_env
 from src.interfaces.server import BESSAIServer
+from src.interfaces.ancillary_services import CapacityAllocator
 
 # BEP-0200 — DRL Arbitrage Agent (optional, fail-safe)
 try:
@@ -131,7 +135,7 @@ _WATCHDOG_MANAGER_ENABLED: bool = os.getenv("BESSAI_WATCHDOG_ENABLED", "true").l
 # ---------------------------------------------------------------------------
 # Tags read on every acquisition cycle
 # ---------------------------------------------------------------------------
-_ACQUISITION_TAGS: list[str] = ["active_power", "soc"]
+_ACQUISITION_TAGS: list[str] = ["active_power", "soc", "frequency", "ac_voltage"]
 
 # ---------------------------------------------------------------------------
 # Graceful shutdown — shared event set by signal handlers
@@ -437,6 +441,13 @@ async def main() -> None:  # noqa: C901
                 tip="Set BESSAI_COMPLIANCE_ENABLED=true to enforce NTSyCS",
             )
 
+        # ── Step 5g — CapacityAllocator (v2.17.0 SS.CC.) ────────────
+        _capacity_allocator = CapacityAllocator(
+            capacity_kwh=float(_cfg.SEP2_MAX_WH) / 1000.0 if hasattr(_cfg, "SEP2_MAX_WH") else 1000.0,
+            max_power_kw=float(_cfg.BESSAI_P_NOM_KW) if hasattr(_cfg, "BESSAI_P_NOM_KW") else 500.0,
+        )
+        log.info("capacity_allocator.initialized", max_power_kw=_capacity_allocator.max_power_kw)
+
         log.info(
             "gateway.started",
             site=_cfg.SITE_ID,
@@ -474,6 +485,10 @@ async def main() -> None:  # noqa: C901
                     LAST_POWER_KW.labels(site_id=_cfg.SITE_ID).set(
                         float(telemetry["active_power"]) / 1000.0
                     )
+                if "frequency" in telemetry:
+                    GRID_FREQUENCY_HZ.labels(site_id=_cfg.SITE_ID).set(float(telemetry["frequency"]))
+                if "ac_voltage" in telemetry:
+                    GRID_VOLTAGE_V.labels(site_id=_cfg.SITE_ID).set(float(telemetry["ac_voltage"]))
 
                 # ── STEP 2: Seguridad ─────────────────────────────────────
                 is_safe = guard.check_safety(telemetry)
@@ -516,6 +531,12 @@ async def main() -> None:  # noqa: C901
                             error=str(exc),
                             action="continuing — compliance non-blocking",
                         )
+
+                # ── STEP 2c: Capacity Allocator (SS.CC.) ──────────────────
+                _soc_pct_alloc = float(telemetry.get("soc", 50.0))
+                sscc_stack = _capacity_allocator.allocate(soc_pct=_soc_pct_alloc)
+                BESS_SSCC_RESERVED_KW.labels(site_id=_cfg.SITE_ID).set(sscc_stack.total_reserved_kw)
+                span.set_attribute("sscc_reserved_kw", sscc_stack.total_reserved_kw)
 
                 health_server.set_cycle(cycle, ok=True, safety_status="ok")
 
@@ -585,11 +606,7 @@ async def main() -> None:  # noqa: C901
                         dtype=np.float32,
                     )
                     _p_pu, _drl_info = _drl_agent.predict(_obs)
-                    _max_kw: float = (
-                        float(_cfg.MAX_CONTINUOUS_DISCHARGE_KW)  # type: ignore[attr-defined]
-                        if hasattr(_cfg, "MAX_CONTINUOUS_DISCHARGE_KW")  # type: ignore[attr-defined]
-                        else 100.0
-                    )
+                    _max_kw: float = sscc_stack.available_for_arbitrage_kw
                     _p_kw = _p_pu * _max_kw
 
                     if _DRL_WRITE_ENABLED and is_safe:

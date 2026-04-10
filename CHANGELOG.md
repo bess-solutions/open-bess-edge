@@ -58,38 +58,29 @@
 - **docs/adopters.md**: fecha actualizada 2026-03-02; link a ADOPTER_HUB
 
 
-## 🤖 AGENT HANDOFF — Estado actual (2026-03-12T18:50 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual (2026-04-10T13:45 -03:00)
 
 > [!IMPORTANT]
-> **Sprint 2026-03-12 (Autopilot) — BEP-0500 VPPFleetManager + Market Live Feed + v2.16.0**
+> **Sprint 2026-04-10 — v2.17.0 Stack Revenue Físico (SS.CC.)**
 >
-> Continuación del autopilot: VPPFleetManager coordinador fleet+VPP+DRL, live market feed, sync v2.16.0.
+> Integración de CapacityAllocator en el lazo de control Modbus (main.py) con clamping dinámico para Agente DRL y telemetría de red.
 
-### ✅ Completado en esta sesión (commit range: `18e51e3` → `HEAD`)
+### ✅ Completado en esta sesión (commit range: `HEAD~1` → `HEAD`)
 
 | Área | Entregables | Commit |
 |------|-------------|--------|
-| **DRL Training (Sprint B)** | `bess_rl_env_cen.py` + `train_cen_standalone.py` PPO PyTorch | `18e51e3` |
-| **8× ONNX CEN** | `models/*_drl_cen_v1.onnx` — p95 < 0.1ms, 374 USD/día (Maitencillo) | `18e51e3` |
-| **Market Adapters (Sprint C)** | `CAISOAdapter`, `ERCOTAdapter`, `ENTSOEAdapter` — 62/62 tests | `18e51e3` |
-| **CI Job 11** | `drl-market-tests` job en `ci.yml` | `635fead` |
-| **pyproject.toml** | 2.15.2 → **2.16.0** | latest |
-| **VPPFleetManager BEP-0500 (Sprint E)** | `src/core/vpp_fleet_manager.py` — FleetOrchestrator+VPP+DRL coordinator | `9437e55` |
-| **DRL + Market wiring (Sprint F)** | `_drl_setpoint_for_site()` ONNX per-site, `set_market_price_fn()`, `has_drl` | `f97cc6a` |
-| **SENMarketFeed BEP-0500 P2 (Sprint G)** | `src/core/sen_market_feed.py` — DuckDB→SENAdapter→duck-curve, 15min TTL | latest |
-| **Tests totales** | **749 passed** (26 VPPFleetManager + 15 SENMarketFeed + 723 previos) | — |
-| **sync_ecosystem v2.16.0** | bessai-web + open-bess-edge — 3,496 pts CEN publicados | — |
-| **PROJECT_STATUS.md** | 749 tests, VPPFleetManager+SENMarketFeed módulos | latest |
+| **SS.CC. (Target v2.17)** | `main.py` usa `CapacityAllocator` pre-Publicación. DRL restringido al remanente. | latest |
+| **Lazo Adquisición OT** | Agregados `frequency` y `ac_voltage` a la lectura de registros en cada ciclo. | latest |
+| **Observabilidad** | `metrics.py` expone `BESS_SSCC_RESERVED_KW`, `GRID_FREQUENCY_HZ`, `GRID_VOLTAGE_V`. | latest |
+| **Documentación** | Workflow `iteracion-bessai`. Walkthrough SS.CC., PROJECT_STATUS v2.17.0. | latest |
 
 ### Estado de tests: **749 passed · 1 xfailed · 0 failed**
 
 ### 🔜 Próximas prioridades
 
-1. **Federated Learning scaffold**: Flower stub + `FLCoordinator` para N≥2 sitios
-2. **HVDC Virtual Dispatch**: `src/core/hvdc_scheduler.py` — despacho intercontinental simulado
-3. **Blog post**: OBE-DOC-003 sobre BEP-0500 VPP multi-site launch (749 tests, 7 mercados)
-4. **Activar DRL write** en staging: `BESSAI_DRL_WRITE=true` con datos ONNX CEN v1
-5. **VPPFleetManager Phase 2**: HTTP real dispatch a SiteProxy endpoints (mTLS)
+1. **Hardware Industrial:** Cotizar y planificar la adopción del Winmate WNAI-E600.
+2. Explorar comandos in-situ Hardware Droop control (Modbus registers) si aplica.
+3. Tareas administrativas (GitHub 2FA, OpenSSF bestpractices, SSAF postulación).
 
 ---
 

@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-03-12 v2.16.0 · **Responsable:** BESS Solutions SpA  
+> **Actualizado:** 2026-04-10 v2.17.0 · **Responsable:** BESS Solutions SpA  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,7 +14,7 @@ Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivad
 
 ---
 
-## ✅ Estado Actual — v2.16.0 (VPPFleetManager BEP-0500 + FL BEP-0600 + HVDC BEP-0700)
+## ✅ Estado Actual — v2.17.0 (Stack Revenue Físico SS.CC.)
 
 > Ver: [`docs/PENDIENTES.md`](docs/PENDIENTES.md) · [`docs/MODULOS_Y_DATOS_SIMULADOS.md`](docs/MODULOS_Y_DATOS_SIMULADOS.md)
 
@@ -31,7 +31,7 @@ Nuevo: test_bessai_evolve_v2.py — 24/24 CMAESMutator + NSGA-II + EliteArchive 
 Nuevo: test_bess_rl_env_cen.py — 23/23 BEP-0200 F3 (env CMg real CEN) ✅
 Registry: 7 perfiles hardware (Fronius, Huawei, SMA, Victron + SolarEdge, BYD, Tesla)
 CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · helm ✅ · drl-market-tests ✅
-Version: v2.16.0 · 3,496 pts CEN reales · bessai-web sync OK
+Version: v2.17.0 · 3,496 pts CEN reales · bessai-web sync OK
 ```
 
 ### 🔍 Audit 360° — Gaps Conocidos y Plan de Acción
@@ -49,7 +49,7 @@ Version: v2.16.0 · 3,496 pts CEN reales · bessai-web sync OK
 | 🔵 Baja | cosign keypair sin configurar | `release.yml` | Rodrigo: `cosign generate-keypair` + Secrets GH | Manual |
 | 🟡 Pendiente | GCP Pub/Sub producción | `.env` | Configurar `GCP_PROJECT_ID` + service account | Piloto |
 | 🟡 Pendiente | DRL write activo (staging) | `.env` | 2 sem. observe → `BESSAI_DRL_WRITE=true` | Piloto |
-| 🔴 **ALTA** | **Stack Revenue Físico (SS.CC.)** | `main.py` | **Inyectar algoritmos de** `CapacityAllocator` **al lazo de control Modbus (reservas/frecuencia)** | v2.17.0 |
+| ✅ **CERRADO** | **Stack Revenue Físico (SS.CC.)** | `src/core/main.py` | **Inyectar algoritmos de** `CapacityAllocator` **al lazo de control Modbus (reservas/frecuencia)** | v2.17.0 |
 
 
 ### Stack Docker — Métricas en vivo (confirmado 2026-02-19)
@@ -136,6 +136,7 @@ Prometheus v2.16.0                          OK      ← localhost:9090
 | **Dashboard DRL** | `dashboard/optimizer.js` + `index.html` | **v2.0** | ✅ **NUEVO v2.9** — Tab DRL Optimizer, SOC trajectory, CMg selector 48 días |
 | **WatchdogManager** | `src/core/watchdog_manager.py` | **v1.0** | ✅ **NUEVO v2.9** — Self-healing autónomo, exponential backoff, Prometheus, AlertDispatcher |
 | **Scrollytelling Landing** | `landing/` (React + Vite) | **v1.0** | ✅ **NUEVO v2.10** — i18n ES/EN, Lucide icons, FAQ/Features, scrollytelling animations |
+| **CapacityAllocator (SS.CC.)** | `src/core/main.py` | **v2.17.0** | ✅ **NUEVO v2.17.0** — Asignación NTSyCS y clamping dinámico DRL |
 
 ### 🐳 Stack Docker — ✅ COMPLETAMENTE OPERATIVO (v1.0.1)
 
@@ -202,7 +203,19 @@ GET /api/v1/health   → ok / degraded
 | `545c084` | Tutorial 5min sin hardware, MQTT+HA tutorial, MkDocs | Onboarding < 5 min |
 | `9bc4d78` | K8s manifests (6 archivos), kustomization.yaml | `kubectl apply -k` en K3s/RPi/GKE |
 
-### Pendientes (solo Rodrigo)
+### ⚠️ Standard Operating Procedure (SOP): Ajuste Físico para V4 (15-min)
+
+Al haber migrado a un entrenamiento ultra-denso (saltos de 15 minutos V4), el Agente DRL puede intentar cazar "micro-spikes" (variaciones fantasmas de 15mins). **Esto requiere una auditoría estricta caso a caso con cada cliente final al momento de desplegar la planta física**, evaluando la hoja de datos (Datasheet) del equipo BESS provisto (Winmate, Sungrow, Tesla, etc.).
+
+Durante el *commissioning* de un modelo a un Gateway, el Ingeniero a Cargo debe elegir una de las 3 filosofías de frenado en `bess_rl_env_cen.py` conforme a las limitantes del hardware del cliente:
+
+1. **Opción A (Ramp-Rate Penalty):** Añadir castigo matemático por estrés térmico si el inversor es lento (ej. si pasa de -100% a +100% en < 15mins).
+2. **Opción B (Restricción C-Rate Absoluto):** Enforzar el suavizado de la curva Action Space a un X% si el sistema HVAC/Liquid Cooling de la batería no tolera oscilaciones violentas.
+3. **Opción C (Dejar Fluir Economía Activa):** Delegar el frenado entero a `degradation_cost_per_kwh`. Válido para Lithium-Ion modernos puros que amortiguan sin problemas y permiten priorizar Retorno de Inversión (ROI) brutal sobre cautela.
+
+---
+
+## Próximos Hitos (A Corto Plazo)
 
 - [ ] Activar 2FA en cuenta GitHub
 - [ ] Completar checkboxes en bestpractices.dev/projects/12001
@@ -238,6 +251,7 @@ v2.16.0  ███████████████████████�
 v2.16.0  ████████████████████████  ✅ Fix: import math lint · Helm appVersion · ci.yml Job numbering
 v2.16.0  ████████████████████████  ✅ Lint 360°: ruff 35/36 fixes · structlog drl_agent · 490 tests
 v2.16.0  ████████████████████████  ✅ Superset: 6 Waves · 3 registry HW · lightweight_mode · alert_dispatcher · 541 tests
+v2.17.0  ████████████████████████  ✅ Stack Revenue Físico (SS.CC.) Integrado · DRL dynamic clamping
 v3.0.0  ░░░░░░░░░░░░░░░░░░░░░░░░  📋 Multi-site planetary scale · SL-2 certification
 ```
 

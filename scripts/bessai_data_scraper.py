@@ -42,6 +42,10 @@ import io
 import json
 import sys
 import time
+
+if sys.stdout.encoding.lower() != 'utf-8':
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
