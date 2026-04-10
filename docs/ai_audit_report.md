@@ -1,11 +1,11 @@
 # 🧠 BESSAI AI Audit Report
 
-> Generated: `2026-03-19T14:55:28Z` | Version: v2.x | Score: **9.6/20** (12/25 features)
+> Generated: `2026-02-26T00:12:15Z` | Version: v2.x | Score: **8.8/20** (11/25 features)
 
 ## Overall Score
 
 ```
-[██████████████░░░░░░░░░░░░░░░░]  9.6/20  (12/25 features implemented)
+[█████████████░░░░░░░░░░░░░░░░░]  8.8/20  (11/25 features implemented)
 ```
 
 ## Feature Checklist 20/10
@@ -25,7 +25,7 @@
 | F11 | Auto-retraining triggered by data freshness | DRL | v2 | ✅ Done |
 | F12 | Predictive Maintenance Transformer (7-30d ahead) | Agents | v3 | ⏳ v3 |
 | F13 | Multi-Agent (Arbitrage + Safety + BatteryHealth) | Agents | v3 | ⏳ v3 |
-| F14 | Federated Learning (Flower) multi-site | Agents | v4 | ✅ Done |
+| F14 | Federated Learning (Flower) multi-site | Agents | v4 | ⏳ v4 |
 | F15 | Daily data pipeline (CMg+ERNC+clima+frecuencia) | Data | v2 | ✅ Done |
 | F16 | Model drift monitoring + auto-revert >30% | Monitoring | v2 | ✅ Done |
 | F17 | Performance regression gating on PRs | CI/CD | v2 | ✅ Done |
@@ -42,33 +42,30 @@
 
 | Model | p50 ms | p99 ms | Throughput IPS |
 |-------|--------|--------|----------------|
-| Cardones_drl_cen_v1.onnx | — | — | [ONNXRuntimeError] : 2 : INVALID_ARGUMENT : Got invalid dimensions for input: obs for the following indices
- index: 1 Got: 3 Expected: 8
- Please fix either the inputs/outputs or the model. |
-| Cardones_predictor.onnx | — | — | [ONNXRuntimeError] : 2 : INVALID_ARGUMENT : Got invalid dimensions for input: float_input for the following indices
- index: 1 Got: 3 Expected: 11
- Please fix either the inputs/outputs or the model. |
-| Cardones_predictor_p10.onnx | — | — | [ONNXRuntimeError] : 2 : INVALID_ARGUMENT : Got invalid dimensions for input: float_input for the following indices
- index: 1 Got: 3 Expected: 11
+| dispatch_policy.onnx | — | — | [ONNXRuntimeError] : 2 : INVALID_ARGUMENT : Got invalid dimensions for input: input for the following indices
+ index: 1 Got: 3 Expected: 4
  Please fix either the inputs/outputs or the model. |
 
 ## 📦 AI Module Inventory
 
 | Module | Lines | Docstring | Tests | Status |
 |--------|-------|-----------|-------|--------|
-| `benchmark_suite` | 18 | ✅ | ⚠️ | ✅ v1 |
-| `bess_rl_env_cen` | 474 | ✅ | ⚠️ | ✅ v1 |
-| `bessai_evolve` | 18 | ✅ | ⚠️ | ✅ v1 |
-| `bessai_evolve_v2` | 18 | ✅ | ⚠️ | 🆕 v2 |
-| `candidate_generator` | 18 | ✅ | ⚠️ | ✅ v1 |
-| `cmaes_mutator` | 18 | ✅ | ⚠️ | 🆕 v2 |
-| `degradation_model` | 18 | ✅ | ⚠️ | ✅ v1 |
-| `elite_archive` | 18 | ✅ | ⚠️ | 🆕 v2 |
-| `fitness_evaluator` | 18 | ✅ | ⚠️ | ✅ v1 |
-| `marl_env` | 18 | ✅ | ⚠️ | ✅ v1 |
-| `milp_optimizer` | 18 | ✅ | ⚠️ | ✅ v1 |
-| `multi_objective_fitness` | 18 | ✅ | ⚠️ | 🆕 v2 |
-| `population_manager` | 18 | ✅ | ⚠️ | ✅ v1 |
+| `arbitrage_policy` | 153 | ✅ | ⚠️ | ✅ v1 |
+| `benchmark_suite` | 398 | ✅ | ⚠️ | ✅ v1 |
+| `bess_rl_env` | 332 | ✅ | ⚠️ | ✅ v1 |
+| `bess_rl_env_cen` | 337 | ✅ | ✅ | ✅ v1 |
+| `bessai_evolve` | 304 | ✅ | ⚠️ | ✅ v1 |
+| `bessai_evolve_v2` | 340 | ✅ | ✅ | 🆕 v2 |
+| `candidate_generator` | 309 | ✅ | ⚠️ | ✅ v1 |
+| `cmaes_mutator` | 326 | ✅ | ⚠️ | 🆕 v2 |
+| `degradation_model` | 361 | ✅ | ✅ | ✅ v1 |
+| `drl_agent` | 351 | ✅ | ⚠️ | ✅ v1 |
+| `elite_archive` | 286 | ✅ | ⚠️ | 🆕 v2 |
+| `fitness_evaluator` | 382 | ✅ | ⚠️ | ✅ v1 |
+| `marl_env` | 374 | ✅ | ✅ | ✅ v1 |
+| `milp_optimizer` | 384 | ✅ | ✅ | ✅ v1 |
+| `multi_objective_fitness` | 348 | ✅ | ⚠️ | 🆕 v2 |
+| `population_manager` | 277 | ✅ | ⚠️ | ✅ v1 |
 
 ## 🏆 Elite Archive
 

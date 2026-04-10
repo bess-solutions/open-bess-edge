@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Integral: BESSAI Edge Gateway</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&family=Sora:wght@400;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0a0f18;
+            --bg-darker: #05080e;
+            --bg-card: #111827;
+            --accent-orange: #f59e0b;
+            --text-light: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        @page {
+            size: A4;
+            margin: 0;
+            -webkit-print-color-adjust: exact;
+        }
+
+        @media print {
+            body {
+                background-color: var(--bg-dark) !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+            .hero {
+                background-color: var(--accent-orange) !important;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Sora', sans-serif;
+        }
+
+        /* Hero Section */
+        .hero {
+            background-color: var(--accent-orange);
+            color: #000;
+            padding: 60px 40px;
+            page-break-after: avoid;
+        }
+        
+        .hero-brand {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hero h1 {
+            font-size: 44px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            max-width: 800px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            max-width: 700px;
+            font-weight: 600;
+            opacity: 0.85;
+        }
+
+        /* Content Sections */
+        .container {
+            padding: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            page-break-inside: avoid;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-orange);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: var(--text-light);
+        }
+
+        ul {
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+            color: var(--text-muted);
+        }
+
+        strong {
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .diagram-container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            page-break-inside: avoid;
+            overflow: hidden;
+        }
+
+        .notice {
+            background-color: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--accent-orange);
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .notice-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 12px;
+            color: var(--accent-orange);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--bg-darker);
+            padding: 30px 40px;
+            font-size: 11px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            page-break-inside: avoid;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-left {
+            opacity: 0.8;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .footer-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .social-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero">
+        <div class="hero-brand">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            BESSAI Research
+        </div>
+        <h1>Análisis Integral: BESSAI Edge Gateway & Ecosystem</h1>
+        <p>Evaluación técnica profunda de la arquitectura, inteligencia artificial de arbitraje y modelo de negocio CERO costo marginal para sistemas BESS.</p>
+    </div>
+
+    <div class="container">
+        
+        <div class="section">
+            <h2 class="section-title">1. Mapa del Ecosistema y Arquitectura de la Información</h2>
+            <p>El siguiente diagrama mapea cómo interactúa el modelo de negocio en la web con el código operativo y el hardware físico de las plantas de baterías.</p>
+            
+            <div class="diagram-container">
+                <div class="mermaid">
+                graph TB
+                    classDef cloud fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#fff
+                    classDef edge fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#fff
+
+                    subgraph Comercial [Capa Web Estratégica]
+                        BS["bess-solutions.cl<br/>Operador OT"]:::cloud
+                        BW["bessai-web.vercel.app<br/>SaaS Dashboard"]:::cloud
+                        BS -.-> BW
+                    end
+
+                    subgraph Cloud [Orquestación Cloud]
+                        VPP["⚡ VPP Fleet Manager"]:::cloud
+                        FL["🧠 FL Coordinator"]:::cloud
+                        GCP["📊 GCP / BigQuery"]:::cloud
+                        BW ==> VPP
+                    end
+
+                    subgraph EdgeLayer [Capa Edge AI]
+                        subgraph Intelecto [Módulo de Decisión]
+                            DRL["Agente DRL PPO"]:::edge
+                            MILP["Optimizador MILP"]:::edge
+                        end
+                        
+                        subgraph Escudo [Módulo Seguridad OT]
+                            SG["SafetyGuard IEC-62443"]:::edge
+                        end
+
+                        DRL --> SG
+                        MILP --> SG
+                    end
+                    
+                    VPP --> DRL
+                    SG --> GCP
+                </div>
+            </div>
+
+            <div class="notice">
+                <div class="notice-title">💡 Flujo Operacional</div>
+                Todo comienza en la capa comercial con la atracción de BESS interesadas en el arbitraje en nodos CEN (vertimiento en $0). Eso desencadena la integración del hardware con el software Edge, curado por SafetyGuard industrial estricto.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">2. Visión y Modelo de Negocio</h2>
+            <p>BESSAI aspira a convertirse en el estándar operativo global para BESS. Soluciona el vertimiento masivo de energía renovable y la falta de optimización financiera.</p>
+            <ul>
+                <li><strong>Value Proposition:</strong> Aumentar el revenue de un BESS hasta +33.5% (ej. $168K USD extras en un BESS de 5MWh) maximizando el arbitraje a través de agentes inteligentes.</li>
+                <li><strong>BESS Solutions (Empresa):</strong> Focalizada en ingeniería extrema, integración OT/IT en el borde prescindiendo de dependencia cloud predominante.</li>
+                <li><strong>BESSAI (Producto):</strong> Enfoque en ROI, simulador financiero y modelo de negocio Zero-Marginal Cost.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">3. Capacidades de Inteligencia Artificial</h2>
+            <ul>
+                <li><strong>Agente DRL (Deep Reinforcement Learning):</strong> Entrenado con PPO y exportado a ONNX (2.1KB, latencia &lt;0.1ms) basado en años de datos reales CMg.</li>
+                <li><strong>BESSAIEvolve:</strong> Bucle de auto-mejora semanal que cruza y muta políticas en sandbox de 8,640 steps.</li>
+                <li><strong>Federated Learning:</strong> Múltiples granjas BESS aprenden colaborativamente sin extraer datos privados vía FedAvg.</li>
+                <li><strong>Optimizador MILP:</strong> Complemento determinístico para la planificación 24h a futuro.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">4. Arquitectura de Grado Industrial & Ciberseguridad</h2>
+            <p>El sistema opera junto al activo (Raspberry Pi 5 / NUC industrial). Es <strong>Hardware Agnostic</strong> mediante drivers Modbus TCP universales validados en perfiles YAML (Huawei, SMA, Tesla).</p>
+            
+            <div class="notice">
+                <div class="notice-title">🛡️ SAFETY GUARD ACTIVO</div>
+                Nunca se despacha a la batería si la instrucción de la IA no pasa primero por un guardarraíl algorítmico y normativo estricto. (Rampas SOC, Térmicas, etc).
+            </div>
+
+            <ul>
+                <li><strong>Cumplimiento NTSyCS (Chile):</strong> Mapeo técnico a regulaciones eléctricas con 11 GAPs cerrados explícitamente.</li>
+                <li><strong>IEC 62443 SL-2:</strong> Ciberseguridad OT industrial y SL-2 readiness confirmado en docs.</li>
+                <li><strong>AI-IDS:</strong> Detector no supervisado (Isolation Forest) que bloquea anomalías y ataques en la red Modbus.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">5. Estado del Proyecto (v2.16.0)</h2>
+            <p>La salud de software reportada indica altísima madurez con <strong>+799 Tests Unitarios</strong> corriendo limpios, OpenSSF Gold coverage, y BESSAI Enhancement Proposals (BEPs) impulsando la innovación técnica comunitaria y corporativa simultáneamente.</p>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        <div class="footer-left">
+            &copy; 2025-2028 BESS Solutions &middot; open-bess-edge &middot; Apache 2.0 &middot; Privacidad
+        </div>
+        <div class="footer-right">
+            <span class="social-link">GitHub</span>
+            <span class="social-link">Discord</span>
+            <span class="social-link">𝕏 X</span>
+            <span class="social-link">LinkedIn</span>
+            <span class="social-link">YouTube</span>
+            <span class="social-link">Instagram</span>
+            <span class="social-link">Analytics</span>
+            <span class="social-link">Cookies</span>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'dark',
+            securityLevel: 'loose',
+            fontFamily: 'Inter'
+        });
+    </script>
+</body>
+</html>

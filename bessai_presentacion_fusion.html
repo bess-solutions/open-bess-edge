@@ -1,0 +1,1569 @@
+
+<style>
+@media print {
+  @page { size: landscape; margin: 0; }
+  body { background: #0a0f18 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; }
+  .nav-bar { display: none !important; }
+  .presentation { padding: 0 !important; max-width: 100% !important; margin: 0 !important; }
+  .slide { display: flex !important; page-break-after: always; break-after: page; border: none !important; border-radius: 0 !important; width: 100vw; height: 100vh; box-sizing: border-box; }
+}
+</style>
+
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap');
+
+:root {
+  --cen-navy: #f3f4f6;       /* Primary Text (Light) */
+  --cen-blue: #0a0f18;       /* bgdark for Headers/Accents */
+  --cen-accent: #f59e0b;     /* Orange Accent */
+  --cen-light: #1f2937;      /* Muted backgrounds inside cards */
+  --cen-gold: #f59e0b;       /* Orange Accent */
+  --cen-green: #22c55e;      /* Success Green */
+  --cen-gray: #cecdcd;       /* Secondary Text / Muted */
+  --cen-light-gray: #0a0f18; /* Body Background */
+  --cen-border: #374151;     /* Subtle borders */
+  --cen-white: #111827;      /* Slide Card Background (bgcard) */
+  --slide-w: 100%;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--cen-light-gray);
+  color: var(--cen-navy);
+}
+
+.presentation {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--cen-white);
+  border: 0.5px solid var(--cen-border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.nav-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--cen-border);
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.nav-dot.active { background: var(--cen-accent); }
+.nav-dot:hover { background: var(--cen-blue); }
+
+.nav-label {
+  font-size: 11px;
+  color: var(--cen-gray);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-left: 4px;
+}
+
+.slide {
+  display: none;
+  background: var(--cen-white);
+  border: 0.5px solid var(--cen-border);
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: 540px;
+  position: relative;
+}
+.slide.active { display: flex; flex-direction: column; }
+
+/* ── HEADER ── */
+.slide-header {
+  background: var(--cen-blue);
+  padding: 0;
+  display: flex;
+  align-items: stretch;
+  min-height: 72px;
+}
+
+.header-accent {
+  width: 6px;
+  background: var(--cen-gold);
+  flex-shrink: 0;
+}
+
+.header-content {
+  flex: 1;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-left { display: flex; flex-direction: column; gap: 2px; }
+
+.slide-tag {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--cen-gold);
+  opacity: 0.9;
+}
+
+.slide-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--cen-accent);
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+}
+
+.slide-subtitle {
+  font-size: 12px;
+  color: rgba(255,255,255,0.65);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.header-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.logo-badge {
+  background: rgba(255,255,255,0.12);
+  border: 0.5px solid rgba(255,255,255,0.25);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.08em;
+}
+
+.logo-version {
+  font-size: 10px;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.05em;
+}
+
+/* ── BODY ── */
+.slide-body {
+  flex: 1;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ── FOOTER ── */
+.slide-footer {
+  border-top: 0.5px solid var(--cen-border);
+  padding: 8px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--cen-light-gray);
+}
+
+.footer-left {
+  font-size: 10px;
+  color: var(--cen-gray);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.slide-number {
+  font-size: 10px;
+  color: var(--cen-gray);
+  font-weight: 600;
+  font-family: 'Barlow Condensed', sans-serif;
+  letter-spacing: 0.08em;
+}
+
+.footer-bar {
+  width: 60px;
+  height: 3px;
+  background: var(--cen-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.footer-progress {
+  height: 100%;
+  background: var(--cen-accent);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* ── SLIDE 1: COVER ── */
+.cover-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 48px;
+  background: linear-gradient(135deg, #111827 0%, #0a0f18 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.cover-bg-lines {
+  position: absolute;
+  top: 0; right: 0;
+  width: 320px; height: 100%;
+  opacity: 0.06;
+}
+
+.cover-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.eyebrow-line {
+  width: 32px;
+  height: 2px;
+  background: var(--cen-gold);
+}
+
+.eyebrow-text {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cen-accent);
+}
+
+.cover-main-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 44px;
+  font-weight: 700;
+  color: var(--cen-navy);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+.cover-main-title span {
+  color: var(--cen-accent);
+}
+
+.cover-desc {
+  font-size: 14px;
+  color: var(--cen-gray);
+  font-weight: 400;
+  line-height: 1.5;
+  max-width: 480px;
+  margin-bottom: 28px;
+}
+
+.cover-meta {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.meta-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cen-gray);
+}
+
+.meta-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cen-blue);
+}
+
+.cover-divider {
+  width: 100%;
+  height: 0.5px;
+  background: var(--cen-border);
+  margin: 20px 0;
+}
+
+.cover-kpis {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.kpi-box {
+  background: var(--cen-white);
+  border: 0.5px solid var(--cen-border);
+  border-left: 3px solid var(--cen-accent);
+  border-radius: 6px;
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kpi-value {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--cen-accent);
+}
+
+.kpi-label {
+  font-size: 11px;
+  color: var(--cen-gray);
+  font-weight: 400;
+}
+
+/* ── SECTION CARDS ── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  flex: 1;
+}
+
+.three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+  flex: 1;
+}
+
+.info-card {
+  background: var(--cen-light-gray);
+  border: 0.5px solid var(--cen-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.info-card.accent-blue {
+  border-left: 3px solid var(--cen-accent);
+  background: #1f2937;
+}
+
+.info-card.accent-gold {
+  border-left: 3px solid var(--cen-gold);
+  background: #1f2937;
+}
+
+.info-card.accent-green {
+  border-left: 3px solid var(--cen-green);
+  background: #1f2937;
+}
+
+.card-icon {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  background: var(--cen-blue);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.card-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cen-navy);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.card-body {
+  font-size: 12px;
+  color: var(--cen-gray);
+  line-height: 1.55;
+}
+
+.card-stat {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--cen-blue);
+  line-height: 1;
+}
+
+.card-stat-label {
+  font-size: 11px;
+  color: var(--cen-gray);
+}
+
+/* ── TABLE ── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.data-table th {
+  background: var(--cen-blue);
+  color: #fff;
+  font-weight: 600;
+  font-family: 'Barlow Condensed', sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 11px;
+  padding: 9px 14px;
+  text-align: left;
+  border: none;
+}
+
+.data-table th:first-child { border-radius: 6px 0 0 0; }
+.data-table th:last-child { border-radius: 0 6px 0 0; }
+
+.data-table td {
+  padding: 9px 14px;
+  border-bottom: 0.5px solid var(--cen-border);
+  color: var(--cen-navy);
+  font-weight: 400;
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:nth-child(even) td { background: var(--cen-light-gray); }
+
+.delta-pos {
+  color: var(--cen-green);
+  font-weight: 700;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+}
+
+.row-highlight td {
+  background: #1f2937 !important;
+  font-weight: 600;
+  color: #f3f4f6 !important;
+}
+
+/* ── BAR CHART ── */
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bar-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--cen-gray);
+  width: 130px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.bar-track {
+  flex: 1;
+  height: 22px;
+  background: var(--cen-light-gray);
+  border-radius: 4px;
+  border: 0.5px solid var(--cen-border);
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+}
+
+.bar-fill.blue { background: var(--cen-blue); }
+.bar-fill.accent { background: var(--cen-accent); }
+.bar-fill.gold { background: var(--cen-gold); }
+
+.bar-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  font-family: 'Barlow Condensed', sans-serif;
+  letter-spacing: 0.04em;
+}
+
+.bar-delta {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cen-green);
+  font-family: 'Barlow Condensed', sans-serif;
+  width: 60px;
+  flex-shrink: 0;
+}
+
+/* ── ARCHITECTURE ── */
+.arch-diagram {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.arch-layer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--cen-light-gray);
+  border: 0.5px solid var(--cen-border);
+  border-radius: 6px;
+  padding: 10px 16px;
+}
+
+.arch-layer-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cen-gray);
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.arch-nodes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.arch-node {
+  background: var(--cen-white);
+  border: 0.5px solid var(--cen-border);
+  border-radius: 5px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--cen-navy);
+  font-family: 'Barlow Condensed', sans-serif;
+  letter-spacing: 0.03em;
+}
+
+.arch-node.blue {
+  background: var(--cen-light);
+  color: var(--cen-accent);
+  border-color: var(--cen-blue);
+}
+
+.arch-node.accent {
+  background: var(--cen-accent);
+  color: #fff;
+  border-color: var(--cen-accent);
+}
+
+.arch-node.gold {
+  background: rgba(245,158,11,0.15);
+  color: var(--cen-accent);
+  border-color: var(--cen-gold);
+}
+
+.arch-connector {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--cen-border);
+  font-size: 16px;
+  height: 12px;
+}
+
+/* ── BULLET LIST ── */
+.bullet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bullet-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.bullet-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--cen-accent);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.bullet-text {
+  font-size: 13px;
+  color: var(--cen-gray);
+  line-height: 1.5;
+}
+
+.bullet-text strong {
+  color: var(--cen-navy);
+  font-weight: 600;
+}
+
+/* ── CALLOUT ── */
+.callout-box {
+  background: var(--cen-light);
+  border: 0.5px solid var(--cen-accent);
+  border-left: 3px solid var(--cen-accent);
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--cen-blue);
+  line-height: 1.55;
+  font-weight: 500;
+}
+
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--cen-accent);
+  margin-bottom: 6px;
+}
+
+/* ── RISK MATRIX ── */
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tag-green { background: rgba(34,197,94,0.15); color: #22c55e; }
+.tag-blue { background: rgba(245,158,11,0.15); color: #f59e0b; }
+.tag-gold { background: rgba(245,158,11,0.15); color: #f59e0b; }
+
+/* ── NAV BUTTONS ── */
+.nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.nav-btn {
+  background: var(--cen-white);
+  border: 0.5px solid var(--cen-border);
+  border-radius: 6px;
+  padding: 7px 18px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Barlow', sans-serif;
+  color: var(--cen-blue);
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: background 0.15s;
+}
+
+.nav-btn:hover { background: var(--cen-light-gray); }
+.nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+.nav-btn.primary {
+  background: var(--cen-blue);
+  color: #fff;
+  border-color: var(--cen-blue);
+}
+
+.nav-btn.primary:hover { background: #002570; }
+
+.slide-counter {
+  font-size: 12px;
+  color: var(--cen-gray);
+  font-weight: 500;
+  font-family: 'Barlow Condensed', sans-serif;
+  letter-spacing: 0.06em;
+}
+
+/* ── DIVIDER ── */
+.section-divider {
+  height: 0.5px;
+  background: var(--cen-border);
+  margin: 4px 0;
+}
+
+</style>
+
+<div class="presentation">
+
+<div class="nav-bar" id="navBar">
+  <span class="nav-label">Diapositivas:</span>
+</div>
+
+<!-- ════════════════════════════════════════
+     DIAPOSITIVA 1 — PORTADA
+═══════════════════════════════════════════ -->
+<div class="slide active" id="slide-1">
+  <div class="slide-header">
+    <div class="header-accent"></div>
+    <div class="header-content">
+      <div class="header-left">
+        <span class="slide-tag">Análisis Técnico · Sistema Eléctrico Nacional</span>
+        <span class="slide-title">BESSAI Edge Gateway</span>
+        <span class="slide-subtitle">Evaluación técnica detallada, agentes de IA de arbitraje y modelo operacional</span>
+      </div>
+      <div class="header-logo">
+        <span class="logo-badge">BESSAI</span>
+        <span class="logo-version">v2.16.0 · 2025</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cover-body">
+    <svg class="cover-bg-lines" viewBox="0 0 320 540" preserveAspectRatio="none">
+      <line x1="40" y1="0" x2="320" y2="540" stroke="#374151" stroke-width="1"/>
+      <line x1="80" y1="0" x2="320" y2="460" stroke="#374151" stroke-width="1"/>
+      <line x1="120" y1="0" x2="320" y2="380" stroke="#374151" stroke-width="1"/>
+      <line x1="160" y1="0" x2="320" y2="300" stroke="#374151" stroke-width="1"/>
+      <line x1="200" y1="0" x2="320" y2="220" stroke="#374151" stroke-width="1"/>
+    </svg>
+
+    <div class="cover-eyebrow">
+      <div class="eyebrow-line"></div>
+      <span class="eyebrow-text">Documento de Presentación Técnica</span>
+    </div>
+
+    <div class="cover-main-title">
+      Optimización de <span>BESS</span><br>con Inteligencia Artificial
+    </div>
+
+    <div class="cover-desc">
+      Sistema edge-first de control y arbitraje energético basado en Deep Reinforcement Learning (PPO) para el mercado spot del SEN Chile, con apilamiento de servicios complementarios y ciberseguridad IEC 62443.
+    </div>
+
+    <div class="cover-kpis">
+      <div class="kpi-box">
+        <span class="kpi-value">+33,5%</span>
+        <span class="kpi-label">Alpha sobre operador humano</span>
+      </div>
+      <div class="kpi-box">
+        <span class="kpi-value">USD 368K</span>
+        <span class="kpi-label">Revenue anual · 5 MWh</span>
+      </div>
+      <div class="kpi-box">
+        <span class="kpi-value">111.100</span>
+        <span class="kpi-label">Puntos históricos · backtest</span>
+      </div>
+      <div class="kpi-box">
+        <span class="kpi-value">&lt;0,1 ms</span>
+        <span class="kpi-label">Latencia de inferencia DRL</span>
+      </div>
+    </div>
+
+    <div class="cover-divider"></div>
+
+    <div class="cover-meta">
+      <div class="meta-item">
+        <span class="meta-label">Empresa</span>
+        <span class="meta-value">BESS Solutions</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Mercado objetivo</span>
+        <span class="meta-value">SEN Chile · CAISO · ERCOT · ENTSO-E</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Repositorio</span>
+        <span class="meta-value">open-bess-edge (GitHub)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <span class="footer-left">BESS Solutions · Confidencial</span>
+    <div class="footer-right">
+      <span class="slide-number">01 / 09</span>
+      <div class="footer-bar"><div class="footer-progress" style="width:11%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     DIAPOSITIVA 2 — PROBLEMA
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-2">
+  <div class="slide-header">
+    <div class="header-accent"></div>
+    <div class="header-content">
+      <div class="header-left">
+        <span class="slide-tag">Contexto de Mercado · SEN Chile</span>
+        <span class="slide-title">El Problema: Curtailment Masivo Solar</span>
+      </div>
+      <div class="header-logo">
+        <span class="logo-badge">BESSAI</span>
+        <span class="logo-version">v2.16.0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-body">
+    <div class="two-col">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="section-label">Situación actual del mercado</div>
+        <div class="bullet-list">
+          <div class="bullet-item">
+            <div class="bullet-dot"></div>
+            <span class="bullet-text"><strong>Curtailment solar masivo:</strong> En el norte de Chile el vertimiento de energía solar provoca que el costo marginal (CMg) marque $0 CLP/kWh hasta el <strong>40% de las horas</strong>.</span>
+          </div>
+          <div class="bullet-item">
+            <div class="bullet-dot"></div>
+            <span class="bullet-text"><strong>BESS convencionales ineficientes:</strong> Los sistemas sin IA desaprovechan los valles de precio cero, dejando más del <strong>33,5% de los ingresos potenciales</strong> sin capturar.</span>
+          </div>
+          <div class="bullet-item">
+            <div class="bullet-dot"></div>
+            <span class="bullet-text"><strong>Ventana de oportunidad:</strong> Existe una brecha estructural entre generación solar y demanda nocturna que los BESS inteligentes pueden arbitrar sistemáticamente.</span>
+          </div>
+          <div class="bullet-item">
+            <div class="bullet-dot"></div>
+            <span class="bullet-text"><strong>Complejidad temporal:</strong> La variabilidad intradiaria del CMg exige decisiones sub-segundo imposibles de gestionar manualmente.</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="section-label">Pérdida de ingreso por tipo de operación</div>
+
+        <div class="bar-chart">
+          <div class="bar-row">
+            <span class="bar-label">Sin gestión activa</span>
+            <div class="bar-track">
+              <div class="bar-fill blue" style="width:45%">
+                <span class="bar-value">$180K</span>
+              </div>
+            </div>
+            <span class="bar-delta" style="color:var(--cen-gray)">–</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Operador humano</span>
+            <div class="bar-track">
+              <div class="bar-fill blue" style="width:60%">
+                <span class="bar-value">$241K</span>
+              </div>
+            </div>
+            <span class="bar-delta" style="color:var(--cen-gray)">Base</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">BESSAI DRL (PPO)</span>
+            <div class="bar-track">
+              <div class="bar-fill accent" style="width:80%">
+                <span class="bar-value">$321K</span>
+              </div>
+            </div>
+            <span class="bar-delta">+33,5%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Full Stack</span>
+            <div class="bar-track">
+              <div class="bar-fill gold" style="width:92%">
+                <span class="bar-value" style="color:#5a3a00">$368K</span>
+              </div>
+            </div>
+            <span class="bar-delta">+53,0%</span>
+          </div>
+        </div>
+
+        <div class="callout-box">
+          Ingresos anuales proyectados en USD para un sistema BESS de 5 MWh · Nodo Maitencillo. Backtest sobre 111.100 puntos históricos del CEN Chile.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <span class="footer-left">BESS Solutions · Confidencial</span>
+    <div class="footer-right">
+      <span class="slide-number">02 / 09</span>
+      <div class="footer-bar"><div class="footer-progress" style="width:22%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     DIAPOSITIVA 3 — VALIDACIÓN FINANCIERA
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-3">
+  <div class="slide-header">
+    <div class="header-accent"></div>
+    <div class="header-content">
+      <div class="header-left">
+        <span class="slide-tag">Validación Financiera · Benchmark Nodo Maitencillo</span>
+        <span class="slide-title">Resultados: Backtest 5 MWh</span>
+      </div>
+      <div class="header-logo">
+        <span class="logo-badge">BESSAI</span>
+        <span class="logo-version">v2.16.0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-body">
+    <div class="three-col" style="margin-bottom:4px;">
+      <div class="info-card accent-blue">
+        <div class="card-title">Operador Humano</div>
+        <div class="card-stat">$240.500</div>
+        <div class="card-stat-label">USD / año · Línea base</div>
+        <div class="card-body">Referencia de gestión manual convencional del mercado spot.</div>
+      </div>
+      <div class="info-card accent-blue">
+        <div class="card-title">BESSAI DRL (PPO)</div>
+        <div class="card-stat" style="color:var(--cen-accent)">$321.000</div>
+        <div class="card-stat-label">USD / año · <span class="delta-pos">+33,5%</span></div>
+        <div class="card-body">Solo arbitraje energético optimizado con Deep Reinforcement Learning.</div>
+      </div>
+      <div class="info-card accent-gold">
+        <div class="card-title">Full Stack (DRL + SS.CC)</div>
+        <div class="card-stat" style="color:#7a5100">$368.000</div>
+        <div class="card-stat-label">USD / año · <span class="delta-pos">+53,0%</span></div>
+        <div class="card-body">Arbitraje + Servicios Complementarios (RP, AGC, CSF) apilados.</div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Estrategia</th>
+          <th>Revenue Anual (USD)</th>
+          <th>∆ vs Humano</th>
+          <th>∆ Absoluto</th>
+          <th>Fuente de Ingreso</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Operador Humano</td>
+          <td><strong>$240.500</strong></td>
+          <td>—</td>
+          <td>—</td>
+          <td>Arbitraje manual</td>
+        </tr>
+        <tr>
+          <td>BESSAI DRL (PPO)</td>
+          <td><strong>$321.000</strong></td>
+          <td><span class="delta-pos">+33,5%</span></td>
+          <td><span class="delta-pos">+$80.500</span></td>
+          <td>Arbitraje IA</td>
+        </tr>
+        <tr class="row-highlight">
+          <td>Arbitraje + SS.CC Full Stack</td>
+          <td><strong>$368.000</strong></td>
+          <td><span class="delta-pos">+53,0%</span></td>
+          <td><span class="delta-pos">+$127.500</span></td>
+          <td>Arbitraje + RP + AGC + CSF</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout-box">
+      <strong>Metodología de backtest:</strong> 111.100 puntos históricos del CEN Chile, incorporando perfiles térmicos reales y C-rates del sistema. Certificación independiente disponible para due diligence.
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <span class="footer-left">BESS Solutions · Confidencial</span>
+    <div class="footer-right">
+      <span class="slide-number">03 / 09</span>
+      <div class="footer-bar"><div class="footer-progress" style="width:33%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     DIAPOSITIVA 4 — ARQUITECTURA DRL+MILP
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-4">
+  <div class="slide-header">
+    <div class="header-accent"></div>
+    <div class="header-content">
+      <div class="header-left">
+        <span class="slide-tag">Arquitectura de Decisión · Control en Tiempo Real</span>
+        <span class="slide-title">DRL + MILP + SafetyGuard</span>
+      </div>
+      <div class="header-logo">
+        <span class="logo-badge">BESSAI</span>
+        <span class="logo-version">v2.16.0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-body">
+    <div class="two-col">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="section-label">Flujo de control sub-segundo</div>
+        <div class="arch-diagram">
+          <div class="arch-layer">
+            <span class="arch-layer-label">Entrada</span>
+            <div class="arch-nodes">
+              <span class="arch-node">SOC / Temp</span>
+              <span class="arch-node">CMg en tiempo real</span>
+              <span class="arch-node">Frecuencia red</span>
+            </div>
+          </div>
+          <div class="arch-connector">↓</div>
+          <div class="arch-layer">
+            <span class="arch-layer-label">Inferencia</span>
+            <div class="arch-nodes">
+              <span class="arch-node blue">Agente DRL · PPO</span>
+              <span class="arch-node" style="font-size:10px">ONNX &lt;0,1 ms</span>
+            </div>
+          </div>
+          <div class="arch-connector">↓</div>
+          <div class="arch-layer">
+            <span class="arch-layer-label">Validación</span>
+            <div class="arch-nodes">
+              <span class="arch-node accent">SafetyGuard IEC-62443</span>
+              <span class="arch-node">MILP Fallback</span>
+            </div>
+          </div>
+          <div class="arch-connector">↓</div>
+          <div class="arch-layer">
+            <span class="arch-layer-label">Actuación</span>
+            <div class="arch-nodes">
+              <span class="arch-node gold">Modbus TCP → HW</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="section-label">Parámetros de veto activo (zero hardware risk)</div>
+        <div class="bullet-list">
+          <div class="bullet-item">
+            <div class="bullet-dot" style="background:var(--cen-gold)"></div>
+            <span class="bullet-text"><strong>SOC &lt; 10%</strong> → Bloqueo extremo de descarga activado.</span>
+          </div>
+          <div class="bullet-item">
+            <div class="bullet-dot" style="background:var(--cen-gold)"></div>
+            <span class="bullet-text"><strong>SOC &gt; 95%</strong> → Bloqueo extremo de carga activado.</span>
+          </div>
+          <div class="bullet-item">
+            <div class="bullet-dot" style="background:var(--cen-gold)"></div>
+            <span class="bullet-text"><strong>∆frec &gt; 0,5 Hz/s</strong> → Modo seguro forzado inmediato.</span>
+          </div>
+          <div class="bullet-item">
+            <div class="bullet-dot" style="background:var(--cen-gold)"></div>
+            <span class="bullet-text"><strong>Temp &gt; 45°C</strong> → Override térmico de emergencia.</span>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="section-label">Sinergia DRL ↔ MILP</div>
+        <div class="info-card accent-blue" style="gap:6px;">
+          <div class="card-body">
+            El <strong>DRL (PPO)</strong> lidera las decisiones financieras el 99% del tiempo con inferencia local &lt;0,1ms. El <strong>MILP determinístico</strong> actúa como fallback matemático garantizado ante cualquier anomalía operacional.
+          </div>
+        </div>
+        <div class="info-card accent-green" style="gap:6px;">
+          <div class="card-body">
+            <strong>Ninguna decisión algorítmica financiera se inyecta al hardware</strong> si falla el chequeo transaccional de SafetyGuard. No existe lógica de negocio sin telemetría curada.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <span class="footer-left">BESS Solutions · Confidencial</span>
+    <div class="footer-right">
+      <span class="slide-number">04 / 09</span>
+      <div class="footer-bar"><div class="footer-progress" style="width:44%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     DIAPOSITIVA 5 — REVENUE STACKING
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-5">
+  <div class="slide-header">
+    <div class="header-accent"></div>
+    <div class="header-content">
+      <div class="header-left">
+        <span class="slide-tag">Monetización · Ancillary Services Stack Engine v1.0</span>
+        <span class="slide-title">Revenue Stacking y Servicios Complementarios</span>
+      </div>
+      <div class="header-logo">
+        <span class="logo-badge">BESSAI</span>
+        <span class="logo-version">v2.16.0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-body">
+    <div class="three-col">
+      <div class="info-card accent-blue">
+        <div class="card-title">CapacityAllocator</div>
+        <div class="card-body">Calcula con precisión de HW los MW no comprometidos por el bot DRL de arbitraje e inyecta esas bandas marginales al control de red local.</div>
+      </div>
+      <div class="info-card accent-gold">
+        <div class="card-title">Mercados Simultáneos</div>
+        <div class="card-body">Califica el BESS para <strong>AGC</strong>, <strong>Reserva Primaria (RP)</strong> y <strong>Capacidad de Suficiencia (CSF)</strong>, obteniendo primas adicionales por disponibilidad rotante.</div>
+      </div>
+      <div class="info-card accent-green">
+        <div class="card-title">Priorización Inteligente</div>
+        <div class="card-body">El algoritmo intercepta el SOC real (descartando rangos &lt;20%) y selecciona automáticamente el portafolio combinatorio más rentable por hora.</div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div class="section-label">Estructura de primas por servicio complementario</div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Servicio</th>
+          <th>Sigla</th>
+          <th>Prima (USD/MW·h)</th>
+          <th>Mecanismo</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Control Automático de Generación</td>
+          <td><strong>AGC</strong></td>
+          <td>$2,4 – $3,0</td>
+          <td>Disponibilidad rotante</td>
+          <td><span class="tag tag-green">Activo</span></td>
+        </tr>
+        <tr>
+          <td>Reserva Primaria</td>
+          <td><strong>RP</strong></td>
+          <td>$3,0 – $4,2</td>
+          <td>Capacidad residual DRL</td>
+          <td><span class="tag tag-green">Activo</span></td>
+        </tr>
+        <tr class="row-highlight">
+          <td>Capacidad de Suficiencia</td>
+          <td><strong>CSF</strong></td>
+          <td>$4,2 – $5,2</td>
+          <td>Disponibilidad declarada</td>
+          <td><span class="tag tag-blue">En piloto</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout-box">
+      Ejemplo operacional: Mientras el BESS espera para descargar en hora punta, su capacidad ociosa se vende como Reserva Primaria (RP), generando ingresos adicionales sin afectar la estrategia de arbitraje principal.
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <span class="footer-left">BESS Solutions · Confidencial</span>
+    <div class="footer-right">
+      <span class="slide-number">05 / 09</span>
+      <div class="footer-bar"><div class="footer-progress" style="width:55%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     DIAPOSITIVA 6 — ARQUITECTURA ECOSISTEMA
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-6">
+  <div class="slide-header">
+    <div class="header-accent"></div>
+    <div class="header-content">
+      <div class="header-left">
+        <span class="slide-tag">Plataforma Tecnológica · Ecosistema Multi-Capa</span>
+        <span class="slide-title">Arquitectura Edge-Cloud y Capa Comercial</span>
+      </div>
+      <div class="header-logo">
+        <span class="logo-badge">BESSAI</span>
+        <span class="logo-version">v2.16.0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-body">
+    <div class="two-col">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="section-label">Stack tecnológico por capa</div>
+        <div class="arch-diagram">
+          <div class="arch-layer" style="border-left:3px solid var(--cen-gold)">
+            <span class="arch-layer-label" style="font-size:9px;">Capa Comercial SaaS</span>
+            <div class="arch-nodes">
+              <span class="arch-node gold" style="font-size:10px">bessai-web.app</span>
+              <span class="arch-node gold" style="font-size:10px">Dashboard ROI</span>
+            </div>
+          </div>
+          <div class="arch-connector">↕</div>
+          <div class="arch-layer" style="border-left:3px solid var(--cen-accent)">
+            <span class="arch-layer-label" style="font-size:9px;">Capa Cloud</span>
+            <div class="arch-nodes">
+              <span class="arch-node accent" style="font-size:10px">GCP / BigQuery</span>
+              <span class="arch-node accent" style="font-size:10px">VPP Fleet · FL</span>
+            </div>
+          </div>
+          <div class="arch-connector">↕</div>
+          <div class="arch-layer" style="border-left:3px solid var(--cen-blue)">
+            <span class="arch-layer-label" style="font-size:9px;">Edge Industrial</span>
+            <div class="arch-nodes">
+              <span class="arch-node blue" style="font-size:10px">Agente DRL (ONNX)</span>
+              <span class="arch-node blue" style="font-size:10px">SafetyGuard</span>
+              <span class="arch-node blue" style="font-size:10px">Modbus TCP</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="section-label">BESS Solutions vs BESSAI SaaS</div>
+        <div class="info-card accent-blue">
+          <div class="card-title">BESS Solutions (Operador OT)</div>
+          <div class="bullet-list" style="gap:6px;">
+            <div class="bullet-item"><div class="bullet-dot"></div><span class="bullet-text" style="font-size:11px;">Ingeniería extrema de terreno sin vendor lock-in</span></div>
+            <div class="bullet-item"><div class="bullet-dot"></div><span class="bullet-text" style="font-size:11px;">Integración OT/IT edge-first; cloud solo para FL asíncrono</span></div>
+            <div class="bullet-item"><div class="bullet-dot"></div><span class="bullet-text" style="font-size:11px;">Certificaciones IEC 62443 · NTSyCS Chile</span></div>
+          </div>
+        </div>
+        <div class="info-card accent-gold">
+          <div class="card-title">BESSAI (SaaS Dashboard)</div>
+          <div class="bullet-list" style="gap:6px;">
+            <div class="bullet-item"><div class="bullet-dot" style="background:var(--cen-gold)"></div><span class="bullet-text" style="font-size:11px;">Simulador financiero interactivo en tiempo real</span></div>
+            <div class="bullet-item"><div class="bullet-dot" style="background:var(--cen-gold)"></div><span class="bullet-text" style="font-size:11px;">Maximización de ROI para inversores B2B</span></div>
+            <div class="bullet-item"><div class="bullet-dot" style="background:var(--cen-gold)"></div><span class="bullet-text" style="font-size:11px;">Modelo Zero-Marginal Cost por GW adicional</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <span class="footer-left">BESS Solutions · Confidencial</span>
+    <div class="footer-right">
+      <span class="slide-number">06 / 09</span>
+      <div class="footer-bar"><div class="footer-progress" style="width:66%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     DIAPOSITIVA 7 — CIBERSEGURIDAD
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-7">
+  <div class="slide-header">
+    <div class="header-accent"></div>
+    <div class="header-content">
+      <div class="header-left">
+        <span class="slide-tag">Ciberseguridad Industrial · Misión Crítica</span>
+        <span class="slide-title">SafetyGuard: Zero Hardware Risk</span>
+      </div>
+      <div class="header-logo">
+        <span class="logo-badge">BESSAI</span>
+        <span class="logo-version">v2.16.0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-body">
+    <div class="three-col">
+      <div class="info-card accent-blue">
+        <div class="card-title">NTSyCS Chile</div>
+        <div class="card-body">Implementación técnica profunda para cumplir y cerrar <strong>11 GAPs</strong> de la Norma de Seguridad y Calidad del Servicio: rampas de potencia, respuesta ante frecuencia y control de tensión.</div>
+        <div><span class="tag tag-green">Cumplimiento total</span></div>
+      </div>
+      <div class="info-card accent-blue">
+        <div class="card-title">IEC 62443 SL-2</div>
+        <div class="card-body">Arquitectura de ciberseguridad industrial OT por defecto. Security readiness auditado mediante <strong>System Security Plan (SSP)</strong> interno y auditoría externa.</div>
+        <div><span class="tag tag-green">Certificado</span></div>
+      </div>
+      <div class="info-card accent-blue">
+        <div class="card-title">AI-IDS · Isolation Forest</div>
+        <div class="card-body">HIDS inteligente alojado en el OT boundary. Detecta automáticamente ciberataques operacionales o sensores defectuosos ante divergencias técnicas en Modbus.</div>
+        <div><span class="tag tag-blue">Activo en Edge</span></div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div class="two-col">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="section-label">Compatibilidad de hardware (zero vendor lock-in)</div>
+        <div class="bullet-list">
+          <div class="bullet-item">
+            <div class="bullet-dot" style="background:var(--cen-green)"></div>
+            <span class="bullet-text"><strong>Huawei SUN2000</strong> — Activo en Producción</span>
+          </div>
+          <div class="bullet-item">
+            <div class="bullet-dot" style="background:var(--cen-green)"></div>
+            <span class="bullet-text"><strong>SMA / Fronius / Victron</strong> — Hardware verificado</span>
+          </div>
+          <div class="bullet-item">
+            <div class="bullet-dot" style="background:var(--cen-green)"></div>
+            <span class="bullet-text"><strong>Tesla / BYD Fleet</strong> — CAN-Bus y REST API</span>
+          </div>
+        </div>
+      </div>
+      <div class="callout-box" style="height:fit-content;align-self:flex-start;">
+        Adquisición vía Modbus TCP con perfiles BESSAI-SPEC-001 (YAML normalizados). Mecanismo de reconexión autónoma y capa IEEE 2030.5 / SEP 2.0. Perfiles normalizados garantizan portabilidad total entre fabricantes.
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <span class="footer-left">BESS Solutions · Confidencial</span>
+    <div class="footer-right">
+      <span class="slide-number">07 / 09</span>
+      <div class="footer-bar"><div class="footer-progress" style="width:77%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     DIAPOSITIVA 8 — ROADMAP
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-8">
+  <div class="slide-header">
+    <div class="header-accent"></div>
+    <div class="header-content">
+      <div class="header-left">
+        <span class="slide-tag">Estado de Arte v2.16.0 · Roadmap de Expansión</span>
+        <span class="slide-title">Madurez Tecnológica y Escalamiento Global</span>
+      </div>
+      <div class="header-logo">
+        <span class="logo-badge">BESSAI</span>
+        <span class="logo-version">v2.16.0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-body">
+    <div class="two-col">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="section-label">Métricas de calidad de software</div>
+        <div class="three-col" style="gap:10px;">
+          <div class="info-card" style="text-align:center;padding:12px 8px;">
+            <div class="card-stat" style="font-size:22px;">799</div>
+            <div class="card-stat-label">Tests unitarios e integración</div>
+          </div>
+          <div class="info-card" style="text-align:center;padding:12px 8px;">
+            <div class="card-stat" style="font-size:22px;">22</div>
+            <div class="card-stat-label">Series de tiempo Prometheus</div>
+          </div>
+          <div class="info-card" style="text-align:center;padding:12px 8px;">
+            <div class="card-stat" style="font-size:22px;">CI/CD</div>
+            <div class="card-stat-label">Pipeline OpenSSF Scorecard</div>
+          </div>
+        </div>
+
+        <div class="section-label">Observabilidad</div>
+        <div class="bullet-list">
+          <div class="bullet-item">
+            <div class="bullet-dot"></div>
+            <span class="bullet-text"><strong>OpenTelemetry nativo</strong> → Prometheus (22 series) → Grafana</span>
+          </div>
+          <div class="bullet-item">
+            <div class="bullet-dot"></div>
+            <span class="bullet-text"><strong>Integración asíncrona</strong> Pub/Sub: MQTT y Google Cloud (GCP)</span>
+          </div>
+          <div class="bullet-item">
+            <div class="bullet-dot"></div>
+            <span class="bullet-text"><strong>Cadena de suministro</strong> certificada y auditada con OpenSSF Scorecard</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="section-label">Roadmap de mercados y expansión</div>
+        <div class="bullet-list">
+          <div class="bullet-item">
+            <div class="bullet-dot" style="background:var(--cen-green)"></div>
+            <span class="bullet-text"><strong>VPP Multi-Sitio (BEP-0500):</strong> Virtual Power Plant activado para gestionar enjambres de docenas de BESS en paralelo.</span>
+          </div>
+          <div class="bullet-item">
+            <div class="bullet-dot" style="background:var(--cen-gold)"></div>
+            <span class="bullet-text"><strong>CAISO (California):</strong> Adaptador comercial nativo programado y en integración.</span>
+          </div>
+          <div class="bullet-item">
+            <div class="bullet-dot" style="background:var(--cen-gold)"></div>
+            <span class="bullet-text"><strong>ERCOT (Texas):</strong> Adaptador comercial nativo en desarrollo avanzado.</span>
+          </div>
+          <div class="bullet-item">
+            <div class="bullet-dot" style="background:var(--cen-gold)"></div>
+            <span class="bullet-text"><strong>ENTSO-E (Europa):</strong> Integración nativa programada · Pilotos Q4 2025.</span>
+          </div>
+        </div>
+
+        <div class="info-card accent-green">
+          <div class="card-title">Federated Learning · Privacidad</div>
+          <div class="card-body">Arquitectura FedAvg puramente basada en gradientes cifrados. Sin fuga cruzada de datos confidenciales OPEX entre plantas de distintos operadores.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <span class="footer-left">BESS Solutions · Confidencial</span>
+    <div class="footer-right">
+      <span class="slide-number">08 / 09</span>
+      <div class="footer-bar"><div class="footer-progress" style="width:88%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     DIAPOSITIVA 9 — DUE DILIGENCE
+═══════════════════════════════════════════ -->
+<div class="slide" id="slide-9">
+  <div class="slide-header">
+    <div class="header-accent"></div>
+    <div class="header-content">
+      <div class="header-left">
+        <span class="slide-tag">Resumen Ejecutivo · Due Diligence</span>
+        <span class="slide-title">Preguntas Clave para Inversores</span>
+      </div>
+      <div class="header-logo">
+        <span class="logo-badge">BESSAI</span>
+        <span class="logo-version">v2.16.0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-body">
+    <div class="two-col" style="flex:none;">
+      <div class="info-card accent-blue">
+        <div class="card-title">Validación financiera</div>
+        <div class="bullet-list" style="gap:6px;">
+          <div class="bullet-item"><div class="bullet-dot"></div><span class="bullet-text" style="font-size:12px;">+33,5% Alpha = <strong>+USD 80K/año</strong> extra sobre BESS 5 MWh</span></div>
+          <div class="bullet-item"><div class="bullet-dot"></div><span class="bullet-text" style="font-size:12px;">Backtest certificado con perfiles térmicos y C-rates reales</span></div>
+          <div class="bullet-item"><div class="bullet-dot"></div><span class="bullet-text" style="font-size:12px;">Auditado sobre 111.100 puntos históricos del CEN Chile</span></div>
+        </div>
+      </div>
+      <div class="info-card accent-blue">
+        <div class="card-title">Tecnología DRL vs MILP</div>
+        <div class="bullet-list" style="gap:6px;">
+          <div class="bullet-item"><div class="bullet-dot"></div><span class="bullet-text" style="font-size:12px;">DRL (PPO) lidera en oportunidad táctica estocástica (&lt;0,1 ms)</span></div>
+          <div class="bullet-item"><div class="bullet-dot"></div><span class="bullet-text" style="font-size:12px;">MILP actúa como fallback determinístico garantizado ante anomalías</span></div>
+          <div class="bullet-item"><div class="bullet-dot"></div><span class="bullet-text" style="font-size:12px;">Sinergia complementaria, no redundante</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="two-col" style="flex:none;">
+      <div class="info-card accent-gold">
+        <div class="card-title">Privacidad · Federated Learning</div>
+        <div class="bullet-list" style="gap:6px;">
+          <div class="bullet-item"><div class="bullet-dot" style="background:var(--cen-gold)"></div><span class="bullet-text" style="font-size:12px;">FedAvg con gradientes cifrados end-to-end</span></div>
+          <div class="bullet-item"><div class="bullet-dot" style="background:var(--cen-gold)"></div><span class="bullet-text" style="font-size:12px;">Sin fuga cruzada de datos OPEX entre plantas de operadores</span></div>
+        </div>
+      </div>
+      <div class="info-card accent-green">
+        <div class="card-title">Modelo de Negocios SaaS</div>
+        <div class="bullet-list" style="gap:6px;">
+          <div class="bullet-item"><div class="bullet-dot" style="background:var(--cen-green)"></div><span class="bullet-text" style="font-size:12px;"><strong>Performance Fee</strong> indexado al % delta sobre operador humano</span></div>
+          <div class="bullet-item"><div class="bullet-dot" style="background:var(--cen-green)"></div><span class="bullet-text" style="font-size:12px;"><strong>Zero marginal cost</strong> por cada GW adicional activado en sistema</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout-box" style="margin-top:4px;">
+      <strong>Expansión internacional confirmada:</strong> Adaptadores extractivos de feeds para CAISO, ERCOT y ENTSO-E en desarrollo base, apuntando a escalamiento internacional con pilotos en Q4 2025.
+    </div>
+
+    <div style="display:flex;gap:16px;align-items:center;justify-content:center;padding:8px 0;flex-wrap:wrap;">
+      <span style="font-size:11px;color:var(--cen-gray);">bess-solutions.cl</span>
+      <span style="color:var(--cen-border);">·</span>
+      <span style="font-size:11px;color:var(--cen-gray);">bessai-web.app</span>
+      <span style="color:var(--cen-border);">·</span>
+      <span style="font-size:11px;color:var(--cen-gray);">open-bess-edge @ GitHub</span>
+      <span style="color:var(--cen-border);">·</span>
+      <span style="font-size:11px;color:var(--cen-gray);">© 2025–2028 BESS Solutions</span>
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <span class="footer-left">BESS Solutions · Confidencial</span>
+    <div class="footer-right">
+      <span class="slide-number">09 / 09</span>
+      <div class="footer-bar"><div class="footer-progress" style="width:100%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── NAVIGATION ── -->
+<div class="nav-buttons">
+  <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" disabled>← Anterior</button>
+  <span class="slide-counter" id="slideCounter">1 / 9</span>
+  <button class="nav-btn primary" id="nextBtn" onclick="changeSlide(1)">Siguiente →</button>
+</div>
+
+</div>
+
+<script>
+const TOTAL = 9;
+let current = 1;
+const titles = ['Portada','Problema','Resultados','Arquitectura DRL','Revenue Stacking','Ecosistema','Seguridad','Roadmap','Due Diligence'];
+
+function buildNav() {
+  const nb = document.getElementById('navBar');
+  titles.forEach((t, i) => {
+    const d = document.createElement('div');
+    d.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    d.title = t;
+    d.onclick = () => goTo(i + 1);
+    nb.appendChild(d);
+    const span = document.createElement('span');
+    span.className = 'nav-label';
+    span.style.cssText = 'margin-right:8px;cursor:pointer;';
+    span.textContent = t;
+    span.onclick = () => goTo(i + 1);
+    nb.appendChild(span);
+  });
+}
+
+function goTo(n) {
+  document.getElementById('slide-' + current).classList.remove('active');
+  document.querySelectorAll('.nav-dot')[current - 1].classList.remove('active');
+  current = n;
+  document.getElementById('slide-' + current).classList.add('active');
+  document.querySelectorAll('.nav-dot')[current - 1].classList.add('active');
+  document.getElementById('prevBtn').disabled = current === 1;
+  document.getElementById('nextBtn').disabled = current === TOTAL;
+  document.getElementById('slideCounter').textContent = current + ' / ' + TOTAL;
+}
+
+function changeSlide(dir) {
+  const next = current + dir;
+  if (next >= 1 && next <= TOTAL) goTo(next);
+}
+
+buildNav();
+</script>

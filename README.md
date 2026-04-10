@@ -288,7 +288,7 @@ BESSAI autonomously improves its arbitrage policy every week using an evolutiona
 
 ```
 Every Monday 00:00 UTC:
-  1. Fetch **39 months / 111,100 datapoints** of real CMg price data (4 SEN nodes — CEN Chile API + DuckDB)
+  1. Fetch 30 days of real CMg price data (CEN Chile API)
   2. Generate 10 policy candidates (Gaussian mutation)
   3. Evaluate each in a 8,640-step sandbox (30 days × 288 timesteps)
   4. Select parents via tournament → produce next generation

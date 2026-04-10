@@ -1,0 +1,418 @@
+\documentclass[10pt,aspectratio=169]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{lmodern}
+\renewcommand{\familydefault}{\sfdefault}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, babel}
+
+% ── COLOR PALETTE ──────────────────────────────────────────────
+\definecolor{bgdark}{HTML}{0a0f18}
+\definecolor{bgcard}{HTML}{111827}
+\definecolor{accentorange}{HTML}{f59e0b}
+\definecolor{textlight}{HTML}{f3f4f6}
+\definecolor{textmuted}{HTML}{94a3b8}
+\definecolor{greenok}{HTML}{22c55e}
+\definecolor{redfail}{HTML}{ef4444}
+
+% ── BEAMER THEME ───────────────────────────────────────────────
+\setbeamercolor{background canvas}{bg=bgdark}
+\setbeamercolor{normal text}{fg=textlight}
+\setbeamercolor{frametitle}{fg=accentorange, bg=bgdark}
+\setbeamercolor{title}{fg=accentorange}
+\setbeamercolor{itemize item}{fg=accentorange}
+\setbeamercolor{itemize subitem}{fg=textmuted}
+\setbeamercolor{block title}{bg=bgcard, fg=accentorange}
+\setbeamercolor{block body}{bg=bgcard, fg=textlight}
+\setbeamercolor{footline}{fg=textmuted, bg=bgcard}
+\setbeamerfont{frametitle}{series=\bfseries, size=\Large}
+\setbeamerfont{title}{series=\bfseries, size=\huge}
+
+% Consistent bullet spacing
+\let\tempone\itemize
+\let\temptwo\enditemize
+\renewenvironment{itemize}{\tempone\addtolength{\itemsep}{0.3em}}{\temptwo}
+
+% ── FOOTER ─────────────────────────────────────────────────────
+\setbeamertemplate{footline}{
+  \leavevmode
+  \hbox{
+  \begin{beamercolorbox}[wd=.6\paperwidth,ht=3ex,dp=1.5ex,left,leftskip=2ex]{footline}
+    \scriptsize \copyright~2025 BESS Solutions $\cdot$ open-bess-edge
+  \end{beamercolorbox}
+  \begin{beamercolorbox}[wd=.4\paperwidth,ht=3ex,dp=1.5ex,right,rightskip=2ex]{footline}
+    \scriptsize \insertframenumber{} / \inserttotalframenumber \hspace*{2ex}
+  \end{beamercolorbox}}
+  \vskip0pt
+}
+\setbeamertemplate{navigation symbols}{}
+
+% ── TITLE ──────────────────────────────────────────────────────
+\title{An\'alisis Integral: BESSAI Edge Gateway}
+\subtitle{Evaluaci\'on t\'ecnica, arbitraje con IA y modelo operacional}
+\author{BESS Solutions}
+\date{Versi\'on v2.16.0 $\cdot$ 2025}
+
+\begin{document}
+
+% ═══════════════════════════════════════════════════════════════
+% SLIDE 1 — PORTADA
+% ═══════════════════════════════════════════════════════════════
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ═══════════════════════════════════════════════════════════════
+% SLIDE 2 — EL PROBLEMA
+% ═══════════════════════════════════════════════════════════════
+\begin{frame}{El Problema: Curtailment Masivo Solar en el SEN}
+  \begin{itemize}
+    \item \textbf{El origen:} En el norte de Chile, el vertimiento masivo de energ\'ia solar provoca que el costo marginal (CMg) marque \$0 CLP/kWh hasta el 40\% de las horas.
+    \item \textbf{Costo de oportunidad:} Los BESS sin Inteligencia Artificial desaprovechan estos valles, dejando enormes ingresos sin capturar (+33.5\% perdido).
+    \item \textbf{La soluci\'on BESSAI:} Agentes inteligentes \textit{edge-first} que deciden cu\'ando cargar gratuitamente (\$0) y cu\'ando descargar en punta, maximizando ingresos autom\'aticamente.
+  \end{itemize}
+\end{frame}
+
+% ═══════════════════════════════════════════════════════════════
+% SLIDE 3 — VALIDACIÓN FINANCIERA
+% ═══════════════════════════════════════════════════════════════
+\begin{frame}{Validaci\'on Financiera: Benchmark Nodo Maitencillo (5 MWh)}
+  \begin{columns}[T]
+    \begin{column}{0.55\textwidth}
+      \begin{table}
+        \centering
+        \renewcommand{\arraystretch}{1.5}
+        \resizebox{\textwidth}{!}{
+        \begin{tabular}{lcc}
+          \toprule
+          \textbf{Estrategia} & \textbf{Revenue Anual (USD)} & \textbf{$\Delta$ vs Humano} \\
+          \midrule
+          Operador Humano & \$240\,500 & -- \\
+          BESSAI DRL (PPO) & \$321\,000 & \textbf{\textcolor{accentorange}{+33.5\%}} \\
+          Arbitraje + SS.CC & \textbf{\textcolor{greenok}{\$368\,000}} & \textbf{\textcolor{greenok}{+53.0\%}} \\
+          \bottomrule
+        \end{tabular}}
+      \end{table}
+      \vspace{0.15cm}
+      \scriptsize \color{textmuted}* Backtest certificado: 111.100 puntos hist\'oricos (CEN Chile).
+    \end{column}
+    \begin{column}{0.45\textwidth}
+      \centering
+      \begin{tikzpicture}[scale=0.75, transform shape, font=\sffamily]
+        \draw[thick, color=textmuted, ->] (0,0) -- (0,4.5) node[above, color=textlight] {\tiny USD/a\~no};
+        \draw[thick, color=textmuted] (0,0) -- (6.2,0);
+        % Bar 1 — Humano
+        \fill[bgcard, draw=textmuted, thick] (0.4,0) rectangle (1.6, 2.40);
+        \node[above, color=textlight, font=\tiny] at (1.0,2.40) {\$240k};
+        \node[below, color=textmuted, font=\tiny] at (1.0,0) {Humano};
+        % Bar 2 — DRL
+        \fill[accentorange!80, draw=accentorange, thick] (2.2,0) rectangle (3.4, 3.21);
+        \node[above, color=textlight, font=\tiny] at (2.8,3.21) {\$321k};
+        \node[below, color=textmuted, font=\tiny] at (2.8,0) {BESSAI DRL};
+        % Bar 3 — Full Stack
+        \fill[greenok!70, draw=greenok, thick] (4.0,0) rectangle (5.2, 3.68);
+        \node[above, color=textlight, font=\tiny] at (4.6,3.68) {\$368k};
+        \node[below, color=textmuted, font=\tiny] at (4.6,0) {Full Stack};
+        % Baseline dashed
+        \draw[dashed, color=textmuted, thin] (0, 2.40) -- (5.6, 2.40);
+        \node[right, color=textmuted, font=\tiny] at (5.6, 2.40) {base};
+      \end{tikzpicture}
+    \end{column}
+  \end{columns}
+  \medskip
+  \centering \scriptsize \textit{Ejemplo: La capacidad ociosa entre despachos se vende como Reserva Primaria (RP), generando ingresos adicionales sin afectar la estrategia principal.}
+\end{frame}
+
+% ═══════════════════════════════════════════════════════════════
+% SLIDE 4 — CAPA COMERCIAL
+% ═══════════════════════════════════════════════════════════════
+\begin{frame}{Capa Comercial y Operacional}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{BESS Solutions (Operador OT)}
+        \begin{itemize}\footnotesize
+          \item Ingenier\'ia de terreno en misiones cr\'iticas.
+          \item Integraci\'on OT/IT sin vendor lock-in.
+          \item Certificaci\'on IEC 62443.
+          \item Inferencia offline. Cloud solo para FL as\'incrono.
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{BESSAI (SaaS Dashboard)}
+        \begin{itemize}\footnotesize
+          \item Simulador financiero CAPEX/ROI en tiempo real.
+          \item Maximizaci\'on param\'etrica para fondos B2B.
+          \item Telemetr\'ia web para stakeholders corporativos.
+          \item Performance Fee: 15--20\% sobre delta revenue.
+        \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ═══════════════════════════════════════════════════════════════
+% SLIDE 5 — ARQUITECTURA ECOSISTEMA
+% ═══════════════════════════════════════════════════════════════
+\begin{frame}{Arquitectura y Mapa del Ecosistema}
+  \vspace{0.2cm}
+  % CLOUD LAYER
+  \begin{beamercolorbox}[wd=\textwidth, rounded=true, sep=5pt]{block title}
+    \centering\small\textbf{\textcolor{blue!50}{$\blacksquare$\enspace CAPA CLOUD / COMERCIAL}}
+  \end{beamercolorbox}
+  \begin{beamercolorbox}[wd=\textwidth, sep=5pt]{block body}
+    \centering\footnotesize
+    \texttt{bess-solutions.cl}\enspace$\cdot$\enspace
+    \texttt{bessai-web.app}\enspace$\cdot$\enspace
+    \textbf{VPP Fleet Coordinator}\enspace$\cdot$\enspace
+    \textbf{GCP / BigQuery}
+  \end{beamercolorbox}
+  \vspace{0.1cm}
+  \centering{\color{textmuted}\small$\downarrow$ Gradientes FL cifrados (FedAvg) / Telemetr\'ia agregada}
+  \vspace{0.1cm}
+  % EDGE LAYER
+  \begin{beamercolorbox}[wd=\textwidth, rounded=true, sep=5pt]{block title}
+    \centering\small\textbf{\textcolor{greenok}{$\blacksquare$\enspace CAPA EDGE INDUSTRIAL — open-bess-edge}}
+  \end{beamercolorbox}
+  \begin{beamercolorbox}[wd=\textwidth, sep=5pt]{block body}
+    \centering\footnotesize
+    \textbf{Agente DRL (ONNX)}\enspace$\rightarrow$\enspace
+    \textbf{SafetyGuard IEC-62443}\enspace$\rightarrow$\enspace
+    \textbf{MILP Fallback (24h)}\enspace$\rightarrow$\enspace
+    \textbf{Modbus TCP}
+  \end{beamercolorbox}
+  \vspace{0.1cm}
+  \centering{\color{textmuted}\small$\downarrow$ Setpoints verificados / Zero Hardware Risk}
+  \vspace{0.1cm}
+  % HARDWARE LAYER
+  \begin{beamercolorbox}[wd=\textwidth, rounded=true, sep=5pt]{block title}
+    \centering\small\textbf{\textcolor{accentorange}{$\blacksquare$\enspace CAPA HARDWARE (AGN\'OSTICO)}}
+  \end{beamercolorbox}
+  \begin{beamercolorbox}[wd=\textwidth, sep=5pt]{block body}
+    \centering\footnotesize
+    \textbf{Huawei SUN2000}\enspace$\cdot$\enspace
+    \textbf{SMA / Fronius / Victron}\enspace$\cdot$\enspace
+    \textbf{Tesla / BYD} (CAN-Bus)
+  \end{beamercolorbox}
+\end{frame}
+
+% ═══════════════════════════════════════════════════════════════
+% SLIDE 6 — ARQUITECTURA DE DECISIÓN
+% ═══════════════════════════════════════════════════════════════
+\begin{frame}{Arquitectura de Decisi\'on: DRL + MILP + SafetyGuard}
+  \begin{columns}[T]
+    \begin{column}{0.50\textwidth}
+      \textbf{\color{accentorange}Flujo de Control Sub-segundo}
+      \vspace{0.3cm}
+      \begin{center}
+      \begin{tikzpicture}[
+        node distance=0.85cm,
+        block/.style={
+          rectangle, draw=accentorange, fill=bgcard, thick,
+          rounded corners=3pt, minimum height=0.72cm, minimum width=3.0cm,
+          align=center, text=textlight, font=\footnotesize
+        },
+        guard/.style={
+          ellipse, draw=greenok, fill=bgdark, thick,
+          minimum height=0.72cm, minimum width=2.8cm,
+          align=center, text=textlight, font=\footnotesize
+        },
+        arr/.style={->, >=stealth, thick}
+      ]
+        \node[block] (drl)  {Agente DRL (PPO)\\{\tiny inferencia $<$0.1\,ms}};
+        \node[guard, below=of drl] (sg) {SafetyGuard\\{\tiny IEC-62443}};
+        \node[block, left=1.0cm of sg] (milp) {MILP Fallback\\{\tiny ventana 24\,h}};
+        \node[block, below=of sg] (hw)  {Inyecci\'on HW\\{\tiny Modbus TCP}};
+
+        \draw[arr, color=accentorange] (drl) -- (sg);
+        \draw[arr, color=greenok]      (sg)  -- node[right, font=\tiny, color=greenok]{OK} (hw);
+        \draw[arr, color=redfail]      (sg)  -- node[above, font=\tiny, color=redfail]{Fallo} (milp);
+        \draw[arr, color=textmuted]    (milp) |- (hw);
+      \end{tikzpicture}
+      \end{center}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{\color{accentorange}Veto Activo (Zero Hardware Risk)}
+      \begin{itemize}
+        \item \textbf{SOC $<$ 10\%} $\rightarrow$ bloqueo de descarga.
+        \item \textbf{SOC $>$ 95\%} $\rightarrow$ bloqueo de carga.
+        \item \textbf{$\Delta$frec $>$ 0.5\,Hz/s} $\rightarrow$ modo seguro.
+        \item \textbf{Temp.\,$>$\,45\textdegree C} $\rightarrow$ override t\'ermico.
+      \end{itemize}
+      \vspace{0.4cm}
+      \begin{block}{Sinergia Perfecta}
+        \footnotesize DRL maximiza revenue el 99\% del tiempo. Ante anomal\'ia, \textbf{MILP} act\'ua como salvavidas matem\'atico garantizado.
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ═══════════════════════════════════════════════════════════════
+% SLIDE 7 — REVENUE STACKING
+% ═══════════════════════════════════════════════════════════════
+\begin{frame}{Revenue Stacking \& Servicios Complementarios}
+  \begin{block}{Ancillary Services Stack Engine v1.0}
+    M\'as all\'a del arbitraje, BESSAI monetiza la capacidad residual del BESS participando simult\'aneamente en mercados auxiliares (SS.CC.).
+  \end{block}
+  \begin{itemize}
+    \item \textbf{CapacityAllocator:} Calcula los MW no comprometidos por el DRL e inyecta esas bandas al control de red local.
+    \item \textbf{Mercados simult\'aneos:} AGC, Reserva Primaria (RP) y Capacidad de Suficiencia (CSF) --- primas de \$2.4--\$5.2 USD/MWh por simple disponibilidad.
+    \item \textbf{Priorizaci\'on inteligente:} Filtra por SOC real y selecciona el portafolio combinatorio m\'as rentable por hora.
+  \end{itemize}
+\end{frame}
+
+% ═══════════════════════════════════════════════════════════════
+% SLIDE 8 — HARDWARE AGNOSTIC
+% ═══════════════════════════════════════════════════════════════
+\begin{frame}{Edge Industrial y Abstracci\'on de Hardware}
+  \begin{block}{Conectividad Hardware Agn\'ostica (BESSAI-SPEC-001)}
+    Adquisici\'on v\'ia Modbus TCP con perfiles YAML normalizados. Reconexion aut\'onoma y capa IEEE 2030.5 / SEP 2.0.
+  \end{block}
+  \vspace{0.4cm}
+  \begin{columns}[t]
+    \begin{column}{0.31\textwidth}
+      \textbf{\color{accentorange}Huawei SUN2000} \\
+      $\checkmark$ Activo en producci\'on.
+    \end{column}
+    \begin{column}{0.31\textwidth}
+      \textbf{\color{accentorange}SMA / Fronius / Victron} \\
+      $\checkmark$ Hardware verificado.
+    \end{column}
+    \begin{column}{0.31\textwidth}
+      \textbf{\color{accentorange}Tesla / BYD Fleet} \\
+      $\checkmark$ CAN-Bus \& REST API.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ═══════════════════════════════════════════════════════════════
+% SLIDE 9 — SAFETYGUARD & CIBERSEGURIDAD
+% ═══════════════════════════════════════════════════════════════
+\begin{frame}{SafetyGuard: Misi\'on Cr\'itica \& Ciberseguridad}
+  \begin{block}{Zero Hardware Risk}
+    Nunca se inyecta la decisi\'on al hardware si falla el chequeo transaccional. \textbf{No hay l\'ogica de negocio sin telemetr\'ia curada.}
+  \end{block}
+  \begin{itemize}
+    \item \textbf{Cumplimiento NTSyCS (Chile):} 11 GAPs cerrados --- rampas, respuesta de frecuencia, contingencias.
+    \item \textbf{IEC 62443 SL-2:} Arquitectura de ciberseguridad OT auditada mediante SSP interno.
+    \item \textbf{AI-IDS (Isolation Forest):} Detecta ataques o sensores defectuosos por divergencia en Modbus.
+  \end{itemize}
+\end{frame}
+
+% ═══════════════════════════════════════════════════════════════
+% SLIDE 10 — ESTADO DE ARTE & ROADMAP
+% ═══════════════════════════════════════════════════════════════
+\begin{frame}{Estado de Arte v2.16.0 y Roadmap}
+  \vspace{0.4cm}
+  \begin{columns}[T]
+    \begin{column}{0.31\textwidth}
+      \centering
+      \textbf{\textcolor{greenok}{Testing e Integridad}}\\
+      \vspace{0.2cm}
+      \begin{itemize}\footnotesize
+        \item 799 tests unitarios activos.
+        \item Pipeline CI/CD s\'olido.
+        \item OpenSSF Scorecard.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.31\textwidth}
+      \centering
+      \textbf{\textcolor{accentorange}{Observabilidad}}\\
+      \vspace{0.2cm}
+      \begin{itemize}\footnotesize
+        \item OpenTelemetry nativo.
+        \item Prometheus \& Grafana.
+        \item MQTT y GCP integrados.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.31\textwidth}
+      \centering
+      \textbf{\textcolor{blue!50}{Expansi\'on Internacional}}\\
+      \vspace{0.2cm}
+      \begin{itemize}\footnotesize
+        \item Adaptadores CAISO/ERCOT.
+        \item Feeds Day-Ahead LMP.
+        \item Pilotos Q4 2025 --- beta H1 2026.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  \vspace{0.8cm}
+  \begin{center}
+    \color{textmuted}\footnotesize El sistema est\'a validado con datos hist\'oricos reales. Listo para despliegue operacional en nuevos sitios.
+  \end{center}
+\end{frame}
+
+% ═══════════════════════════════════════════════════════════════
+% SLIDE 11 — DUE DILIGENCE FAQ
+% ═══════════════════════════════════════════════════════════════
+\begin{frame}{Due Diligence: Preguntas Clave}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{\color{accentorange}Validaci\'on Financiera}
+      \begin{itemize}
+        \item $+33.5\%$ Alpha ($+$\$80K USD/a\~no) sobre BESS 5 MWh.
+        \item Backtest con perfiles t\'ermicos y C-rates reales.
+      \end{itemize}
+      \vspace{0.2cm}
+      \textbf{\color{accentorange}DRL vs MILP}
+      \begin{itemize}
+        \item DRL (PPO): decisi\'on t\'actica est\'ocastica ($<$0.1 ms).
+        \item MILP: \textit{fallback determin\'istico} garantizado.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{\color{accentorange}Federated Learning}
+      \begin{itemize}
+        \item Arquitectura FedAvg con gradientes cifrados.
+        \item Cero fuga de datos OPEX entre plantas.
+      \end{itemize}
+      \vspace{0.2cm}
+      \textbf{\color{accentorange}Modelo de Negocios (SaaS)}
+      \begin{itemize}
+        \item Performance Fee 15--20\% sobre delta revenue.
+        \item Zero marginal cost por sitio adicional.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  \vspace{0.5cm}
+  \centering\tiny\textcolor{textmuted}{* Adaptadores CAISO, ERCOT y ENTSO-E en desarrollo. Pilotos Q4 2025 --- Beta ampliada H1 2026.}
+\end{frame}
+
+% ═══════════════════════════════════════════════════════════════
+% SLIDE 12 — CTA & CONTACTO
+% ═══════════════════════════════════════════════════════════════
+\begin{frame}{\color{accentorange}Pr\'oximos Pasos --- \'Unete al Ecosistema BESSAI}
+  \vspace{0.2cm}
+  \begin{columns}[T]
+    \begin{column}{0.55\textwidth}
+      \textbf{\color{textlight}\textquestiondown Qu\'e ofrecemos al inversor?}
+      \begin{itemize}
+        \item Demo t\'ecnica en vivo en \textbf{48 horas} --- BESS real, datos reales.
+        \item \textbf{Performance Fee 15--20\%} sobre el delta de revenue vs.\ operador humano.
+        \item Escalamiento sin CAPEX adicional: cada nuevo sitio multiplica el valor del modelo.
+        \item Acceso prioritario al programa VPP \textbf{Chile + California}.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \begin{block}{Contacto}
+        \vspace{0.15cm}
+        \textbf{\color{accentorange}BESS Solutions}\\[0.2cm]
+        \footnotesize
+        \textbf{Email:}\\
+        \texttt{contacto@bess-solutions.cl}\\[0.25cm]
+        \textbf{Repositorio:}\\
+        \texttt{github.com/bess-solutions/}\\
+        \texttt{open-bess-edge}\\[0.25cm]
+        \textbf{Buscamos:}\\
+        Seed / Serie A para escalar\\ a 50 sitios en 18 meses.
+      \end{block}
+    \end{column}
+  \end{columns}
+  \vspace{0.3cm}
+  \centering\textcolor{accentorange}{\large\textbf{Disponibles para due diligence t\'ecnico inmediato.}}
+\end{frame}
+
+\end{document}

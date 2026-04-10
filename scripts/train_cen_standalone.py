@@ -58,9 +58,10 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--lr", type=float, default=3e-4, help="Learning rate")
     p.add_argument("--gamma", type=float, default=0.99, help="Discount factor")
     p.add_argument("--hidden", type=int, default=64, help="Hidden layer size")
-    p.add_argument("--batch-size", type=int, default=256, help="Minibatch size")
-    p.add_argument("--steps-per-iter", type=int, default=512,
-                   help="Steps to collect per iteration")
+    p.add_argument("--batch-size", type=int, default=1024, help="Minibatch size (Scaled up to 1024 for 15-min data)")
+    p.add_argument("--steps-per-iter", type=int, default=2048,
+                   help="Steps to collect per iteration (Scaled x4 for 15-min data)")
+    p.add_argument("--timestep-min", type=int, default=15, help="Simulation timestep in minutes")
     p.add_argument("--reports-dir", type=str, default="reports")
     p.add_argument("--all-nodes", action="store_true",
                    help="Train one model per CEN node and save each to models/")
@@ -211,7 +212,7 @@ def ppo_update(policy, optimizer, obs, actions, old_logp, returns, values,
 # ONNX Export
 # ---------------------------------------------------------------------------
 
-def export_onnx(policy, output_path: str, obs_dim: int = 12) -> None:
+def export_onnx(policy, output_path: str) -> None:
     """Export the policy actor to ONNX (obs input → action output)."""
     import onnx
     import torch
@@ -228,7 +229,7 @@ def export_onnx(policy, output_path: str, obs_dim: int = 12) -> None:
             return mean  # deterministic action = mean
 
     actor = ActorOnly(policy)
-    dummy = torch.zeros(1, obs_dim, dtype=torch.float32)
+    dummy = torch.zeros(1, 8, dtype=torch.float32)
     out = Path(output_path)
     out.parent.mkdir(parents=True, exist_ok=True)
 
@@ -242,8 +243,7 @@ def export_onnx(policy, output_path: str, obs_dim: int = 12) -> None:
         dynamic_axes={"obs": {0: "batch"}, "action": {0: "batch"}},
     )
     onnx.checker.check_model(str(out))
-    print(f"[PPO] ONNX exported: {out} (obs_dim={obs_dim})")
-
+    print(f"[PPO] ONNX exported: {out}")
 
 
 # ---------------------------------------------------------------------------
@@ -267,13 +267,10 @@ def train_node(
         node=node,
         capacity_kwh=args.capacity_kwh,
         max_power_kw=args.max_power_kw,
-        use_weather=True,  # 12-dim obs when cmg_weather_features.json is available
+        timestep_duration_min=args.timestep_min,
     )
 
-    obs_dim = env.observation_space.shape[0]  # 12 with weather, 8 without
-    print(f"  obs_dim={obs_dim} ({'weather-enriched' if obs_dim == 12 else 'base'})")
-    policy = build_policy_net(obs_dim=obs_dim, act_dim=1, hidden=args.hidden).to(device)
-
+    policy = build_policy_net(obs_dim=8, act_dim=1, hidden=args.hidden).to(device)
     optimizer = torch.optim.Adam(policy.parameters(), lr=args.lr)
 
     t0 = time.monotonic()
@@ -314,13 +311,13 @@ def train_node(
         f"total={elapsed_total:.0f}s"
     )
 
-    export_onnx(policy, output_path, obs_dim=obs_dim)
+    export_onnx(policy, output_path)
 
     # Quick latency check
     import torch
     import onnxruntime as ort
     sess = ort.InferenceSession(output_path)
-    dummy = np.random.rand(1, obs_dim).astype(np.float32)
+    dummy = np.random.rand(1, 8).astype(np.float32)
     latencies = []
     for _ in range(50):
         t0l = time.perf_counter()

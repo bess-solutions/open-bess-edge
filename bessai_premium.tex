@@ -1,0 +1,140 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{xcolor}
+
+\usepackage{geometry}
+\usepackage{tikz}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{tcolorbox}
+\usepackage{lmodern}
+\renewcommand{\familydefault}{\sfdefault}
+\usetikzlibrary{shapes.geometric, arrows, positioning, fit, babel}
+
+\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=3.5cm}
+
+% Colors based on BESSAI Dark Theme
+\definecolor{bgdark}{HTML}{0a0f18}
+\definecolor{bgcard}{HTML}{111827}
+\definecolor{accentorange}{HTML}{f59e0b}
+\definecolor{textlight}{HTML}{f3f4f6}
+\definecolor{textmuted}{HTML}{9ca3af}
+
+\pagecolor{bgdark}
+\color{textlight}
+
+% Links
+\hypersetup{
+    colorlinks=true,
+    linkcolor=accentorange,
+    urlcolor=accentorange,
+}
+
+% Customize Sections
+\usepackage{titlesec}
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{accentorange}}{\thesection.}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{accentorange}}{\thesubsection.}{1em}{}
+
+% Header and Footer
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{1pt}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{textmuted}\leaders\hrule height \footrulewidth\hfill}}
+\fancyfoot[L]{\color{textmuted}\scriptsize \copyright~2025-2028 BESS Solutions $\cdot$ open-bess-edge $\cdot$ Apache 2.0 $\cdot$ Privacidad}
+\fancyfoot[R]{\color{textmuted}\scriptsize GitHub $\cdot$ Discord $\cdot$ X $\cdot$ LinkedIn $\cdot$ YouTube $\cdot$ Instagram $\cdot$ Analytics}
+
+\begin{document}
+
+\begin{tcolorbox}[colback=accentorange,colframe=accentorange,arc=0mm,boxrule=0mm,top=10mm,bottom=10mm]
+\color{black}
+{\small\bfseries \texttt{>} BESSAI RESEARCH}\par\vspace{5mm}
+{\Huge\bfseries Análisis Integral: BESSAI Edge Gateway \& Ecosystem}\par\vspace{5mm}
+{\large\bfseries Evaluación técnica profunda de la arquitectura, inteligencia artificial de arbitraje y modelo de negocio CERO costo marginal para sistemas BESS.}
+\end{tcolorbox}
+
+\vspace{0.5cm}
+
+\section{Mapa del Ecosistema y Arquitectura de la Información}
+El siguiente diagrama mapea cómo interactúa el modelo de negocio en la web con el código operativo y el hardware físico de las plantas de baterías.
+
+\vspace{0.5cm}
+\begin{center}
+\begin{tikzpicture}[
+    node distance=1cm and 1cm,
+    boxcloud/.style={rectangle, rounded corners, draw=blue!50, fill=bgcard, thick, minimum width=3.5cm, minimum height=0.8cm, align=center, text=textlight, font=\footnotesize},
+    boxedge/.style={rectangle, rounded corners, draw=green!50, fill=bgcard, thick, minimum width=3.5cm, minimum height=0.8cm, align=center, text=textlight, font=\footnotesize},
+    arrow/.style={thick,->,>=stealth, draw=textmuted}
+]
+
+% Cloud Layer
+\node[boxcloud] (bs) {bess-solutions.cl\\Operador OT};
+\node[boxcloud, right=1.5cm of bs] (bw) {bessai-web.app\\SaaS Dashboard};
+\node[boxcloud, below=1.5cm of bs] (vpp) {VPP Fleet Manager};
+\node[boxcloud, right=0.5cm of vpp] (fl) {FL Coordinator};
+\node[boxcloud, right=0.5cm of fl] (gcp) {GCP / BigQuery};
+
+% Edge Layer
+\node[boxedge, below=1.5cm of vpp] (drl) {Agente DRL PPO};
+\node[boxedge, right=0.5cm of drl] (milp) {Optimizador MILP};
+\node[boxedge, below=1cm of drl, xshift=2cm] (sg) {SafetyGuard IEC-62443};
+
+% Connections
+\draw[arrow, dashed] (bs) -- (bw);
+\draw[arrow] (bw) -- (vpp);
+\draw[arrow] (vpp) -- (drl);
+\draw[arrow] (drl) -- (sg);
+\draw[arrow] (milp) -- (sg);
+\draw[arrow] (sg.east) to[out=0,in=270] (gcp.south);
+
+% Subgraphs (Fit)
+\node[draw=blue!50, dashed, fit=(bs) (bw), inner sep=0.3cm, label={[text=textlight, font=\footnotesize]above:Capa Web Estratégica}] {};
+\node[draw=blue!50, dashed, fit=(vpp) (fl) (gcp), inner sep=0.3cm, label={[text=textlight, font=\footnotesize]above:Orquestación Cloud}] {};
+\node[draw=green!50, dashed, fit=(drl) (milp) (sg), inner sep=0.3cm, label={[text=textlight, font=\footnotesize]left:Capa Edge AI}] {};
+
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.2cm}
+\begin{tcolorbox}[colback=bgcard,colframe=accentorange,arc=2mm,boxrule=1mm,leftrule=3mm]
+{\bfseries\color{accentorange} \textbullet\ FLUJO OPERACIONAL}\par
+Todo comienza en la capa comercial con la atracción de BESS interesadas en el arbitraje en nodos CEN (vertimiento en \$0). Eso desencadena la integración del hardware con el software Edge, curado por SafetyGuard industrial estricto.
+\end{tcolorbox}
+
+\section{Visión y Modelo de Negocio}
+BESSAI aspira a convertirse en el estándar operativo global para BESS. Soluciona el vertimiento masivo de energía renovable y la falta de optimización financiera.
+\begin{itemize}
+    \item \textbf{Value Proposition:} Aumentar el revenue de un BESS hasta +33.5\% maximizando el arbitraje a través de agentes inteligentes.
+    \item \textbf{BESS Solutions (Empresa):} Focalizada en ingeniería extrema, integración OT/IT en el borde prescindiendo de dependencia cloud predominante.
+    \item \textbf{BESSAI (Producto):} Enfoque en ROI, simulador financiero y modelo de negocio Zero-Marginal Cost.
+\end{itemize}
+
+\section{Capacidades de Inteligencia Artificial}
+\begin{itemize}
+    \item \textbf{Agente DRL (Deep Reinforcement Learning):} Entrenado con PPO y exportado a ONNX (2.1KB, latencia $<$0.1ms) basado en años de datos reales CMg.
+    \item \textbf{BESSAIEvolve:} Bucle de auto-mejora semanal que cruza y muta políticas en sandbox de 8,640 steps.
+    \item \textbf{Federated Learning:} Múltiples granjas BESS aprenden colaborativamente sin extraer datos privados vía FedAvg.
+    \item \textbf{Optimizador MILP:} Complemento determinístico para la planificación 24h a futuro.
+\end{itemize}
+
+\section{Arquitectura de Grado Industrial \& Ciberseguridad}
+El sistema opera junto al activo (Raspberry Pi 5 / NUC industrial). Es \textbf{Hardware Agnostic} mediante drivers Modbus TCP universales validados en perfiles YAML (Huawei, SMA, Tesla).
+
+\begin{tcolorbox}[colback=bgcard,colframe=accentorange,arc=2mm,boxrule=1mm,leftrule=3mm]
+{\bfseries\color{accentorange} \textbullet\ SAFETY GUARD ACTIVO}\par
+Nunca se despacha a la batería si la instrucción de la IA no pasa primero por un guardarraíl algorítmico y normativo estricto. (Rampas SOC, Térmicas, etc).
+\end{tcolorbox}
+
+\begin{itemize}
+    \item \textbf{Cumplimiento NTSyCS (Chile):} Mapeo técnico a regulaciones eléctricas con 11 GAPs cerrados explícitamente.
+    \item \textbf{IEC 62443 SL-2:} Ciberseguridad OT industrial y SL-2 readiness confirmado en docs.
+    \item \textbf{AI-IDS:} Detector no supervisado (Isolation Forest) que bloquea anomalías y ataques en la red Modbus.
+\end{itemize}
+
+\section{Estado del Proyecto (v2.16.0)}
+La salud de software reportada indica altísima madurez con \textbf{+799 Tests Unitarios} corriendo limpios, OpenSSF Gold coverage, y BESSAI Enhancement Proposals (BEPs) impulsando la innovación técnica comunitaria y corporativa.
+
+\end{document}

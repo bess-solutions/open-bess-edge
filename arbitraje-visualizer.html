@@ -2132,21 +2132,57 @@
 
         // ── 4. API FETCH ──────────────────────────────────────────────────────────
         var _cache = null;
-        var CEN = 'https://sipub.api.coordinador.cl/costos-marginales-online-8b/v4/findAll?user_key=2b44048b9df6f8c42f3ff9aa1c153f32';
-        var PROXY = 'https://corsproxy.io/?' + encodeURIComponent(CEN);
+        function buildCenUrl() {
+            var d = new Date();
+            var dStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+            // Fetch top 5000 records of the day from the new V4 API
+            return 'https://sipub.api.coordinador.cl/costo-marginal-online/v4/findByDate?startDate=' + dStr + '&endDate=' + dStr + '&limit=10000&user_key=2b44048b9df6f8c42f3ff9aa1c153f32';
+        }
+        var PROXY = 'https://corsproxy.io/?' + encodeURIComponent(buildCenUrl());
 
         function transformApi(json) {
-            if (!json || !json.barras) return [];
-            return json.barras.map(function (ab, i) {
-                var by = {};
-                (ab.valores || []).forEach(function (v) { var h = new Date(v.fecha).getUTCHours(); if (!by[h]) by[h] = []; by[h].push(v.valor); });
+            var dataArr = json.data || (Array.isArray(json) ? json : null);
+            if (!dataArr) return [];
+            
+            var grouped = {};
+            dataArr.forEach(function(item) {
+                var barra = item.barra_transf || item.barra;
+                if (!barra) return;
+                if (!grouped[barra]) grouped[barra] = [];
+                grouped[barra].push(item);
+            });
+
+            var res = [];
+            var idx = 0;
+            for (var bName in grouped) {
+                var items = grouped[bName];
+                var byH = {};
+                items.forEach(function (v) { 
+                    var fecha = v.fecha_minuto || v.fecha_hora;
+                    if (!fecha) return;
+                    var h = new Date(fecha).getUTCHours(); 
+                    if (!byH[h]) byH[h] = []; 
+                    var val = (v.cmg_usd_mwh_ !== undefined) ? v.cmg_usd_mwh_ : (v.cmg_kwh_ !== undefined ? (v.cmg_kwh_ * 1000) : (v.cmg_mills_kwh_ !== undefined ? v.cmg_mills_kwh_ : v.valor));
+                    if (val !== undefined && val !== null) {
+                        byH[h].push(parseFloat(val));
+                    }
+                });
                 var ts = [];
-                for (var h = 0; h < 24; h++) { var a = by[h] || []; if (a.length) ts.push({ hour: h, cost: parseFloat((a.reduce(function (x, y) { return x + y; }, 0) / a.length).toFixed(2)) }); }
-                if (ts.length < 4) return null;
-                var tm = (ab.nombre || '').match(/(\d+)\s?kv/i);
-                var nm = (ab.nombre || 'Barra ' + i).replace(/\s+\d+\s?kv/i, '').trim();
-                return { id: nm.toLowerCase().replace(/\s+/g, '-') + '-' + i, name: nm, tension: tm ? tm[1] + ' kV' : undefined, timeSeries: ts };
-            }).filter(Boolean);
+                for (var h = 0; h < 24; h++) { 
+                    var a = byH[h] || []; 
+                    if (a.length) {
+                        var valAvg = a.reduce(function (x, y) { return x + y; }, 0) / a.length;
+                        ts.push({ hour: h, cost: parseFloat((valAvg).toFixed(2)) }); 
+                    }
+                }
+                if (ts.length >= 4) {
+                    var tm = bName.match(/(\d+)$/);
+                    var nm = bName.replace(/(_+)?(\d+)$/, '').replace(/_/g, ' ').trim();
+                    res.push({ id: nm.toLowerCase().replace(/\s+/g, '-') + '-' + idx, name: nm, tension: tm ? tm[1] + ' kV' : 'N/A', timeSeries: ts });
+                    idx++;
+                }
+            }
+            return res;
         }
         function retryFetch(url, n, ms) {
             return fetch(url).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
@@ -2154,23 +2190,25 @@
         }
         function setApiBadge(type, text) {
             var b = document.getElementById('apiBadge'), l = document.getElementById('apiStatus');
-            b.className = 'api-badge ' + (type === 'live' ? 'api-live' : type === 'err' ? 'api-err' : 'api-demo');
-            l.textContent = text;
+            if(b) b.className = 'api-badge ' + (type === 'live' ? 'api-live' : type === 'err' ? 'api-err' : 'api-demo');
+            if(l) l.textContent = text;
         }
         function loadData() {
             if (_cache) { S.rawBarras = _cache; S.isLive = true; return Promise.resolve(); }
-            setApiBadge('demo', 'Conectando CEN…');
+            setApiBadge('demo', 'Conectando CEN V4…');
             return retryFetch(PROXY, 3, 1000).then(function (json) {
                 var b = transformApi(json);
                 if (b.length) {
-                    _cache = b; S.rawBarras = b; S.isLive = true; setApiBadge('live', 'LIVE · CEN Chile');
-                    document.getElementById('dataTimestamp').textContent = '● Tiempo real · ' + new Date().toLocaleString('es-CL') + ' · ' + b.length + ' barras';
+                    _cache = b; S.rawBarras = b; S.isLive = true; setApiBadge('live', 'LIVE · CEN V4 (15-min)');
+                    var dt = document.getElementById('dataTimestamp');
+                    if(dt) dt.textContent = '● Tiempo real · ' + new Date().toLocaleString('es-CL') + ' · ' + b.length + ' barras (V4)';
                 }
                 else throw new Error('empty');
             }).catch(function () {
                 S.rawBarras = makeDemoBarras(); S.isLive = false;
                 setApiBadge('demo', 'DEMO · datos sintéticos');
-                document.getElementById('dataTimestamp').textContent = '⚠ Datos sintéticos — API CEN no disponible vía browser (CORS). Algoritmos idénticos a producción.';
+                var dt = document.getElementById('dataTimestamp');
+                if(dt) dt.textContent = '⚠ Datos sintéticos — API CEN V4 no disponible vía browser (CORS). Algoritmos idénticos a producción.';
             });
         }
     </script>

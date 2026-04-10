@@ -148,7 +148,7 @@ jobs:
               '**Sources failed:** ' + '${{ needs.scrape.outputs.failed_sources }}',
               '',
               '**Action required:**',
-              '1. Check if CEN Chile APIs are available: https://api.energiaabierta.cl',
+              '1. Check if CEN Chile APIs are available: https://sipub.api.coordinador.cl/v4/',
               '2. Check Open-Meteo: https://api.open-meteo.com',
               '3. Re-run the workflow manually: `workflow_dispatch`',
               '',

@@ -80,9 +80,8 @@ CHECKLIST_20_10 = [
     ("F25", "Jupyter notebooks: train your own agent",           "Community",     "v3"),
 ]
 
-# Features implemented as of v2.16.0 (Fase 0+1+BEP-0600)
+# Features implemented as of v2 code additions (Fase 0+1)
 IMPLEMENTED_IDS = {"F01", "F02", "F03", "F04", "F06", "F08", "F11",
-                   "F14",           # Federated Learning — fl_coordinator.py (BEP-0600 v2.16.0)
                    "F15", "F16", "F17", "F18"}
 
 

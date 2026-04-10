@@ -109,7 +109,7 @@ SEN_SERVICES: dict[str, dict] = {
 }
 
 # USD/CLP exchange rate (updated via config in production)
-DEFAULT_USD_CLP = 871.0
+DEFAULT_USD_CLP = 950.0
 
 
 # ─────────────────────────────────────────────────────────────────────────────

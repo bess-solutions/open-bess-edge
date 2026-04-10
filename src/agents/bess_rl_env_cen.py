@@ -4,22 +4,20 @@
 src/agents/bess_rl_env_cen.py
 ==============================
 BEP-0200 Phase 3 — BESS Arbitrage Gymnasium Environment with Real CEN/SEN CMg Data.
-v2.1: Weather-enriched observation space (12 features, ERA5 Open-Meteo).
 
-Observation space (12-dim, all normalized to [-1, 1]):
-    [0]  soc           - State of charge (0=empty, 1=full)
-    [1]  cmg_norm      - Current CMg price (normalized by max_price)
-    [2]  cmg_delta     - Price change from previous step (normalized)
-    [3]  hour_sin      - Hour of day, sin component
-    [4]  hour_cos      - Hour of day, cos component
-    [5]  step_frac     - Fraction of episode completed
-    [6]  energy_left   - Approximate charge available for discharge
+This environment trains a DRL agent on real-world Chilean electricity market (CEN)
+market clearing price (CMg) time series from the bessai-web/data/cmg_data.json
+dataset, which contains 437+ hourly price points per node for 8 SEN nodes.
+
+Observation space (8-dim, all normalized to [0, 1]):
+    [0]  soc          - State of charge (0=empty, 1=full)
+    [1]  cmg_norm     - Current CMg price (normalized by max_price)
+    [2]  cmg_delta    - Price change from previous step (normalized)
+    [3]  hour_sin     - Hour of day, sin component
+    [4]  hour_cos     - Hour of day, cos component
+    [5]  step_frac    - Fraction of episode completed
+    [6]  energy_left  - Approximate charge available for discharge
     [7]  capacity_left - Headroom for charging
-    --- ERA5 weather features (Pearson rad↔CMg=-0.59, duck_delta=70 USD/MWh) ---
-    [8]  radiation     - Direct solar radiation (W/m², normed)
-    [9]  wind_speed    - Wind speed 10m (km/h, normed)
-    [10] cloud_cover   - Cloud cover % (normed)
-    [11] cmg_lag1h     - CMg 1h lag (early momentum signal, normed)
 
 Action space (Box, 1-dim, [-1, 1]):
     -1.0 → full discharge at max_power_kw
@@ -49,54 +47,10 @@ import numpy as np
 # Dataset loading
 # ---------------------------------------------------------------------------
 
-_DEFAULT_CMG_PATH  = Path(__file__).parents[3] / "bessai-web" / "data" / "cmg_data.json"
-_DEFAULT_FEAT_PATH = Path(__file__).parents[3] / "bessai-web" / "data" / "cmg_weather_features.json"
+_DEFAULT_CMG_PATH = Path(__file__).parents[3] / "bessai-web" / "data" / "cmg_data.json"
 _FALLBACK_CMG_PATH = Path(
     os.environ.get("CEN_CMG_DATA_PATH", str(_DEFAULT_CMG_PATH))
 )
-
-# Observation dimensions
-OBS_DIM_BASE    = 8    # original features
-OBS_DIM_WEATHER = 12   # + radiation, wind, cloud, cmg_lag1h
-
-
-# ---------------------------------------------------------------------------
-# Weather feature cache (lazy-loaded singleton per process)
-# ---------------------------------------------------------------------------
-
-class _WeatherCache:
-    """Lazy loader for cmg_weather_features.json indexed by node/timestamp."""
-    _instance: _WeatherCache | None = None
-    _index: dict = {}
-    _loaded: bool = False
-
-    @classmethod
-    def get_instance(cls) -> _WeatherCache:
-        if cls._instance is None:
-            cls._instance = cls()
-        return cls._instance
-
-    def load(self, path: Path | None = None) -> None:
-        if self._loaded:
-            return
-        p = path or _DEFAULT_FEAT_PATH
-        if not p.exists():
-            return
-        try:
-            data = json.loads(p.read_text(encoding="utf-8"))
-            for row in data.get("features", []):
-                key = f"{row.get('node','')}/{row.get('ts','')}"
-                self._index[key] = row
-            self._loaded = True
-        except Exception:
-            pass
-
-    def get(self, node: str, timestamp: str) -> dict | None:
-        return self._index.get(f"{node}/{timestamp}")
-
-    @property
-    def available(self) -> bool:
-        return self._loaded
 
 # Nodes available in the CEN dataset
 CEN_NODES = [
@@ -199,8 +153,8 @@ class BESSArbitrageEnvCEN:
         efficiency: float = 0.92,
         degradation_cost_per_kwh: float = 0.003,
         safety_penalty: float = 0.5,
+        timestep_duration_min: int = 15,
         render_mode: str | None = None,
-        use_weather: bool = True,    # enable 12-dim weather-enriched obs
     ) -> None:
         # Lazy gymnasium import (optional dep for non-training code)
         try:
@@ -219,32 +173,23 @@ class BESSArbitrageEnvCEN:
         self.efficiency = float(efficiency)
         self.degradation_cost = float(degradation_cost_per_kwh)
         self.safety_penalty = float(safety_penalty)
+        self.timestep_duration_min = int(timestep_duration_min)
+        self.dt_h = self.timestep_duration_min / 60.0
         self.render_mode = render_mode
         self.node = node
-        self.use_weather = use_weather
 
-        # Load CMg dataset
+        # Load dataset
         self._days = load_cmg_dataset(cmg_data_path, node=node)
         self._max_price = max(p for day in self._days for p in day)
         if self._max_price <= 0:
             self._max_price = 1.0
 
-        # Load timestamps for weather lookup
-        self._timestamps: list[str] = self._load_timestamps(cmg_data_path or _FALLBACK_CMG_PATH)
-
-        # Pre-load weather cache (non-fatal)
-        if use_weather:
-            _WeatherCache.get_instance().load()
-            obs_dim = OBS_DIM_WEATHER if _WeatherCache.get_instance().available else OBS_DIM_BASE
-        else:
-            obs_dim = OBS_DIM_BASE
-        self._obs_dim = obs_dim
-
         # Build observation & action spaces
+        # Obs: [soc, cmg_norm, cmg_delta, hour_sin, hour_cos, step_frac, energy_left, cap_left]
         self.observation_space = gym.spaces.Box(
-            low=np.full(obs_dim, -1.0, dtype=np.float32),
-            high=np.full(obs_dim, 1.0, dtype=np.float32),
-            shape=(obs_dim,),
+            low=np.full(8, -1.0, dtype=np.float32),
+            high=np.full(8, 1.0, dtype=np.float32),
+            shape=(8,),
             dtype=np.float32,
         )
         self.action_space = gym.spaces.Box(
@@ -258,25 +203,11 @@ class BESSArbitrageEnvCEN:
         self._soc: float = 0.5
         self._step: int = 0
         self._prices: list[float] = []
-        self._price_timestamps: list[str] = []  # timestamps for weather lookup
         self._total_steps: int = 0
         self._prev_price: float = 0.0
         self._episode_revenue: float = 0.0
-        self._episode_start_idx: int = 0
 
         self.np_random = np.random.default_rng(42)
-
-    def _load_timestamps(self, cmg_data_path: str | Path) -> list[str]:
-        """Load timestamps from cmg_data.json for weather feature lookup."""
-        try:
-            path = Path(cmg_data_path)
-            if not path.exists():
-                return []
-            data = json.loads(path.read_text(encoding="utf-8"))
-            series = data.get("series", {}).get(self.node, [])
-            return [pt["t"] for pt in series]
-        except Exception:
-            return []
 
     # ------------------------------------------------------------------
     # Gymnasium API
@@ -299,21 +230,8 @@ class BESSArbitrageEnvCEN:
             start = int(self.np_random.integers(0, max_start))
 
         self._prices = []
-        self._price_timestamps = []
-        # Compute the flat index offset for timestamp lookup
-        flat_idx = 0
-        for day_idx in range(start):
-            flat_idx += len(self._days[day_idx % len(self._days)])
-        self._episode_start_idx = flat_idx
-
         for day_idx in range(start, start + self.episode_days):
-            day_prices = self._days[day_idx % len(self._days)].tolist()
-            self._prices.extend(day_prices)
-            # Map to timestamps
-            n = len(day_prices)
-            ts_slice = self._timestamps[flat_idx:flat_idx + n] if self._timestamps else []
-            self._price_timestamps.extend(ts_slice)
-            flat_idx += n
+            self._prices.extend(self._days[day_idx % len(self._days)].tolist())
 
         self._total_steps = len(self._prices)
         self._step = 0
@@ -333,7 +251,7 @@ class BESSArbitrageEnvCEN:
         action_scalar = float(np.clip(action, -1.0, 1.0).flat[0])
 
         power_kw = action_scalar * self.max_power_kw  # + = charge, - = discharge
-        dt_h = 1.0  # 1-hour time steps
+        dt_h = self.dt_h
 
         cmg = self._prices[self._step]
 
@@ -406,48 +324,29 @@ class BESSArbitrageEnvCEN:
     def _get_obs(self) -> np.ndarray:
         step_idx = min(self._step, self._total_steps - 1)
         cmg = self._prices[step_idx]
-        prev_cmg = self._prices[max(0, step_idx - 1)]
 
-        # Hour of day (from position in sequence; 1 step = 1 hour)
-        hour = step_idx % 24
+        # Hour of day (from position in sequence)
+        hour = (step_idx * self.dt_h) % 24.0
         hour_sin = math.sin(2 * math.pi * hour / 24.0)
         hour_cos = math.cos(2 * math.pi * hour / 24.0)
 
-        cmg_norm  = float(np.clip(cmg / self._max_price, 0.0, 1.0))
+        cmg_norm = float(np.clip(cmg / self._max_price, 0.0, 1.0))
         cmg_delta = float(np.clip((cmg - self._prev_price) / (self._max_price + 1e-6), -1.0, 1.0))
-        step_frac  = float(step_idx / max(self._total_steps - 1, 1))
-        energy_left = float(self._soc)
-        cap_left    = float(1.0 - self._soc)
+        step_frac = float(step_idx / max(self._total_steps - 1, 1))
+        energy_left = float(self._soc)        # how much charge is available
+        cap_left = float(1.0 - self._soc)    # headroom for charging
 
-        base_obs = np.array([
-            self._soc,
-            cmg_norm,
-            cmg_delta,
-            hour_sin,
-            hour_cos,
-            step_frac,
-            energy_left,
-            cap_left,
-        ], dtype=np.float32)
-
-        if self._obs_dim == OBS_DIM_BASE:
-            return base_obs
-
-        # ── Weather features (ERA5) ───────────────────────────────────
-        w_cache = _WeatherCache.get_instance()
-        ts = self._price_timestamps[step_idx] if step_idx < len(self._price_timestamps) else ""
-        row = w_cache.get(self.node, ts) if ts else None
-
-        def _norm_w(key: str, lo: float, hi: float) -> float:
-            if row is None:
-                return 0.0
-            v = row.get(key)
-            return 0.0 if v is None else float(np.clip(2.0 * (v - lo) / (hi - lo) - 1.0, -1.0, 1.0))
-
-        radiation  = _norm_w("radiation",  0.0,   1000.0)
-        wind       = _norm_w("wind",       0.0,   80.0)
-        cloud      = _norm_w("cloud",      0.0,   100.0)
-        # cmg_lag1h from prev step price (normalised; same as cmg_delta but absolute)
-        cmg_lag1h  = float(np.clip(prev_cmg / self._max_price, 0.0, 1.0)) * 2.0 - 1.0
-
-        return np.concatenate([base_obs, [radiation, wind, cloud, cmg_lag1h]]).astype(np.float32)
+        obs = np.array(
+            [
+                self._soc,
+                cmg_norm,
+                cmg_delta,
+                hour_sin,
+                hour_cos,
+                step_frac,
+                energy_left,
+                cap_left,
+            ],
+            dtype=np.float32,
+        )
+        return obs

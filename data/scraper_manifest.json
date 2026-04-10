@@ -1,0 +1,22 @@
+{
+  "scraped_at": "2026-04-09T14:50:16.679244+00:00",
+  "days": 30,
+  "sources_requested": [
+    "cmg",
+    "ernc",
+    "demand",
+    "weather",
+    "frequency",
+    "degradation"
+  ],
+  "sources_ok": [
+    "weather"
+  ],
+  "sources_failed": [
+    "cmg",
+    "ernc",
+    "demand",
+    "frequency",
+    "degradation"
+  ]
+}

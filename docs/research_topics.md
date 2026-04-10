@@ -1,7 +1,7 @@
 # Temas de Investigación Abiertos — BESSAI Edge Gateway
 
-> **Última actualización**: Marzo 2026  
-> **Contacto**: `contacto@bess-solutions.cl` · [GitHub Discussions](https://github.com/bess-solutions/open-bess-edge/discussions/categories/research)
+> **Última actualización**: 2026-03-02  
+> **Contacto**: `research@bessai.io` o [GitHub Discussions](https://github.com/bess-solutions/open-bess-edge/discussions/categories/research)
 
 ---
 
@@ -31,7 +31,7 @@ BESSAI Edge Gateway es un proyecto open source real, con código en producción,
 
 **Pregunta de investigación**: ¿Cómo adaptar o mejorar el algoritmo DRL (SAC, TD3, PPO+LSTM) para manejar alta volatilidad de precios y distribuciones no estacionarias en mercados spot?
 
-**Datos disponibles**: 111,100 pts horarios CMg CEN Chile 2023–2026 (4 nodos) — **público CC-BY 4.0** en [`bessai-academic`](https://github.com/bess-solutions/bessai-academic).  
+**Datos disponibles**: CMg horario CEN Chile 2020–2025 (via bessai-cen-data).  
 **Entregable esperado**: Modelo mejorado exportable a ONNX + comparación benchmark publicada.
 
 ---
@@ -70,13 +70,13 @@ BESSAI Edge Gateway es un proyecto open source real, con código en producción,
 
 **Área**: Sistemas de potencia, Optimización distribuida  
 **Nivel**: Magíster / Doctorado  
-**Estado**: 🟢 **Disponible — VPP implementado en v2.16.0**  
+**Estado**: 🟢 Disponible  
 
-**Contexto**: El `vpp_fleet_manager.py` (BEP-0500) implementa coordinación multi-sitio con ONNX DRL por sitio. El protocolo de consenso para respuesta de frecuencia distribuida < 500 ms entre múltiples gateways en Chile **está abierto a investigación** sobre el stack real ya desplegado.
+**Contexto**: El proyecto plantea un piloto VPP con 5 sitios BESS coordinados en Chile (BEP-0300, Q4 2026). El protocolo de coordinación y el algoritmo de consenso para respuesta de frecuencia < 500 ms aúnn están abiertos a investigación.
 
 **Pregunta de investigación**: ¿Qué algoritmo de consenso distribuido (ADMM, gossip, mean-field) minimiza la latencia de coordinación VPP manteniendo la equidad entre sitios en una topología de red chilena real?
 
-**Entregable esperado**: Simulación sobre `vpp_fleet_manager.py` real con 5+ gateways + análisis de latencia y equidad.
+**Entregable esperado**: Simulación en BESSAI con 5+ gateways + análisis de latencia y equidad.
 
 ---
 
@@ -120,51 +120,6 @@ BESSAI Edge Gateway es un proyecto open source real, con código en producción,
 
 ---
 
-### Tema R-008: Prediction Log Inmutable como Feedback Loop del Evolve Engine
-
-**Área**: Machine Learning, Sistemas Autónomos, BEP-0303  
-**Nivel**: Magíster / Doctorado  
-**Estado**: 🟢 **Disponible — infraestructura implementada en producción**  
-
-**Contexto**: BESSAI implementa un `prediction_log` en DuckDB con integridad SHA-256 encadenada (inspirado en blockchain) que registra cada predicción de CMg con su error real posterior. Cuando el error supera el 30%, el sistema marca `retrain_triggered = True` y el Evolve Engine reentrenar automáticamente. Este «self-supervised feedback loop» sin etiquetado humano es un patrón poco estudiado en sistemas de energía.
-
-**Pregunta de investigación**: ¿Cuál es el umbral óptimo de error (actualmente 30%) para disparar el reentrenamiento? ¿Cómo interactúa el tamaño de la ventana de error con la derive concept drift del mercado spot?
-
-**Datos disponibles**: `prediction_log` real (append-only, SHA-256 verificado) + `cmg_historico` 111K pts CC-BY 4.0.  
-**Entregable esperado**: Paper sobre umbral óptimo de reentrenamiento + métrica de «monotonicidad del log» para auditoría regulatoria.
-
----
-
-### Tema R-009: Vertimiento Solar como Oportunidad de Arbitraje BESS — Evidencia Empírica SEN Chile 2023–2026
-
-**Área**: Economía de la energía, Mercados eléctricos, Almacenamiento  
-**Nivel**: Magister / Ingeniería civil eléctrica  
-**Estado**: 🟢 **Disponible — dataset CC-BY 4.0 + notebooks reproducibles listos**  
-
-**Contexto**: En el norte de Chile (Cardones, Crucero), el vertimiento solar masivo genera el 38–40% de horas con CMg ≤ 2 CLP/kWh — una ventana de carga a costo cero que un BESS puede explotar sistemáticamente. El backtest con la estrategia rule-based P25/P75 sobre 39 meses reales muestra IRR 4.1–4.6% para CAPEX 200 USD/kWh. **Este tema está directamente alineado con la colaboración BESSAI × USACH 2026.**
-
-**Pregunta de investigación**: ¿Cómo evoluciona la brecha de arbitraje BESS en función del aumento de capacidad solar instalada en el SEN? ¿En qué punto la saturación de BESS elimina el diferencial P25/P75?
-
-**Datos disponibles**: 111,100 pts CMg horarios 4 nodos 2023–2026 — **público CC-BY 4.0** + notebooks de backtest reproducibles en [`bessai-academic`](https://github.com/bess-solutions/bessai-academic).  
-**Entregable esperado**: Paper publicable en *Energies* (MDPI) o *Applied Energy* (Elsevier) + dataset citado en Zenodo.
-
----
-
-### Tema R-010: Aprendizaje Federado para Modelos CMg Multi-Sitio (BEP-0600)
-
-**Área**: Federated Learning, Privacidad, Sistemas de energía  
-**Nivel**: Doctorado  
-**Estado**: 🟢 **Disponible — `fl_coordinator.py` implementado en v2.16.0**  
-
-**Contexto**: El `fl_coordinator.py` (BEP-0600) implementa FedAvg con ponderación por capacidad BESS para mejorar el modelo CMg sin compartir datos brutos entre sitios. Cada gateway entrena localmente y comparte solo los gradientes. La pregunta abierta es cómo manejar la **heterogeneidad de mercado**: un sitio en Cardones (vertimiento alto) y uno en Charrua (CMg alto, sin solar) tienen distribuciones muy diferentes.
-
-**Pregunta de investigación**: ¿Cómo adaptar FedAvg o FedProx para manejar heterogeneidad de mercado entre nodos SEN con distribuciones CMg fundamentalmente distintas, sin degradar el modelo global?
-
-**Datos disponibles**: 111,100 pts CMg horarios (4 nodos = 4 distribuciones distintas) CC-BY 4.0 + `fl_coordinator.py` open source.  
-**Entregable esperado**: Comparativo FedAvg vs FedProx vs modelo local óptimo por nodo + propuesta de algoritmo adaptado a heterogeneidad de mercado.
-
----
-
 ## Cómo postular a un tema de investigación
 
 1. Leer el tema completo y verificar que tienes acceso a los datos necesarios
@@ -181,8 +136,7 @@ BESSAI Edge Gateway es un proyecto open source real, con código en producción,
 
 | Recurso | Acceso | Descripción |
 |---|---|---|
-| **Dataset CMg 4 nodos SEN 2023–2026** | **Público CC-BY 4.0** | 111,100 pts horarios — [`bessai-academic`](https://github.com/bess-solutions/bessai-academic) |
-| **Notebooks de backtest** | **Público** | 3 notebooks reproducibles: EDA, backtest 12 escenarios, comparativo nodos |
+| Dataset CMg Chile 2020–2025 | Previa solicitud | CMg horario del CEN Chile |
 | Simulador BESS | Open source | `src/simulation/` + `BESSArbitrageEnv` |
 | Código fuente completo | GitHub | `github.com/bess-solutions/open-bess-edge` |
 | Entorno de desarrollo Docker | Open source | `docker-compose.yml` + instrucciones |

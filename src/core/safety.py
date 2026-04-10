@@ -65,24 +65,19 @@ class SafetyGuard:
         the inverter's safety timer is refreshed well within its window.
     """
 
+    # ------------------------------------------------------------------
+    # Safety limits  (engineering units, same as telemetry dict values)
+    # ------------------------------------------------------------------
+    SOC_MIN: float = 5.0  # % — below this: deep-discharge risk
+    SOC_MAX: float = 98.0  # % — above this: overcharge risk
+    TEMP_MAX: float = 45.0  # °C — above this: thermal runaway risk
+
     # Watchdog counter wraps at UINT16 max
     _WATCHDOG_MAX: int = 65535
 
-    def __init__(
-        self,
-        watchdog_interval_s: float = 1.0,
-        soc_min: float | None = None,
-        soc_max: float | None = None,
-        temp_max: float | None = None,
-    ) -> None:
-        from src.core.config import settings
-
+    def __init__(self, watchdog_interval_s: float = 1.0) -> None:
         self._watchdog_interval_s = watchdog_interval_s
         self._heartbeat_counter: int = 0
-        
-        self.SOC_MIN: float = soc_min if soc_min is not None else settings.SAFETY_SOC_MIN
-        self.SOC_MAX: float = soc_max if soc_max is not None else settings.SAFETY_SOC_MAX
-        self.TEMP_MAX: float = temp_max if temp_max is not None else settings.SAFETY_TEMP_MAX
 
     # ------------------------------------------------------------------
     # Public API — safety check

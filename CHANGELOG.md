@@ -152,9 +152,6 @@
 
 
 ### 📚 Documentation
-- update PROJECT_STATUS.md to v2.16.0 (`efc89a4f`, @BESS Solutions)
-- **research**: R-008/R-009/R-010 CC-BY 4.0 VPP live v2.16.0 (`b8a2271d`, @BESS Solutions)
-- deprecar sec-bess-ingestor (GAPs ✅ v2.16.0), actualizar BESSAIEvolve 39m/111K pts, academic_collaboration USACH + CC-BY 4.0 (`8aaf1fa6`, @BESS Solutions)
 - **benchmarks**: v2.16.0 — 8 nodos CEN, BEP-0500/0600/0700, 570 días, 799 tests, revenue table (`3f925094`, @BESS Solutions)
 - **readme**: v2.16.0 — 799 tests, BEP-0700 HVDC, VPP fleet, FL coordinator, real roadmap + structure (`d26fe72d`, @BESS Solutions)
 - **status**: 799 tests, HVDCScheduler BEP-0700 Sprint J (`3d31cf10`, @BESS Solutions)
@@ -190,8 +187,6 @@
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
-- **math**: align USD/CLP factor with 871.0 SSoT (`e48ddc81`, @BESS Solutions)
-- **audit**: F14 FL BEP-0600 v2.16.0 score 9.6/20 + resolve merge conflicts (`f03b4dfe`, @BESS Solutions)
 - **tests**: ONNX latency auto-detect input shape, dry-run xfail for Py3.14 venv (`b38cc423`, @BESS Solutions)
 - repair 6 broken internal links (exhaustive link scan) (`1790f17e`, @BESS Solutions)
 - remove broken image in quickstart_5min.md (`aeedafdb`, @BESS Solutions)
@@ -212,7 +207,6 @@
 - remove deprecated fetch_cmg_evolution.py (superseded by bessai_data_scraper.py) (`1f734cd4`, @BESS Solutions)
 
 ### ✨ New Features
-- **safety**: agregar validacion Pydantic y soporte a limites dinamicos en SafetyGuard (`9a323bbd`, @testeadoroficial)
 - **bep0700**: HVDCScheduler — DC power flow, 500MW, losses, price arbitrage, 26 tests, ruff clean (`4268a404`, @BESS Solutions)
 - **bep0600**: FLCoordinator — FedAvg FL scaffold, 24 tests, BEP-0600, ruff clean (`0c733e34`, @BESS Solutions)
 - **bep0500-p2**: SENMarketFeed — DuckDB+SEN+duck-curve live price feed, 15 tests, v2.16.0 (`9085f3d3`, @BESS Solutions)

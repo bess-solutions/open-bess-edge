@@ -9,9 +9,9 @@ BESSAI Edge Gateway — Multi-Source Data Scraper ("El Busquilla")
 Scrapes and caches all external data sources relevant to BESS arbitrage
 model training and BESSAIEvolve fitness evaluation:
 
-  1. CMg spot price          — CEN Chile (energiaabierta.cl + coordinador.cl Excel)
-  2. ERNC generation         — CEN Chile (solar + wind + PMGD)
-  3. SEN gross demand        — CEN Chile system load
+  1. CMg spot price          — CEN Chile V4 API (15-min, sipub.api.coordinador.cl)
+  2. ERNC generation         — CEN Chile (api.energiaabierta.cl solar + wind + PMGD)
+  3. SEN gross demand        — CEN Chile (api.energiaabierta.cl system load)
   4. Weather / irradiance    — Open-Meteo (free, no API key)
   5. Grid frequency          — CEN Chile (5-min frequency data)
   6. Battery degradation ref — NREL Degradation Tracker (public JSON)
@@ -80,7 +80,8 @@ DEFAULT_LON = -70.66
 
 # CEN public APIs
 _API_BASE = "https://api.energiaabierta.cl"
-_CMG_URL  = _API_BASE + "/clevels/cmg/pMarginalGestor/json"
+_CEN_V4_API = "https://sipub.api.coordinador.cl"
+_CMG_ONLINE_V4 = _CEN_V4_API + "/costo-marginal-online/v4/findByDate"
 _GEN_URL  = _API_BASE + "/clevels/ernc/generateResumen/json"
 _DEM_URL  = _API_BASE + "/clevels/demanda/DemandaBruta/json"
 _FREQ_URL = (
@@ -151,38 +152,67 @@ def _date_range(n_days: int) -> tuple[str, str]:
 # ── Source 1: CMg — Spot Price ─────────────────────────────────────────────────
 
 def scrape_cmg(n_days: int = 30) -> pd.DataFrame | None:
-    """CMg (Costo Marginal de Gestión) — hourly spot price in USD/MWh."""
-    print("📡 [CMg] Fetching spot price...")
+    """CMg (Costo Marginal de Gestión) — 15-min spot price in USD/MWh from CEN V4."""
+    print("📡 [CMg] Fetching spot price from CEN API V4...")
     if not _PD or not _REQ:
         return None
 
     start, end = _date_range(n_days)
-    data = _get(_CMG_URL, params={"startDate": start, "endDate": end, "type": "hourly"})
+    page = 1
+    total_pages = 1
+    all_data = []
 
-    if not data:
+    # API key is required by the new portal
+    api_key_header = {"user_key": "2b44048b9df6f8c42f3ff9aa1c153f32"} # Default public portal key
+
+    while page <= total_pages:
+        params = {"startDate": start, "endDate": end, "limit": 10000, "page": page}
+        try:
+            resp = _req.get(_CMG_ONLINE_V4, params=params, headers=api_key_header, timeout=30)
+            if resp.status_code != 200:
+                print(f"  HTTP {resp.status_code} — {_CMG_ONLINE_V4}", file=sys.stderr)
+                break
+            payload = resp.json()
+            if not payload or "data" not in payload:
+                break
+            all_data.extend(payload["data"])
+            
+            # Paginación interna V4
+            total_pages = payload.get("total_pages", 1)
+            page += 1
+            time.sleep(0.5) # rate limit prevention
+        except Exception as exc:
+            print(f"  ❌ Failed page {page}: {exc}", file=sys.stderr)
+            break
+
+    if not all_data:
         return None
 
-    df = pd.DataFrame(data)
+    df = pd.DataFrame(all_data)
     if df.empty:
         return None
     df.columns = [c.lower().strip().replace(" ", "_") for c in df.columns]
 
-    # Detect price column
-    price_col = next((c for c in df.columns if "marginal" in c or "cmg" in c or "precio" in c), None)
-    if price_col is None:
+    # Detect price column (V4 uses cmg_kwh_ or cmg_mills_kwh_)
+    if "cmg_kwh_" in df.columns:
+        df["cmg_usd_mwh"] = pd.to_numeric(df["cmg_kwh_"], errors="coerce") * 1000.0
+    elif "cmg_mills_kwh_" in df.columns:
+        df["cmg_usd_mwh"] = pd.to_numeric(df["cmg_mills_kwh_"], errors="coerce")
+    elif "cmg_usd_mwh" in df.columns:
+        df["cmg_usd_mwh"] = pd.to_numeric(df["cmg_usd_mwh"], errors="coerce")
+    else:
         print("  ⚠️  No price column found. Columns:", list(df.columns), file=sys.stderr)
         return None
 
-    df = df.rename(columns={price_col: "cmg_usd_mwh"})
-    df["cmg_usd_mwh"] = pd.to_numeric(df["cmg_usd_mwh"], errors="coerce")
-
-    # Convert CLP/kWh → USD/MWh if values look like CLP
-    if df["cmg_usd_mwh"].median() > 50:
-        df["cmg_usd_mwh"] = df["cmg_usd_mwh"] / 950.0 * 1000.0
-
-    df["source"] = "api_energiaabierta_cmg"
+    df["source"] = "api_cen_v4_cmg"
     df = df.dropna(subset=["cmg_usd_mwh"])
-    _save(df[["cmg_usd_mwh", "source"]], "cmg", "CMg spot price")
+    
+    if "barra_transf" in df.columns:
+        cols_to_save = ["barra_transf", "fecha_minuto", "cmg_usd_mwh", "source"]
+    else:
+        cols_to_save = ["cmg_usd_mwh", "source"]
+        
+    _save(df[[c for c in cols_to_save if c in df.columns]], "cmg", "CMg spot price (15-min ALL bars)")
 
     # Also write main parquet for FitnessEvaluator compatibility
     out = DATA_DIR / "cmg_historico.parquet"

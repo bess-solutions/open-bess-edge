@@ -213,7 +213,7 @@ patch_coverage_threshold = 70
 # CHANGELOG excerpt v2.15.2 (2026-03-12)
 # ---------------------------------------------------------------------------
 # BEP-0200 Phase 3:
-#   + bess_rl_env_cen.py: Gymnasium env using real CEN/SEN CMg data (8 nodes)
+#   + bess_rl_env_cen.py: Gymnasium env using real CEN/SEN CMg V4 data (15-min All Nodes)
 #   + train_cen_standalone.py: PPO trainer (torch-only, no Ray) → ONNX
 #   + 8× _drl_cen_v1.onnx models (p95 latency < 0.1ms, best_reward=374 USD)
 # Sprint C — Global Market Adapters:
