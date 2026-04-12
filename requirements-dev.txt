@@ -22,6 +22,7 @@ aiohttp>=3.9.5
 
 # --- Dev utilities ---
 ipython>=8.24.0
+locust>=2.28.0
 
 # --- Dependency management & security (IEC 62443-2-3 / OpenSSF Gold) ---
 pip-tools>=7.4.0        # pip-compile --generate-hashes → requirements.hash.txt

@@ -178,3 +178,23 @@ groups:
           description: >
             Fleet orchestrator reports 0 active sites for 5 minutes.
             All managed BESS sites may be unreachable. Check network connectivity.
+
+      - alert: HighFleetLatency
+        expr: bess_fleet_latency_ms{operation="summary", quantile="0.99"} > 100
+        for: 1m
+        labels:
+          severity: warning
+          site_id: "{{ $labels.site_id }}"
+        annotations:
+          summary: "High latency in FleetCoordinator (site: {{ $labels.site_id }}, operation: {{ $labels.operation }})"
+          description: "Latency is {{ $value }}ms (threshold: 100ms). Check system logs for root cause."
+
+      - alert: LowCarbonViability
+        expr: bess_carbon_viability_score < 2
+        for: 15m
+        labels:
+          severity: info
+          site_id: "{{ $labels.site_id }}"
+        annotations:
+          summary: "Low Carbon Viability Score for region {{ $labels.region }} on {{ $labels.site_id }}"
+          description: "The BESS carbon viability score is {{ $value }} (below 2). Expected commercial benefits from carbon offsetting may be compromised."
