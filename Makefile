@@ -8,6 +8,7 @@
         validate-registry tf-plan helm-lint helm-template \
         docs docs-serve \
         changelog release-dry-run release publish-pypi \
+        consolidate consolidate-quick \
         clean
 
 PYTHON  ?= python
@@ -224,6 +225,18 @@ clean: ## Remove build artifacts, caches, and temp files
 	find . -type f -name "*.pyc" -delete
 	rm -rf .pytest_cache .mypy_cache .ruff_cache htmlcov dist build *.egg-info
 	rm -rf /tmp/bessai-dist-dry/
-	@echo "✅ Clean complete"
+	@echo "[OK] Clean complete"
+
+# -- Consolidation -------------------------------------------------------------
+
+consolidate: ## Generate full project consolidation report (with live tests ~90s)
+	@echo "Generating CONSOLIDATION.md (live tests)..."
+	@PYTHONIOENCODING=utf-8 $(PYTHON) scripts/consolidate.py --out CONSOLIDATION.md
+	@echo "[OK] Informe disponible: CONSOLIDATION.md"
+
+consolidate-quick: ## Generate consolidation report WITHOUT running tests (5s)
+	@echo "Generating CONSOLIDATION.md (skip tests)..."
+	@PYTHONIOENCODING=utf-8 $(PYTHON) scripts/consolidate.py --out CONSOLIDATION.md --no-tests
+	@echo "[OK] Informe rapido disponible: CONSOLIDATION.md"
 
 

@@ -78,6 +78,16 @@ class FleetSiteState:
         return min(self.max_power_kw, headroom_soc / 100 * self.max_power_kw * 2)
 
     @property
+    def injection_kw(self) -> float:
+        """Positive-valued alias for available_discharge_kw.
+
+        Always returns a non-negative value, avoiding confusion with the
+        negative sign convention used in dispatch setpoints.
+        Suitable for display in dashboards and operator reports.
+        """
+        return self.available_discharge_kw
+
+    @property
     def is_stale(self) -> bool:
         return (time.time() - self.last_seen) > SITE_STALE_THRESHOLD_S
 
@@ -93,6 +103,7 @@ class FleetSiteState:
             "max_power_kw": self.max_power_kw,
             "current_power_kw": round(self.current_power_kw, 1),
             "available_discharge_kw": round(self.available_discharge_kw, 1),
+            "injection_kw": round(self.injection_kw, 1),
             "available_charge_kw": round(self.available_charge_kw, 1),
             "temperature_c": self.temperature_c,
             "cycle_count": self.cycle_count,

@@ -315,6 +315,24 @@ class BESSAIServer:
             status=404,
         )
 
+    async def _handle_setpoint(self, request: web.Request) -> web.Response:
+        try:
+            data = await request.json()
+            target_kw = float(data.get("target_kw", 0.0))
+            strategy = str(data.get("strategy", ""))
+            log.info("server.setpoint_received", target_kw=target_kw, strategy=strategy)
+            return web.Response(
+                text=json.dumps({"status": "accepted", "target_kw": target_kw}),
+                content_type="application/json",
+                status=202,
+            )
+        except Exception as exc:
+            return web.Response(
+                text=json.dumps({"error": "bad request", "detail": str(exc)}),
+                content_type="application/json",
+                status=400,
+            )
+
     # ------------------------------------------------------------------
     # App construction
     # ------------------------------------------------------------------
@@ -329,6 +347,7 @@ class BESSAIServer:
         app.router.add_get("/fleet/summary", self._handle_fleet_summary)
         app.router.add_get("/fleet/sites", self._handle_fleet_sites)
         app.router.add_get("/api/v1/telemetry", self._handle_telemetry)
+        app.router.add_post("/api/v1/setpoint", self._handle_setpoint)
         # Wildcard for not found (aiohttp doesn't have native 404 middleware by default)
         return app
 

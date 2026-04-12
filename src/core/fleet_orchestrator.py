@@ -31,9 +31,11 @@ from __future__ import annotations
 
 import asyncio
 import time
+import ssl
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
+import aiohttp
 import structlog
 
 from src.interfaces.metrics import (
@@ -97,6 +99,7 @@ class SiteProxy:
         host:           IP/hostname of the remote site.
         site_id:        Unique site identifier.
         capacity_kwh:   Nameplate BESS capacity.
+        ssl_context:    Optional SSL context for mTLS.
         telemetry_fn:   Optional callable returning SiteTelemetry (for testing).
     """
 
@@ -105,11 +108,13 @@ class SiteProxy:
         host: str,
         site_id: str = "unknown",
         capacity_kwh: float = 100.0,
+        ssl_context: ssl.SSLContext | None = None,
         telemetry_fn: Callable[[str], SiteTelemetry] | None = None,
     ) -> None:
         self.host = host
         self.site_id = site_id
         self.capacity_kwh = capacity_kwh
+        self.ssl_context = ssl_context
         self._telemetry_fn = telemetry_fn
         self._last_telemetry: SiteTelemetry | None = None
 
@@ -117,24 +122,60 @@ class SiteProxy:
         """Fetch current telemetry from this site.
 
         Returns:
-            SiteTelemetry — from inject fn (test), or a realistic stub.
+            SiteTelemetry — from network HTTP endpoint, or inject fn (test).
         """
         if self._telemetry_fn is not None:
             tel = self._telemetry_fn(self.site_id)
             self._last_telemetry = tel
             return tel
 
-        # Production stub — would be: async with httpx.AsyncClient() as c: ...
-        stub = SiteTelemetry(
-            site_id=self.site_id,
-            soc_pct=60.0,
-            power_kw=0.0,
-            temp_c=28.0,
-            capacity_kwh=self.capacity_kwh,
-            available_kw=self.capacity_kwh * 0.5,  # 50% flex
-        )
-        self._last_telemetry = stub
-        return stub
+        try:
+            connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+            async with aiohttp.ClientSession(connector=connector) as session:
+                url = f"https://{self.host}:8000/api/v1/telemetry" if self.ssl_context else f"http://{self.host}:8000/api/v1/telemetry"
+                async with session.get(url, timeout=3.0) as resp:
+                    resp.raise_for_status()
+                    data = await resp.json()
+                    tel = SiteTelemetry(
+                        site_id=self.site_id,
+                        soc_pct=float(data.get("soc_pct", 50.0)),
+                        power_kw=float(data.get("power_kw", 0.0)),
+                        temp_c=float(data.get("temp_c", 25.0)),
+                        capacity_kwh=self.capacity_kwh,
+                        available_kw=self.capacity_kwh * 0.5,
+                    )
+                    self._last_telemetry = tel
+                    return tel
+        except Exception as exc:
+            log.warning("site_proxy.fetch_error", site_id=self.site_id, error=str(exc))
+            # Fallback to stub for robustness
+            stub = SiteTelemetry(
+                site_id=self.site_id,
+                soc_pct=60.0,
+                power_kw=0.0,
+                temp_c=28.0,
+                capacity_kwh=self.capacity_kwh,
+                available_kw=self.capacity_kwh * 0.5,
+            )
+            self._last_telemetry = stub
+            return stub
+
+    async def dispatch_setpoint(self, target_kw: float, strategy: str) -> None:
+        """Dispatch a setpoint asynchronously via REST API."""
+        if self._telemetry_fn is not None:
+            log.debug("site_proxy.dispatch_mocked", site_id=self.site_id, target_kw=target_kw)
+            return
+
+        try:
+            connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+            async with aiohttp.ClientSession(connector=connector) as session:
+                url = f"https://{self.host}:8000/api/v1/setpoint" if self.ssl_context else f"http://{self.host}:8000/api/v1/setpoint"
+                payload = {"target_kw": target_kw, "strategy": strategy}
+                async with session.post(url, json=payload, timeout=3.0) as resp:
+                    resp.raise_for_status()
+                    log.info("site_proxy.dispatched", site_id=self.site_id, target_kw=target_kw, strategy=strategy)
+        except Exception as exc:
+            log.warning("site_proxy.dispatch_error", site_id=self.site_id, error=str(exc))
 
     @property
     def last_telemetry(self) -> SiteTelemetry | None:

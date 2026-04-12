@@ -44,6 +44,16 @@ __all__ = ["LCAEngine", "LCAResult", "LCAConfig"]
 
 log = structlog.get_logger(__name__)
 
+# ---------------------------------------------------------------------------
+# Carbon viability thresholds (gCO₂eq/kWh)
+# ---------------------------------------------------------------------------
+# Based on BESS break-even analysis: battery embodied CO₂ (60 kgCO₂/kWh)
+# amortised over 4000 full-cycles at 80% DoD.
+# Net benefit only positive when grid EF > ~30 g/kWh.
+_VIABILITY_LOW_G_KWH: float = 80.0    # EF < 80 → low commercial carbon benefit
+_VIABILITY_MID_G_KWH: float = 200.0   # EF 80–200 → moderate benefit
+_VIABILITY_HIGH_G_KWH: float = 400.0  # EF > 400 → high benefit (coal-heavy grid)
+
 
 @dataclass
 class LCAConfig:
@@ -99,6 +109,7 @@ class LCAEngine:
         self,
         config: LCAConfig | None = None,
         site_id: str = "edge",
+        strict_region: bool = False,
     ) -> None:
         self.config = config or LCAConfig()
         self.site_id = site_id
@@ -110,8 +121,20 @@ class LCAEngine:
         if self.config.grid_emission_factor is not None:
             self._grid_ef = self.config.grid_emission_factor
         else:
+            region_key = self.config.region.upper()
             default_ef = 345.0  # global average gCO₂eq/kWh
-            self._grid_ef = GRID_EMISSION_FACTORS_G_KWH.get(self.config.region.upper(), default_ef)
+            if region_key not in GRID_EMISSION_FACTORS_G_KWH:
+                if strict_region:
+                    raise ValueError(
+                        f"Unsupported region: {self.config.region!r}. "
+                        f"Supported regions: {sorted(GRID_EMISSION_FACTORS_G_KWH.keys())}"
+                    )
+                log.warning(
+                    "lca_engine.unknown_region",
+                    region=self.config.region,
+                    fallback_ef=default_ef,
+                )
+            self._grid_ef = GRID_EMISSION_FACTORS_G_KWH.get(region_key, default_ef)
 
         # Battery embodied carbon amortisation
         if self.config.embodied_co2_per_kwh_kg > 0:
@@ -211,3 +234,65 @@ class LCAEngine:
     def equivalent_trees_planted(self) -> float:
         """Rough equivalence: 1 tree absorbs ~21 kgCO₂/year."""
         return self._cumulative_co2_avoided_kg / 21.0
+
+    @property
+    def carbon_viability_score(self) -> int:
+        """Commercial carbon viability score for this region/EF.
+
+        Returns an integer 0–3 based on grid emission factor:
+
+        - 0: **Marginal** — EF < 80 g/kWh (e.g. Norway, Uruguay, France).
+             BESS may not pay back its embodied CO₂ on carbon savings alone.
+        - 1: **Low** — EF 80–200 g/kWh (e.g. Brazil, Colombia, Sweden).
+             Moderate carbon benefit; revenue case driven by arbitrage.
+        - 2: **Medium** — EF 200–400 g/kWh (e.g. Chile, UK, Germany).
+             Clear carbon benefit; supports carbon credit monetisation.
+        - 3: **High** — EF > 400 g/kWh (e.g. India, Poland, South Africa).
+             Strong carbon case; BESS payback in <5 years on carbon alone.
+
+        Use ``carbon_viability_label`` for a human-readable string.
+        """
+        ef = self._grid_ef
+        if ef < _VIABILITY_LOW_G_KWH:
+            return 0
+        if ef < _VIABILITY_MID_G_KWH:
+            return 1
+        if ef < _VIABILITY_HIGH_G_KWH:
+            return 2
+        return 3
+
+    @property
+    def carbon_viability_label(self) -> str:
+        """Human-readable label for carbon_viability_score."""
+        return [
+            "marginal",   # 0
+            "low",        # 1
+            "medium",     # 2
+            "high",       # 3
+        ][self.carbon_viability_score]
+
+    def viability_report(self) -> dict:
+        """Return a client-facing carbon viability summary dict.
+
+        Suitable for inclusion in PDF reports or API responses.
+
+        Returns
+        -------
+        dict with keys:
+            region, grid_ef_g_kwh, viability_score, viability_label,
+            cumulative_co2_avoided_kg, equivalent_trees, warning (optional).
+        """
+        report: dict = {
+            "region": self.config.region,
+            "grid_ef_g_kwh": round(self._grid_ef, 1),
+            "viability_score": self.carbon_viability_score,
+            "viability_label": self.carbon_viability_label,
+            "cumulative_co2_avoided_kg": round(self._cumulative_co2_avoided_kg, 2),
+            "equivalent_trees": round(self.equivalent_trees_planted, 1),
+        }
+        if self.carbon_viability_score == 0:
+            report["warning"] = (
+                f"Grid EF={self._grid_ef:.0f} g/kWh is below 80 g/kWh. "
+                "Carbon credits may not justify BESS investment in this region."
+            )
+        return report

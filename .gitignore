@@ -179,3 +179,8 @@ pytest_*.txt
 *_out.txt
 *_current.txt
 *_result.txt
+
+# ---------------------------------------------------------------------------
+# Auto-generated reports (use: make consolidate to regenerate)
+# ---------------------------------------------------------------------------
+CONSOLIDATION.md

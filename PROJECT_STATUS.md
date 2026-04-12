@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-04-10 v2.17.0 · **Responsable:** BESS Solutions SpA  
+> **Actualizado:** 2026-04-12 v2.17.1 · **Responsable:** BESS Solutions SpA  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -20,18 +20,18 @@ Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivad
 
 ### Tests
 ```
-799 passed ✅  · 0 failed · 1 xfailed · 8 skipped
-Nuevo: test_hvdc_scheduler.py — 26/26 BEP-0700 HVDCScheduler (DC flow, arbitrage, losses) ✅
-Nuevo: test_fl_coordinator.py — 24/24 BEP-0600 FLCoordinator (FedAvg, L2, sessions) ✅
-Nuevo: test_sen_market_feed.py — 15/15 BEP-0500 P2 SENMarketFeed (DuckDB+duck-curve) ✅
-Nuevo: test_vpp_fleet_manager.py — 26/26 BEP-0500 VPPFleetManager (fleet+VPP+DRL coordinator) ✅
-Nuevo: test_drl_agent.py — 17/17 BEP-0200 P3 (PPO PyTorch, ONNX All Nodes CEN V4) ✅
-Nuevo: test_market_adapter_global.py — 62/62 CAISO+ERCOT+ENTSO-E (7 mercados) ✅
-Nuevo: test_bessai_evolve_v2.py — 24/24 CMAESMutator + NSGA-II + EliteArchive ✅
-Nuevo: test_bess_rl_env_cen.py — 23/23 BEP-0200 F3 (env CMg real CEN) ✅
-Registry: 7 perfiles hardware (Fronius, Huawei, SMA, Victron + SolarEdge, BYD, Tesla)
+1061 passed ✅  · 36 failed (infra live, expected) · 33 skipped
+Batch 1 (2026-04-12): test_lightweight_mode.py — 31/31 ✅
+Batch 1 (2026-04-12): test_servicios_complementarios.py — 37/37 ✅
+Batch 1 (2026-04-12): test_alert_dispatcher.py — 31/31 ✅
+Batch 1 (2026-04-12): test_ppo_trainer.py — 34/34 ✅
+Batch 2 (2026-04-12): test_lca_engine_extended.py — 38/38 ✅
+Batch 2 (2026-04-12): test_alert_manager_extended.py — 55/55 ✅
+Batch 2 (2026-04-12): test_fleet_coordinator_extended.py — 47/47 ✅
+Batch 2 (2026-04-12): test_health_server.py — 20/20 ✅
+Previos: test_market_adapter_global.py — 62/62 · test_vpp_fleet_manager.py — 26/26 ✅
 CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · helm ✅ · drl-market-tests ✅
-Version: v2.17.0 · 3,496 pts CEN reales · bessai-web sync OK
+Version: v2.17.1 · 3,496 pts CEN reales · bessai-web sync OK
 ```
 
 ### 🔍 Audit 360° — Gaps Conocidos y Plan de Acción

@@ -408,6 +408,22 @@ class VPPFleetManager:
     # Main control cycle
     # ------------------------------------------------------------------
 
+    async def _dispatch_all(self, setpoints: list[SiteSetpoint]) -> None:
+        """Asynchronously dispatch all setpoints to their respective SiteProxies."""
+        import asyncio  # noqa: PLC0415
+        
+        coros = []
+        for sp in setpoints:
+            # We access the private _sites dictionary from the fleet orchestrator
+            # pylint: disable=protected-access
+            proxy = self._fleet._sites.get(sp.site_id)
+            if proxy:
+                coros.append(proxy.dispatch_setpoint(sp.target_kw, sp.strategy.value))
+                
+        if coros:
+            await asyncio.gather(*coros, return_exceptions=True)
+            log.info("vpp_fleet.dispatched_concurrently", n_commands=len(coros))
+
     @property
     def has_drl(self) -> bool:
         """True if at least one site has a loaded ONNX DRL model."""
@@ -491,6 +507,10 @@ class VPPFleetManager:
 
         # Step 6: Publish VPP event
         event = self._vpp.publish_event(flex_request_kw=total_kw) if total_kw != 0.0 else None
+
+        # Step 6b: Dispatch setpoints to Edges
+        if setpoints:
+            loop.run_until_complete(self._dispatch_all(setpoints))
 
         duration = time.perf_counter() - t0
 
