@@ -199,6 +199,7 @@
 - remove deprecated fetch_cmg_evolution.py (superseded by bessai_data_scraper.py) (`1f734cd4`, @BESS Solutions)
 
 ### ✨ New Features
+- **infra**: tier-1 scale out with HPA, load tests, and prometheus alerts (`387aae6e`, @testeadoroficial)
 - **metrics**: add prometheus hooks for viability and fleet latency, enhance security (`646c767b`, @testeadoroficial)
 - **consolidate**: agregar script consolidación y metrics prometheus (`5d3bf726`, @testeadoroficial)
 - **core**: migrate to CEN V4 15-min and all-nodes architecture (`7d12120d`, @testeadoroficial)
