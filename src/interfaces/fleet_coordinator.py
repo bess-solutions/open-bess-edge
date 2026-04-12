@@ -29,6 +29,8 @@ from dataclasses import dataclass, field
 
 import structlog
 
+from .metrics import FLEET_LATENCY_MS, INJECTION_KW_CAPACITY
+
 __all__ = ["FleetCoordinator", "FleetSiteState", "SiteSetpoint"]
 
 log = structlog.get_logger(__name__)
@@ -169,6 +171,7 @@ class FleetCoordinator:
         self._sites[site.site_id] = site
         log.debug("fleet.site_registered", site_id=site.site_id,
                   soc_pct=site.soc_pct, max_power_kw=site.max_power_kw)
+        INJECTION_KW_CAPACITY.labels(site_id="edge", fleet_site=site.site_id).set(site.injection_kw)
 
     def update_site(self, site_id: str, **kwargs) -> None:
         """Update telemetry fields for an existing site."""
@@ -179,6 +182,7 @@ class FleetCoordinator:
             if hasattr(site, k):
                 setattr(site, k, v)
         site.last_seen = time.time()
+        INJECTION_KW_CAPACITY.labels(site_id="edge", fleet_site=site.site_id).set(site.injection_kw)
 
     def remove_site(self, site_id: str) -> None:
         """Remove a site from the fleet."""
@@ -241,6 +245,7 @@ class FleetCoordinator:
         Returns:
             List of SiteSetpoint — one per active site.
         """
+        t0 = time.time()
         sites = self.active_sites
         if not sites:
             log.warning("fleet.no_active_sites")
@@ -276,15 +281,17 @@ class FleetCoordinator:
         log.info("fleet.setpoints_computed",
                  n_sites=len(setpoints), dispatch_kw=capped,
                  mode=mode, total_available_kw=round(total_available, 1))
+        FLEET_LATENCY_MS.labels(site_id="edge", operation="compute_setpoints").observe((time.time() - t0) * 1000)
         return setpoints
 
     # ── Summary ───────────────────────────────────────────────────────────────
 
     def fleet_summary(self) -> dict:
         """Return a fleet-wide status dictionary for API/dashboard use."""
+        t0 = time.time()
         stale = [s.site_id for s in self._sites.values() if s.is_stale]
         overtemp = [s.site_id for s in self._sites.values() if s.is_overtemperature]
-        return {
+        res = {
             "n_sites": self.n_sites,
             "n_active": self.n_active_sites,
             "stale_sites": stale,
@@ -295,3 +302,5 @@ class FleetCoordinator:
             "program_id": self.program_id,
             "sites": [s.to_dict() for s in self._sites.values()],
         }
+        FLEET_LATENCY_MS.labels(site_id="edge", operation="summary").observe((time.time() - t0) * 1000)
+        return res

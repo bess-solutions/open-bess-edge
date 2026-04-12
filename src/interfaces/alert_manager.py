@@ -119,6 +119,9 @@ class AlertManager:
         Returns:
             Alert if fired (or updated), None if deduplicated.
         """
+        if not isinstance(message, str) or len(message) > 500:
+            raise ValueError("Invalid alert message. Must be a string <= 500 chars.")
+
         now = time.time()
         last = self._fire_times.get(name, 0.0)
         if now - last < self.dedup_window_s and name in self._active:

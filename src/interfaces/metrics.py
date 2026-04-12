@@ -24,6 +24,7 @@ from prometheus_client import (
     REGISTRY,
     Counter,
     Gauge,
+    Histogram,
     generate_latest,
 )
 
@@ -64,6 +65,10 @@ __all__ = [
     "BESS_SSCC_RESERVED_KW",
     "GRID_FREQUENCY_HZ",
     "GRID_VOLTAGE_V",
+    # v2.17.1 — Commercial and Fleet Readiness
+    "CARBON_VIABILITY_SCORE",
+    "INJECTION_KW_CAPACITY",
+    "FLEET_LATENCY_MS",
 ]
 
 # ---------------------------------------------------------------------------
@@ -239,6 +244,25 @@ GRID_VOLTAGE_V: Gauge = Gauge(
     ["site_id"],
 )
 
+# v2.17.1 — Commercial and Fleet Readiness
+CARBON_VIABILITY_SCORE: Gauge = Gauge(
+    "bess_carbon_viability_score",
+    "Carbon viability score by region (0-3).",
+    ["site_id", "region"],
+)
+
+INJECTION_KW_CAPACITY: Gauge = Gauge(
+    "bess_injection_kw_capacity",
+    "Absolute injection capacity (discharge) available per site in kW.",
+    ["site_id", "fleet_site"],
+)
+
+FLEET_LATENCY_MS: Histogram = Histogram(
+    "bess_fleet_latency_ms",
+    "Latency of fleet coordination operations in milliseconds.",
+    ["site_id", "operation"],
+    buckets=(1.0, 5.0, 10.0, 25.0, 50.0, 100.0, 250.0, 500.0, float("inf")),
+)
 
 def generate_metrics() -> bytes:
     """Return the current metrics snapshot as Prometheus text format."""

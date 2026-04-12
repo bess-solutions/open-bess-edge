@@ -38,6 +38,7 @@ from .lca_config import BATTERY_EMBODIED_CO2_KG_KWH, GRID_EMISSION_FACTORS_G_KWH
 from .metrics import (
     CARBON_AVOIDED_KG,
     CARBON_INTENSITY_G_KWH,
+    CARBON_VIABILITY_SCORE,
 )
 
 __all__ = ["LCAEngine", "LCAResult", "LCAConfig"]
@@ -53,6 +54,8 @@ log = structlog.get_logger(__name__)
 _VIABILITY_LOW_G_KWH: float = 80.0    # EF < 80 → low commercial carbon benefit
 _VIABILITY_MID_G_KWH: float = 200.0   # EF 80–200 → moderate benefit
 _VIABILITY_HIGH_G_KWH: float = 400.0  # EF > 400 → high benefit (coal-heavy grid)
+
+SUPPORTED_REGIONS = frozenset(GRID_EMISSION_FACTORS_G_KWH.keys())
 
 
 @dataclass
@@ -123,11 +126,11 @@ class LCAEngine:
         else:
             region_key = self.config.region.upper()
             default_ef = 345.0  # global average gCO₂eq/kWh
-            if region_key not in GRID_EMISSION_FACTORS_G_KWH:
+            if region_key not in SUPPORTED_REGIONS:
                 if strict_region:
                     raise ValueError(
                         f"Unsupported region: {self.config.region!r}. "
-                        f"Supported regions: {sorted(GRID_EMISSION_FACTORS_G_KWH.keys())}"
+                        f"Supported regions: {sorted(SUPPORTED_REGIONS)}"
                     )
                 log.warning(
                     "lca_engine.unknown_region",
@@ -146,6 +149,12 @@ class LCAEngine:
         self._total_battery_co2_kg = self._battery_embodied_co2 * self.config.capacity_kwh
         # Co₂ per full equivalent cycle
         self._co2_per_fec_kg = self._total_battery_co2_kg / self.config.design_cycles
+
+        # Init metrics
+        CARBON_INTENSITY_G_KWH.labels(site_id=self.site_id).set(self._grid_ef)
+        CARBON_VIABILITY_SCORE.labels(
+            site_id=self.site_id, region=self.config.region.upper()
+        ).set(self.carbon_viability_score)
 
         log.info(
             "lca_engine.init",
