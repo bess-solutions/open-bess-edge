@@ -143,6 +143,7 @@
 
 
 ### 📚 Documentation
+- add operations guide and locust analysis script for tier-1 validation (`25d631cf`, @testeadoroficial)
 - **benchmarks**: v2.16.0 — 8 nodos CEN, BEP-0500/0600/0700, 570 días, 799 tests, revenue table (`3f925094`, @BESS Solutions)
 - **readme**: v2.16.0 — 799 tests, BEP-0700 HVDC, VPP fleet, FL coordinator, real roadmap + structure (`d26fe72d`, @BESS Solutions)
 - **status**: 799 tests, HVDCScheduler BEP-0700 Sprint J (`3d31cf10`, @BESS Solutions)
