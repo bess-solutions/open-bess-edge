@@ -15,13 +15,18 @@ Endpoints disponibles:
     http://localhost:8000/fleet/summary
     http://localhost:8000/fleet/sites
     http://localhost:8000/api/v1/telemetry
+
+Nota HPA/Multi-worker Tier-1: 
+Debido a la ausencia de os.fork en Windows nativo, para simular replicación de 
+workers concurrentes similares a K8s con Gunicorn/Uvicorn, se recomienda usar Docker:
+> docker run -d -p 8000:8000 bessai-edge gunicorn -w 4 -k aiohttp.GunicornWebWorker demo_server:app
 """
 import asyncio
 import math
 import random
 import time
 
-from src.interfaces.metrics import CARBON_VIABILITY_SCORE, FLEET_LATENCY_MS
+from src.interfaces.metrics import BATTERY_DEGRADATION, CARBON_VIABILITY_SCORE, FLEET_LATENCY_MS
 from src.interfaces.server import BESSAIServer
 
 
@@ -90,6 +95,12 @@ async def simulate_loop(server: BESSAIServer) -> None:
         # P99 base de ~20-30ms, si falla compliance inyectamos picos simulados de > 100ms
         latency = random.uniform(15.0, 35.0) if compliance_ok else random.uniform(90.0, 150.0)
         FLEET_LATENCY_MS.labels(site_id="DEMO-CL-001", operation="fleet_sync").observe(latency)
+
+        # Degradacion de bacteria correlacionada
+        # Penaliza alta latencia y altos SOC/Descargas
+        degradation_delta = 0.005 if compliance_ok else 0.05
+        base_degrad = 2.1 + (cycle * degradation_delta) 
+        BATTERY_DEGRADATION.labels(site_id="DEMO-CL-001", battery_id="BAT-01").set(base_degrad)
 
         # Log de ciclo
         direction = "(UP) cargando" if power_kw < 0 else "(DOWN) descargando"

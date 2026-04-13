@@ -53,6 +53,7 @@ def analyze(csv_file: str) -> None:
             try:
                 p99 = float(parts[idx_p99])
                 fails = int(parts[idx_fails])
+                reqs = int(parts[idx_reqs])
             except ValueError:
                 continue
 
@@ -61,8 +62,12 @@ def analyze(csv_file: str) -> None:
             if p99 > 100.0:
                 print(f"  [!] ALERTA: Violación de SLA en {name} (P99 = {p99}ms > 100ms)")
                 sla_violation = True
-            if fails > 0:
-                print(f"  [!] ALERTA: Detectados {fails} fallos en el endpoint {name}.")
+            
+            if reqs > 0:
+                error_rate = fails / reqs
+                if error_rate > 0.001:
+                    print(f"  [!] ALERTA: Tasa de errores inaceptable en {name}: {error_rate:.2%} (> 0.1% SLA)")
+                    sla_violation = True
 
     print("-------------------------------------------------")
     if sla_violation:

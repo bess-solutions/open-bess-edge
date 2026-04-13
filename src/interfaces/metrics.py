@@ -69,6 +69,7 @@ __all__ = [
     "CARBON_VIABILITY_SCORE",
     "INJECTION_KW_CAPACITY",
     "FLEET_LATENCY_MS",
+    "BATTERY_DEGRADATION",
 ]
 
 # ---------------------------------------------------------------------------
@@ -262,6 +263,12 @@ FLEET_LATENCY_MS: Histogram = Histogram(
     "Latency of fleet coordination operations in milliseconds.",
     ["site_id", "operation"],
     buckets=(1.0, 5.0, 10.0, 25.0, 50.0, 100.0, 250.0, 500.0, float("inf")),
+)
+
+BATTERY_DEGRADATION: Gauge = Gauge(
+    "bess_battery_degradation",
+    "Daily battery degradation estimated percentage.",
+    ["site_id", "battery_id"],
 )
 
 def generate_metrics() -> bytes:
