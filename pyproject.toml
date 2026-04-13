@@ -43,15 +43,15 @@ classifiers = [
 dependencies = [
     "pydantic-settings>=2.2",
     "pymodbus>=3.6",
-    "scikit-learn>=1.4",
-    "onnxruntime>=1.17",
+    "scikit-learn>=1.7.2",
+    "onnxruntime>=1.24.3",
     "google-cloud-pubsub>=2.20",
     "opentelemetry-sdk>=1.23",
     "opentelemetry-exporter-otlp>=1.23",
     "prometheus-client>=0.20",
     "structlog>=24.1",
     "aiohttp>=3.9",
-    "numpy>=1.26",
+    "numpy>=2.2.6",
 ]
 
 [project.optional-dependencies]
@@ -89,7 +89,7 @@ drl-standalone = [
     "torch>=2.5",
     "onnx>=1.15",
     "onnxscript>=0.1",
-    "onnxruntime>=1.17",
+    "onnxruntime>=1.24.3",
 ]
 # Full DRL stack (all optional deps)
 full = [
