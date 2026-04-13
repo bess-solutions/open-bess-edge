@@ -187,6 +187,7 @@
 - **quality**: remediacion completa Pyright 0 errores + Bandit 0 alertas Medium/High (`bbb366cc`, @BESS Solutions)
 
 ### 🔧 Maintenance
+- bump bessai-web submodule after tier-1 web sync (`470a1e9f`, @testeadoroficial)
 - **docs**: actualizar archivos de proyecto a v2.17.0 (`4b33d4ce`, @testeadoroficial)
 - 360Deg consolidation 2026-03-12 v2.15.1 (`bfedfa11`, @BESS Solutions)
 - 360Deg consolidation 2026-03-12 v2.15.1 (`3be19636`, @BESS Solutions)
