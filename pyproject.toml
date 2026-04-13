@@ -67,7 +67,7 @@ drl = [
     "gymnasium>=0.29",
     "ray[rllib]>=2.9",
     "torch>=2.2",
-    "onnx>=1.15",
+    "onnx>=1.21.0",
 ]
 # Simulation / RL environment only (without full Ray RLlib)
 sim = [
@@ -87,7 +87,7 @@ marl = [
 drl-standalone = [
     "gymnasium>=1.0",
     "torch>=2.5",
-    "onnx>=1.15",
+    "onnx>=1.21.0",
     "onnxscript>=0.1",
     "onnxruntime>=1.17",
 ]
@@ -96,7 +96,7 @@ full = [
     "gymnasium>=0.29",
     "ray[rllib]>=2.9",
     "torch>=2.2",
-    "onnx>=1.15",
+    "onnx>=1.21.0",
     "pulp>=2.8",
     "highspy>=1.7",
     "pettingzoo>=1.24",
