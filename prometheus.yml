@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'bessai-edge'
+    static_configs:
+      - targets: ['bessai-edge:8000']
+        labels:
+          deployment: "local-pilot"
