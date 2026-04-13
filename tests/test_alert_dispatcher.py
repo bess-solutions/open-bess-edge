@@ -20,10 +20,7 @@ import os
 import smtplib
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from src.core.alert_dispatcher import AlertDispatcher, AlertSeverity
-
 
 # ---------------------------------------------------------------------------
 # Helpers / fixtures

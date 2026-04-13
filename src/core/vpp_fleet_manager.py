@@ -411,7 +411,7 @@ class VPPFleetManager:
     async def _dispatch_all(self, setpoints: list[SiteSetpoint]) -> None:
         """Asynchronously dispatch all setpoints to their respective SiteProxies."""
         import asyncio  # noqa: PLC0415
-        
+
         coros = []
         for sp in setpoints:
             # We access the private _sites dictionary from the fleet orchestrator
@@ -419,7 +419,7 @@ class VPPFleetManager:
             proxy = self._fleet._sites.get(sp.site_id)
             if proxy:
                 coros.append(proxy.dispatch_setpoint(sp.target_kw, sp.strategy.value))
-                
+
         if coros:
             await asyncio.gather(*coros, return_exceptions=True)
             log.info("vpp_fleet.dispatched_concurrently", n_commands=len(coros))

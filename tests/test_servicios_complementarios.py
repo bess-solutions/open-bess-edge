@@ -19,14 +19,10 @@ from __future__ import annotations
 import os
 
 import pytest
-
 from src.core.servicios_complementarios import (
-    SCEligibility,
     SCOffer,
-    SCRevenueEstimate,
     ServiciosComplementarios,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

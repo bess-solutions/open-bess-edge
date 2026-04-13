@@ -13,7 +13,6 @@ Run con:
 from __future__ import annotations
 
 import json
-from datetime import date
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -45,14 +44,17 @@ def _make_response(data, status_code: int = 200):
 
 class TestMarketAdapterRegistry:
     def test_all_markets_registered(self):
-        from src.core.market_adapter import MarketAdapterRegistry, _ADAPTERS
+        from src.core.market_adapter import MarketAdapterRegistry
         markets = MarketAdapterRegistry.available_markets()
         expected = {"SEN", "COES", "XM", "CENACE", "CAISO", "ERCOT", "ENTSOE"}
         assert expected.issubset(set(markets)), f"Missing: {expected - set(markets)}"
 
     def test_registry_returns_correct_type(self):
         from src.core.market_adapter import (
-            MarketAdapterRegistry, CAISOAdapter, ERCOTAdapter, ENTSOEAdapter,
+            CAISOAdapter,
+            ENTSOEAdapter,
+            ERCOTAdapter,
+            MarketAdapterRegistry,
         )
         MarketAdapterRegistry.reset()
         assert isinstance(MarketAdapterRegistry.get("CAISO"), CAISOAdapter)
@@ -421,8 +423,9 @@ ALL_MARKETS = ["SEN", "COES", "XM", "CENACE", "CAISO", "ERCOT", "ENTSOE"]
 @pytest.mark.parametrize("market_id", ALL_MARKETS)
 def test_all_adapters_fallback_returns_24_prices(market_id):
     """Every adapter must return exactly 24 SpotPrice objects when API fails."""
-    from src.core.market_adapter import MarketAdapterRegistry
     import os
+
+    from src.core.market_adapter import MarketAdapterRegistry
     # Ensure ENTSO-E token missing to trigger fallback
     os.environ.pop("BESSAI_ENTSOE_TOKEN", None)
     MarketAdapterRegistry.reset()

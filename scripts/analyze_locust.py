@@ -7,8 +7,9 @@ Uso:
     python scripts/analyze_locust.py results_stats.csv
 """
 
-import sys
 import os
+import sys
+
 
 def analyze(csv_file: str) -> None:
     if not os.path.exists(csv_file):
@@ -16,18 +17,18 @@ def analyze(csv_file: str) -> None:
         sys.exit(1)
 
     print(f"--- BESSAI Load Test Analysis ({csv_file}) ---")
-    
+
     sla_violation = False
-    
-    with open(csv_file, "r", encoding="utf-8") as f:
+
+    with open(csv_file, encoding="utf-8") as f:
         lines = f.readlines()
-        
+
         if len(lines) <= 1:
             print("CSV vacío o sin suficientes datos.")
             return
 
         headers = lines[0].strip().split(",")
-        
+
         try:
             # Buscar índices comunes dinámicamente tolerando comillas o sin comillas
             stripped_headers = [h.strip('"') for h in headers]
@@ -43,7 +44,7 @@ def analyze(csv_file: str) -> None:
             parts = line.strip().split(",")
             if len(parts) < max(idx_name, idx_reqs, idx_fails, idx_p99):
                 continue
-                
+
             name = parts[idx_name].strip('"')
             if name == "Aggregated":
                 print(f"\nResumen Global: {parts[idx_reqs]} peticiones, {parts[idx_fails]} fallos.")
@@ -54,9 +55,9 @@ def analyze(csv_file: str) -> None:
                 fails = int(parts[idx_fails])
             except ValueError:
                 continue
-                
+
             print(f"Endpoint: {name:20s} | P99: {p99} ms | Fallos: {fails}")
-            
+
             if p99 > 100.0:
                 print(f"  [!] ALERTA: Violación de SLA en {name} (P99 = {p99}ms > 100ms)")
                 sla_violation = True
@@ -74,5 +75,5 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Uso: python analyze_locust.py <archivo_stats.csv>")
         sys.exit(1)
-    
+
     analyze(sys.argv[1])

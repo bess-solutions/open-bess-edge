@@ -21,10 +21,7 @@ from __future__ import annotations
 
 import time
 
-import pytest
-
 from src.interfaces.alert_manager import Alert, AlertLevel, AlertManager
-
 
 # ---------------------------------------------------------------------------
 # Alert dataclass

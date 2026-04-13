@@ -21,7 +21,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 from src.core.sen_market_feed import SENMarketFeed
 
-
 # ─── Helpers ────────────────────────────────────────────────────────────────
 
 def _feed_no_db(node: str = "Lo_Aguirre") -> SENMarketFeed:

@@ -17,14 +17,12 @@ Run with:
 
 from __future__ import annotations
 
-import json
 import os
 import time
 from pathlib import Path
 
 import numpy as np
 import pytest
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -241,7 +239,7 @@ class TestBESSArbitrageEnvCEN:
 
     def test_multiple_nodes_all_work(self):
         """Each CEN node should be usable as an env without errors."""
-        from src.agents.bess_rl_env_cen import BESSArbitrageEnvCEN, CEN_NODES
+        from src.agents.bess_rl_env_cen import CEN_NODES, BESSArbitrageEnvCEN
 
         path = _resolve_cmg_path()
         for node in CEN_NODES:

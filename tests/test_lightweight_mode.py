@@ -19,15 +19,13 @@ from __future__ import annotations
 import os
 
 import pytest
-
 from src.core.lightweight_mode import (
-    LightweightModeManager,
     _ALWAYS_ACTIVE,
     _OPTIONAL_COMPONENTS,
+    LightweightModeManager,
     is_lightweight_active,
     should_enable_component,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

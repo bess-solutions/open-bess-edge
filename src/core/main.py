@@ -54,6 +54,7 @@ from src.core.safety import SafetyGuard
 from src.drivers.base import DataProvider
 from src.drivers.modbus_driver import UniversalDriver
 from src.drivers.simulator_driver import SimMode, SimulatorDriver
+from src.interfaces.ancillary_services import CapacityAllocator
 from src.interfaces.metrics import (
     BESS_SSCC_RESERVED_KW,
     CYCLES_TOTAL,
@@ -71,7 +72,6 @@ from src.interfaces.otel_setup import configure_otel, get_tracer, shutdown_otel
 from src.interfaces.pubsub_publisher import PubSubPublisher
 from src.interfaces.sep2_adapter import SEP2Error, build_adapter_from_env
 from src.interfaces.server import BESSAIServer
-from src.interfaces.ancillary_services import CapacityAllocator
 
 # BEP-0200 — DRL Arbitrage Agent (optional, fail-safe)
 try:

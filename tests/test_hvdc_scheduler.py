@@ -19,7 +19,6 @@ from __future__ import annotations
 import pytest
 from src.core.hvdc_scheduler import HVDCFlowDirection, HVDCScheduler
 
-
 # ─── Helpers ────────────────────────────────────────────────────────────────
 
 def _sched(link_mw: float = 500.0, min_spread: float = 5.0) -> HVDCScheduler:

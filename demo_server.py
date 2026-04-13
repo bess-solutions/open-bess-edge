@@ -18,11 +18,11 @@ Endpoints disponibles:
 """
 import asyncio
 import math
+import random
 import time
 
-import random
-from src.interfaces.server import BESSAIServer
 from src.interfaces.metrics import CARBON_VIABILITY_SCORE, FLEET_LATENCY_MS
+from src.interfaces.server import BESSAIServer
 
 
 async def simulate_loop(server: BESSAIServer) -> None:
@@ -85,7 +85,7 @@ async def simulate_loop(server: BESSAIServer) -> None:
         # Score entre 1.0 (mal mix) a 3.0 (gran mix)
         carbon_score = random.uniform(2.1, 2.9) if compliance_ok else random.uniform(0.5, 1.8)
         CARBON_VIABILITY_SCORE.labels(site_id="DEMO-CL-001", region="CL").set(carbon_score)
-        
+
         # Latency
         # P99 base de ~20-30ms, si falla compliance inyectamos picos simulados de > 100ms
         latency = random.uniform(15.0, 35.0) if compliance_ok else random.uniform(90.0, 150.0)

@@ -24,17 +24,14 @@ import time
 
 import pytest
 from aiohttp.test_utils import make_mocked_request
-
-from src.interfaces.alert_manager import Alert, AlertLevel, AlertManager
+from src.interfaces.alert_manager import AlertLevel, AlertManager
 from src.interfaces.fleet_coordinator import (
     FleetCoordinator,
     FleetSiteState,
-    SiteSetpoint,
 )
 from src.interfaces.health import HealthServer
-from src.interfaces.lca_engine import LCAConfig, LCAEngine
 from src.interfaces.lca_config import GRID_EMISSION_FACTORS_G_KWH
-
+from src.interfaces.lca_engine import LCAConfig, LCAEngine
 
 # ---------------------------------------------------------------------------
 # 1. LCAEngine — carbon_viability_score
