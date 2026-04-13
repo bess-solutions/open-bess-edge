@@ -57,7 +57,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0", "pytest-asyncio>=0.23", "pytest-cov>=4.1",
-    "ruff>=0.3", "mypy>=1.9", "bandit>=1.7", "pip-audit>=2.7",
+    "ruff>=0.3", "mypy>=1.9", "bandit>=1.7", "pip-audit>=2.10.0",
 ]
 docs = [
     "mkdocs-material>=9.5", "mkdocs-minify-plugin>=0.8",
