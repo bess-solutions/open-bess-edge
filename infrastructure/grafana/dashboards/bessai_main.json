@@ -655,6 +655,107 @@
                     "refId": "A"
                 }
             ]
+        },
+        {
+            "id": 14,
+            "type": "stat",
+            "title": "🌿 Carbon Viability Score",
+            "gridPos": {
+                "x": 0,
+                "y": 30,
+                "w": 12,
+                "h": 6
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "red",
+                                "value": null
+                            },
+                            {
+                                "color": "orange",
+                                "value": 1
+                            },
+                            {
+                                "color": "green",
+                                "value": 2
+                            }
+                        ]
+                    }
+                }
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ]
+                },
+                "colorMode": "background"
+            },
+            "targets": [
+                {
+                    "expr": "bess_carbon_viability_score{site_id=~\"$site\"}",
+                    "legendFormat": "Viability Score",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "id": 15,
+            "type": "timeseries",
+            "title": "⚡ Fleet Latency (ms)",
+            "gridPos": {
+                "x": 12,
+                "y": 30,
+                "w": 12,
+                "h": 6
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "ms",
+                    "custom": {
+                        "lineWidth": 2,
+                        "fillOpacity": 15
+                    },
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 100
+                            }
+                        ]
+                    }
+                }
+            },
+            "options": {
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "targets": [
+                {
+                    "expr": "histogram_quantile(0.99, rate(bess_fleet_latency_ms_bucket{site_id=~\"$site\"}[5m]))",
+                    "legendFormat": "P99 Latency (ms)",
+                    "refId": "A"
+                }
+            ]
         }
     ],
     "refresh": "10s",
