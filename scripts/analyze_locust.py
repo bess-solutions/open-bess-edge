@@ -29,11 +29,12 @@ def analyze(csv_file: str) -> None:
         headers = lines[0].strip().split(",")
         
         try:
-            # Buscar índices comunes dinámicamente
-            idx_name = headers.index('"Name"')
-            idx_reqs = headers.index('"Request Count"')
-            idx_fails = headers.index('"Failure Count"')
-            idx_p99 = headers.index('"99%"')
+            # Buscar índices comunes dinámicamente tolerando comillas o sin comillas
+            stripped_headers = [h.strip('"') for h in headers]
+            idx_name = stripped_headers.index('Name')
+            idx_reqs = stripped_headers.index('Request Count')
+            idx_fails = stripped_headers.index('Failure Count')
+            idx_p99 = stripped_headers.index('99%')
         except ValueError as e:
             print(f"Formato de CSV no soportado: {e}")
             return
@@ -64,10 +65,10 @@ def analyze(csv_file: str) -> None:
 
     print("-------------------------------------------------")
     if sla_violation:
-        print("❌ Resultado: SLA de Tier-1 NO CUMPLIDO.")
+        print("[FAIL] Resultado: SLA de Tier-1 NO CUMPLIDO.")
         sys.exit(1)
     else:
-        print("✅ Resultado: Operaciones normales, SLA CUMPLIDO.")
+        print("[PASS] Resultado: Operaciones normales, SLA CUMPLIDO.")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

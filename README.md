@@ -17,7 +17,7 @@
 [![BESSAI-SPEC](https://img.shields.io/badge/BESSAI--SPEC-4_normative_docs-blueviolet)](docs/specs/)
 [![BEP Process](https://img.shields.io/badge/BEPs-10_proposals-lightblue)](docs/bep/BEP-0001.md)
 [![Tests](https://img.shields.io/badge/tests-799_passing-brightgreen)](tests/)
-[![Version](https://img.shields.io/badge/version-v2.16.0-blue)](.)
+[![Version](https://img.shields.io/badge/version-v2.17.1-blue)](.)
 [![Security](https://img.shields.io/badge/Security-SECURITY.md-red)](SECURITY.md)
 
 [**Documentation**](https://bess-solutions.github.io/open-bess-edge) · [**Quick Start**](#-quick-start) · [**Discord**](https://discord.gg/ZqpE8AZs) · [**BEP Proposals**](docs/bep/BEP-0001.md) · [**Roadmap**](#-roadmap)
@@ -237,7 +237,8 @@ Open in VS Code → **Reopen in Container** — all dependencies, pre-commit hoo
 | **FL Coordinator** | Federated Learning FedAvg (capacity-weighted), L2 convergence | BEP-0600 |
 | **HVDC Scheduler** | Inter-regional DC power flow arbitrage (500MW, 1.8% losses) | BEP-0700 |
 | **CMg Live Feed** | Real-time Chilean SEN spot price ingestion | BEP-0302 |
-| **Explainable AI (XAI)** | SHAP-based decision explanations | BEP-0301 |
+| **Fleet P99 SLAs** | Locust Load Testing SLA guard rails (<100ms latency) | – |
+| **Tier-1 Operability** | Prometheus Alerts (`HighFleetLatency`, `LowCarbon`) & K8s HPA auto-scaling | – |
 | **OpenTelemetry** | Distributed traces + metrics to GCP / Datadog / Grafana | – |
 | **Global Market Adapters** | CAISO · ERCOT · ENTSO-E · SEN · COES · XM · CENACE | – |
 | **Multi-arch Docker** | amd64 + arm64 (Raspberry Pi 4/5 native) | – |
@@ -272,10 +273,10 @@ Open in VS Code → **Reopen in Container** — all dependencies, pre-commit hoo
 | ✅ Done | IEC 62443 SL-1/2 · OpenSSF · BEPs 0100–0303 · BESSAIEvolve v1 | v2.10.0–v2.12.0 |
 | ✅ Done | **8 CEN DRL ONNX models** · PPO trainer · Global Market Adapters (CAISO, ERCOT, ENTSO-E) | v2.14.0 |
 | ✅ Done | **VPP Fleet Manager (BEP-0500)** · SENMarketFeed CEN live · Multi-site ONNX DRL dispatch | v2.15.0 |
-| ✅ Done | **FL Coordinator (BEP-0600)** · FedAvg capacity-weighted · L2 convergence · 799 CI tests | **v2.16.0** |
+| ✅ Done | **FL Coordinator (BEP-0600)** · FedAvg capacity-weighted · L2 convergence · 799 CI tests | v2.16.0 |
 | ✅ Done | **HVDC Scheduler (BEP-0700)** · DC power flow · 500MW · inter-regional price arbitrage | v2.16.0 |
-| 🔵 Planned | Flower (flwr) integration for FL · gRPC + mTLS FL protocol | v2.17.0 |
-| 🔵 Planned | VPP HTTP real dispatch (mTLS SiteProxy) · HVDC TSO integration | v2.18.0 |
+| ✅ Done | **Tier-1 Observability** · Prometheus Alerts (HighFleetLatency/Carbon) · K8s HPA | **v2.17.1** |
+| 🔵 Planned | Flower (flwr) integration for FL · gRPC + mTLS FL protocol | v2.18.0 |
 | 🔵 Planned | P2P Energy Trading · LCA Engine · Carbon Dashboard | 2027 |
 
 See full roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)

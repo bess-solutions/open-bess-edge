@@ -20,7 +20,9 @@ import asyncio
 import math
 import time
 
+import random
 from src.interfaces.server import BESSAIServer
+from src.interfaces.metrics import CARBON_VIABILITY_SCORE, FLEET_LATENCY_MS
 
 
 async def simulate_loop(server: BESSAIServer) -> None:
@@ -79,9 +81,19 @@ async def simulate_loop(server: BESSAIServer) -> None:
             {"site_id": "DEMO-CL-003", "soc_pct": round(soc * 1.05, 1), "p_kw": round(power_kw * 1.1, 2)},
         ])
 
+        # Export MOCK Tier-1 Metrics
+        # Score entre 1.0 (mal mix) a 3.0 (gran mix)
+        carbon_score = random.uniform(2.1, 2.9) if compliance_ok else random.uniform(0.5, 1.8)
+        CARBON_VIABILITY_SCORE.labels(site_id="DEMO-CL-001", region="CL").set(carbon_score)
+        
+        # Latency
+        # P99 base de ~20-30ms, si falla compliance inyectamos picos simulados de > 100ms
+        latency = random.uniform(15.0, 35.0) if compliance_ok else random.uniform(90.0, 150.0)
+        FLEET_LATENCY_MS.labels(site_id="DEMO-CL-001", operation="fleet_sync").observe(latency)
+
         # Log de ciclo
-        direction = "↑ cargando" if power_kw < 0 else "↓ descargando"
-        status = "✅ COMPLIANT" if compliance_ok else "⚠️  VIOLATION"
+        direction = "(UP) cargando" if power_kw < 0 else "(DOWN) descargando"
+        status = "[OK] COMPLIANT" if compliance_ok else "[!] VIOLATION"
         print(f"  Ciclo {cycle:04d} | SOC: {soc:.1f}% | P: {power_kw:+.1f} kW {direction} | {status}")
 
         await asyncio.sleep(5.0)
@@ -90,12 +102,12 @@ async def simulate_loop(server: BESSAIServer) -> None:
 async def main() -> None:
     server = BESSAIServer(
         site_id="DEMO-CL-001",
-        version="2.15.0-demo",
+        version="v2.17.1-demo",
         port=8000,
     )
 
     print("=" * 60)
-    print("  BESSAI Edge Gateway — Demo Server v2.15.0")
+    print("  BESSAI Edge Gateway — Demo Server v2.17.1 (Tier-1)")
     print("=" * 60)
     print()
     print("  Endpoints disponibles:")

@@ -137,6 +137,8 @@ Prometheus v2.16.0                          OK      ← localhost:9090
 | **WatchdogManager** | `src/core/watchdog_manager.py` | **v1.0** | ✅ **NUEVO v2.9** — Self-healing autónomo, exponential backoff, Prometheus, AlertDispatcher |
 | **Scrollytelling Landing** | `landing/` (React + Vite) | **v1.0** | ✅ **NUEVO v2.10** — i18n ES/EN, Lucide icons, FAQ/Features, scrollytelling animations |
 | **CapacityAllocator (SS.CC.)** | `src/core/main.py` | **v2.17.0** | ✅ **NUEVO v2.17.0** — Asignación NTSyCS y clamping dinámico DRL |
+| **Locust Load Tests** | `tests/load/locustfile.py` | **v1.0** | ✅ **NUEVO v2.17.1** — P99 < 100ms SLA, analyze_locust.py CI audit |
+| **Tier-1 HPA K8s** | `infrastructure/helm` | **v2.17.1** | ✅ **NUEVO v2.17.1** — Auto-scaling en base a `bess_fleet_latency_ms` PromQA |
 
 ### 🐳 Stack Docker — ✅ COMPLETAMENTE OPERATIVO (v1.0.1)
 
