@@ -202,6 +202,7 @@
 - remove deprecated fetch_cmg_evolution.py (superseded by bessai_data_scraper.py) (`1f734cd4`, @BESS Solutions)
 
 ### ✨ New Features
+- **pilot**: battery degradation metrics, readiness probe and stricter locust SLA (`572916a6`, @testeadoroficial)
 - **infra**: certify tier-1 SLA compliance with prometheus metrics and locust validation (`87620aa2`, @testeadoroficial)
 - **infra**: tier-1 scale out with HPA, load tests, and prometheus alerts (`387aae6e`, @testeadoroficial)
 - **metrics**: add prometheus hooks for viability and fleet latency, enhance security (`646c767b`, @testeadoroficial)
