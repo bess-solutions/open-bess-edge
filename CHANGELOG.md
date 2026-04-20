@@ -142,6 +142,7 @@
 
 
 ### 📚 Documentation
+- **hardware**: agregar diagrama relacional Mermaid al wiring diagram (`7d9def4d`, @testeadoroficial)
 - **hardware**: documentar integración física del Watchdog LED 13 en Wiring Diagram (`dc080bca`, @testeadoroficial)
 - add operations guide and locust analysis script for tier-1 validation (`25d631cf`, @testeadoroficial)
 - **benchmarks**: v2.16.0 — 8 nodos CEN, BEP-0500/0600/0700, 570 días, 799 tests, revenue table (`3f925094`, @BESS Solutions)
