@@ -37,6 +37,11 @@ Cuando el DRL decida descargar y vender energía a Precio Margina (CMg) elevado,
 - **LED Anodo (Pata larga)**: Pin digital `8` del SainSmart (Con Resistencia de 220Ω en serie).
 - **LED Cátodo (Pata corta)**: Línea `GND`. 
 
+### 5. Indicador de Conexión y Lazo Vivo (BESSAI Watchdog Heartbeat)
+No es necesario cablear nada extra para esta funcionalidad. BESSAI utiliza el LED integrado en la propia placa del Arduino (marcado con una pequeña letra "L" al lado del chip).
+Cuando el software del Gateway inyecta exitosamente el pulso de latido al Servidor Modbus por TCP y FC06 (Escritura simple), el Arduino encenderá y apagará el LED "L" indicando que el Gateway de Inteligencia Artificial está vivo y controlando el circuito.
+- **Hardware Integrado**: Pin digital interno `13` (`LED_BUILTIN`).
+
 ## Cuidados Operacionales
 
 1. Procura alimentar directamente con el cable USB desde el computador, eso proporcionará energía estándar.
