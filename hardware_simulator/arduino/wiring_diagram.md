@@ -2,52 +2,7 @@
 
 El proyecto requiere los siguientes periféricos que se deben cablear físicamente en una Placa de Pruebas (Breadboard) o conectados directamente a las patas del SainSmart UNO (Arduino Uno clon).
 
-```mermaid
-graph LR
-    %% Entidades Base
-    BESSAI[💻 Gateway BESSAI\nTCP localhost:5020]
-    ARDUINO((🔴 SainSmart UNO\nArduino R3))
-    
-    %% Nodos de Alimentación a Sensores
-    VCC_5V[⚡ +5V Pin]
-    GND_PIN[🔌 GND Pin]
-
-    %% Sensores de Entrada
-    subgraph Inputs [Sensores y Feedback IA]
-        POT_SOC[🎛️ Potenciómetro 10kΩ\n(Simula SOC)]
-        POT_TEMP[🎛️ Potenciómetro 10kΩ\n(Simula Temp °C)]
-    end
-    
-    %% Actuadores y Salidas
-    subgraph Outputs [Actuadores Locales (Reacción IA)]
-        LED_CHG((🟢 LED Carga\nResistencia 220Ω))
-        LED_DIS((🔴 LED Descarga\nResistencia 220Ω))
-        LED_13((💡 LED interno 'L'\nWatchdog Pulse))
-    end
-    
-    %% Conectividad
-    BESSAI <-->|Cable USB\nModbus RTU over Serial COM| ARDUINO
-    
-    %% Alimentaciones
-    VCC_5V -.->|Pata 1| POT_SOC
-    VCC_5V -.->|Pata 1| POT_TEMP
-    
-    GND_PIN -.->|Pata 3| POT_SOC
-    GND_PIN -.->|Pata 3| POT_TEMP
-    GND_PIN -.->|Cátodo| LED_CHG
-    GND_PIN -.->|Cátodo| LED_DIS
-
-    %% Señales
-    POT_SOC -->|Pata 2 Central\nSeñal a A0| ARDUINO
-    POT_TEMP -->|Pata 2 Central\nSeñal a A1| ARDUINO
-    
-    ARDUINO -->|Señal D7\n(Power < 0)| LED_CHG
-    ARDUINO -->|Señal D8\n(Power > 0)| LED_DIS
-    ARDUINO -.->|Integrado en placa\n(D13)| LED_13
-
-    classDef arduino fill:#00878F,stroke:#005c5f,color:white,stroke-width:2px;
-    class ARDUINO arduino;
-```
+![Diagrama de Cableado Físico Arduino (Breadboard)](assets/arduino_wiring_diagram.png)
 
 ## Lista de Materiales (BOM)
 
