@@ -202,6 +202,7 @@
 - remove deprecated fetch_cmg_evolution.py (superseded by bessai_data_scraper.py) (`1f734cd4`, @BESS Solutions)
 
 ### ✨ New Features
+- **hardware**: mapping visual feedback de Watchdog Heartbeat a LED_BUILTIN Arduino e integrar FC06 a bridge (`3767f377`, @testeadoroficial)
 - **observability**: add docker-compose for prometheus/grafana and create L2 support playbook (`98a702e3`, @testeadoroficial)
 - **pilot**: battery degradation metrics, readiness probe and stricter locust SLA (`572916a6`, @testeadoroficial)
 - **infra**: certify tier-1 SLA compliance with prometheus metrics and locust validation (`87620aa2`, @testeadoroficial)
