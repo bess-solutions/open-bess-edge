@@ -186,6 +186,7 @@
 - **quality**: remediacion completa Pyright 0 errores + Bandit 0 alertas Medium/High (`bbb366cc`, @BESS Solutions)
 
 ### 🔧 Maintenance
+- **docs**: actualizar archivos de proyecto a v2.17.0 (`833ce262`, @testeadoroficial)
 - formatting and autofix unused imports via ruff (`03999c6f`, @testeadoroficial)
 - bump bessai-web submodule after tier-1 web sync (`470a1e9f`, @testeadoroficial)
 - **docs**: actualizar archivos de proyecto a v2.17.0 (`4b33d4ce`, @testeadoroficial)
