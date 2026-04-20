@@ -222,7 +222,10 @@ async def main() -> None:  # noqa: C901
     # ── Register OS signal handlers ───────────────────────────────────────
     loop = asyncio.get_running_loop()
     for sig in (signal.SIGINT, signal.SIGTERM):
-        loop.add_signal_handler(sig, _handle_signal, sig)
+        try:
+            loop.add_signal_handler(sig, _handle_signal, sig)
+        except NotImplementedError:
+            pass  # Ignorado en Windows (EventLoop no soporta señales POSIX)
 
     # ── Step 2 — OpenTelemetry ────────────────────────────────────────────
     configure_otel()

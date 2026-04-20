@@ -1,6 +1,6 @@
 # 📊 BESSAI Edge Gateway — Estado del Proyecto
 
-> **Actualizado:** 2026-04-12 v2.17.1 · **Responsable:** BESS Solutions SpA  
+> **Actualizado:** 2026-04-20 v2.17.0 · **Responsable:** BESS Solutions SpA  
 > *Actualiza este archivo en cada iteración junto con CHANGELOG.md y requirements.txt.*
 
 ---
@@ -14,7 +14,7 @@ Ver roadmap oficial: [`docs/ROADMAP.md`](docs/ROADMAP.md) · Roadmap v2 archivad
 
 ---
 
-## ✅ Estado Actual — v2.17.0 (Stack Revenue Físico SS.CC.)
+## ✅ Estado Actual — v2.17.0 (Modbus TCP Bridge Industrialized)
 
 > Ver: [`docs/PENDIENTES.md`](docs/PENDIENTES.md) · [`docs/MODULOS_Y_DATOS_SIMULADOS.md`](docs/MODULOS_Y_DATOS_SIMULADOS.md)
 
@@ -31,7 +31,7 @@ Batch 2 (2026-04-12): test_fleet_coordinator_extended.py — 47/47 ✅
 Batch 2 (2026-04-12): test_health_server.py — 20/20 ✅
 Previos: test_market_adapter_global.py — 62/62 · test_vpp_fleet_manager.py — 26/26 ✅
 CI/CD: ruff ✅ · mypy ✅ · pytest+codecov ✅ · bandit ✅ · trivy ✅ · docker ✅ · helm ✅ · drl-market-tests ✅
-Version: v2.17.1 · 3,496 pts CEN reales · bessai-web sync OK
+Version: v2.17.0 · Hardware-In-the-Loop Arduino Bridge Operativo ✅
 ```
 
 ### 🔍 Audit 360° — Gaps Conocidos y Plan de Acción
@@ -49,7 +49,7 @@ Version: v2.17.1 · 3,496 pts CEN reales · bessai-web sync OK
 | 🔵 Baja | cosign keypair sin configurar | `release.yml` | Rodrigo: `cosign generate-keypair` + Secrets GH | Manual |
 | 🟡 Pendiente | GCP Pub/Sub producción | `.env` | Configurar `GCP_PROJECT_ID` + service account | Piloto |
 | 🟡 Pendiente | DRL write activo (staging) | `.env` | 2 sem. observe → `BESSAI_DRL_WRITE=true` | Piloto |
-| ✅ **CERRADO** | **Stack Revenue Físico (SS.CC.)** | `src/core/main.py` | **Inyectar algoritmos de** `CapacityAllocator` **al lazo de control Modbus (reservas/frecuencia)** | v2.17.0 |
+| ✅ **CERRADO** | **Modbus TCP Bridge Industrialization** | `rtu_to_tcp_bridge.py` | **Servidor Modbus TCP Asíncrono Nativo implementado, telemetría fluyendo sin safety blocks** | v2.17.0 |
 
 
 ### Stack Docker — Métricas en vivo (confirmado 2026-02-19)

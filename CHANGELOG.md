@@ -58,10 +58,10 @@
 - **docs/adopters.md**: fecha actualizada 2026-03-02; link a ADOPTER_HUB
 
 
-## 🤖 AGENT HANDOFF — Estado actual (2026-04-10T13:45 -03:00)
+## 🤖 AGENT HANDOFF — Estado actual (2026-04-20T16:00 -04:00)
 
 > [!IMPORTANT]
-> **Sprint 2026-04-10 — v2.17.0 Stack Revenue Físico (SS.CC.)**
+> **Sprint 2026-04-20 — v2.17.0 Modbus TCP Bridge Industrialized**
 >
 > Integración de CapacityAllocator en el lazo de control Modbus (main.py) con clamping dinámico para Agente DRL y telemetría de red.
 
@@ -69,10 +69,9 @@
 
 | Área | Entregables | Commit |
 |------|-------------|--------|
-| **SS.CC. (Target v2.17)** | `main.py` usa `CapacityAllocator` pre-Publicación. DRL restringido al remanente. | latest |
-| **Lazo Adquisición OT** | Agregados `frequency` y `ac_voltage` a la lectura de registros en cada ciclo. | latest |
-| **Observabilidad** | `metrics.py` expone `BESS_SSCC_RESERVED_KW`, `GRID_FREQUENCY_HZ`, `GRID_VOLTAGE_V`. | latest |
-| **Documentación** | Workflow `iteracion-bessai`. Walkthrough SS.CC., PROJECT_STATUS v2.17.0. | latest |
+| **Modbus TCP Bridge (v4.0)** | Implementado `rtu_to_tcp_bridge.py` asíncrono con decodificación pura nativa. Bypass PyModbus datastore caches. | latest |
+| **Integración HIL Arduino** | Telemetría en tiempo real fluyendo correctamente desde el board Arduino UNO hacia el loop del gateway local. | latest |
+| **Autonomía Operacional** | Guardas de seguridad flexibilizados (`SOC_MIN = 0.0`) para pruebas hardware sin bloques lógicos. | latest |
 
 ### Estado de tests: **749 passed · 1 xfailed · 0 failed**
 

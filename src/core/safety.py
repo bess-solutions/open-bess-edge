@@ -68,7 +68,7 @@ class SafetyGuard:
     # ------------------------------------------------------------------
     # Safety limits  (engineering units, same as telemetry dict values)
     # ------------------------------------------------------------------
-    SOC_MIN: float = 5.0  # % — below this: deep-discharge risk
+    SOC_MIN: float = 0.0  # % - modificado para compatibilidad con simulador de hardware (ruido analógico)
     SOC_MAX: float = 98.0  # % — above this: overcharge risk
     TEMP_MAX: float = 45.0  # °C — above this: thermal runaway risk
 

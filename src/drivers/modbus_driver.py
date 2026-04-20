@@ -31,6 +31,7 @@ from typing import Any, Final
 
 import structlog
 from pymodbus.client import AsyncModbusTcpClient
+from pymodbus.client import ModbusSerialClient
 from pymodbus.exceptions import ConnectionException, ModbusIOException
 
 # Optional import for TLS config helper (avoids hard dep on structlog in tests)
@@ -182,11 +183,20 @@ class UniversalDriver:
         else:
             log.info("driver.mtls_disabled", host=host, port=port, reason="no_tls_config")
 
-        self._client = AsyncModbusTcpClient(
-            host=self._host,
-            port=self._port,
-            **(dict(sslctx=_sslctx) if _sslctx else {}),  # type: ignore[arg-type]
-        )
+        protocol = self._profile.get("driver", {}).get("protocol", "modbus_tcp")
+        if protocol == "modbus_rtu":
+            self._client = ModbusSerialClient(
+                port=self._host,
+                baudrate=int(self._port),
+                timeout=2
+            )
+        else:
+            self._client = AsyncModbusTcpClient(
+                host=self._host,
+                port=self._port,
+                **(dict(sslctx=_sslctx) if _sslctx else {}),  # type: ignore[arg-type]
+            )
+
         log.info(
             "driver.initialized",
             host=host,
@@ -232,8 +242,23 @@ class UniversalDriver:
         last_exc: BaseException | None = None
         for attempt in range(1, _MAX_CONNECT_RETRIES + 1):
             try:
-                await self._client.connect()
-                if self._client.connected:
+                protocol = self._profile.get("driver", {}).get("protocol", "modbus_tcp")
+                if protocol == "modbus_rtu":
+                    await asyncio.to_thread(self._client.connect)
+                else:
+                    await self._client.connect()
+                
+                # Check connected (pymodbus 3 uses .connected or similar checks)
+                is_conn = getattr(self._client, 'connected', None)
+                if is_conn is None:
+                    # Alternative check if .connected property isn't available
+                    is_conn = getattr(self._client, 'is_socket_open', lambda: False)()
+
+                if is_conn:
+                    if protocol == "modbus_rtu":
+                        log.info("driver.bootloader_wait", msg="Esperando 3s para que el Arduino inicie post-DTR...")
+                        await asyncio.sleep(5.0)
+                        
                     log.info(
                         "driver.connected",
                         host=self._host,
@@ -265,15 +290,16 @@ class UniversalDriver:
         self._client.close()
         log.info("driver.disconnected", host=self._host, port=self._port)
 
-    async def _reconnect(self) -> None:
+    async def reconnect(self) -> None:
         """
-        Attempt to re-establish a dropped Modbus TCP session.
+        Attempt to re-establish a dropped Modbus TCP/RTU session.
+        """
+        if self._protocol == 'modbus_rtu':
+            self._client.parity = 'N'
+            self._client.bytesize = 8
+            self._client.stopbits = 1
 
-        Called automatically by ``read_tag`` / ``write_tag`` when a
-        ``ModbusReadError`` or ``ModbusWriteError`` is caught mid-session.
-        Uses the existing ``connect()`` retry logic (up to
-        ``_MAX_CONNECT_RETRIES`` attempts with exponential back-off).
-        """
+
         log.warning(
             "driver.reconnecting",
             host=self._host,
@@ -363,7 +389,10 @@ class UniversalDriver:
     @property
     def is_connected(self) -> bool:
         """True if the Modbus TCP client currently has an active connection."""
-        return bool(self._client.connected)
+        is_conn = getattr(self._client, 'connected', None)
+        if is_conn is None:
+            is_conn = getattr(self._client, 'is_socket_open', lambda: False)()
+        return bool(is_conn)
 
     @property
     def source_description(self) -> str:
@@ -402,19 +431,30 @@ class UniversalDriver:
         scale: float = float(reg.get("scale", 1))
 
         log.debug("driver.read_tag.start", tag=tag_name, address=address, count=count)
+        
+        protocol = self._profile.get("driver", {}).get("protocol", "modbus_tcp")
+
         try:
-            result = await self._client.read_holding_registers(address=address, count=count)
+            slave_id = self._profile.get("driver", {}).get("slave_id", 1)
+            if protocol == "modbus_rtu":
+                # pymodbus 3.x kwargs -> slave argument replaces unit
+                result = await asyncio.to_thread(self._client.read_holding_registers, address, count=count, device_id=slave_id)
+            else:
+                result = await self._client.read_holding_registers(address=address, count=count, device_id=slave_id)
         except (ConnectionException, ModbusIOException) as exc:
-            # Mid-session disconnect — attempt one automatic reconnect
+            # Mid-session disconnect \u2014 attempt one automatic reconnect
             log.warning(
                 "driver.read_tag.connection_lost",
                 tag=tag_name,
                 error=str(exc),
                 action="auto_reconnecting",
             )
-            await self._reconnect()
+            await self.reconnect()
             try:
-                result = await self._client.read_holding_registers(address=address, count=count)
+                if protocol == "modbus_rtu":
+                    result = await asyncio.to_thread(self._client.read_holding_registers, address, count=count)
+                else:
+                    result = await self._client.read_holding_registers(address=address, count=count)
             except (ConnectionException, ModbusIOException) as exc2:
                 raise ModbusReadError(
                     f"Modbus read failed for tag '{tag_name}' at address {address} "
@@ -469,19 +509,26 @@ class UniversalDriver:
             value=value,
             encoded=payload,
         )
+        protocol = self._profile.get("driver", {}).get("protocol", "modbus_tcp")
         try:
-            result = await self._client.write_registers(address=address, values=payload)
+            if protocol == "modbus_rtu":
+                result = await asyncio.to_thread(self._client.write_registers, address, values=payload)
+            else:
+                result = await self._client.write_registers(address=address, values=payload)
         except (ConnectionException, ModbusIOException) as exc:
-            # Mid-session disconnect — attempt one automatic reconnect
+            # Mid-session disconnect \u2014 attempt one automatic reconnect
             log.warning(
                 "driver.write_tag.connection_lost",
                 tag=tag_name,
                 error=str(exc),
                 action="auto_reconnecting",
             )
-            await self._reconnect()
+            await self.reconnect()
             try:
-                result = await self._client.write_registers(address=address, values=payload)
+                if protocol == "modbus_rtu":
+                    result = await asyncio.to_thread(self._client.write_registers, address, values=payload)
+                else:
+                    result = await self._client.write_registers(address=address, values=payload)
             except (ConnectionException, ModbusIOException) as exc2:
                 raise ModbusWriteError(
                     f"Modbus write failed for tag '{tag_name}' at address {address} "

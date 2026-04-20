@@ -1,0 +1,78 @@
+{
+    "$schema": "https://bessai.io/schemas/device-profile/v2.json",
+    "profile_version": "2.0.0",
+    "device": {
+        "manufacturer": "SainSmart",
+        "model": "Arduino_Simulator",
+        "description": "Custom Arduino Modbus RTU simulator",
+        "protocol": "ModbusTCP"
+    },
+    "connection": {
+        "byte_order": "BIG",
+        "word_order": "BIG",
+        "timeout_seconds": 3,
+        "retries": 1
+    },
+    "driver": {
+        "protocol": "modbus_tcp",
+        "endpoint": "localhost",
+        "port": 5020,
+        "slave_id": 1
+    },
+    "registers": {
+        "soc": {
+            "address": 0,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RO",
+            "scale": 1,
+            "unit": "%",
+            "description": "Simulated State of Charge"
+        },
+        "temp_c": {
+            "address": 1,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RO",
+            "scale": 1,
+            "unit": "\u00b0C",
+            "description": "Simulated Temperature"
+        },
+        "active_power": {
+            "address": 2,
+            "count": 1,
+            "type": "INT16",
+            "access": "RO",
+            "scale": 1,
+            "unit": "W",
+            "description": "Simulated Power"
+        },
+        "inverter_state": {
+            "address": 3,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RO",
+            "scale": 1,
+            "unit": "enum",
+            "description": "Simulated State"
+        },
+        "frequency": {
+            "address": 4,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RO",
+            "scale": 1,
+            "unit": "Hz",
+            "description": "Mock Frequency"
+        },
+        "ac_voltage": {
+            "address": 5,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RO",
+            "scale": 1,
+            "unit": "V",
+            "description": "Mock Voltage"
+        }
+    }
+}
