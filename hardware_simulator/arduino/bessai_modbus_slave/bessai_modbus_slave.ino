@@ -21,10 +21,11 @@ const int REG_POWER         = 2; // Potencia actual
 const int REG_STATE         = 3; // Estado de Inversor
 const int REG_FREQ          = 4; // Frecuencia
 const int REG_AC_VOLTAGE    = 5; // Tensión RMS / Batería Voltage real
+const int REG_HEARTBEAT     = 6; // BESSAI Watchdog Pulse
 
 // --- Puntero a memoria Modbus ---
 ModbusRTUSlave modbus(Serial);
-uint16_t holdingRegisters[6] = {0, 0, 0, 0, 50, 0}; // 6 registros (Freq base = 50Hz)
+uint16_t holdingRegisters[7] = {0, 0, 0, 0, 50, 0, 0}; // 7 registros (Freq base = 50Hz)
 
 void setup() {
   // Asegurar que el hardware USART se encienda independientemente de la librería Modbus
@@ -41,8 +42,12 @@ void setup() {
   digitalWrite(PIN_RELAY_CHG, LOW);
   digitalWrite(PIN_RELAY_DIS, LOW);
 
+  // Configure the Built-in LED to blink with Gateway's heartbeat
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+
   // Iniciar Modbus RTU en Serial (ID Esclavo = 1, Baud Rate 9600)
-  modbus.configureHoldingRegisters(holdingRegisters, 6);
+  modbus.configureHoldingRegisters(holdingRegisters, 7);
   modbus.begin(1, 9600);
 }
 
@@ -94,4 +99,13 @@ void loop() {
      digitalWrite(PIN_RELAY_CHG, LOW);
      holdingRegisters[REG_STATE] = 1;
   }
+  
+  // 5. Watchdog Heartbeat Feedback Visual
+  static uint16_t lastHeartbeat = 0;
+  if (holdingRegisters[REG_HEARTBEAT] != lastHeartbeat) {
+      digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+      lastHeartbeat = holdingRegisters[REG_HEARTBEAT];
+  }
+  
+  delay(10);
 }

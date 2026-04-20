@@ -11,6 +11,7 @@ log = logging.getLogger("bessai_bridge")
 
 arduino_vars = [0]*10
 lock = threading.Lock()
+pending_writes = {}
 
 def serial_worker(serial_port):
     log.info(f"[Thread] Abriendo {serial_port} a 9600 baudios...")
@@ -31,7 +32,17 @@ def serial_worker(serial_port):
     
     while True:
         try:
-            response = client.read_holding_registers(address=0, count=6, device_id=1)
+            writes = {}
+            with lock:
+                writes = pending_writes.copy()
+                pending_writes.clear()
+            
+            for addr, val in writes.items():
+                client.write_register(address=addr, value=val, device_id=1)
+                log.info(f"Bridge --> Arduino Write [{addr}] = {val}")
+                time.sleep(0.05)
+                
+            response = client.read_holding_registers(address=0, count=7, device_id=1)
             if not getattr(response, 'isError', lambda: True)():
                 log.info(f"Arduino -> {response.registers}")
                 with lock:
@@ -73,6 +84,17 @@ async def handle_modbus_client(reader, writer):
                 resp_len = 2 + len(resp_payload)
                 resp_header = struct.pack(">HHHBB", tx_id, proto, resp_len, unit, func)
                 writer.write(resp_header + resp_payload)
+                await writer.drain()
+            elif func == 0x06:
+                addr, val = struct.unpack(">HH", payload)
+                with lock:
+                    pending_writes[addr] = val
+                    arduino_vars[addr] = val
+                
+                # The response to FC06 is an exact echo of the request
+                resp_len = 2 + len(payload)
+                resp_header = struct.pack(">HHHBB", tx_id, proto, resp_len, unit, func)
+                writer.write(resp_header + payload)
                 await writer.drain()
             else:
                 # Modbus Exception: Illegal Function

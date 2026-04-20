@@ -73,6 +73,15 @@
             "scale": 1,
             "unit": "V",
             "description": "Mock Voltage"
+        },
+        "watchdog_heartbeat": {
+            "address": 6,
+            "count": 1,
+            "type": "UINT16",
+            "access": "RW",
+            "scale": 1,
+            "unit": "counter",
+            "description": "Heartbeat for physical LED toggle"
         }
     }
 }
