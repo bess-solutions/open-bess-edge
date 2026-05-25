@@ -62,7 +62,7 @@ jobs:
           BESSAI_COMPLIANCE_ENABLED: "true"
 
       - name: Upload compliance report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: compliance-junit-${{ github.run_id }}
