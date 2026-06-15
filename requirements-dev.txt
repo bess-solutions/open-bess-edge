@@ -18,7 +18,7 @@ ruff>=0.4.4
 
 # --- Mocking HTTP (for PubSub tests) ---
 aioresponses>=0.7.6
-aiohttp>=3.9.5
+aiohttp==3.14.1
 
 # --- Dev utilities ---
 ipython>=8.24.0
