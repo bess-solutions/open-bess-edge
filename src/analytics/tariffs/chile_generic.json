@@ -1,0 +1,49 @@
+{
+  "periods": {
+    "PUNTA": {
+      "rules": [
+        {
+          "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          "hours_start": 18,
+          "hours_end": 22
+        }
+      ]
+    },
+    "INTERMEDIA": {
+      "rules": [
+        {
+          "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          "hours_start": 6,
+          "hours_end": 18
+        },
+        {
+          "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          "hours_start": 22,
+          "hours_end": 24
+        }
+      ]
+    },
+    "BASE": {
+      "rules": [
+        {
+          "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          "hours_start": 0,
+          "hours_end": 6
+        },
+        {
+          "days": ["Saturday", "Sunday"],
+          "hours_start": 0,
+          "hours_end": 24
+        }
+      ]
+    }
+  },
+  "prices_mxn_kwh": {
+    "BASE": 1.2,
+    "INTERMEDIA": 1.8,
+    "PUNTA": 2.5
+  },
+  "demand_charge_mxn_kw_month": {
+    "PUNTA": 350.0
+  }
+}

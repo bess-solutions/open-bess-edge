@@ -100,18 +100,18 @@ class TestBidConstruction:
 
 
 class TestBidSubmission:
-    def test_dry_run_submission_returns_result(self, bidder: CENSCBidder) -> None:
+    async def test_dry_run_submission_returns_result(self, bidder: CENSCBidder) -> None:
         bid = bidder.build_pfr_bid(60.0)
-        result = asyncio.get_event_loop().run_until_complete(bidder.submit_bid(bid))
+        result = await bidder.submit_bid(bid)
         assert isinstance(result, BidResult)
         assert result.bid is bid
 
-    def test_stats_update_on_submission(self, bidder: CENSCBidder) -> None:
+    async def test_stats_update_on_submission(self, bidder: CENSCBidder) -> None:
         bid = bidder.build_pfr_bid(60.0)
-        asyncio.get_event_loop().run_until_complete(bidder.submit_bid(bid))
+        await bidder.submit_bid(bid)
         assert bidder.stats["bids_submitted"] == 1
 
-    def test_revenue_accrues_on_won_bid(self, bidder: CENSCBidder) -> None:
+    async def test_revenue_accrues_on_won_bid(self, bidder: CENSCBidder) -> None:
         """Force a win by submitting many bids — statistically some will win."""
         wins = 0
         for i in range(20):
@@ -123,7 +123,7 @@ class TestBidSubmission:
                 window_start=float(1_700_000_000 + i * 900),
                 soc_pct=60.0,
             )
-            result = asyncio.get_event_loop().run_until_complete(bidder.submit_bid(bid))
+            result = await bidder.submit_bid(bid)
             if result.won:
                 wins += 1
         # With 85% dry-run acceptance rate, should win at least a few

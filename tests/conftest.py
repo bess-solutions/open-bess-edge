@@ -14,6 +14,10 @@ interop tests are executed by themselves.
 
 from __future__ import annotations
 
+import os
+os.environ.setdefault("SITE_ID", "TEST-SITE-ID")
+os.environ.setdefault("INVERTER_IP", "127.0.0.1")
+
 import subprocess
 import sys
 import time

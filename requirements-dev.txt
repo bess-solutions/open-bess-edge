@@ -28,6 +28,7 @@ pandas>=2.0.0
 # --- Model Context Protocol (MCP) ---
 mcp>=0.1.0
 fastmcp>=0.1.0
+pyarrow>=12.0
 
 # --- Dependency management & security (IEC 62443-2-3 / OpenSSF Gold) ---
 pip-tools>=7.4.0        # pip-compile --generate-hashes → requirements.hash.txt
