@@ -4,7 +4,7 @@
 
 **Industrial-grade open-source edge gateway for secure, AI-optimized Battery Energy Storage System (BESS) management.**
 
-*Self-evolving arbitrage intelligence · IEC 62443 · IEC 61850 · IEEE 2030.5 · NTSyCS Chile*
+*Self-evolving arbitrage intelligence · IEC 62443 SL-1→SL-3 · IEC 61850 · DNP3 · IEC 60870-5-104 · IEEE 1547-2018 IBR/GFM · NTSyCS Chile*
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
@@ -12,7 +12,9 @@
 [![Codecov](https://codecov.io/gh/bess-solutions/open-bess-edge/branch/main/graph/badge.svg)](https://codecov.io/gh/bess-solutions/open-bess-edge)
 [![Docker](https://img.shields.io/badge/Docker-amd64%20%7C%20arm64-2496ED?logo=docker&logoColor=white)](https://ghcr.io/bess-solutions/open-bess-edge)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/bess-solutions/open-bess-edge/badge)](https://scorecard.dev/viewer/?uri=github.com/bess-solutions/open-bess-edge)
-[![IEC 62443](https://img.shields.io/badge/IEC_62443-SL--2_Compliant-orange)](docs/compliance/iec62443_mapping.md)
+[![IEC 62443](https://img.shields.io/badge/IEC_62443-SL--1%2FSL--2%2FSL--3_Roadmap-orange)](docs/compliance/iec62443_mapping.md)
+[![IEEE 1547](https://img.shields.io/badge/IEEE_1547--2018-IBR%2FGFM_Ready-green)](docs/compliance/ieee1547_mapping.md)
+[![DNP3](https://img.shields.io/badge/DNP3-IEC_60870--5--104-blue)](docs/specs/protocol_stack.md)
 [![NTSyCS](https://img.shields.io/badge/NTSyCS-11_GAPs_Closed-brightgreen)](docs/compliance/ntscys_compliance.md)
 [![BESSAI-SPEC](https://img.shields.io/badge/BESSAI--SPEC-4_normative_docs-blueviolet)](docs/specs/)
 [![BEP Process](https://img.shields.io/badge/BEPs-10_proposals-lightblue)](docs/bep/BEP-0001.md)
@@ -30,11 +32,12 @@
 
 BESSAI is a production-ready edge computing platform that sits between your Battery Energy Storage System hardware and cloud infrastructure. It handles:
 
-- **Real-time telemetry** collection from inverters and BMS (Modbus TCP, IEC 61850, IEEE 2030.5)
+- **Real-time telemetry** collection from inverters and BMS (Modbus TCP, IEC 61850, DNP3, IEC 60870-5-104)
 - **AI-powered dispatch** decisions via a DRL arbitrage agent (ONNX inference, no cloud required)
 - **Autonomous self-improvement** via BESSAIEvolve — an AlphaEvolve-inspired weekly evolution loop
-- **Safety enforcement** with IEC 62443 SL-1 compliant guardrails
+- **Safety enforcement** with IEC 62443 SL-1/SL-2 compliant guardrails — roadmap to SL-3
 - **Multi-cloud publishing** to GCP Pub/Sub, MQTT, OpenTelemetry
+- **Full system architecture**: from BT battery racks + bidirectional inverters + transformers + MT cells + protections + plant SCADA + substation SCADA + IoT gateway + industrial firewall/DMZ + local EMS + control UPS
 
 > **Reference deployment:** 200kWh / 100kW Huawei SUN2000 BESS, Santiago Chile — arbitraging the Chilean SEN spot market (CMg) in production since 2025.
 
@@ -44,21 +47,32 @@ BESSAI is a production-ready edge computing platform that sits between your Batt
 
 ```mermaid
 graph TB
-    subgraph Hardware["⚡ BESS Hardware"]
-        INV[Inverter<br/>Huawei · SMA · Victron · BYD · Tesla]
-        BMS[BMS / Battery Pack]
+    subgraph HW["⚡ Physical BESS System"]
+        BAT[Battery Racks BT<br/>+ BMS per module]
+        INV[Bidirectional Inverters<br/>Huawei · SMA · Sungrow · BYD · Tesla]
+        TRF[Step-up Transformer<br/>BT → MT]
+        MT[MT Switchgear & Cells<br/>13.2 kV / 23 kV]
+        PROT[Protection Relays<br/>All interfaces: BT · AC · MT · PCC]
     end
 
-    subgraph Edge["🖥️ Edge Gateway (BESSAI)"]
-        DRV[Protocol Drivers<br/>Modbus TCP · IEC 61850 · IEEE 2030.5]
-        SG[SafetyGuard<br/>IEC 62443 SL-1]
-        AI[AI Engine]
+    subgraph Edge["🖥️ Open BESS Edge Gateway"]
+        GW[IoT Gateway / Edge Compute<br/>Modbus→MQTT · OPC-UA · TLS]
+        FW[Industrial Firewall + DMZ<br/>OT/IT Segmentation · DPI]
+        EMS[Local EMS / DERMS<br/>24-48h Autonomous · Grid-Forming]
+        UPS[Control UPS<br/>Emergency power for control systems]
+        DRV[Protocol Drivers<br/>Modbus TCP · IEC 61850 · DNP3 · IEC 104]
+        SG[SafetyGuard<br/>IEC 62443 SL-1/SL-2]
         subgraph AI["🤖 AI Engine"]
             IDS[AI-IDS<br/>IsolationForest]
             DRL[DRL Agent<br/>PPO ONNX]
             EVO[BESSAIEvolve<br/>Weekly μ+λ Evolution]
         end
-        TEL[Telemetry Layer<br/>Prometheus · OpenTelemetry · MQTT]
+        TEL[Telemetry Layer<br/>Prometheus · OpenTelemetry · MQTT/TLS]
+    end
+
+    subgraph SE["🏭 Substation SCADA"]
+        SCADA_SE[SCADA SE<br/>IEC 60870-5-104 · DNP3]
+        IED[Protection IEDs<br/>IEC 61850 GOOSE]
     end
 
     subgraph Cloud["☁️ Cloud"]
@@ -71,15 +85,22 @@ graph TB
         CMG[CEN Chile CMg API<br/>Real-time spot price]
     end
 
+    BAT -->|CAN/RS485| GW
     INV -->|Modbus TCP| DRV
-    BMS -->|RS485 / TCP| DRV
+    TRF & MT & PROT -->|IEC 61850 GOOSE| IED
+    IED --> SCADA_SE
+    GW --> FW
+    FW --> EMS
+    EMS --> DRV
     DRV --> SG
     SG --> AI
     CMG -->|30-day history| EVO
     AI --> TEL
+    SCADA_SE -->|IEC 60870-5-104| TEL
     TEL --> GCP
     TEL --> PROM
     TEL --> OT
+    UPS -.->|Powers| GW & FW & EMS
 ```
 
 ---
@@ -243,6 +264,11 @@ Open in VS Code → **Reopen in Container** — all dependencies, pre-commit hoo
 | **Global Market Adapters** | CAISO · ERCOT · ENTSO-E · SEN · COES · XM · CENACE | – |
 | **Multi-arch Docker** | amd64 + arm64 (Raspberry Pi 4/5 native) | – |
 | **IEC 62443 SL-1/2** | Full control mapping — SL-2 compliant | – |
+| **IEC 62443 SL-3** | Aspiracional — zero-trust OT + HSM + SOC 24/7 | Roadmap v3.x |
+| **DNP3** | Telecontrol a subestación y CEN | `DNP3Driver` |
+| **IEC 60870-5-104** | SCADA SE telecontrol (CEN/CDEC Chile) | `IEC104Driver` |
+| **IEEE 1547-2018 (IBR/GFM)** | Grid-Forming + anti-island + LVRT/HVRT | `FrequencyResponseAgent` |
+| **Telemetry — Degradation Profile** | SOC/SOH + V/I per rack + BMS mode + cycles + C-rate history | `TelemetryPublisher` |
 
 ---
 
@@ -263,6 +289,55 @@ Open in VS Code → **Reopen in Container** — all dependencies, pre-commit hoo
 | Ley 21.663/2024 | ✅ | CSIRT ≤3h (`SecurityNotifier`) |
 | IEEE 2030.5 / SEP 2.0 | ✅ 10 endpoints | [BEP-0100](docs/bep/BEP-0100.md) |
 | Apache 2.0 SPDX | ✅ All source files | [LICENSE](LICENSE) |
+
+---
+
+## 📐 Open BESS Edge Standard v1.0
+
+This gateway implements the **Open BESS Edge Standard** — a Chilean-context architecture specification for secure, interoperable BESS deployments.
+
+### System Components (Full Stack)
+
+| Layer | Components | Voltage Level |
+|---|---|---|
+| **Storage** | Battery racks + modular BMS | BT < 1,000 V AC / < 1,500 V DC |
+| **Conversion** | Bidirectional PCS/Inverters | BT → MT |
+| **Transformation** | Step-up power transformer | BT/MT → MT |
+| **MT Interface** | MT switchgear & cells | 1 kV – 36 kV |
+| **Protection** | Protection relays at ALL interfaces | Per NCh / IEC |
+| **Plant SCADA** | Local BESS control & supervision | OT isolated network |
+| **Substation SCADA** | Integration with SE SCADA | OT/IT via DMZ |
+| **IoT Gateway** | Edge compute: Modbus→MQTT/OPC-UA, local preprocessing | — |
+| **Industrial Firewall + DMZ** | OT/IT segmentation, DPI, allowlist rules | — |
+| **Local EMS/DERMS** | Autonomous 24-48h operation, Grid-Forming mode | — |
+| **Control UPS** | Emergency power for all control & security systems | — |
+
+### Protocol Stack
+
+| Protocol | Layer | Mandatory |
+|---|---|---|
+| Modbus TCP/RTU | Field Level (BMS ↔ PCS ↔ SCADA) | ✅ |
+| IEC 61850 (GOOSE + MMS) | Station Level (protection IEDs, SE) | ✅ |
+| DNP3 | SCADA Level (utility requirement) | ✅ |
+| IEC 60870-5-104 | Telecontrol (SCADA SE / CEN-CDEC) | ✅ |
+| MQTT v5 + TLS 1.3 | Cloud / API telemetry | ⭐ Recommended |
+| OPC-UA | IT/OT convergence, multi-vendor | ⭐ Recommended |
+
+### IEC 62443 Security Levels — Roadmap
+
+```
+SL-3 ◀ Aspirational (2027+) — APT resistance, HSM, SOC 24/7
+SL-2 ◀ Operational target (2026) — MFA, TLS, IDS/IPS, patch mgmt
+SL-1 ◀ Commissioning minimum (current) — Passwords, segmentation, logs
+```
+
+### Regulatory Framework (Chile)
+
+- **NTSCS** (CNE) — mandatory regulatory floor for SEN connection
+- **IEEE 1547-2018** — technical standard for IBR/GFM interconnection
+- **IEC 61850** — communication vocabulary (logical nodes: ZBAT, MMXU, PTOC, PFRC)
+
+> 📄 Full specification: [Open BESS Edge Standard v1.0](docs/standards/open_bess_edge_standard_v1.md)
 
 ---
 
