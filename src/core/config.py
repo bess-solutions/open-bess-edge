@@ -1,4 +1,4 @@
-﻿# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 # Copyright 2024-2026 BESS Solutions SpA
 
 """
@@ -125,6 +125,14 @@ class Settings(BaseSettings):
     GCP_PUBSUB_TOPIC: str | None = Field(
         default=None,
         description="GCP Pub/Sub topic name for telemetry. Required in production.",
+    )
+    MODEL_REGISTRY_URL: str = Field(
+        default="https://storage.googleapis.com/bessai-models",
+        description="Base URL for the Cloud Model Registry where ONNX models are hosted.",
+    )
+    MODEL_REGISTRY_ENABLED: bool = Field(
+        default=True,
+        description="Enable dynamic downloading of custom ONNX models from the Cloud Model Registry.",
     )
 
     # ------------------------------------------------------------------
