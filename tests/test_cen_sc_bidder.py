@@ -7,8 +7,6 @@ Tests for the CEN SC auto-bidder — BEP-0200 Phase 3.
 
 from __future__ import annotations
 
-import asyncio
-
 import pytest
 from src.core.cen_sc_bidder import (
     BidResult,
