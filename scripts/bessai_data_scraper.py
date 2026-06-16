@@ -439,7 +439,7 @@ def build_training_dataset(frames: dict[str, pd.DataFrame]) -> pd.DataFrame | No
         return None
 
     # Use CMg as the primary index if available, otherwise first available
-    primary = ts_sources.get("cmg") or next(iter(ts_sources.values()))
+    primary = ts_sources.get("cmg") if ts_sources.get("cmg") is not None else next(iter(ts_sources.values()))
 
     # Simple concat — in production you'd align on a proper timestamp column
     merged = pd.concat(list(ts_sources.values()), axis=0, ignore_index=True)
