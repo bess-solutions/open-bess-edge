@@ -50,11 +50,12 @@ def auto_generate_test_models():
     """Auto-generate dummy ONNX models for testing."""
     import sys
     from pathlib import Path
-    
+
     root = Path(__file__).resolve().parent.parent
     sys.path.insert(0, str(root))
     try:
         from scripts import generate_all_test_onnx
+
         generate_all_test_onnx.main()
     except Exception as e:
         print(f"Warning: could not auto-generate test models: {e}", file=sys.stderr)
