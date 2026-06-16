@@ -46,7 +46,22 @@ def pytest_addoption(parser: pytest.Parser) -> None:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def start_demo_server():
+def auto_generate_test_models():
+    """Auto-generate dummy ONNX models for testing."""
+    import sys
+    from pathlib import Path
+    
+    root = Path(__file__).resolve().parent.parent
+    sys.path.insert(0, str(root))
+    try:
+        from scripts import generate_all_test_onnx
+        generate_all_test_onnx.main()
+    except Exception as e:
+        print(f"Warning: could not auto-generate test models: {e}", file=sys.stderr)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def start_demo_server(auto_generate_test_models):
     """Start demo_server.py in a background process during the test session."""
     proc = subprocess.Popen([sys.executable, "demo_server.py"])
     # Wait for server to boot up
