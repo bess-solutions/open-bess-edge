@@ -14,6 +14,7 @@ Uso rápido::
     df = profiler.export_profile()
     print(profiler.summary())
 """
+
 from __future__ import annotations
 
 import json
@@ -44,11 +45,11 @@ class LoadSummary:
     resolution_min: int
     max_demand_kw: float
     avg_demand_kw: float
-    load_factor: float                          # promedio / máximo (0-1)
-    peak_demand_punta_kw: float                 # demanda máxima en periodo Punta
+    load_factor: float  # promedio / máximo (0-1)
+    peak_demand_punta_kw: float  # demanda máxima en periodo Punta
     energy_kwh_total: float
-    energy_kwh_by_period: dict[str, float]      # {"BASE": x, "INTERMEDIA": y, "PUNTA": z}
-    estimated_monthly_cost_mxn: float | None = None   # si hay precios en config
+    energy_kwh_by_period: dict[str, float]  # {"BASE": x, "INTERMEDIA": y, "PUNTA": z}
+    estimated_monthly_cost_mxn: float | None = None  # si hay precios en config
 
     def __str__(self) -> str:
         lines = [
@@ -67,7 +68,9 @@ class LoadSummary:
         for period, kwh in sorted(self.energy_kwh_by_period.items()):
             lines.append(f"    {period:<12}: {kwh:>8.1f} kWh")
         if self.estimated_monthly_cost_mxn is not None:
-            lines.append(f"  Costo estimado   : ${self.estimated_monthly_cost_mxn:>10,.0f} MXN/mes")
+            lines.append(
+                f"  Costo estimado   : ${self.estimated_monthly_cost_mxn:>10,.0f} MXN/mes"
+            )
         lines.append("═" * 60)
         return "\n".join(lines)
 
@@ -149,7 +152,9 @@ class LoadProfiler:
         df = pd.read_csv(filepath, sep=sep)
 
         if timestamp_col not in df.columns:
-            raise ValueError(f"Columna '{timestamp_col}' no encontrada. Columnas: {df.columns.tolist()}")
+            raise ValueError(
+                f"Columna '{timestamp_col}' no encontrada. Columnas: {df.columns.tolist()}"
+            )
         if kw_col not in df.columns:
             raise ValueError(f"Columna '{kw_col}' no encontrada. Columnas: {df.columns.tolist()}")
 
@@ -216,7 +221,9 @@ class LoadProfiler:
         if zero_threshold_kw > 0:
             false_zeros = df["kw"] <= zero_threshold_kw
             df.loc[false_zeros, "kw"] = float("nan")
-            logger.info("Convertidos %d ceros (<= %.1f kW) a NaN", false_zeros.sum(), zero_threshold_kw)
+            logger.info(
+                "Convertidos %d ceros (<= %.1f kW) a NaN", false_zeros.sum(), zero_threshold_kw
+            )
 
         # La interpolación solo en huecos menores al límite
         if fill_method == "ffill":
@@ -231,7 +238,9 @@ class LoadProfiler:
         final_nulls = df["kw"].isna().sum()
         logger.info(
             "Limpieza: %d NaN iniciales → %d restantes (huecos > %dmin no interpolados)",
-            initial_nulls, final_nulls, max_gap_minutes,
+            initial_nulls,
+            final_nulls,
+            max_gap_minutes,
         )
 
         self._df = df
@@ -261,7 +270,9 @@ class LoadProfiler:
 
         self._df = df
         self._resolution = resolution
-        logger.info("Resampleo: %s → %s. Filas: %d", original_res or "desconocida", resolution, len(df))
+        logger.info(
+            "Resampleo: %s → %s. Filas: %d", original_res or "desconocida", resolution, len(df)
+        )
         return self
 
     # ── Etiquetado tarifario ──────────────────────────────────────────────────
@@ -273,7 +284,7 @@ class LoadProfiler:
         Evaluación en orden: PUNTA > INTERMEDIA > BASE (más restrictivo primero).
         """
         periods_config = self._config.get("periods", {})
-        day_name = ts.day_name()   # "Monday", "Tuesday", etc.
+        day_name = ts.day_name()  # "Monday", "Tuesday", etc.
         hour = ts.hour
 
         for period_name in ["PUNTA", "INTERMEDIA", "BASE"]:
@@ -283,7 +294,7 @@ class LoadProfiler:
                     if rule["hours_start"] <= hour < rule["hours_end"]:
                         return period_name
 
-        return "BASE"   # fallback seguro
+        return "BASE"  # fallback seguro
 
     def tag_periods(self) -> LoadProfiler:
         """
@@ -294,7 +305,10 @@ class LoadProfiler:
         """
         self._assert_loaded()
         self._df["tariff_period"] = self._df.index.map(self._classify_period)
-        logger.info("Periodos tarifarios etiquetados. Distribución:\n%s", self._df["tariff_period"].value_counts().to_string())
+        logger.info(
+            "Periodos tarifarios etiquetados. Distribución:\n%s",
+            self._df["tariff_period"].value_counts().to_string(),
+        )
         return self
 
     # ── Output ────────────────────────────────────────────────────────────────
@@ -381,4 +395,4 @@ class LoadProfiler:
             freq = pd.infer_freq(self._df.index)
             if freq:
                 return max(1, int(pd.Timedelta(freq).total_seconds() / 60))
-        return 15   # default
+        return 15  # default

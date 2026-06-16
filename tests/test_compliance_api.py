@@ -20,6 +20,7 @@ from src.interfaces.compliance_api import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 class _MockSocket:
     """Minimal socket-like for handler tests without a real server."""
 
@@ -78,7 +79,6 @@ class TestComplianceHandler:
         HandlerClass = make_compliance_handler(site_id, "v2.13.0-test")
 
         captured_code: list[int] = []
-        captured_body: list[bytes] = []
 
         class _FakeHandler(HandlerClass):  # type: ignore[valid-type]
             def __init__(self) -> None:  # type: ignore[override]

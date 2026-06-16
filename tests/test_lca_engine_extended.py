@@ -31,6 +31,7 @@ from src.interfaces.lca_engine import LCAConfig, LCAEngine
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def engine_cl() -> LCAEngine:
     """Standard Chilean grid engine — 100 kWh BESS."""
@@ -52,6 +53,7 @@ def engine_pl() -> LCAEngine:
 # ---------------------------------------------------------------------------
 # LCAConfig defaults
 # ---------------------------------------------------------------------------
+
 
 class TestLCAConfigDefaults:
     def test_default_region(self):
@@ -75,15 +77,20 @@ class TestLCAConfigDefaults:
 # Region lookup
 # ---------------------------------------------------------------------------
 
+
 class TestRegionLookup:
     def test_cl_emission_factor(self):
         engine = LCAEngine(config=LCAConfig(region="CL"))
-        assert engine.grid_emission_factor_g_kwh == pytest.approx(GRID_EMISSION_FACTORS_G_KWH["CL"])
+        assert engine.grid_emission_factor_g_kwh == pytest.approx(
+            GRID_EMISSION_FACTORS_G_KWH["CL"]
+        )
 
     def test_fr_emission_factor_low(self):
         """France has nuclear-dominant low EF."""
         engine = LCAEngine(config=LCAConfig(region="FR"))
-        assert engine.grid_emission_factor_g_kwh == pytest.approx(GRID_EMISSION_FACTORS_G_KWH["FR"])
+        assert engine.grid_emission_factor_g_kwh == pytest.approx(
+            GRID_EMISSION_FACTORS_G_KWH["FR"]
+        )
         assert engine.grid_emission_factor_g_kwh < 100.0
 
     def test_pl_emission_factor_high(self):
@@ -99,7 +106,9 @@ class TestRegionLookup:
     def test_lowercase_region_normalized(self):
         """Region code should be uppercased internally."""
         engine = LCAEngine(config=LCAConfig(region="cl"))
-        assert engine.grid_emission_factor_g_kwh == pytest.approx(GRID_EMISSION_FACTORS_G_KWH["CL"])
+        assert engine.grid_emission_factor_g_kwh == pytest.approx(
+            GRID_EMISSION_FACTORS_G_KWH["CL"]
+        )
 
     def test_custom_override_ignores_region(self):
         """Manual grid_emission_factor overrides region lookup."""
@@ -110,6 +119,7 @@ class TestRegionLookup:
 # ---------------------------------------------------------------------------
 # CO2 accounting math
 # ---------------------------------------------------------------------------
+
 
 class TestCO2Accounting:
     def test_zero_discharge_zero_grid_co2(self, engine_cl: LCAEngine):
@@ -166,11 +176,15 @@ class TestCO2Accounting:
 # Cumulative tracking
 # ---------------------------------------------------------------------------
 
+
 class TestCumulativeTracking:
     def test_cumulative_increases_each_cycle(self, engine_cl: LCAEngine):
         for _ in range(5):
             engine_cl.update(discharged_kwh=10.0)
-        assert engine_cl.cumulative_co2_avoided_kg > engine_cl.update(discharged_kwh=10.0).co2_avoided_kg
+        assert (
+            engine_cl.cumulative_co2_avoided_kg
+            > engine_cl.update(discharged_kwh=10.0).co2_avoided_kg
+        )
 
     def test_cumulative_in_result_matches_property(self, engine_cl: LCAEngine):
         engine_cl.update(discharged_kwh=5.0)
@@ -198,6 +212,7 @@ class TestCumulativeTracking:
 # Reset
 # ---------------------------------------------------------------------------
 
+
 class TestReset:
     def test_reset_zeroes_cumulative(self, engine_cl: LCAEngine):
         for _ in range(10):
@@ -221,6 +236,7 @@ class TestReset:
 # ---------------------------------------------------------------------------
 # Tree equivalence
 # ---------------------------------------------------------------------------
+
 
 class TestTreeEquivalence:
     def test_zero_avoided_zero_trees(self):
@@ -246,6 +262,7 @@ class TestTreeEquivalence:
 # ---------------------------------------------------------------------------
 # Custom embodied carbon
 # ---------------------------------------------------------------------------
+
 
 class TestCustomEmbodiedCarbon:
     def test_custom_embodied_used(self):

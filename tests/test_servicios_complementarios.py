@@ -28,6 +28,7 @@ from src.core.servicios_complementarios import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def sc() -> ServiciosComplementarios:
     """Default SC instance — 1 MW nameplate, default fractions."""
@@ -37,6 +38,7 @@ def sc() -> ServiciosComplementarios:
 # ---------------------------------------------------------------------------
 # Eligibility
 # ---------------------------------------------------------------------------
+
 
 class TestEligibility:
     def test_fully_eligible(self, sc: ServiciosComplementarios):
@@ -99,6 +101,7 @@ class TestEligibility:
 # Offer calculation
 # ---------------------------------------------------------------------------
 
+
 class TestOffer:
     def test_ineligible_offer_is_all_zeros(self):
         sc = ServiciosComplementarios(p_nom_kw=1000.0, q_max_kvar=0.0)
@@ -141,13 +144,14 @@ class TestOffer:
             r3_fraction=0.4,
         )
         offer = sc.compute_offer(soc=65.0, p_available_kw=2000.0)
-        assert offer.pfr_offer_kw == pytest.approx(200.0)   # 0.1 × 2000
-        assert offer.r3_offer_kw == pytest.approx(800.0)    # 0.4 × 2000
+        assert offer.pfr_offer_kw == pytest.approx(200.0)  # 0.1 × 2000
+        assert offer.r3_offer_kw == pytest.approx(800.0)  # 0.4 × 2000
 
 
 # ---------------------------------------------------------------------------
 # Revenue estimation
 # ---------------------------------------------------------------------------
+
 
 class TestRevenue:
     def test_zero_offer_zero_revenue(self, sc: ServiciosComplementarios):
@@ -191,10 +195,16 @@ class TestRevenue:
 # from_env() classmethod
 # ---------------------------------------------------------------------------
 
+
 class TestFromEnv:
     def test_from_env_defaults(self):
-        for key in ["BESSAI_P_NOM_KW", "BESSAI_Q_MAX_KVAR", "SC_SOC_MIN_PCT",
-                    "SC_PFR_FRACTION", "SC_R3_FRACTION"]:
+        for key in [
+            "BESSAI_P_NOM_KW",
+            "BESSAI_Q_MAX_KVAR",
+            "SC_SOC_MIN_PCT",
+            "SC_PFR_FRACTION",
+            "SC_R3_FRACTION",
+        ]:
             os.environ.pop(key, None)
         sc = ServiciosComplementarios.from_env()
         assert sc._p_nom_kw == pytest.approx(1000.0)
@@ -215,6 +225,7 @@ class TestFromEnv:
 # ---------------------------------------------------------------------------
 # Pricing env-var override
 # ---------------------------------------------------------------------------
+
 
 class TestPricingEnvOverride:
     def test_custom_pfr_price_affects_revenue(self):

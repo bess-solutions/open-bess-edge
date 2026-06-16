@@ -123,6 +123,7 @@ class ONNXDispatcher:
         if not self.model_path.exists():
             try:
                 from src.core.model_registry import ModelRegistryClient
+
                 client = ModelRegistryClient()
                 resolved = client.get_model(self.model_path.name)
                 if resolved.exists():

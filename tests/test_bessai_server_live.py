@@ -7,6 +7,7 @@ Requiere que demo_server.py esté corriendo en http://localhost:8000
 Ejecutar con:
     python tests/test_bessai_server_live.py
 """
+
 import json
 import sys
 import threading
@@ -14,7 +15,6 @@ import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
-import pytest
 
 # Forzar UTF-8 en stdout para Windows
 if hasattr(sys.stdout, "reconfigure"):
@@ -60,15 +60,25 @@ def check(name: str, passed: bool, detail: str = "", ms: float = 0.0) -> None:
 def test_health_schema():
     print("\n── TEST 1: Estructura /health ─────────")
     data, ms = get("/health")
-    required_keys = ["status", "site_id", "version", "uptime_s", "last_cycle",
-                     "safety_status", "compliance_ok", "compliance_score"]
+    required_keys = [
+        "status",
+        "site_id",
+        "version",
+        "uptime_s",
+        "last_cycle",
+        "safety_status",
+        "compliance_ok",
+        "compliance_score",
+    ]
     missing = [k for k in required_keys if k not in data]
     check("Tiene todos los campos requeridos", not missing, f"Faltan: {missing}", ms)
     check("status ∈ {healthy, degraded}", data.get("status") in ("healthy", "degraded"))
     check("uptime_s > 0", data.get("uptime_s", 0) > 0)
     check("last_cycle > 0 (el loop está corriendo)", data.get("last_cycle", 0) > 0)
-    check("compliance_score es float [0–100]",
-         0.0 <= float(data.get("compliance_score", -1)) <= 100.0)
+    check(
+        "compliance_score es float [0–100]",
+        0.0 <= float(data.get("compliance_score", -1)) <= 100.0,
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -82,10 +92,12 @@ def test_telemetry_is_live():
     d2, ms2 = get("/api/v1/telemetry")
     print(f"   {INFO} Ciclo 2: SOC={d2.get('soc_pct')}%, P={d2.get('power_kw')}kW")
     changed = d1.get("soc_pct") != d2.get("soc_pct") or d1.get("power_kw") != d2.get("power_kw")
-    check("Los valores cambian entre ciclos (datos vivos)", changed,
-         f"SOC: {d1.get('soc_pct')} → {d2.get('soc_pct')}")
-    check("soc_pct está en rango [0, 100]",
-         0.0 <= float(d2.get("soc_pct", -1)) <= 100.0)
+    check(
+        "Los valores cambian entre ciclos (datos vivos)",
+        changed,
+        f"SOC: {d1.get('soc_pct')} → {d2.get('soc_pct')}",
+    )
+    check("soc_pct está en rango [0, 100]", 0.0 <= float(d2.get("soc_pct", -1)) <= 100.0)
     check("timestamp_utc presente en respuesta", "timestamp_utc" in d2)
 
 
@@ -97,13 +109,19 @@ def test_compliance_report():
     data, ms = get("/compliance/report")
     check("Tiene 11 GAPs", data.get("gaps_checked") == 11, ms=ms)
     gaps = data.get("gaps", {})
-    check("GAPs van de GAP-001 a GAP-011",
-         all(f"GAP-{str(i).zfill(3)}" in gaps for i in range(1, 12)))
+    check(
+        "GAPs van de GAP-001 a GAP-011",
+        all(f"GAP-{str(i).zfill(3)}" in gaps for i in range(1, 12)),
+    )
     check("norm_ref menciona NTSyCS", "NTSyCS" in data.get("norm_ref", ""))
     check("generated_at_utc presente", "generated_at_utc" in data)
-    check("report_type = NTSyCS_COMPLIANCE_REPORT",
-         data.get("report_type") == "NTSyCS_COMPLIANCE_REPORT")
-    print(f"   {INFO} Estado: {data.get('overall_status')} — Score: {data.get('compliance_score')}")
+    check(
+        "report_type = NTSyCS_COMPLIANCE_REPORT",
+        data.get("report_type") == "NTSyCS_COMPLIANCE_REPORT",
+    )
+    print(
+        f"   {INFO} Estado: {data.get('overall_status')} — Score: {data.get('compliance_score')}"
+    )
     if data.get("violations"):
         print(f"   {INFO} Violaciones activas: {data['violations']}")
 
@@ -116,17 +134,22 @@ def test_fleet():
     summary, ms = get("/fleet/summary")
     check("n_sites = 3", summary.get("n_sites") == 3, ms=ms)
     check("total_capacity_kwh = 600", summary.get("total_capacity_kwh") == 600.0)
-    check("fleet_soc_pct en rango [0, 100]",
-         0.0 <= float(summary.get("fleet_soc_pct", -1)) <= 100.0)
-    print(f"   {INFO} Fleet SOC: {summary.get('fleet_soc_pct')}% | "
-          f"Disponible: {summary.get('total_available_kw')} kW | "
-          f"Alarmas: {summary.get('sites_in_alarm')}")
+    check(
+        "fleet_soc_pct en rango [0, 100]", 0.0 <= float(summary.get("fleet_soc_pct", -1)) <= 100.0
+    )
+    print(
+        f"   {INFO} Fleet SOC: {summary.get('fleet_soc_pct')}% | "
+        f"Disponible: {summary.get('total_available_kw')} kW | "
+        f"Alarmas: {summary.get('sites_in_alarm')}"
+    )
 
     sites, _ = get("/fleet/sites")
     check("Retorna lista de 3 sitios", len(sites) == 3)
     site_ids = [s.get("site_id") for s in sites]
-    check("Sitios: DEMO-CL-001/002/003 presentes",
-         "DEMO-CL-001" in site_ids and "DEMO-CL-003" in site_ids)
+    check(
+        "Sitios: DEMO-CL-001/002/003 presentes",
+        "DEMO-CL-001" in site_ids and "DEMO-CL-003" in site_ids,
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -170,8 +193,11 @@ def test_concurrent_load():
         t.join()
     total_ms = (time.monotonic() - t0) * 1000
 
-    check(f"Todas las {N} requests completaron", len(responses) == N,
-         f"{len(errors)} errores: {errors[:2]}")
+    check(
+        f"Todas las {N} requests completaron",
+        len(responses) == N,
+        f"{len(errors)} errores: {errors[:2]}",
+    )
     check("Cero errores bajo carga", len(errors) == 0, f"Errores: {errors}")
     avg_ms = sum(timings) / len(timings) if timings else 0
     p99_ms = sorted(timings)[-1] if timings else 0
@@ -193,21 +219,26 @@ def test_compliance_violation_scenario():
     # Los dos endpoints deben ser coherentes entre sí
     health_ok = health.get("compliance_ok")
     status_ok = status.get("status") == "compliant"
-    check("compliance_ok en /health coincide con /compliance/status",
-         health_ok == status_ok,
-         f"/health: {health_ok}, /compliance/status: {status.get('status')}")
+    check(
+        "compliance_ok en /health coincide con /compliance/status",
+        health_ok == status_ok,
+        f"/health: {health_ok}, /compliance/status: {status.get('status')}",
+    )
 
     report, _ = get("/compliance/report")
-    check("overall_status en /compliance/report es coherente",
-         (health_ok and report.get("overall_status") == "COMPLIANT") or
-         (not health_ok and report.get("overall_status") == "NON_COMPLIANT"))
+    check(
+        "overall_status en /compliance/report es coherente",
+        (health_ok and report.get("overall_status") == "COMPLIANT")
+        or (not health_ok and report.get("overall_status") == "NON_COMPLIANT"),
+    )
 
     if not health_ok:
-        check("Hay violaciones listadas cuando score < 100",
-             len(report.get("violations", [])) > 0)
+        check("Hay violaciones listadas cuando score < 100", len(report.get("violations", [])) > 0)
         print(f"   {INFO} Violación activa: {report.get('violations', ['?'])[0]}")
     else:
-        print(f"   {INFO} Sistema compliant en este momento (score: {health.get('compliance_score')})")
+        print(
+            f"   {INFO} Sistema compliant en este momento (score: {health.get('compliance_score')})"
+        )
         check("violations = [] cuando compliant", report.get("violations") == [])
 
 
@@ -227,7 +258,7 @@ def test_prometheus_metrics():
     check("Contiene bess_safety_blocks_total", "bess_safety_blocks_total" in text)
     check("Contiene bess_last_soc_percent", "bess_last_soc_percent" in text)
     check("Contiene bess_gateway_info", "bess_gateway_info" in text)
-    lines_with_data = [l for l in text.split("\n") if l and not l.startswith("#")]
+    lines_with_data = [line for line in text.split("\n") if line and not line.startswith("#")]
     print(f"   {INFO} {len(lines_with_data)} series de métricas activas")
 
 
@@ -269,6 +300,7 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n{FAIL} Error fatal en test suite: {e}")
         import traceback
+
         traceback.print_exc()
 
     print_summary()

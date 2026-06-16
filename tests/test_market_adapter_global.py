@@ -42,9 +42,11 @@ def _make_response(data, status_code: int = 200):
 # Registry: verify all 7 markets are registered
 # ---------------------------------------------------------------------------
 
+
 class TestMarketAdapterRegistry:
     def test_all_markets_registered(self):
         from src.core.market_adapter import MarketAdapterRegistry
+
         markets = MarketAdapterRegistry.available_markets()
         expected = {"SEN", "COES", "XM", "CENACE", "CAISO", "ERCOT", "ENTSOE"}
         assert expected.issubset(set(markets)), f"Missing: {expected - set(markets)}"
@@ -56,6 +58,7 @@ class TestMarketAdapterRegistry:
             ERCOTAdapter,
             MarketAdapterRegistry,
         )
+
         MarketAdapterRegistry.reset()
         assert isinstance(MarketAdapterRegistry.get("CAISO"), CAISOAdapter)
         assert isinstance(MarketAdapterRegistry.get("ERCOT"), ERCOTAdapter)
@@ -64,12 +67,14 @@ class TestMarketAdapterRegistry:
 
     def test_unknown_market_raises_value_error(self):
         from src.core.market_adapter import MarketAdapterRegistry
+
         MarketAdapterRegistry.reset()
         with pytest.raises(ValueError, match="Unknown market"):
             MarketAdapterRegistry.get("NORDPOOL")
 
     def test_all_adapters_have_market_id(self):
         from src.core.market_adapter import MarketAdapterRegistry
+
         MarketAdapterRegistry.reset()
         for mkt in ["SEN", "COES", "XM", "CENACE", "CAISO", "ERCOT", "ENTSOE"]:
             adapter = MarketAdapterRegistry.get(mkt)
@@ -81,20 +86,31 @@ class TestMarketAdapterRegistry:
 # SpotPrice & DispatchRules dataclass sanity
 # ---------------------------------------------------------------------------
 
+
 class TestDataStructures:
     def test_spot_price_to_dict_has_all_keys(self):
         from src.core.market_adapter import SpotPrice
+
         sp = SpotPrice(hour=10, price_usd_mwh=55.0, node="TEST", market="SEN", date=_DATE)
         d = sp.to_dict()
-        assert set(d.keys()) == {"hour", "price_usd_mwh", "price_clp_kwh", "node", "market", "date"}
+        assert set(d.keys()) == {
+            "hour",
+            "price_usd_mwh",
+            "price_clp_kwh",
+            "node",
+            "market",
+            "date",
+        }
 
     def test_spot_price_clp_conversion(self):
         from src.core.market_adapter import SpotPrice
+
         sp = SpotPrice(hour=0, price_usd_mwh=100.0, node="X", market="SEN", date=_DATE)
         assert sp.price_clp_kwh == pytest.approx(95.0, rel=0.01)
 
     def test_dispatch_rules_defaults(self):
         from src.core.market_adapter import DispatchRules
+
         dr = DispatchRules()
         assert dr.min_soc_pct == 10.0
         assert dr.max_soc_pct == 95.0
@@ -105,9 +121,11 @@ class TestDataStructures:
 # SEN — Chile (duck curve always returns 24 prices)
 # ---------------------------------------------------------------------------
 
+
 class TestSENAdapter:
     def setup_method(self):
         from src.core.market_adapter import SENAdapter
+
         self.adapter = SENAdapter()
 
     def test_returns_24_hourly_prices(self):
@@ -135,9 +153,11 @@ class TestSENAdapter:
 # COES — Peru (mock + fallback)
 # ---------------------------------------------------------------------------
 
+
 class TestCOESAdapter:
     def setup_method(self):
         from src.core.market_adapter import COESAdapter
+
         self.adapter = COESAdapter()
 
     def test_fallback_on_api_error_returns_24_prices(self):
@@ -146,8 +166,9 @@ class TestCOESAdapter:
         assert len(prices) == 24
 
     def test_live_data_parsed_correctly(self):
-        mock_data = [{"hora": h + 1, "precio": 38.5 + h * 0.5, "barra": "LIMA_SUR"}
-                     for h in range(24)]
+        mock_data = [
+            {"hora": h + 1, "precio": 38.5 + h * 0.5, "barra": "LIMA_SUR"} for h in range(24)
+        ]
         with patch("src.core.market_adapter._http_get", return_value=_make_response(mock_data)):
             prices = self.adapter.get_spot_prices(_DATE, "LIMA_SUR")
         assert len(prices) == 24
@@ -164,9 +185,11 @@ class TestCOESAdapter:
 # XM — Colombia (mock + fallback)
 # ---------------------------------------------------------------------------
 
+
 class TestXMAdapter:
     def setup_method(self):
         from src.core.market_adapter import XMAdapter
+
         self.adapter = XMAdapter()
 
     def test_fallback_returns_24_prices(self):
@@ -177,8 +200,10 @@ class TestXMAdapter:
     def test_cop_usd_conversion(self):
         """120000 COP/kWh → ~28.57 USD/MWh at 4200 COP/USD."""
         mock_data = {
-            "Items": [{"Hour": h + 1, "Values": {"PrecioOfertaBolsaEscasez": 120000.0}}
-                      for h in range(24)]
+            "Items": [
+                {"Hour": h + 1, "Values": {"PrecioOfertaBolsaEscasez": 120000.0}}
+                for h in range(24)
+            ]
         }
         with patch("src.core.market_adapter._http_get", return_value=_make_response(mock_data)):
             prices = self.adapter.get_spot_prices(_DATE, "BOGOTA")
@@ -194,9 +219,11 @@ class TestXMAdapter:
 # CENACE — Mexico (mock + fallback)
 # ---------------------------------------------------------------------------
 
+
 class TestCENACEAdapter:
     def setup_method(self):
         from src.core.market_adapter import CENACEAdapter
+
         self.adapter = CENACEAdapter()
 
     def test_fallback_returns_24_prices(self):
@@ -219,9 +246,11 @@ class TestCENACEAdapter:
 # CAISO — California (mock + fallback)
 # ---------------------------------------------------------------------------
 
+
 class TestCAISOAdapter:
     def setup_method(self):
         from src.core.market_adapter import CAISOAdapter
+
         self.adapter = CAISOAdapter()
 
     def test_fallback_returns_24_prices(self):
@@ -239,16 +268,10 @@ class TestCAISOAdapter:
         """Mock 12 × 5-min intervals per hour (2 hours worth)."""
         report_data = []
         for h in range(24):
-            for interval in range(12):
+            for _interval in range(12):
                 ts = f"2026-03-12T{h:02d}:05:00-0000"
                 report_data.append({"INTERVAL_START_GMT": ts, "VALUE": 50.0 + h})
-        mock_data = {
-            "OASISReport": {
-                "MessagePayload": {
-                    "RTO": {"REPORT_DATA": report_data}
-                }
-            }
-        }
+        mock_data = {"OASISReport": {"MessagePayload": {"RTO": {"REPORT_DATA": report_data}}}}
         with patch("src.core.market_adapter._http_get", return_value=_make_response(mock_data)):
             prices = self.adapter.get_spot_prices(_DATE, "TH_NP15_GEN-APND")
         assert len(prices) == 24
@@ -276,9 +299,11 @@ class TestCAISOAdapter:
 # ERCOT — Texas (mock + fallback)
 # ---------------------------------------------------------------------------
 
+
 class TestERCOTAdapter:
     def setup_method(self):
         from src.core.market_adapter import ERCOTAdapter
+
         self.adapter = ERCOTAdapter()
 
     def test_fallback_returns_24_prices(self):
@@ -362,11 +387,13 @@ _ENTSOE_XML = """<?xml version="1.0" encoding="UTF-8"?>
 class TestENTSOEAdapter:
     def setup_method(self):
         from src.core.market_adapter import ENTSOEAdapter
+
         self.adapter = ENTSOEAdapter()
 
     def test_fallback_without_token(self):
         """Without token, should silently use duck curve fallback."""
         import os
+
         saved = os.environ.pop("BESSAI_ENTSOE_TOKEN", None)
         try:
             with patch("src.core.market_adapter._http_get", return_value=None):
@@ -379,6 +406,7 @@ class TestENTSOEAdapter:
     def test_xml_parsing_with_mock_token(self):
         """Parse synthetic XML and verify EUR→USD conversion."""
         import os
+
         os.environ["BESSAI_ENTSOE_TOKEN"] = "FAKE_TOKEN"
         os.environ["BESSAI_EUR_USD_RATE"] = "1.08"
         try:
@@ -426,6 +454,7 @@ def test_all_adapters_fallback_returns_24_prices(market_id):
     import os
 
     from src.core.market_adapter import MarketAdapterRegistry
+
     # Ensure ENTSO-E token missing to trigger fallback
     os.environ.pop("BESSAI_ENTSOE_TOKEN", None)
     MarketAdapterRegistry.reset()
@@ -441,6 +470,7 @@ def test_all_adapters_fallback_returns_24_prices(market_id):
 def test_all_adapters_have_ancillary_services(market_id):
     """All adapters must expose at least 2 ancillary services."""
     from src.core.market_adapter import MarketAdapterRegistry
+
     MarketAdapterRegistry.reset()
     adapter = MarketAdapterRegistry.get(market_id)
     services = adapter.get_ancillary_services()
@@ -452,6 +482,7 @@ def test_all_adapters_have_ancillary_services(market_id):
 def test_all_adapters_dispatch_rules_valid(market_id):
     """Dispatch rules must be internally consistent."""
     from src.core.market_adapter import MarketAdapterRegistry
+
     MarketAdapterRegistry.reset()
     adapter = MarketAdapterRegistry.get(market_id)
     rules = adapter.get_dispatch_rules()

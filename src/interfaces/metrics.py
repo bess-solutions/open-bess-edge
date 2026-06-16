@@ -271,6 +271,7 @@ BATTERY_DEGRADATION: Gauge = Gauge(
     ["site_id", "battery_id"],
 )
 
+
 def generate_metrics() -> bytes:
     """Return the current metrics snapshot as Prometheus text format."""
     return generate_latest(REGISTRY)

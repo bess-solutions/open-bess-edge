@@ -11,9 +11,11 @@ according to the node/bar configuration, enabling zero-code deployments.
 
 from __future__ import annotations
 
-import structlog
 from pathlib import Path
+
 import httpx
+import structlog
+
 from src.core.config import settings
 
 logger = structlog.get_logger("bess.edge.model_registry")
@@ -52,8 +54,14 @@ class ModelRegistryClient:
         else:
             # If it's a SEN node, it uses the DRL format
             if model_name in [
-                "Cardones", "Charrua", "Crucero", "Hualpen",
-                "Lo_Aguirre", "Maitencillo", "Polpaico", "Quillota"
+                "Cardones",
+                "Charrua",
+                "Crucero",
+                "Hualpen",
+                "Lo_Aguirre",
+                "Maitencillo",
+                "Polpaico",
+                "Quillota",
             ]:
                 filename = f"{model_name}_drl_cen_v1.onnx.data"
             else:

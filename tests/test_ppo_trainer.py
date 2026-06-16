@@ -33,6 +33,7 @@ from src.core.ppo_trainer import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _default_config(max_episode_steps: int = 16, **kwargs) -> TrainingConfig:
     return TrainingConfig(max_episode_steps=max_episode_steps, **kwargs)
 
@@ -44,6 +45,7 @@ def _default_env(**cfg_kwargs) -> BESSDispatchEnv:
 # ---------------------------------------------------------------------------
 # TrainingConfig
 # ---------------------------------------------------------------------------
+
 
 class TestTrainingConfig:
     def test_default_learning_rate(self):
@@ -58,7 +60,7 @@ class TestTrainingConfig:
     def test_default_reward_weights(self):
         cfg = TrainingConfig()
         assert cfg.w_revenue == pytest.approx(1.0)
-        assert cfg.w_safety < 0   # penalty
+        assert cfg.w_safety < 0  # penalty
         assert cfg.w_degradation < 0  # penalty
         assert cfg.w_soc_balance > 0  # bonus
 
@@ -78,6 +80,7 @@ class TestTrainingConfig:
 # ---------------------------------------------------------------------------
 # BESSDispatchEnv — synthetic CMg
 # ---------------------------------------------------------------------------
+
 
 class TestSyntheticCMg:
     def test_synthetic_cmg_length(self):
@@ -103,6 +106,7 @@ class TestSyntheticCMg:
 # ---------------------------------------------------------------------------
 # BESSDispatchEnv — reset & step
 # ---------------------------------------------------------------------------
+
 
 class TestEnvReset:
     def test_reset_returns_obs_and_empty_info(self):
@@ -240,6 +244,7 @@ class TestEnvStep:
 # PPOTrainer — initialization
 # ---------------------------------------------------------------------------
 
+
 class TestPPOTrainerInit:
     def test_init_default_config(self):
         trainer = PPOTrainer(site_id="TEST-001")
@@ -264,6 +269,7 @@ class TestPPOTrainerInit:
 # PPOTrainer — data loading
 # ---------------------------------------------------------------------------
 
+
 class TestPPOTrainerDataLoading:
     def test_missing_data_falls_back_to_synthetic(self, tmp_path: Path):
         trainer = PPOTrainer(site_id="T", data_path=str(tmp_path / "nonexistent.csv"))
@@ -278,8 +284,10 @@ class TestPPOTrainerDataLoading:
 
     def test_valid_csv_loaded(self, tmp_path: Path):
         csv_path = tmp_path / "cen_data.csv"
-        rows = [{"timestamp": f"2025-01-01T{h:02d}:00:00", "cmg_usd_mwh": str(40.0 + h)}
-                for h in range(24)]
+        rows = [
+            {"timestamp": f"2025-01-01T{h:02d}:00:00", "cmg_usd_mwh": str(40.0 + h)}
+            for h in range(24)
+        ]
         with open(csv_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=["timestamp", "cmg_usd_mwh"])
             writer.writeheader()
@@ -302,6 +310,7 @@ class TestPPOTrainerDataLoading:
 # ---------------------------------------------------------------------------
 # PPOTrainer — training (validation loop only — no SB3 required)
 # ---------------------------------------------------------------------------
+
 
 class TestPPOTrainerValidationLoop:
     def test_train_returns_training_result(self):

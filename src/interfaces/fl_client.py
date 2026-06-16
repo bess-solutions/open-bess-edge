@@ -24,6 +24,7 @@ Usage::
     # Or use the launcher that reads config from env
     start_fl_client()
 """
+
 from __future__ import annotations
 
 import os
@@ -41,6 +42,7 @@ __all__ = ["BESSAIFLClient", "start_fl_client", "FLClientConfig"]
 # Configuration
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class FLClientConfig:
     """FL client configuration loaded from environment variables."""
 
@@ -48,9 +50,7 @@ class FLClientConfig:
         self.enabled: bool = os.getenv("BESSAI_FL_ENABLED", "false").lower() == "true"
         self.server_url: str = os.getenv("FL_SERVER_URL", "localhost:8080")
         self.site_id: str = os.getenv("BESSAI_SITE_ID", "SITE-UNKNOWN")
-        self.model_path: Path = Path(
-            os.getenv("BESSAI_MODEL_PATH", "models/dispatch_policy.onnx")
-        )
+        self.model_path: Path = Path(os.getenv("BESSAI_MODEL_PATH", "models/dispatch_policy.onnx"))
         self.weights_path: Path = Path(
             os.getenv("BESSAI_FL_WEIGHTS", "models/federated/fl_weights.npz")
         )
@@ -60,6 +60,7 @@ class FLClientConfig:
 # ─────────────────────────────────────────────────────────────────────────────
 # FL Client
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class BESSAIFLClient:
     """Federated Learning client for BESSAI edge sites.
@@ -96,19 +97,23 @@ class BESSAIFLClient:
         if self.weights_path.exists():
             loaded = np.load(str(self.weights_path), allow_pickle=True)
             self._weights = [loaded[k] for k in loaded.files]
-            log.info("fl_client.params_loaded", site_id=self.site_id,
-                     n_layers=len(self._weights), path=str(self.weights_path))
+            log.info(
+                "fl_client.params_loaded",
+                site_id=self.site_id,
+                n_layers=len(self._weights),
+                path=str(self.weights_path),
+            )
         else:
-            log.warning("fl_client.no_weights_found", site_id=self.site_id,
-                        path=str(self.weights_path))
+            log.warning(
+                "fl_client.no_weights_found", site_id=self.site_id, path=str(self.weights_path)
+            )
             self._weights = []
         return self._weights
 
     def set_parameters(self, parameters: list[np.ndarray]) -> None:
         """Apply global parameters received from the FL server."""
         self._weights = parameters
-        log.debug("fl_client.params_received", site_id=self.site_id,
-                  n_layers=len(parameters))
+        log.debug("fl_client.params_received", site_id=self.site_id, n_layers=len(parameters))
 
     # ── Fit (local training) ──────────────────────────────────────────────────
 
@@ -137,8 +142,9 @@ class BESSAIFLClient:
             for _layer in self._weights:
                 # Placeholder: in production, compute real policy gradient
                 pass  # gradient update applied below
-            log.debug("fl_client.epoch", site_id=self.site_id,
-                      epoch=epoch + 1, total=self.local_epochs)
+            log.debug(
+                "fl_client.epoch", site_id=self.site_id, epoch=epoch + 1, total=self.local_epochs
+            )
 
         for layer in self._weights:
             noise = np.random.randn(*layer.shape) * learning_rate * 0.1
@@ -151,8 +157,9 @@ class BESSAIFLClient:
         }
         self._round_metrics = metrics
 
-        log.info("fl_client.fit_complete", site_id=self.site_id,
-                 n_samples=n_samples, metrics=metrics)
+        log.info(
+            "fl_client.fit_complete", site_id=self.site_id, n_samples=n_samples, metrics=metrics
+        )
         return updated, n_samples, metrics
 
     # ── Evaluate ──────────────────────────────────────────────────────────────
@@ -173,8 +180,12 @@ class BESSAIFLClient:
         loss = float(np.random.uniform(0.08, 0.35))
         accuracy = float(np.random.uniform(0.65, 0.92))
         metrics = {"accuracy": accuracy, "site_id": self.site_id}
-        log.info("fl_client.evaluate_complete", site_id=self.site_id,
-                 loss=round(loss, 4), accuracy=round(accuracy, 3))
+        log.info(
+            "fl_client.evaluate_complete",
+            site_id=self.site_id,
+            loss=round(loss, 4),
+            accuracy=round(accuracy, 3),
+        )
         return loss, n_samples, metrics
 
     # ── Persistence ───────────────────────────────────────────────────────────
@@ -207,14 +218,16 @@ class BESSAIFLClient:
 
             return _FlowerAdapter()
         except ImportError:
-            log.warning("fl_client.flwr_not_installed",
-                        msg="Install flwr to use Flower federation")
+            log.warning(
+                "fl_client.flwr_not_installed", msg="Install flwr to use Flower federation"
+            )
             return None
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Launcher
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def start_fl_client() -> None:
     """Launch the FL client based on environment config.
@@ -241,9 +254,8 @@ def start_fl_client() -> None:
 
     try:
         import flwr as fl
-        log.info("fl_client.starting", server_url=cfg.server_url,
-                 site_id=cfg.site_id)
-        fl.client.start_numpy_client(server_address=cfg.server_url,
-                                      client=flower_client)
+
+        log.info("fl_client.starting", server_url=cfg.server_url, site_id=cfg.site_id)
+        fl.client.start_numpy_client(server_address=cfg.server_url, client=flower_client)
     except Exception as e:
         log.error("fl_client.start_failed", error=str(e))

@@ -31,6 +31,7 @@ def bidder() -> CENSCBidder:
 # Eligibility tests
 # ---------------------------------------------------------------------------
 
+
 class TestEligibility:
     def test_normal_soc_eligible(self, bidder: CENSCBidder) -> None:
         ok, reason = bidder.check_eligibility(60.0, SCType.PFR)
@@ -62,6 +63,7 @@ class TestEligibility:
 # Bid construction tests
 # ---------------------------------------------------------------------------
 
+
 class TestBidConstruction:
     def test_pfr_bid_capacity_reasonable(self, bidder: CENSCBidder) -> None:
         bid = bidder.build_pfr_bid(soc_pct=70.0)
@@ -78,8 +80,15 @@ class TestBidConstruction:
     def test_bid_payload_has_required_fields(self, bidder: CENSCBidder) -> None:
         bid = bidder.build_pfr_bid(70.0)
         payload = bid.to_cen_payload()
-        for key in ("serviceType", "siteId", "offeredCapacityKW", "priceUSDMWh",
-                    "windowStartUTC", "technology", "responseTimeSeconds"):
+        for key in (
+            "serviceType",
+            "siteId",
+            "offeredCapacityKW",
+            "priceUSDMWh",
+            "windowStartUTC",
+            "technology",
+            "responseTimeSeconds",
+        ):
             assert key in payload
         assert payload["technology"] == "BESS"
         assert payload["responseTimeSeconds"] <= 2.0  # NTSyCS requirement
@@ -88,6 +97,7 @@ class TestBidConstruction:
 # ---------------------------------------------------------------------------
 # Submission tests (dry-run)
 # ---------------------------------------------------------------------------
+
 
 class TestBidSubmission:
     def test_dry_run_submission_returns_result(self, bidder: CENSCBidder) -> None:

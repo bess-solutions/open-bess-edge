@@ -14,13 +14,13 @@ interop tests are executed by themselves.
 
 from __future__ import annotations
 
-import pytest
-
-
 import subprocess
+import sys
 import time
 import urllib.request
-import sys
+
+import pytest
+
 
 def pytest_addoption(parser: pytest.Parser) -> None:
     """Register CLI options for the interop test suite."""
@@ -44,6 +44,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         # Already registered (e.g. called from the test module as well)
         pass
 
+
 @pytest.fixture(scope="session", autouse=True)
 def start_demo_server():
     """Start demo_server.py in a background process during the test session."""
@@ -58,4 +59,3 @@ def start_demo_server():
     yield
     proc.terminate()
     proc.wait()
-

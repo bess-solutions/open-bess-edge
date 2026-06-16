@@ -58,13 +58,13 @@ AncillaryService = Literal["CSF", "RP", "RSS", "RSB", "AGC"]
 SEN_SERVICES: dict[str, dict] = {
     "CSF": {
         "label": "Capacidad Suficiencia Frecuencia",
-        "min_kw": 10.0,          # minimum BESS power to qualify
-        "max_kw_pct": 0.30,      # max fraction of rated power that can go to this service
-        "price_usd_mw_h": 4.5,   # USD per MW·h of reserved capacity
-        "priority": 1,           # allocation priority (1 = highest)
-        "soc_min_pct": 20.0,     # minimum SoC required to commit
+        "min_kw": 10.0,  # minimum BESS power to qualify
+        "max_kw_pct": 0.30,  # max fraction of rated power that can go to this service
+        "price_usd_mw_h": 4.5,  # USD per MW·h of reserved capacity
+        "priority": 1,  # allocation priority (1 = highest)
+        "soc_min_pct": 20.0,  # minimum SoC required to commit
         "soc_max_pct": 95.0,
-        "response_s": 1,         # response time requirement (seconds)
+        "response_s": 1,  # response time requirement (seconds)
     },
     "RP": {
         "label": "Reserva Primaria",
@@ -100,7 +100,7 @@ SEN_SERVICES: dict[str, dict] = {
         "label": "Control Automático de Generación",
         "min_kw": 15.0,
         "max_kw_pct": 0.20,
-        "price_usd_mw_h": 5.2,   # AGC commands → highest premium
+        "price_usd_mw_h": 5.2,  # AGC commands → highest premium
         "priority": 5,
         "soc_min_pct": 30.0,
         "soc_max_pct": 85.0,
@@ -115,6 +115,7 @@ DEFAULT_USD_CLP = 950.0
 # ─────────────────────────────────────────────────────────────────────────────
 # Data classes
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 @dataclass
 class AncillaryServiceCapacity:
@@ -185,17 +186,24 @@ class AncillaryStack:
         """Revenue per service in CLP/h."""
         return {
             s.service: round(s.revenue_clp_per_hour(self.usd_clp_rate))
-            for s in self.services if s.eligible
+            for s in self.services
+            if s.eligible
         }
 
     def summary(self) -> str:
         lines = ["── Ancillary Services Stack ──────────────────────"]
         for s in self.services:
-            status = f"{s.reserved_kw:.0f} kW @ {s.price_usd_mw_h} USD/MW·h" if s.eligible else f"⚠ {s.rejection_reason}"
+            status = (
+                f"{s.reserved_kw:.0f} kW @ {s.price_usd_mw_h} USD/MW·h"
+                if s.eligible
+                else f"⚠ {s.rejection_reason}"
+            )
             lines.append(f"  {s.service:<5} {s.label:<40} {status}")
         lines.append(f"  {'TOTAL':>5} {'':40} {self.total_reserved_kw:.0f} kW")
-        lines.append(f"  Revenue: USD {self.total_revenue_usd_per_hour:.4f}/h  "
-                     f"CLP {self.total_revenue_clp_per_hour:,.0f}/h")
+        lines.append(
+            f"  Revenue: USD {self.total_revenue_usd_per_hour:.4f}/h  "
+            f"CLP {self.total_revenue_clp_per_hour:,.0f}/h"
+        )
         lines.append(f"  Arbitrage headroom: {self.available_for_arbitrage_kw:.0f} kW")
         return "\n".join(lines)
 
@@ -213,6 +221,7 @@ class AncillaryStack:
 # ─────────────────────────────────────────────────────────────────────────────
 # CapacityAllocator
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class CapacityAllocator:
     """Allocates residual BESS capacity to SEN ancillary services.
@@ -284,19 +293,31 @@ class CapacityAllocator:
             # Check SoC window
             if not (soc_min <= soc_pct <= soc_max):
                 reason = f"SoC {soc_pct:.1f}% outside [{soc_min}–{soc_max}]%"
-                assignments.append(AncillaryServiceCapacity(
-                    service=svc, label=label, reserved_kw=0.0,
-                    price_usd_mw_h=price, eligible=False, rejection_reason=reason,
-                ))
+                assignments.append(
+                    AncillaryServiceCapacity(
+                        service=svc,
+                        label=label,
+                        reserved_kw=0.0,
+                        price_usd_mw_h=price,
+                        eligible=False,
+                        rejection_reason=reason,
+                    )
+                )
                 continue
 
             # Check available capacity
             if remaining_kw < min_kw:
                 reason = f"Only {remaining_kw:.1f} kW available, need ≥{min_kw}"
-                assignments.append(AncillaryServiceCapacity(
-                    service=svc, label=label, reserved_kw=0.0,
-                    price_usd_mw_h=price, eligible=False, rejection_reason=reason,
-                ))
+                assignments.append(
+                    AncillaryServiceCapacity(
+                        service=svc,
+                        label=label,
+                        reserved_kw=0.0,
+                        price_usd_mw_h=price,
+                        eligible=False,
+                        rejection_reason=reason,
+                    )
+                )
                 continue
 
             # Allocate up to max for this service
@@ -305,15 +326,18 @@ class CapacityAllocator:
             total_reserved += allocated_kw
 
             cap = AncillaryServiceCapacity(
-                service=svc, label=label,
-                reserved_kw=allocated_kw, price_usd_mw_h=price,
+                service=svc,
+                label=label,
+                reserved_kw=allocated_kw,
+                price_usd_mw_h=price,
             )
             total_revenue_usd += cap.revenue_usd_per_hour
             assignments.append(cap)
 
             log.debug(
                 "ancillary.allocated",
-                service=svc_id, reserved_kw=round(allocated_kw, 1),
+                service=svc_id,
+                reserved_kw=round(allocated_kw, 1),
                 revenue_usd_h=round(cap.revenue_usd_per_hour, 4),
             )
 

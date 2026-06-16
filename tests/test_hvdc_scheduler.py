@@ -14,6 +14,7 @@ Coverage:
 - HVDCResult properties: is_active, net_benefit_usd
 - HVDCFlowDirection enum values
 """
+
 from __future__ import annotations
 
 import pytest
@@ -21,11 +22,13 @@ from src.core.hvdc_scheduler import HVDCFlowDirection, HVDCScheduler
 
 # ─── Helpers ────────────────────────────────────────────────────────────────
 
+
 def _sched(link_mw: float = 500.0, min_spread: float = 5.0) -> HVDCScheduler:
     return HVDCScheduler(link_capacity_mw=link_mw, min_spread_usd_mwh=min_spread)
 
 
 # ─── IDLE tests ───────────────────────────────────────────────────────────────
+
 
 class TestIdle:
     def test_idle_when_spread_zero(self):
@@ -56,6 +59,7 @@ class TestIdle:
 
 # ─── Direction ────────────────────────────────────────────────────────────────
 
+
 class TestDirection:
     def test_a_to_b_when_a_cheaper(self):
         s = _sched()
@@ -79,6 +83,7 @@ class TestDirection:
 
 
 # ─── Setpoints ───────────────────────────────────────────────────────────────
+
 
 class TestSetpoints:
     def test_a_exports_negative_setpoint(self):
@@ -106,6 +111,7 @@ class TestSetpoints:
 
 # ─── Capacity constraint ─────────────────────────────────────────────────────
 
+
 class TestCapacity:
     def test_constrained_when_available_exceeds_link(self):
         s = _sched(link_mw=1.0)  # 1 MW = 1000 kW
@@ -125,6 +131,7 @@ class TestCapacity:
 
 
 # ─── Losses ──────────────────────────────────────────────────────────────────
+
 
 class TestLosses:
     def test_losses_positive(self):
@@ -148,6 +155,7 @@ class TestLosses:
 
 # ─── Arbitrage revenue ────────────────────────────────────────────────────────
 
+
 class TestArbitrage:
     def test_higher_spread_higher_revenue(self):
         s = _sched()
@@ -162,6 +170,7 @@ class TestArbitrage:
 
 
 # ─── Accessors ───────────────────────────────────────────────────────────────
+
 
 class TestAccessors:
     def test_dispatch_count_increments(self):

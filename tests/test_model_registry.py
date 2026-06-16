@@ -11,7 +11,6 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
 import httpx
 from src.core.model_registry import ModelRegistryClient
 

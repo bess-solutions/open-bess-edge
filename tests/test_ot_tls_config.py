@@ -19,7 +19,6 @@ The self-signed certs are generated via the stdlib ssl module without openssl bi
 from __future__ import annotations
 
 import ssl
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -35,11 +34,12 @@ def _gen_self_signed_cert(tmp_path: Path) -> tuple[Path, Path]:
     Generate a self-signed certificate + private key using the cryptography library.
     Returns (cert_path, key_path).
     """
+    import datetime
+
     from cryptography import x509
     from cryptography.hazmat.primitives import hashes, serialization
     from cryptography.hazmat.primitives.asymmetric import rsa
     from cryptography.x509.oid import NameOID
-    import datetime
 
     key_path = tmp_path / "test.key"
     cert_path = tmp_path / "test.crt"
@@ -51,17 +51,21 @@ def _gen_self_signed_cert(tmp_path: Path) -> tuple[Path, Path]:
     )
 
     # Generate self-signed certificate (valid 1 day for tests)
-    subject = issuer = x509.Name([
-        x509.NameAttribute(NameOID.COMMON_NAME, "bessai-test"),
-        x509.NameAttribute(NameOID.ORGANIZATION_NAME, "BESSAI-Test"),
-    ])
+    subject = issuer = x509.Name(
+        [
+            x509.NameAttribute(NameOID.COMMON_NAME, "bessai-test"),
+            x509.NameAttribute(NameOID.ORGANIZATION_NAME, "BESSAI-Test"),
+        ]
+    )
     cert = (
         x509.CertificateBuilder()
         .subject_name(subject)
         .issuer_name(issuer)
         .public_key(private_key.public_key())
         .serial_number(x509.random_serial_number())
-        .not_valid_before(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=1))
+        .not_valid_before(
+            datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=1)
+        )
         .not_valid_after(datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1))
         .sign(private_key, hashes.SHA256())
     )
@@ -79,7 +83,6 @@ def _gen_self_signed_cert(tmp_path: Path) -> tuple[Path, Path]:
     cert_path.write_bytes(cert_bytes)
 
     return cert_path, key_path
-
 
 
 # ---------------------------------------------------------------------------

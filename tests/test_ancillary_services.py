@@ -11,6 +11,7 @@ Coverage:
   - CapacityAllocator: full allocation, SoC gates, power gates
   - Integration with ArbitrageEngine (enable_revenue_stacking=True)
 """
+
 from __future__ import annotations
 
 import pytest
@@ -22,6 +23,7 @@ from src.interfaces.ancillary_services import (
 )
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
+
 
 @pytest.fixture
 def default_allocator() -> CapacityAllocator:
@@ -36,8 +38,8 @@ def small_allocator() -> CapacityAllocator:
 
 # ── AncillaryServiceCapacity tests ────────────────────────────────────────────
 
-class TestAncillaryServiceCapacity:
 
+class TestAncillaryServiceCapacity:
     def test_revenue_usd_per_hour_positive(self):
         cap = AncillaryServiceCapacity(
             service="CSF", label="Test", reserved_kw=100.0, price_usd_mw_h=4.5
@@ -55,8 +57,12 @@ class TestAncillaryServiceCapacity:
 
     def test_ineligible_service_zero_revenue(self):
         cap = AncillaryServiceCapacity(
-            service="AGC", label="Test", reserved_kw=0.0,
-            price_usd_mw_h=5.2, eligible=False, rejection_reason="SoC out of range"
+            service="AGC",
+            label="Test",
+            reserved_kw=0.0,
+            price_usd_mw_h=5.2,
+            eligible=False,
+            rejection_reason="SoC out of range",
         )
         assert cap.revenue_usd_per_hour == 0.0
 
@@ -73,12 +79,18 @@ class TestAncillaryServiceCapacity:
 
 # ── AncillaryStack tests ──────────────────────────────────────────────────────
 
-class TestAncillaryStack:
 
+class TestAncillaryStack:
     def _make_stack(self, clp_rate=950.0) -> AncillaryStack:
         s1 = AncillaryServiceCapacity("CSF", "A", reserved_kw=50.0, price_usd_mw_h=4.5)
-        s2 = AncillaryServiceCapacity("RP", "B", reserved_kw=30.0, price_usd_mw_h=3.8,
-                                       eligible=False, rejection_reason="SoC low")
+        s2 = AncillaryServiceCapacity(
+            "RP",
+            "B",
+            reserved_kw=30.0,
+            price_usd_mw_h=3.8,
+            eligible=False,
+            rejection_reason="SoC low",
+        )
         return AncillaryStack(
             services=[s1, s2],
             total_reserved_kw=50.0,
@@ -116,8 +128,8 @@ class TestAncillaryStack:
 
 # ── CapacityAllocator tests ───────────────────────────────────────────────────
 
-class TestCapacityAllocator:
 
+class TestCapacityAllocator:
     def test_full_allocation_normal_soc(self, default_allocator):
         """At 60% SoC with no arbitrage reservation, all eligible services receive capacity."""
         stack = default_allocator.allocate(soc_pct=60.0, arbitrage_reserved_kw=0.0)
@@ -191,29 +203,32 @@ class TestCapacityAllocator:
 
 # ── Integration with ArbitrageEngine ─────────────────────────────────────────
 
-class TestRevenueStackingIntegration:
 
+class TestRevenueStackingIntegration:
     def _make_forecasts(self):
         """Build 24 minimal PriceForecast objects for testing."""
         from src.interfaces.cmg_predictor import PriceForecast
+
         forecasts = []
         for h in range(24):
             # Low price hours 0-5, high price hours 18-21
             cmg = 30.0 + (h * 3.5)
-            forecasts.append(PriceForecast(
-                hour=h,
-                cmg_clp_kwh=cmg,
-                cmg_p10=cmg * 0.85,
-                cmg_p90=cmg * 1.15,
-                confidence=0.75,
-            ))
+            forecasts.append(
+                PriceForecast(
+                    hour=h,
+                    cmg_clp_kwh=cmg,
+                    cmg_p10=cmg * 0.85,
+                    cmg_p90=cmg * 1.15,
+                    confidence=0.75,
+                )
+            )
         return forecasts
 
     def test_stacking_disabled_no_ancillary_fields(self):
         from src.interfaces.arbitrage_engine import ArbitrageEngine
+
         engine = ArbitrageEngine(
-            capacity_kwh=1000.0, max_power_kw=500.0,
-            enable_revenue_stacking=False
+            capacity_kwh=1000.0, max_power_kw=500.0, enable_revenue_stacking=False
         )
         schedule = engine.compute(self._make_forecasts(), current_soc_pct=60.0)
         assert schedule.ancillary_revenue_clp == 0.0
@@ -222,9 +237,12 @@ class TestRevenueStackingIntegration:
 
     def test_stacking_enabled_adds_ancillary_revenue(self):
         from src.interfaces.arbitrage_engine import ArbitrageEngine
+
         engine = ArbitrageEngine(
-            capacity_kwh=1000.0, max_power_kw=500.0,
-            enable_revenue_stacking=True, usd_clp_rate=950.0
+            capacity_kwh=1000.0,
+            max_power_kw=500.0,
+            enable_revenue_stacking=True,
+            usd_clp_rate=950.0,
         )
         schedule = engine.compute(self._make_forecasts(), current_soc_pct=60.0)
         # At 60% SoC there should be ancillary revenue > 0
@@ -234,9 +252,9 @@ class TestRevenueStackingIntegration:
 
     def test_stacking_api_dict_contains_breakdown(self):
         from src.interfaces.arbitrage_engine import ArbitrageEngine
+
         engine = ArbitrageEngine(
-            capacity_kwh=1000.0, max_power_kw=500.0,
-            enable_revenue_stacking=True
+            capacity_kwh=1000.0, max_power_kw=500.0, enable_revenue_stacking=True
         )
         schedule = engine.compute(self._make_forecasts(), current_soc_pct=60.0)
         d = schedule.to_api_dict()
@@ -245,9 +263,9 @@ class TestRevenueStackingIntegration:
 
     def test_stacking_summary_mentions_stacked(self):
         from src.interfaces.arbitrage_engine import ArbitrageEngine
+
         engine = ArbitrageEngine(
-            capacity_kwh=1000.0, max_power_kw=500.0,
-            enable_revenue_stacking=True
+            capacity_kwh=1000.0, max_power_kw=500.0, enable_revenue_stacking=True
         )
         schedule = engine.compute(self._make_forecasts(), current_soc_pct=60.0)
         if schedule.ancillary_revenue_clp > 0:

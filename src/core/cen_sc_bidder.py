@@ -39,6 +39,7 @@ import structlog
 
 try:
     import aiohttp
+
     _HAS_AIOHTTP = True
 except ImportError:
     _HAS_AIOHTTP = False
@@ -50,10 +51,11 @@ log = structlog.get_logger(__name__)
 
 class SCType(str, Enum):
     """Servicios Complementarios types per CEN Chile 2024."""
-    PFR = "PFR"       # Primary Frequency Response
-    CREG = "CREG"     # Voltage Regulation
-    AGC = "AGC"       # Automatic Generation Control
-    SE = "SE"         # Seguimiento de Energía
+
+    PFR = "PFR"  # Primary Frequency Response
+    CREG = "CREG"  # Voltage Regulation
+    AGC = "AGC"  # Automatic Generation Control
+    SE = "SE"  # Seguimiento de Energía
 
 
 @dataclass
@@ -84,12 +86,10 @@ class SCBid:
             "siteId": self.site_id,
             "offeredCapacityKW": self.capacity_kw,
             "priceUSDMWh": self.price_usd_mwh,
-            "windowStartUTC": time.strftime(
-                "%Y-%m-%dT%H:%M:%SZ", time.gmtime(self.window_start)
-            ),
+            "windowStartUTC": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(self.window_start)),
             "stateOfChargeAtBid": self.soc_pct,
             "technology": "BESS",
-            "responseTimeSeconds": 1.5,   # BESSAI inverter response ≤1.5s
+            "responseTimeSeconds": 1.5,  # BESSAI inverter response ≤1.5s
             "protocolVersion": "NTSyCS-2024-v1",
         }
 
@@ -190,9 +190,7 @@ class CENSCBidder:
     # Eligibility
     # ------------------------------------------------------------------
 
-    def check_eligibility(
-        self, soc_pct: float, sc_type: SCType = SCType.PFR
-    ) -> tuple[bool, str]:
+    def check_eligibility(self, soc_pct: float, sc_type: SCType = SCType.PFR) -> tuple[bool, str]:
         """Check if this site is eligible to bid for a given SC service.
 
         Returns (eligible, reason_if_not)
@@ -255,6 +253,7 @@ class CENSCBidder:
             )
             # Simulate ~85% acceptance rate in dry-run
             import hashlib
+
             h = int(hashlib.md5(f"{bid.site_id}{bid.window_start}".encode()).hexdigest(), 16)  # nosec B324
             accepted = (h % 100) < 85
             result = BidResult(
@@ -322,9 +321,7 @@ class CENSCBidder:
     # Auto-bid loop
     # ------------------------------------------------------------------
 
-    async def auto_bid_loop(
-        self, soc_getter: Any, interval_s: float = 60.0
-    ) -> None:
+    async def auto_bid_loop(self, soc_getter: Any, interval_s: float = 60.0) -> None:
         """Background task: evaluate + submit SC bids every minute.
 
         Args:
@@ -334,7 +331,9 @@ class CENSCBidder:
         log.info("cen_bidder.auto_bid_loop.started", interval_s=interval_s)
         while True:
             try:
-                soc = await soc_getter() if asyncio.iscoroutinefunction(soc_getter) else soc_getter()
+                soc = (
+                    await soc_getter() if asyncio.iscoroutinefunction(soc_getter) else soc_getter()
+                )
 
                 for sc_type in (SCType.PFR, SCType.CREG):
                     eligible, reason = self.check_eligibility(soc, sc_type)
@@ -343,7 +342,8 @@ class CENSCBidder:
                         continue
 
                     bid = (
-                        self.build_pfr_bid(soc) if sc_type == SCType.PFR
+                        self.build_pfr_bid(soc)
+                        if sc_type == SCType.PFR
                         else self.build_creg_bid(soc)
                     )
                     await self.submit_bid(bid)
@@ -366,7 +366,8 @@ class CENSCBidder:
             "bids_won": self._bids_won,
             "win_rate_pct": (
                 round(self._bids_won / self._bids_submitted * 100, 1)
-                if self._bids_submitted > 0 else 0.0
+                if self._bids_submitted > 0
+                else 0.0
             ),
             "total_revenue_usd": round(self._revenue_usd, 2),
             "dry_run": self._dry_run,

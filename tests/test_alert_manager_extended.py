@@ -27,6 +27,7 @@ from src.interfaces.alert_manager import Alert, AlertLevel, AlertManager
 # Alert dataclass
 # ---------------------------------------------------------------------------
 
+
 class TestAlertDataclass:
     def test_alert_id_is_8_chars(self):
         a = Alert()
@@ -55,8 +56,16 @@ class TestAlertDataclass:
     def test_to_dict_keys(self):
         a = Alert(level=AlertLevel.CRITICAL, name="OVERTEMP", message="Temp=58°C")
         d = a.to_dict()
-        for key in ["alert_id", "level", "name", "message", "site_id", "timestamp",
-                    "resolved", "age_s"]:
+        for key in [
+            "alert_id",
+            "level",
+            "name",
+            "message",
+            "site_id",
+            "timestamp",
+            "resolved",
+            "age_s",
+        ]:
             assert key in d
 
     def test_to_dict_level_is_string(self):
@@ -71,6 +80,7 @@ class TestAlertDataclass:
 # ---------------------------------------------------------------------------
 # AlertManager.fire()
 # ---------------------------------------------------------------------------
+
 
 class TestFire:
     def test_fire_returns_alert(self):
@@ -124,7 +134,7 @@ class TestFire:
     def test_fire_after_resolve_allowed(self):
         mgr = AlertManager(dedup_window_s=60.0)
         mgr.fire(AlertLevel.WARNING, "SOC_LOW")
-        mgr.resolve("SOC_LOW")    # resolves and removes from active
+        mgr.resolve("SOC_LOW")  # resolves and removes from active
         # Now fire again — no longer in _active, so dedup won't block it
         # (dedup checks both time window AND name in _active)
         result = mgr.fire(AlertLevel.WARNING, "SOC_LOW")
@@ -134,6 +144,7 @@ class TestFire:
 # ---------------------------------------------------------------------------
 # AlertManager.resolve() and resolve_all()
 # ---------------------------------------------------------------------------
+
 
 class TestResolve:
     def test_resolve_returns_true_for_active(self):
@@ -190,6 +201,7 @@ class TestResolve:
 # Counts and properties
 # ---------------------------------------------------------------------------
 
+
 class TestCounts:
     def test_active_count_zero_initially(self):
         mgr = AlertManager()
@@ -227,12 +239,20 @@ class TestCounts:
 # summary()
 # ---------------------------------------------------------------------------
 
+
 class TestSummary:
     def test_summary_keys(self):
         mgr = AlertManager(site_id="TEST")
         s = mgr.summary()
-        for key in ["site_id", "active_total", "critical", "warning", "info",
-                    "history_total", "active"]:
+        for key in [
+            "site_id",
+            "active_total",
+            "critical",
+            "warning",
+            "info",
+            "history_total",
+            "active",
+        ]:
             assert key in s
 
     def test_summary_site_id(self):
@@ -269,6 +289,7 @@ class TestSummary:
 # History max rotation
 # ---------------------------------------------------------------------------
 
+
 class TestHistoryRotation:
     def test_history_bounded_by_max_history(self):
         mgr = AlertManager(max_history=3, dedup_window_s=0.0)
@@ -292,6 +313,7 @@ class TestHistoryRotation:
 # ---------------------------------------------------------------------------
 # get_active()
 # ---------------------------------------------------------------------------
+
 
 class TestGetActive:
     def test_get_active_empty_initially(self):

@@ -7,6 +7,7 @@ class BESSAITier1LoadTest(HttpUser):
     Simulates traffic from multiple edge nodes components hitting critical endpoints.
     Requires the server to be running (e.g. `python standalone_api.py`).
     """
+
     wait_time = between(0.5, 2.0)
 
     @task(3)
@@ -15,7 +16,9 @@ class BESSAITier1LoadTest(HttpUser):
         with self.client.get("/fleet/summary", catch_response=True) as response:
             if response.status_code == 200:
                 if response.elapsed.total_seconds() > 0.100:
-                    response.failure(f"SLA violation: >100ms latency ({response.elapsed.total_seconds():.3f}s)")
+                    response.failure(
+                        f"SLA violation: >100ms latency ({response.elapsed.total_seconds():.3f}s)"
+                    )
             elif response.status_code == 404:
                 response.failure("Fleet summary not found")
 
@@ -25,6 +28,8 @@ class BESSAITier1LoadTest(HttpUser):
         with self.client.get("/metrics", catch_response=True) as response:
             if response.status_code == 200:
                 if response.elapsed.total_seconds() > 0.100:
-                    response.failure(f"SLA violation: >100ms latency ({response.elapsed.total_seconds():.3f}s)")
+                    response.failure(
+                        f"SLA violation: >100ms latency ({response.elapsed.total_seconds():.3f}s)"
+                    )
             else:
                 response.failure("Metrics scrape failed")

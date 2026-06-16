@@ -59,13 +59,13 @@ log: structlog.BoundLogger = structlog.get_logger(__name__)
 
 _OPTIONAL_COMPONENTS = frozenset(
     {
-        "opentelemetry",       # OpenTelemetry traces and spans
-        "ai_ids_full",         # AI-IDS full anomaly scoring (z-score on all signals)
-        "vpp_publisher",       # VPP/federated orchestrator MQTT uplink
-        "p2p_trading",         # Peer-to-peer energy trading module
-        "lca_engine",          # Life Cycle Assessment carbon engine
-        "fl_client",           # Federated Learning client
-        "debug_logging",       # DEBUG-level log verbosity
+        "opentelemetry",  # OpenTelemetry traces and spans
+        "ai_ids_full",  # AI-IDS full anomaly scoring (z-score on all signals)
+        "vpp_publisher",  # VPP/federated orchestrator MQTT uplink
+        "p2p_trading",  # Peer-to-peer energy trading module
+        "lca_engine",  # Life Cycle Assessment carbon engine
+        "fl_client",  # Federated Learning client
+        "debug_logging",  # DEBUG-level log verbosity
     }
 )
 

@@ -45,7 +45,6 @@ try:
     from src.interfaces.sep2_adapter import (
         SEP2Adapter,
         SEP2ConfigError,
-        SEP2Error,
         _derive_lfdi,
         _storage_mode_from_power,
         build_adapter_from_env,
