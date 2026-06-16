@@ -71,6 +71,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc  # release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
 
   # ─────────────────────────────────────────────────────────────────
   # Publish to PyPI (requires manual approval via GitHub Environment)
@@ -93,3 +94,6 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc  # release/v1
+        with:
+          skip-existing: true
+
