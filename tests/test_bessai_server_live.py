@@ -14,6 +14,7 @@ import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
+import pytest
 
 # Forzar UTF-8 en stdout para Windows
 if hasattr(sys.stdout, "reconfigure"):

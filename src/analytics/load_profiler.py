@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 # ── Constants ──────────────────────────────────────────────────────────────────
 
 TARIFF_DIR = Path(__file__).parent / "tariffs"
-SUPPORTED_MARKETS = {"mexico": "gdmth_mexico.json"}
+SUPPORTED_MARKETS = {"chile": "chile_generic.json"}
 
 # ── Data models ───────────────────────────────────────────────────────────────
 
@@ -83,10 +83,10 @@ class LoadProfiler:
     Etiqueta periodos tarifarios según config JSON (CFE GDMTH, extensible).
     """
 
-    def __init__(self, market: str = "mexico", tariff_config_path: Path | None = None) -> None:
+    def __init__(self, market: str = "chile", tariff_config_path: Path | None = None) -> None:
         """
         Args:
-            market: Mercado objetivo. "mexico" usa CFE GDMTH por defecto.
+            market: Mercado objetivo. "chile" usa chile_generic por defecto.
             tariff_config_path: Ruta custom al JSON de tarifas (override de market).
         """
         self._market = market.lower()
@@ -116,7 +116,7 @@ class LoadProfiler:
     def from_csv(
         cls,
         filepath: str | Path,
-        market: str = "mexico",
+        market: str = "chile",
         timestamp_col: str = "timestamp",
         kw_col: str = "kw",
         sep: str = ",",
@@ -167,7 +167,7 @@ class LoadProfiler:
     def from_dataframe(
         cls,
         df: pd.DataFrame,
-        market: str = "mexico",
+        market: str = "chile",
         timestamp_col: str = "timestamp",
         kw_col: str = "kw",
     ) -> LoadProfiler:

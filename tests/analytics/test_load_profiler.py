@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2025-2026 BESS Solutions. All rights reserved.
-"""Tests para src/analytics/load_profiler.py — Mercado México (CFE GDMTH)."""
+"""Tests para src/analytics/load_profiler.py — Mercado Chile."""
 from __future__ import annotations
 
 import numpy as np
@@ -30,7 +30,7 @@ def make_csv_string(df: pd.DataFrame) -> str:
 class TestIngestion:
     def test_from_dataframe_loads_correctly(self):
         df = make_df(days=1)
-        p = LoadProfiler.from_dataframe(df, market="mexico")
+        p = LoadProfiler.from_dataframe(df, market="chile")
         result = p.export_profile()
         assert len(result) == len(df)
 
@@ -38,7 +38,7 @@ class TestIngestion:
         df = make_df(days=1)
         csv_path = tmp_path / "test_load.csv"
         csv_path.write_text(df.to_csv(index=False))
-        p = LoadProfiler.from_csv(csv_path, market="mexico")
+        p = LoadProfiler.from_csv(csv_path, market="chile")
         result = p.export_profile()
         assert len(result) == len(df)
 
@@ -62,7 +62,7 @@ class TestIngestion:
             LoadProfiler.from_dataframe(df, market="noexiste")
 
     def test_assert_loaded_raises_before_load(self):
-        p = LoadProfiler(market="mexico")
+        p = LoadProfiler(market="chile")
         with pytest.raises(RuntimeError, match="No hay datos"):
             p.export_profile()
 
@@ -124,7 +124,7 @@ class TestTariffTagging:
     """Verifica la lógica tarifaria CFE GDMTH para México."""
 
     def _classify(self, ts_str: str) -> str:
-        p = LoadProfiler(market="mexico")
+        p = LoadProfiler(market="chile")
         return p._classify_period(pd.Timestamp(ts_str))
 
     # ── PUNTA: Lunes-Viernes 18:00-21:59
@@ -190,7 +190,7 @@ class TestSummary:
 
     def test_estimated_cost_positive_if_config_has_prices(self):
         df = make_df(days=7)
-        s = LoadProfiler.from_dataframe(df, market="mexico").summary()
+        s = LoadProfiler.from_dataframe(df, market="chile").summary()
         assert s.estimated_monthly_cost_mxn is not None
         assert s.estimated_monthly_cost_mxn > 0
 
@@ -220,7 +220,7 @@ class TestFullPipeline:
         df.loc[100:105, "kw"] = float("nan")   # hueco
 
         result = (
-            LoadProfiler.from_dataframe(df, market="mexico")
+            LoadProfiler.from_dataframe(df, market="chile")
             .clean(fill_method="linear", zero_threshold_kw=5.0)
             .resample("15min")
             .tag_periods()

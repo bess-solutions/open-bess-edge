@@ -45,7 +45,7 @@ import numpy as np
 # Dataset loading
 # ---------------------------------------------------------------------------
 
-_DEFAULT_CMG_PATH = Path(__file__).parents[3] / "bessai-web" / "data" / "cmg_data.json"
+_DEFAULT_CMG_PATH = Path(__file__).parents[2] / "bessai-web" / "data" / "cmg_data.json"
 _FALLBACK_CMG_PATH = Path(
     os.environ.get("CEN_CMG_DATA_PATH", str(_DEFAULT_CMG_PATH))
 )

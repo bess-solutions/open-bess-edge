@@ -17,6 +17,11 @@ from __future__ import annotations
 import pytest
 
 
+import subprocess
+import time
+import urllib.request
+import sys
+
 def pytest_addoption(parser: pytest.Parser) -> None:
     """Register CLI options for the interop test suite."""
     # Guard against being called multiple times (e.g. in pytest-xdist)
@@ -38,3 +43,19 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     except ValueError:
         # Already registered (e.g. called from the test module as well)
         pass
+
+@pytest.fixture(scope="session", autouse=True)
+def start_demo_server():
+    """Start demo_server.py in a background process during the test session."""
+    proc = subprocess.Popen([sys.executable, "demo_server.py"])
+    # Wait for server to boot up
+    for _ in range(20):
+        try:
+            with urllib.request.urlopen("http://localhost:8000/health", timeout=0.5) as _:
+                break
+        except Exception:
+            time.sleep(0.5)
+    yield
+    proc.terminate()
+    proc.wait()
+

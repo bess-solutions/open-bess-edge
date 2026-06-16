@@ -183,8 +183,8 @@ class UniversalDriver:
         else:
             log.info("driver.mtls_disabled", host=host, port=port, reason="no_tls_config")
 
-        protocol = self._profile.get("driver", {}).get("protocol", "modbus_tcp")
-        if protocol == "modbus_rtu":
+        self._protocol = self._profile.get("driver", {}).get("protocol", "modbus_tcp")
+        if self._protocol == "modbus_rtu":
             self._client = ModbusSerialClient(
                 port=self._host,
                 baudrate=int(self._port),

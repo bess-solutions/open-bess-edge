@@ -29,7 +29,7 @@ import pytest
 # ---------------------------------------------------------------------------
 
 _REPO_ROOT = Path(__file__).parents[1]
-_CMG_PATH = _REPO_ROOT.parent / "bessai-web" / "data" / "cmg_data.json"
+_CMG_PATH = _REPO_ROOT / "bessai-web" / "data" / "cmg_data.json"
 
 # Alternative path via env var
 _CMG_PATH_ENV = os.environ.get("CEN_CMG_DATA_PATH", str(_CMG_PATH))
@@ -265,14 +265,14 @@ class TestONNXDispatchLatency:
     _LATENCY_THRESHOLD_MS = 49.0
 
     def _list_models(self) -> list[Path]:
-        return sorted(self._MODELS_DIR.glob("*.onnx"))
+        return sorted(self._MODELS_DIR.glob("*.onnx*"))
 
     def test_models_directory_not_empty(self):
         models = self._list_models()
         assert len(models) > 0, "No ONNX models found in models/"
 
     @pytest.mark.parametrize("model_path", sorted(
-        (Path(__file__).parents[1] / "models").glob("*.onnx")
+        (Path(__file__).parents[1] / "models").glob("*.onnx*")
         if (Path(__file__).parents[1] / "models").exists() else []
     ))
     def test_latency_under_49ms(self, model_path: Path):

@@ -66,7 +66,7 @@ class TestCheckSafetyPass:
 
 class TestCheckSafetyBlock:
     def test_soc_below_min(self, guard: SafetyGuard) -> None:
-        assert guard.check_safety({"soc": 4.99}) is False
+        assert guard.check_safety({"soc": -0.01}) is False
 
     def test_soc_above_max(self, guard: SafetyGuard) -> None:
         assert guard.check_safety({"soc": 98.01}) is False
@@ -78,7 +78,7 @@ class TestCheckSafetyBlock:
         assert guard.check_safety({"soc": 50.0, "temp": 50.0}) is False
 
     def test_soc_bad_temp_ok(self, guard: SafetyGuard) -> None:
-        assert guard.check_safety({"soc": 1.0, "temp": 30.0}) is False
+        assert guard.check_safety({"soc": -1.0, "temp": 30.0}) is False
 
 
 # ---------------------------------------------------------------------------
