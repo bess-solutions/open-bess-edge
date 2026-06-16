@@ -166,13 +166,19 @@ def scrape_cmg(n_days: int = 30) -> pd.DataFrame | None:
     total_pages = 1
     all_data = []
 
-    # API key is required by the new portal
-    api_key_header = {"user_key": "2b44048b9df6f8c42f3ff9aa1c153f32"} # Default public portal key
+    # API key is required by the Coordinator portal
+    api_key = "2b44048b9df6f8c42f3ff9aa1c153f32" # Default public portal key
 
     while page <= total_pages:
-        params = {"startDate": start, "endDate": end, "limit": 10000, "page": page}
+        params = {
+            "user_key": api_key,
+            "startDate": start,
+            "endDate": end,
+            "limit": 10000,
+            "page": page
+        }
         try:
-            resp = _req.get(_CMG_ONLINE_V4, params=params, headers=api_key_header, timeout=30)
+            resp = _req.get(_CMG_ONLINE_V4, params=params, timeout=30)
             if resp.status_code != 200:
                 print(f"  HTTP {resp.status_code} — {_CMG_ONLINE_V4}", file=sys.stderr)
                 break
@@ -197,11 +203,13 @@ def scrape_cmg(n_days: int = 30) -> pd.DataFrame | None:
         return None
     df.columns = [c.lower().strip().replace(" ", "_") for c in df.columns]
 
-    # Detect price column (V4 uses cmg_kwh_ or cmg_mills_kwh_)
+    # Detect price column (V4 uses cmg_kwh_, cmg_mills_kwh_, or cmg_usd_mwh_)
     if "cmg_kwh_" in df.columns:
         df["cmg_usd_mwh"] = pd.to_numeric(df["cmg_kwh_"], errors="coerce") * 1000.0
     elif "cmg_mills_kwh_" in df.columns:
         df["cmg_usd_mwh"] = pd.to_numeric(df["cmg_mills_kwh_"], errors="coerce")
+    elif "cmg_usd_mwh_" in df.columns:
+        df["cmg_usd_mwh"] = pd.to_numeric(df["cmg_usd_mwh_"], errors="coerce")
     elif "cmg_usd_mwh" in df.columns:
         df["cmg_usd_mwh"] = pd.to_numeric(df["cmg_usd_mwh"], errors="coerce")
     else:
