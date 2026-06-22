@@ -142,6 +142,7 @@
 
 
 ### 📚 Documentation
+- add technical study on Edge AI implementation for Open BESS Edge (`6dad6bbb`, @BESSAI Node Linares)
 - **hardware**: reemplazar diagrama mermaid por ilustracion vectorial amigable del breadboard (`c9520125`, @testeadoroficial)
 - **hardware**: agregar diagrama relacional Mermaid al wiring diagram (`7d9def4d`, @testeadoroficial)
 - **hardware**: documentar integración física del Watchdog LED 13 en Wiring Diagram (`dc080bca`, @testeadoroficial)
