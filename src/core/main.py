@@ -35,11 +35,11 @@ Run
 from __future__ import annotations
 
 import asyncio
-from contextlib import AsyncExitStack
 import logging
 import os
 import signal
 import time
+from contextlib import AsyncExitStack
 from importlib.metadata import version as _pkg_version
 from typing import Any
 
@@ -579,8 +579,8 @@ async def main() -> None:  # noqa: C901
                             cycle=cycle,
                             error=str(exc),
                         )
-                    PUBLISH_ERRORS_TOTAL.labels(site_id=_cfg.SITE_ID).inc()
-                    span.record_exception(exc)
+                        PUBLISH_ERRORS_TOTAL.labels(site_id=_cfg.SITE_ID).inc()
+                        span.record_exception(exc)
 
                 # ── STEP 4b: MQTT dual-channel (fail-safe) ────────────────
                 if mqtt_pub is not None and mqtt_pub.is_connected:
