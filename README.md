@@ -13,7 +13,7 @@
 [![IEC 62443](https://img.shields.io/badge/IEC_62443-SL--1%2FSL--2%2FSL--3_Roadmap-orange)](docs/compliance/iec62443_mapping.md)
 [![IEEE 1547](https://img.shields.io/badge/IEEE_1547--2018-IBR%2FGFM_Ready-green)](docs/compliance/ieee1547_mapping.md)
 [![NTSyCS](https://img.shields.io/badge/NTSyCS-11_GAPs_Closed-brightgreen)](docs/compliance/ntscys_compliance.md)
-[![Tests](https://img.shields.io/badge/tests-1227_passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-1234_passing-brightgreen)](tests/)
 [![Version](https://img.shields.io/badge/version-v2.17.1-blue)](.)
 
 [**Read in English 🇬🇧**](README.en.md) · [**Documentación**](https://bess-solutions.github.io/open-bess-edge) · [**Inicio Rápido**](#-inicio-rápido) · [**Servidor MCP**](docs/mcp_server.md) · [**Propuestas BEP**](docs/bep/BEP-0001.md) · [**Mapa de Ruta**](#-mapa-de-ruta)
