@@ -22,6 +22,7 @@ Usage::
     summary = coord.fleet_summary()
     setpoints = coord.compute_setpoints(dispatch_kw=300.0)
 """
+
 from __future__ import annotations
 
 import time
@@ -42,6 +43,7 @@ SITE_STALE_THRESHOLD_S = 300  # 5 minutes
 # ─────────────────────────────────────────────────────────────────────────────
 # Data classes
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 @dataclass
 class FleetSiteState:
@@ -141,6 +143,7 @@ class SiteSetpoint:
 # FleetCoordinator
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class FleetCoordinator:
     """Coordinates power dispatch across a fleet of BESSAI edge sites.
 
@@ -169,9 +172,15 @@ class FleetCoordinator:
     def register_site(self, site: FleetSiteState) -> None:
         """Add or refresh a site in the fleet registry."""
         self._sites[site.site_id] = site
-        log.debug("fleet.site_registered", site_id=site.site_id,
-                  soc_pct=site.soc_pct, max_power_kw=site.max_power_kw)
-        INJECTION_KW_CAPACITY.labels(site_id="edge", fleet_site=site.site_id).set(site.injection_kw)
+        log.debug(
+            "fleet.site_registered",
+            site_id=site.site_id,
+            soc_pct=site.soc_pct,
+            max_power_kw=site.max_power_kw,
+        )
+        INJECTION_KW_CAPACITY.labels(site_id="edge", fleet_site=site.site_id).set(
+            site.injection_kw
+        )
 
     def update_site(self, site_id: str, **kwargs) -> None:
         """Update telemetry fields for an existing site."""
@@ -182,7 +191,9 @@ class FleetCoordinator:
             if hasattr(site, k):
                 setattr(site, k, v)
         site.last_seen = time.time()
-        INJECTION_KW_CAPACITY.labels(site_id="edge", fleet_site=site.site_id).set(site.injection_kw)
+        INJECTION_KW_CAPACITY.labels(site_id="edge", fleet_site=site.site_id).set(
+            site.injection_kw
+        )
 
     def remove_site(self, site_id: str) -> None:
         """Remove a site from the fleet."""
@@ -192,10 +203,7 @@ class FleetCoordinator:
     @property
     def active_sites(self) -> list[FleetSiteState]:
         """Sites that are online, not stale, and not overtemperature."""
-        return [
-            s for s in self._sites.values()
-            if not s.is_stale and not s.is_overtemperature
-        ]
+        return [s for s in self._sites.values() if not s.is_stale and not s.is_overtemperature]
 
     @property
     def n_sites(self) -> int:
@@ -253,35 +261,43 @@ class FleetCoordinator:
 
         total_available = self.total_flex_kw(mode)
         if total_available < self.min_flex_kw:
-            log.info("fleet.below_min_flex",
-                     total_available_kw=round(total_available, 1),
-                     min_flex_kw=self.min_flex_kw)
+            log.info(
+                "fleet.below_min_flex",
+                total_available_kw=round(total_available, 1),
+                min_flex_kw=self.min_flex_kw,
+            )
             return [SiteSetpoint(s.site_id, 0.0, "below_min_flex") for s in sites]
 
         capped = min(dispatch_kw, total_available)
         setpoints: list[SiteSetpoint] = []
 
         for site in sites:
-            cap = (site.available_discharge_kw if mode == "discharge"
-                   else site.available_charge_kw)
+            cap = site.available_discharge_kw if mode == "discharge" else site.available_charge_kw
             if total_available > 0:
                 share = (cap / total_available) * capped
             else:
                 share = 0.0
             # Apply sign convention: discharge = negative power
             signed = -round(share, 1) if mode == "discharge" else round(share, 1)
-            setpoints.append(SiteSetpoint(
-                site_id=site.site_id,
-                power_kw=signed,
-                reason=f"proportional_{mode}",
-            ))
-            log.debug("fleet.setpoint", site_id=site.site_id,
-                      power_kw=signed, mode=mode)
+            setpoints.append(
+                SiteSetpoint(
+                    site_id=site.site_id,
+                    power_kw=signed,
+                    reason=f"proportional_{mode}",
+                )
+            )
+            log.debug("fleet.setpoint", site_id=site.site_id, power_kw=signed, mode=mode)
 
-        log.info("fleet.setpoints_computed",
-                 n_sites=len(setpoints), dispatch_kw=capped,
-                 mode=mode, total_available_kw=round(total_available, 1))
-        FLEET_LATENCY_MS.labels(site_id="edge", operation="compute_setpoints").observe((time.time() - t0) * 1000)
+        log.info(
+            "fleet.setpoints_computed",
+            n_sites=len(setpoints),
+            dispatch_kw=capped,
+            mode=mode,
+            total_available_kw=round(total_available, 1),
+        )
+        FLEET_LATENCY_MS.labels(site_id="edge", operation="compute_setpoints").observe(
+            (time.time() - t0) * 1000
+        )
         return setpoints
 
     # ── Summary ───────────────────────────────────────────────────────────────
@@ -302,5 +318,7 @@ class FleetCoordinator:
             "program_id": self.program_id,
             "sites": [s.to_dict() for s in self._sites.values()],
         }
-        FLEET_LATENCY_MS.labels(site_id="edge", operation="summary").observe((time.time() - t0) * 1000)
+        FLEET_LATENCY_MS.labels(site_id="edge", operation="summary").observe(
+            (time.time() - t0) * 1000
+        )
         return res

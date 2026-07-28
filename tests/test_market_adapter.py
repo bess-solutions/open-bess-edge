@@ -6,6 +6,7 @@ tests/test_market_adapter.py
 Test suite for MarketAdapter protocol and all market implementations.
 Includes HTTP mock tests for COES, XM, and CENACE live data paths.
 """
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
@@ -24,6 +25,7 @@ from src.core.market_adapter import (
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
+
 @pytest.fixture(autouse=True)
 def reset_registry():
     """Clear the adapter registry cache between tests."""
@@ -34,8 +36,8 @@ def reset_registry():
 
 # ── SpotPrice tests ───────────────────────────────────────────────────────────
 
-class TestSpotPrice:
 
+class TestSpotPrice:
     def test_clp_conversion(self):
         sp = SpotPrice(hour=12, price_usd_mwh=50.0, node="Maitencillo", market="SEN")
         # 50 USD/MWh * (1/1000) * 950 = 47.5 CLP/kWh
@@ -50,8 +52,8 @@ class TestSpotPrice:
 
 # ── SENAdapter tests ──────────────────────────────────────────────────────────
 
-class TestSENAdapter:
 
+class TestSENAdapter:
     def test_market_id(self):
         assert SENAdapter().market_id == "SEN"
 
@@ -96,14 +98,18 @@ class TestSENAdapter:
 
 # ── Latam adapter tests (fallback + HTTP mock) ────────────────────────────────
 
+
 class TestLatamAdaptersFallback:
     """Verify that COES/XM/CENACE fall back to Duck Curve when API is unreachable."""
 
-    @pytest.mark.parametrize("adapter_cls,expected_market,expected_country", [
-        (COESAdapter, "COES", "Peru"),
-        (XMAdapter, "XM", "Colombia"),
-        (CENACEAdapter, "CENACE", "Mexico"),
-    ])
+    @pytest.mark.parametrize(
+        "adapter_cls,expected_market,expected_country",
+        [
+            (COESAdapter, "COES", "Peru"),
+            (XMAdapter, "XM", "Colombia"),
+            (CENACEAdapter, "CENACE", "Mexico"),
+        ],
+    )
     def test_market_id_and_country(self, adapter_cls, expected_market, expected_country):
         a = adapter_cls()
         assert a.market_id == expected_market
@@ -161,8 +167,7 @@ class TestLatamAdaptersHTTP:
     def test_coes_live_parses_24_prices(self):
         """COES returns [{hora:1..24, precio:X, barra:LIMA_SUR}] → 24 SpotPrices."""
         fake_data = [
-            {"hora": h + 1, "precio": 38.5 + h * 0.5, "barra": "LIMA_SUR"}
-            for h in range(24)
+            {"hora": h + 1, "precio": 38.5 + h * 0.5, "barra": "LIMA_SUR"} for h in range(24)
         ]
         mock_resp = self._mock_response(fake_data)
         with patch("src.core.market_adapter._requests") as mock_req:
@@ -207,10 +212,7 @@ class TestLatamAdaptersHTTP:
 
     def test_cenace_live_parses_24_prices(self):
         """CENACE returns {Resultados:[{Hora:'01'..,'24', PML:X}]}."""
-        resultados = [
-            {"Hora": str(h + 1).zfill(2), "PML": 850.0 + h * 10}
-            for h in range(24)
-        ]
+        resultados = [{"Hora": str(h + 1).zfill(2), "PML": 850.0 + h * 10} for h in range(24)]
         mock_resp = self._mock_response({"Resultados": resultados})
         with patch("src.core.market_adapter._requests") as mock_req:
             mock_req.get.return_value = mock_resp
@@ -231,8 +233,8 @@ class TestLatamAdaptersHTTP:
 
 # ── MarketAdapterRegistry tests ───────────────────────────────────────────────
 
-class TestMarketAdapterRegistry:
 
+class TestMarketAdapterRegistry:
     def test_default_returns_sen(self):
         adapter = MarketAdapterRegistry.get()
         assert adapter.market_id == "SEN"

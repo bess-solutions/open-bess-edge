@@ -60,6 +60,7 @@ log: structlog.BoundLogger = structlog.get_logger(__name__)
 
 class AlertSeverity(str, Enum):
     """Alert severity levels, ordered from lowest to highest."""
+
     INFO = "INFO"
     WARNING = "WARNING"
     CRITICAL = "CRITICAL"
@@ -78,9 +79,9 @@ class AlertSeverity(str, Enum):
 # ---------------------------------------------------------------------------
 
 _SEVERITY_COLORS = {
-    AlertSeverity.INFO: "#2196F3",       # blue
-    AlertSeverity.WARNING: "#FF9800",    # orange
-    AlertSeverity.CRITICAL: "#F44336",   # red
+    AlertSeverity.INFO: "#2196F3",  # blue
+    AlertSeverity.WARNING: "#FF9800",  # orange
+    AlertSeverity.CRITICAL: "#F44336",  # red
 }
 
 _SEVERITY_EMOJIS = {
@@ -119,7 +120,9 @@ class AlertDispatcher:
 
     def __init__(self, min_severity: AlertSeverity = AlertSeverity.WARNING) -> None:
         env_min = os.environ.get("ALERT_MIN_SEVERITY", "").strip().upper()
-        self._min_severity = AlertSeverity(env_min) if env_min in AlertSeverity._value2member_map_ else min_severity  # type: ignore[attr-defined]
+        self._min_severity = (
+            AlertSeverity(env_min) if env_min in AlertSeverity._value2member_map_ else min_severity
+        )  # type: ignore[attr-defined]
 
         self._slack_webhook = os.environ.get("ALERT_SLACK_WEBHOOK", "").strip() or None
         self._email_from = os.environ.get("ALERT_EMAIL_FROM", "").strip() or None
@@ -182,8 +185,10 @@ class AlertDispatcher:
         tags = tags or {}
 
         # Always log
-        log_fn = log.error if severity == AlertSeverity.CRITICAL else (
-            log.warning if severity == AlertSeverity.WARNING else log.info
+        log_fn = (
+            log.error
+            if severity == AlertSeverity.CRITICAL
+            else (log.warning if severity == AlertSeverity.WARNING else log.info)
         )
         log_fn(
             "alert_dispatcher.alert",
@@ -196,11 +201,15 @@ class AlertDispatcher:
 
         # Slack
         if self._slack_webhook:
-            self._send_slack(severity=severity, title=title, detail=detail, source=source, tags=tags, ts=ts)
+            self._send_slack(
+                severity=severity, title=title, detail=detail, source=source, tags=tags, ts=ts
+            )
 
         # Email
         if self._email_from and self._email_to:
-            self._send_email(severity=severity, title=title, detail=detail, source=source, tags=tags, ts=ts)
+            self._send_email(
+                severity=severity, title=title, detail=detail, source=source, tags=tags, ts=ts
+            )
 
     # ------------------------------------------------------------------
     # Private: Slack

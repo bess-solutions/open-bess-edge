@@ -29,7 +29,7 @@ import pytest
 # ---------------------------------------------------------------------------
 
 _REPO_ROOT = Path(__file__).parents[1]
-_CMG_PATH = _REPO_ROOT.parent / "bessai-web" / "data" / "cmg_data.json"
+_CMG_PATH = _REPO_ROOT / "bessai-web" / "data" / "cmg_data.json"
 
 # Alternative path via env var
 _CMG_PATH_ENV = os.environ.get("CEN_CMG_DATA_PATH", str(_CMG_PATH))
@@ -48,6 +48,7 @@ def _resolve_cmg_path() -> str:
 def _has_gymnasium() -> bool:
     try:
         import gymnasium  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -56,6 +57,7 @@ def _has_gymnasium() -> bool:
 def _has_onnxruntime() -> bool:
     try:
         import onnxruntime  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -265,16 +267,20 @@ class TestONNXDispatchLatency:
     _LATENCY_THRESHOLD_MS = 49.0
 
     def _list_models(self) -> list[Path]:
-        return sorted(self._MODELS_DIR.glob("*.onnx"))
+        return sorted(self._MODELS_DIR.glob("*.onnx*"))
 
     def test_models_directory_not_empty(self):
         models = self._list_models()
         assert len(models) > 0, "No ONNX models found in models/"
 
-    @pytest.mark.parametrize("model_path", sorted(
-        (Path(__file__).parents[1] / "models").glob("*.onnx")
-        if (Path(__file__).parents[1] / "models").exists() else []
-    ))
+    @pytest.mark.parametrize(
+        "model_path",
+        sorted(
+            (Path(__file__).parents[1] / "models").glob("*.onnx*")
+            if (Path(__file__).parents[1] / "models").exists()
+            else []
+        ),
+    )
     def test_latency_under_49ms(self, model_path: Path):
         """Each ONNX model should produce output in < 49ms (p95 over 100 calls).
         Input shape is auto-detected from the model metadata.
@@ -329,11 +335,10 @@ class TestTrainDRLCENDryRun:
 
     @pytest.mark.xfail(
         reason="Dry-run requires torch which may not be in the subprocess Python (3.14 venv). "
-               "Validated manually with py -3.12.",
+        "Validated manually with py -3.12.",
         strict=False,
     )
     def test_dry_run_passes(self):
-
         """train_drl_cen.py --dry-run should exit 0 and write a report."""
         import subprocess
         import sys
@@ -349,8 +354,10 @@ class TestTrainDRLCENDryRun:
                 sys.executable,
                 str(script),
                 "--dry-run",
-                "--cmg-data", cmg,
-                "--reports-dir", str(_REPO_ROOT / "reports"),
+                "--cmg-data",
+                cmg,
+                "--reports-dir",
+                str(_REPO_ROOT / "reports"),
             ],
             capture_output=True,
             text=True,

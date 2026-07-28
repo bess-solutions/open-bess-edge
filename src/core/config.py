@@ -1,4 +1,4 @@
-﻿# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 # Copyright 2024-2026 BESS Solutions SpA
 
 """
@@ -126,6 +126,14 @@ class Settings(BaseSettings):
         default=None,
         description="GCP Pub/Sub topic name for telemetry. Required in production.",
     )
+    MODEL_REGISTRY_URL: str = Field(
+        default="https://storage.googleapis.com/bessai-models",
+        description="Base URL for the Cloud Model Registry where ONNX models are hosted.",
+    )
+    MODEL_REGISTRY_ENABLED: bool = Field(
+        default=True,
+        description="Enable dynamic downloading of custom ONNX models from the Cloud Model Registry.",
+    )
 
     # ------------------------------------------------------------------
     # Observability
@@ -167,7 +175,7 @@ class Settings(BaseSettings):
         description="TCP port for the IEEE 2030.5 (SEP 2.0) server.",
     )
     SEP2_HOST: str = Field(
-        default="0.0.0.0",  # nosec B104 — configurable via env var SEP2_HOST; defaults to all interfaces for container deployments
+        default="127.0.0.1",  # Configurable via env var SEP2_HOST; default 127.0.0.1 for local/OT security
         description="Bind address for the IEEE 2030.5 server.",
     )
     SEP2_TLS_CERT: str | None = Field(
@@ -240,7 +248,7 @@ class Settings(BaseSettings):
         description="Path to CEN CA certificate PEM for server verification.",
     )
     IEC104_HOST: str = Field(
-        default="0.0.0.0",  # nosec B104
+        default="127.0.0.1",  # Configurable via env var IEC104_HOST; default 127.0.0.1 for local/OT security
         description="Bind address for the IEC 60870-5-104 SCADA server (GAP-004).",
     )
     IEC104_PORT: int = Field(

@@ -35,6 +35,7 @@ def _make_driver(connected: bool = True, reconnect_succeeds: bool = True) -> Mag
     driver.is_connected = connected
 
     if reconnect_succeeds:
+
         async def _reconnect() -> None:
             driver.is_connected = True
 

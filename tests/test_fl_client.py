@@ -5,6 +5,7 @@ tests/test_fl_client.py
 =========================
 Test suite for BESSAIFLClient and FedAvg aggregation (Phase 2 — FL).
 """
+
 from __future__ import annotations
 
 import numpy as np
@@ -13,6 +14,7 @@ from src.interfaces.fl_client import BESSAIFLClient, FLClientConfig
 from src.interfaces.fl_server import BESSAIFLServer, FedAvgAggregator
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
+
 
 @pytest.fixture
 def dummy_weights() -> list[np.ndarray]:
@@ -37,8 +39,8 @@ def client(tmp_path, dummy_weights) -> BESSAIFLClient:
 
 # ── FLClientConfig tests ──────────────────────────────────────────────────────
 
-class TestFLClientConfig:
 
+class TestFLClientConfig:
     def test_default_disabled(self):
         cfg = FLClientConfig()
         assert cfg.enabled is False
@@ -56,8 +58,8 @@ class TestFLClientConfig:
 
 # ── BESSAIFLClient tests ──────────────────────────────────────────────────────
 
-class TestBESSAIFLClient:
 
+class TestBESSAIFLClient:
     def test_get_parameters_loads_from_file(self, client):
         params = client.get_parameters()
         assert len(params) == 3
@@ -106,8 +108,8 @@ class TestBESSAIFLClient:
 
 # ── FedAvgAggregator tests ────────────────────────────────────────────────────
 
-class TestFedAvgAggregator:
 
+class TestFedAvgAggregator:
     def test_aggregate_two_clients_equal_samples(self):
         w1 = [np.ones((4, 2)) * 1.0, np.ones(4) * 1.0]
         w2 = [np.ones((4, 2)) * 3.0, np.ones(4) * 3.0]
@@ -144,8 +146,8 @@ class TestFedAvgAggregator:
 
 # ── BESSAIFLServer tests ──────────────────────────────────────────────────────
 
-class TestBESSAIFLServer:
 
+class TestBESSAIFLServer:
     def _make_update(self, n_layers=3, n_samples=100) -> dict:
         return {
             "site_id": f"SITE-{n_samples}",

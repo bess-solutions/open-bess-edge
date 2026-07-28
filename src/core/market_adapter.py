@@ -29,6 +29,7 @@ Usage::
     rules = adapter.get_dispatch_rules()
     services = adapter.get_ancillary_services()
 """
+
 from __future__ import annotations
 
 import math
@@ -42,6 +43,7 @@ import structlog
 
 try:
     import requests as _requests  # type: ignore[import-untyped]
+
     _HAS_REQUESTS = True
 except ImportError:
     _HAS_REQUESTS = False
@@ -67,6 +69,7 @@ log = structlog.get_logger(__name__)
 # ─────────────────────────────────────────────────────────────────────────────
 # Shared data structures
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 @dataclass
 class SpotPrice:
@@ -150,6 +153,7 @@ class DispatchRules:
 # Abstract base — MarketAdapter Protocol
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class MarketAdapter(ABC):
     """Abstract interface all market adapters must implement."""
 
@@ -199,6 +203,7 @@ class MarketAdapter(ABC):
 # SEN — Chile (fully implemented)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class SENAdapter(MarketAdapter):
     """Market adapter for Chile's SEN (Sistema Eléctrico Nacional).
 
@@ -207,8 +212,14 @@ class SENAdapter(MarketAdapter):
     """
 
     SEN_NODES = [
-        "Maitencillo", "Quillota", "Pan_de_Azucar", "Cardones",
-        "Crucero", "Encuentro", "Diego_de_Almagro", "Polpaico",
+        "Maitencillo",
+        "Quillota",
+        "Pan_de_Azucar",
+        "Cardones",
+        "Crucero",
+        "Encuentro",
+        "Diego_de_Almagro",
+        "Polpaico",
     ]
 
     @property
@@ -222,21 +233,24 @@ class SENAdapter(MarketAdapter):
     def get_spot_prices(self, date_str: str, node: str = "Maitencillo") -> list[SpotPrice]:
         """Return stub 24h prices. In production, queries DuckDB bessai_cen.db."""
         import math
+
         prices = []
         for h in range(24):
             # Duck Curve model for Chilean SEN:
             # – Cheapest overnight (2-4 AM), mid-price midday solar dip, peak 18-21 PM
-            overnight_dip  = -12.0 * math.exp(-((h - 3) ** 2) / 5.0)   # cheap off-peak
-            solar_dip      = -8.0  * math.exp(-((h - 12) ** 2) / 6.0)  # solar overgeneration
-            evening_peak   =  28.0 * math.exp(-((h - 19) ** 2) / 4.0)  # ramping demand
+            overnight_dip = -12.0 * math.exp(-((h - 3) ** 2) / 5.0)  # cheap off-peak
+            solar_dip = -8.0 * math.exp(-((h - 12) ** 2) / 6.0)  # solar overgeneration
+            evening_peak = 28.0 * math.exp(-((h - 19) ** 2) / 4.0)  # ramping demand
             price = max(0.0, 35.0 + overnight_dip + solar_dip + evening_peak)
-            prices.append(SpotPrice(
-                hour=h,
-                price_usd_mwh=price,
-                node=node,
-                market="SEN",
-                date=date_str,
-            ))
+            prices.append(
+                SpotPrice(
+                    hour=h,
+                    price_usd_mwh=price,
+                    node=node,
+                    market="SEN",
+                    date=date_str,
+                )
+            )
         return prices
 
     def get_ancillary_services(self) -> list[AncillaryServiceDef]:
@@ -251,10 +265,12 @@ class SENAdapter(MarketAdapter):
 
     def get_dispatch_rules(self) -> DispatchRules:
         return DispatchRules(
-            min_soc_pct=10.0, max_soc_pct=95.0,
+            min_soc_pct=10.0,
+            max_soc_pct=95.0,
             max_daily_cycles=2,
             peak_hours=list(range(17, 24)),
-            currency="CLP", usd_local_rate=950.0,
+            currency="CLP",
+            usd_local_rate=950.0,
             grid_frequency_hz=50.0,
         )
 
@@ -303,17 +319,21 @@ def _duck_curve_fallback(
     prices = []
     for h in range(24):
         overnight = overnight_amp * math.exp(-((h - 3) ** 2) / 5.0)
-        solar     = solar_amp    * math.exp(-((h - 12) ** 2) / 6.0)
-        peak      = peak_amp     * math.exp(-((h - 19) ** 2) / 4.0)
-        usd_mwh   = max(0.0, base_usd + overnight + solar + peak)
-        prices.append(SpotPrice(hour=h, price_usd_mwh=round(usd_mwh, 2),
-                                node=node, market=market, date=date_str))
+        solar = solar_amp * math.exp(-((h - 12) ** 2) / 6.0)
+        peak = peak_amp * math.exp(-((h - 19) ** 2) / 4.0)
+        usd_mwh = max(0.0, base_usd + overnight + solar + peak)
+        prices.append(
+            SpotPrice(
+                hour=h, price_usd_mwh=round(usd_mwh, 2), node=node, market=market, date=date_str
+            )
+        )
     return prices
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # COES — Peru
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class COESAdapter(MarketAdapter):
     """Peru COES market adapter with real HTTP client + Duck Curve fallback.
@@ -375,17 +395,19 @@ class COESAdapter(MarketAdapter):
     def get_ancillary_services(self) -> list[AncillaryServiceDef]:
         # COES: Reserva de Frecuencia Primaria (RFP) y Potencia Firme
         return [
-            AncillaryServiceDef("RFP", "Reserva de Frecuencia Primaria",    20.0, 3.5, 30),
-            AncillaryServiceDef("PF",  "Potencia Firme",                   100.0, 2.0, 3600),
-            AncillaryServiceDef("SFR", "Reserva de Frecuencia Secundaria",   30.0, 2.8, 300),
+            AncillaryServiceDef("RFP", "Reserva de Frecuencia Primaria", 20.0, 3.5, 30),
+            AncillaryServiceDef("PF", "Potencia Firme", 100.0, 2.0, 3600),
+            AncillaryServiceDef("SFR", "Reserva de Frecuencia Secundaria", 30.0, 2.8, 300),
         ]
 
     def get_dispatch_rules(self) -> DispatchRules:
         return DispatchRules(
-            min_soc_pct=15.0, max_soc_pct=90.0,
+            min_soc_pct=15.0,
+            max_soc_pct=90.0,
             max_daily_cycles=2,
             peak_hours=list(range(18, 23)),
-            currency="PEN", usd_local_rate=3.7,
+            currency="PEN",
+            usd_local_rate=3.7,
             grid_frequency_hz=60.0,
         )
 
@@ -396,6 +418,7 @@ class COESAdapter(MarketAdapter):
 # ─────────────────────────────────────────────────────────────────────────────
 # XM — Colombia
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class XMAdapter(MarketAdapter):
     """Colombia XM market adapter with real HTTP client + Duck Curve fallback.
@@ -463,15 +486,17 @@ class XMAdapter(MarketAdapter):
         return [
             AncillaryServiceDef("AGC_CO", "Regulación Automática de Generación", 10.0, 6.0, 4),
             AncillaryServiceDef("RES_CO", "Reserva Rodante", 30.0, 2.5, 60),
-            AncillaryServiceDef("RF_CO",  "Respaldo de Frecuencia", 20.0, 3.0, 30),
+            AncillaryServiceDef("RF_CO", "Respaldo de Frecuencia", 20.0, 3.0, 30),
         ]
 
     def get_dispatch_rules(self) -> DispatchRules:
         return DispatchRules(
-            min_soc_pct=10.0, max_soc_pct=95.0,
+            min_soc_pct=10.0,
+            max_soc_pct=95.0,
             max_daily_cycles=2,
             peak_hours=list(range(9, 13)) + list(range(18, 21)),  # bimodal Colombia
-            currency="COP", usd_local_rate=4200.0,
+            currency="COP",
+            usd_local_rate=4200.0,
             grid_frequency_hz=60.0,
         )
 
@@ -482,6 +507,7 @@ class XMAdapter(MarketAdapter):
 # ─────────────────────────────────────────────────────────────────────────────
 # CENACE — Mexico
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class CENACEAdapter(MarketAdapter):
     """Mexico CENACE market adapter with real HTTP client + Duck Curve fallback.
@@ -551,16 +577,18 @@ class CENACEAdapter(MarketAdapter):
     def get_ancillary_services(self) -> list[AncillaryServiceDef]:
         return [
             AncillaryServiceDef("R_RAPIDA", "Reserva de Regulación Rápida", 10.0, 7.0, 10),
-            AncillaryServiceDef("R_LENTA",  "Reserva de Regulación Lenta",  50.0, 3.0, 300),
-            AncillaryServiceDef("RS_MX",    "Reserva de Corto Plazo",       25.0, 4.5, 60),
+            AncillaryServiceDef("R_LENTA", "Reserva de Regulación Lenta", 50.0, 3.0, 300),
+            AncillaryServiceDef("RS_MX", "Reserva de Corto Plazo", 25.0, 4.5, 60),
         ]
 
     def get_dispatch_rules(self) -> DispatchRules:
         return DispatchRules(
-            min_soc_pct=10.0, max_soc_pct=90.0,
+            min_soc_pct=10.0,
+            max_soc_pct=90.0,
             max_daily_cycles=2,
             peak_hours=list(range(19, 23)),
-            currency="MXN", usd_local_rate=18.0,
+            currency="MXN",
+            usd_local_rate=18.0,
             grid_frequency_hz=60.0,
         )
 
@@ -571,6 +599,7 @@ class CENACEAdapter(MarketAdapter):
 # ─────────────────────────────────────────────────────────────────────────────
 # CAISO — California (USA)
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class CAISOAdapter(MarketAdapter):
     """California ISO market adapter — OASIS API, 5-min real-time LMP.
@@ -606,15 +635,14 @@ class CAISOAdapter(MarketAdapter):
             log.info("caiso_adapter.live", date=date_str, node=node, points=len(prices))
             return prices
         log.warning("caiso_adapter.fallback", date=date_str, reason="OASIS unavailable")
-        return _duck_curve_fallback(date_str, node, "CAISO",
-                                    base_usd=45.0, peak_amp=55.0)
+        return _duck_curve_fallback(date_str, node, "CAISO", base_usd=45.0, peak_amp=55.0)
 
     def _fetch_caiso(self, date_str: str, node: str) -> list[SpotPrice]:
         """Fetch hourly LMP from OASIS and bucket 5-min intervals into hourly averages."""
         try:
             dt = datetime.strptime(date_str, "%Y-%m-%d")
             start = dt.strftime("%Y%m%dT00:00-0000")
-            end   = (dt + timedelta(days=1)).strftime("%Y%m%dT00:00-0000")
+            end = (dt + timedelta(days=1)).strftime("%Y%m%dT00:00-0000")
             params = {
                 "queryname": "PRC_RTPD_LMP",
                 "startdatetime": start,
@@ -631,9 +659,9 @@ class CAISOAdapter(MarketAdapter):
             # OASIS JSON: {"OASISReport": {"MessagePayload": {"RTO": {"REPORT_DATA": [...]}}}}
             report_data = (
                 data.get("OASISReport", {})
-                    .get("MessagePayload", {})
-                    .get("RTO", {})
-                    .get("REPORT_DATA", [])
+                .get("MessagePayload", {})
+                .get("RTO", {})
+                .get("REPORT_DATA", [])
             )
             # Bucket 5-min intervals into hours (simple average)
             hourly: dict[int, list[float]] = {h: [] for h in range(24)}
@@ -659,19 +687,21 @@ class CAISOAdapter(MarketAdapter):
 
     def get_ancillary_services(self) -> list[AncillaryServiceDef]:
         return [
-            AncillaryServiceDef("REG_UP",   "Regulation Up",         10.0, 12.0, 4),
-            AncillaryServiceDef("REG_DN",   "Regulation Down",       10.0, 10.0, 4),
-            AncillaryServiceDef("SPIN_RES", "Spinning Reserve",      30.0,  8.0, 10),
-            AncillaryServiceDef("NSPIN",    "Non-Spinning Reserve",  30.0,  5.0, 600),
-            AncillaryServiceDef("FLEX_UP",  "Flexible Ramping Up",   20.0,  6.0, 300),
+            AncillaryServiceDef("REG_UP", "Regulation Up", 10.0, 12.0, 4),
+            AncillaryServiceDef("REG_DN", "Regulation Down", 10.0, 10.0, 4),
+            AncillaryServiceDef("SPIN_RES", "Spinning Reserve", 30.0, 8.0, 10),
+            AncillaryServiceDef("NSPIN", "Non-Spinning Reserve", 30.0, 5.0, 600),
+            AncillaryServiceDef("FLEX_UP", "Flexible Ramping Up", 20.0, 6.0, 300),
         ]
 
     def get_dispatch_rules(self) -> DispatchRules:
         return DispatchRules(
-            min_soc_pct=10.0, max_soc_pct=95.0,
-            max_daily_cycles=3,           # California allows more cycling
+            min_soc_pct=10.0,
+            max_soc_pct=95.0,
+            max_daily_cycles=3,  # California allows more cycling
             peak_hours=list(range(15, 22)),  # Solar duck curve peak
-            currency="USD", usd_local_rate=1.0,
+            currency="USD",
+            usd_local_rate=1.0,
             grid_frequency_hz=60.0,
         )
 
@@ -682,6 +712,7 @@ class CAISOAdapter(MarketAdapter):
 # ─────────────────────────────────────────────────────────────────────────────
 # ERCOT — Texas (USA)
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class ERCOTAdapter(MarketAdapter):
     """ERCOT Texas market adapter — Public API, 15-min Settlement Point Prices.
@@ -697,11 +728,11 @@ class ERCOTAdapter(MarketAdapter):
     _DEFAULT_NODE = "HB_NORTH"  # North Hub — benchmark node
 
     ERCOT_HUBS = [
-        "HB_NORTH",   # North Hub
-        "HB_SOUTH",   # South Hub
-        "HB_WEST",    # West Hub (wind-heavy)
-        "HB_HOUSTON", # Houston Hub
-        "HB_PAN",     # Panhandle (wind)
+        "HB_NORTH",  # North Hub
+        "HB_SOUTH",  # South Hub
+        "HB_WEST",  # West Hub (wind-heavy)
+        "HB_HOUSTON",  # Houston Hub
+        "HB_PAN",  # Panhandle (wind)
     ]
 
     @property
@@ -719,8 +750,9 @@ class ERCOTAdapter(MarketAdapter):
             log.info("ercot_adapter.live", date=date_str, node=node, points=len(prices))
             return prices
         log.warning("ercot_adapter.fallback", date=date_str, reason="ERCOT API unavailable")
-        return _duck_curve_fallback(date_str, node, "ERCOT",
-                                    base_usd=40.0, peak_amp=80.0)  # Texas scarcity spikes
+        return _duck_curve_fallback(
+            date_str, node, "ERCOT", base_usd=40.0, peak_amp=80.0
+        )  # Texas scarcity spikes
 
     def _fetch_ercot(self, date_str: str, node: str) -> list[SpotPrice]:
         """Fetch 15-min SPP and aggregate to hourly averages."""
@@ -732,8 +764,7 @@ class ERCOTAdapter(MarketAdapter):
                 "settlementPoint": node,
                 "size": "9999",
             }
-            resp = _http_get(self._API_BASE, params=params,
-                             headers={"accept": "application/json"})
+            resp = _http_get(self._API_BASE, params=params, headers={"accept": "application/json"})
             if resp is None:
                 return []
             data = resp.json()
@@ -745,7 +776,7 @@ class ERCOTAdapter(MarketAdapter):
                 header = rows[0]
                 rows = rows[1:]
                 hour_idx = header.index("deliveryHour") if "deliveryHour" in header else 1
-                spp_idx  = header.index("spp") if "spp" in header else 3
+                spp_idx = header.index("spp") if "spp" in header else 3
             else:
                 hour_idx, spp_idx = 1, 3
 
@@ -771,19 +802,21 @@ class ERCOTAdapter(MarketAdapter):
 
     def get_ancillary_services(self) -> list[AncillaryServiceDef]:
         return [
-            AncillaryServiceDef("REGUP",   "Regulation Up",           10.0, 15.0,  5),
-            AncillaryServiceDef("REGDN",   "Regulation Down",         10.0, 12.0,  5),
-            AncillaryServiceDef("RRS",     "Responsive Reserve",      30.0,  9.0, 10),
-            AncillaryServiceDef("ECRS",    "ERCOT Contingency Reserve",50.0,  7.0, 600),
-            AncillaryServiceDef("NSPNRES", "Non-Spinning Reserve",    30.0,  5.0, 600),
+            AncillaryServiceDef("REGUP", "Regulation Up", 10.0, 15.0, 5),
+            AncillaryServiceDef("REGDN", "Regulation Down", 10.0, 12.0, 5),
+            AncillaryServiceDef("RRS", "Responsive Reserve", 30.0, 9.0, 10),
+            AncillaryServiceDef("ECRS", "ERCOT Contingency Reserve", 50.0, 7.0, 600),
+            AncillaryServiceDef("NSPNRES", "Non-Spinning Reserve", 30.0, 5.0, 600),
         ]
 
     def get_dispatch_rules(self) -> DispatchRules:
         return DispatchRules(
-            min_soc_pct=10.0, max_soc_pct=95.0,
-            max_daily_cycles=4,               # ERCOT rewards frequent cycling
-            peak_hours=list(range(14, 21)),   # Summer afternoon peak
-            currency="USD", usd_local_rate=1.0,
+            min_soc_pct=10.0,
+            max_soc_pct=95.0,
+            max_daily_cycles=4,  # ERCOT rewards frequent cycling
+            peak_hours=list(range(14, 21)),  # Summer afternoon peak
+            currency="USD",
+            usd_local_rate=1.0,
             grid_frequency_hz=60.0,
         )
 
@@ -794,6 +827,7 @@ class ERCOTAdapter(MarketAdapter):
 # ─────────────────────────────────────────────────────────────────────────────
 # ENTSO-E — Europe
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class ENTSOEAdapter(MarketAdapter):
     """ENTSO-E pan-European market adapter — Transparency Platform, 1h Day-Ahead.
@@ -813,19 +847,19 @@ class ENTSOEAdapter(MarketAdapter):
     """
 
     _API = "https://web-api.tp.entsoe.eu/api"
-    _DEFAULT_NODE = "DE-LU"   # Germany-Luxembourg bidding zone
+    _DEFAULT_NODE = "DE-LU"  # Germany-Luxembourg bidding zone
 
     # ENTSO-E EIC area codes for bidding zones
     ENTSOE_ZONES: dict[str, str] = {
-        "DE-LU":   "10Y1001A1001A82H",   # Germany-Luxembourg
-        "FR":      "10YFR-RTE------C",   # France
-        "ES":      "10YES-REE------0",   # Spain
-        "IT-NORD": "10YIT-GRTN-----B",   # Italy North
-        "GB":      "10YGB----------A",   # Great Britain
-        "NL":      "10YNL----------L",   # Netherlands
-        "PT":      "10YPT-REN------W",   # Portugal
-        "PL":      "10YPL-AREA-----S",   # Poland
-        "NO-NO1":  "10YNO-1--------2",   # Norway NO1
+        "DE-LU": "10Y1001A1001A82H",  # Germany-Luxembourg
+        "FR": "10YFR-RTE------C",  # France
+        "ES": "10YES-REE------0",  # Spain
+        "IT-NORD": "10YIT-GRTN-----B",  # Italy North
+        "GB": "10YGB----------A",  # Great Britain
+        "NL": "10YNL----------L",  # Netherlands
+        "PT": "10YPT-REN------W",  # Portugal
+        "PL": "10YPL-AREA-----S",  # Poland
+        "NO-NO1": "10YNO-1--------2",  # Norway NO1
     }
 
     @property
@@ -842,17 +876,22 @@ class ENTSOEAdapter(MarketAdapter):
         if prices:
             log.info("entsoe_adapter.live", date=date_str, node=node, points=len(prices))
             return prices
-        log.warning("entsoe_adapter.fallback", date=date_str, reason="Transparency Platform unavailable")
-        return _duck_curve_fallback(date_str, node, "ENTSOE",
-                                    base_usd=80.0, overnight_amp=-20.0, peak_amp=40.0)
+        log.warning(
+            "entsoe_adapter.fallback", date=date_str, reason="Transparency Platform unavailable"
+        )
+        return _duck_curve_fallback(
+            date_str, node, "ENTSOE", base_usd=80.0, overnight_amp=-20.0, peak_amp=40.0
+        )
 
     def _fetch_entsoe(self, date_str: str, node: str) -> list[SpotPrice]:
         """Fetch Day-Ahead prices from ENTSO-E Transparency Platform."""
         try:
             token = os.getenv("BESSAI_ENTSOE_TOKEN", "")
             if not token:
-                log.warning("entsoe_adapter.no_token",
-                            hint="Set BESSAI_ENTSOE_TOKEN env var (register at transparency.entsoe.eu)")
+                log.warning(
+                    "entsoe_adapter.no_token",
+                    hint="Set BESSAI_ENTSOE_TOKEN env var (register at transparency.entsoe.eu)",
+                )
                 return []
 
             eic = self.ENTSOE_ZONES.get(node, self.ENTSOE_ZONES["DE-LU"])
@@ -860,11 +899,11 @@ class ENTSOEAdapter(MarketAdapter):
             dt_next = dt + timedelta(days=1)
             # ENTSO-E expects UTC timestamps in YYYYMMDDHHmm format
             period_start = dt.strftime("%Y%m%d0000")
-            period_end   = dt_next.strftime("%Y%m%d0000")
+            period_end = dt_next.strftime("%Y%m%d0000")
 
             params = {
                 "securityToken": token,
-                "documentType": "A44",       # Day-ahead prices
+                "documentType": "A44",  # Day-ahead prices
                 "in_Domain": eic,
                 "out_Domain": eic,
                 "periodStart": period_start,
@@ -876,6 +915,7 @@ class ENTSOEAdapter(MarketAdapter):
 
             # ENTSO-E returns XML — parse with stdlib
             import xml.etree.ElementTree as ET
+
             root = ET.fromstring(resp.text)
             ns = {"ns": "urn:iec62325.351:tc57wg16:451-3:publicationdocument:7:0"}
 
@@ -890,9 +930,9 @@ class ENTSOEAdapter(MarketAdapter):
                         continue
                     pt_min = {"PT60M": 60, "PT30M": 30, "PT15M": 15}.get(resolution, 60)
                     for point in period.findall("ns:Point", ns):
-                        pos  = int(point.findtext("ns:position", "0", ns))
-                        eur  = float(point.findtext("ns:price.amount", "0", ns))
-                        usd  = eur * eur_usd
+                        pos = int(point.findtext("ns:position", "0", ns))
+                        eur = float(point.findtext("ns:price.amount", "0", ns))
+                        usd = eur * eur_usd
                         # Convert position to hour
                         h = ((pos - 1) * pt_min) // 60
                         if 0 <= h <= 23:
@@ -911,19 +951,21 @@ class ENTSOEAdapter(MarketAdapter):
     def get_ancillary_services(self) -> list[AncillaryServiceDef]:
         # ENTSO-E common services (vary by TSO, these are representative)
         return [
-            AncillaryServiceDef("FCR",   "Frequency Containment Reserve",  6.0, 10.0,  30),
-            AncillaryServiceDef("aFRR",  "Automatic Frequency Restoration", 10.0, 8.0, 300),
-            AncillaryServiceDef("mFRR",  "Manual Frequency Restoration",   20.0, 5.0, 900),
-            AncillaryServiceDef("RR",    "Replacement Reserve",            30.0, 3.0, 3600),
-            AncillaryServiceDef("DMAS",  "Day-Ahead Market Balancing",     50.0, 4.0, 1800),
+            AncillaryServiceDef("FCR", "Frequency Containment Reserve", 6.0, 10.0, 30),
+            AncillaryServiceDef("aFRR", "Automatic Frequency Restoration", 10.0, 8.0, 300),
+            AncillaryServiceDef("mFRR", "Manual Frequency Restoration", 20.0, 5.0, 900),
+            AncillaryServiceDef("RR", "Replacement Reserve", 30.0, 3.0, 3600),
+            AncillaryServiceDef("DMAS", "Day-Ahead Market Balancing", 50.0, 4.0, 1800),
         ]
 
     def get_dispatch_rules(self) -> DispatchRules:
         return DispatchRules(
-            min_soc_pct=10.0, max_soc_pct=95.0,
+            min_soc_pct=10.0,
+            max_soc_pct=95.0,
             max_daily_cycles=2,
-            peak_hours=list(range(8, 20)),   # EU industrial day profile
-            currency="EUR", usd_local_rate=0.92,  # EUR per USD
+            peak_hours=list(range(8, 20)),  # EU industrial day profile
+            currency="EUR",
+            usd_local_rate=0.92,  # EUR per USD
             grid_frequency_hz=50.0,
         )
 
@@ -970,9 +1012,7 @@ class MarketAdapterRegistry:
             adapter_cls = _ADAPTERS.get(key)
             if adapter_cls is None:
                 supported = ", ".join(_ADAPTERS.keys())
-                raise ValueError(
-                    f"Unknown market: {key!r}. Supported: {supported}"
-                )
+                raise ValueError(f"Unknown market: {key!r}. Supported: {supported}")
             cls._instance[key] = adapter_cls()
             log.info("market_adapter.loaded", market_id=key)
         return cls._instance[key]

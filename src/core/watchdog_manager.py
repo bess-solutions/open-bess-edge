@@ -165,12 +165,8 @@ class WatchdogManager:
         self._max_heal_retries = max_heal_retries or int(
             os.getenv("WATCHDOG_MAX_HEAL_RETRIES", "5")
         )
-        self._backoff_base_s = backoff_base_s or float(
-            os.getenv("WATCHDOG_BACKOFF_BASE_S", "1.0")
-        )
-        self._backoff_max_s = backoff_max_s or float(
-            os.getenv("WATCHDOG_BACKOFF_MAX_S", "30.0")
-        )
+        self._backoff_base_s = backoff_base_s or float(os.getenv("WATCHDOG_BACKOFF_BASE_S", "1.0"))
+        self._backoff_max_s = backoff_max_s or float(os.getenv("WATCHDOG_BACKOFF_MAX_S", "30.0"))
         self._alert_dispatcher = alert_dispatcher
         self._metrics = WatchdogMetrics()
 

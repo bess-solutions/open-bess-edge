@@ -355,13 +355,16 @@ class ArbitrageEngine:
             schedule = self._apply_revenue_stacking(
                 schedule=schedule,
                 current_soc_pct=current_soc_pct,
-                arbitrage_peak_kw=float(self.max_power_kw * len(discharge_hours) / max(len(slots), 1)),
+                arbitrage_peak_kw=float(
+                    self.max_power_kw * len(discharge_hours) / max(len(slots), 1)
+                ),
             )
         return schedule
 
     def _apply_revenue_stacking(self, schedule, current_soc_pct, arbitrage_peak_kw):
         """Allocate residual capacity to ancillary services and annotate schedule."""
         from .ancillary_services import CapacityAllocator
+
         allocator = CapacityAllocator(
             capacity_kwh=self.capacity_kwh,
             max_power_kw=self.max_power_kw,
@@ -375,7 +378,9 @@ class ArbitrageEngine:
         breakdown = {"arbitrage": round(schedule.projected_net_clp)}
         breakdown.update({k: round(v * 24) for k, v in stack.revenue_breakdown.items()})
         schedule.ancillary_revenue_clp = round(ancillary_daily_clp)
-        schedule.total_stacked_revenue_clp = round(schedule.projected_net_clp + ancillary_daily_clp)
+        schedule.total_stacked_revenue_clp = round(
+            schedule.projected_net_clp + ancillary_daily_clp
+        )
         schedule.revenue_breakdown = breakdown
         schedule.ancillary_stack = stack
         return schedule

@@ -13,6 +13,7 @@ Coverage:
 - last_price accessor
 - repr
 """
+
 from __future__ import annotations
 
 import time
@@ -23,12 +24,14 @@ from src.core.sen_market_feed import SENMarketFeed
 
 # ─── Helpers ────────────────────────────────────────────────────────────────
 
+
 def _feed_no_db(node: str = "Lo_Aguirre") -> SENMarketFeed:
     """Feed that always falls through to duck curve (no duckdb, no adapter)."""
     return SENMarketFeed(node=node, use_duckdb=False)
 
 
 # ─── Duck curve basic tests ─────────────────────────────────────────────────
+
 
 class TestDuckCurveFallback:
     def test_returns_positive_price(self):
@@ -55,6 +58,7 @@ class TestDuckCurveFallback:
 
 # ─── Callable interface ──────────────────────────────────────────────────────
 
+
 class TestCallableInterface:
     def test_feed_is_callable(self):
         feed = _feed_no_db()
@@ -80,6 +84,7 @@ class TestCallableInterface:
 
 # ─── TTL cache ───────────────────────────────────────────────────────────────
 
+
 class TestCacheTTL:
     def test_second_call_uses_cache(self):
         feed = _feed_no_db()
@@ -103,6 +108,7 @@ class TestCacheTTL:
 
 # ─── VPPFleetManager integration ─────────────────────────────────────────────
 
+
 class TestVPPIntegration:
     def test_set_market_price_fn_uses_feed(self):
         from src.core.fleet_orchestrator import SiteProxy, SiteTelemetry
@@ -110,15 +116,19 @@ class TestVPPIntegration:
 
         def _proxy(sid: str) -> SiteTelemetry:
             return SiteTelemetry(
-                site_id=sid, soc_pct=70.0, power_kw=0.0,
-                temp_c=25.0, capacity_kwh=200.0, available_kw=80.0,
+                site_id=sid,
+                soc_pct=70.0,
+                power_kw=0.0,
+                temp_c=25.0,
+                capacity_kwh=200.0,
+                available_kw=80.0,
             )
 
         proxy = SiteProxy("127.0.0.1", site_id="CL-001", capacity_kwh=200.0, telemetry_fn=_proxy)
         mgr = VPPFleetManager(discharge_threshold=60.0)
         mgr.add_site("CL-001", proxy)
 
-        feed = _feed_no_db()
+        _feed_no_db()
         # Wire a lambda that always returns 90 USD/MWh (above threshold)
         mgr.set_market_price_fn(lambda: 90.0)
         result = mgr.run_cycle()
@@ -131,8 +141,12 @@ class TestVPPIntegration:
 
         def _proxy(sid: str) -> SiteTelemetry:
             return SiteTelemetry(
-                site_id=sid, soc_pct=70.0, power_kw=0.0,
-                temp_c=25.0, capacity_kwh=100.0, available_kw=50.0,
+                site_id=sid,
+                soc_pct=70.0,
+                power_kw=0.0,
+                temp_c=25.0,
+                capacity_kwh=100.0,
+                available_kw=50.0,
             )
 
         proxy = SiteProxy("127.0.0.1", site_id="CL-A", capacity_kwh=100.0, telemetry_fn=_proxy)
@@ -150,6 +164,7 @@ class TestVPPIntegration:
 
 # ─── DuckDB path helpers ──────────────────────────────────────────────────────
 
+
 class TestDBPath:
     def test_default_db_path_is_string(self):
         feed = _feed_no_db()
@@ -163,6 +178,7 @@ class TestDBPath:
 
 
 # ─── repr ─────────────────────────────────────────────────────────────────────
+
 
 class TestRepr:
     def test_repr_contains_node(self):

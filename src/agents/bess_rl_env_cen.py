@@ -45,15 +45,19 @@ import numpy as np
 # Dataset loading
 # ---------------------------------------------------------------------------
 
-_DEFAULT_CMG_PATH = Path(__file__).parents[3] / "bessai-web" / "data" / "cmg_data.json"
-_FALLBACK_CMG_PATH = Path(
-    os.environ.get("CEN_CMG_DATA_PATH", str(_DEFAULT_CMG_PATH))
-)
+_DEFAULT_CMG_PATH = Path(__file__).parents[2] / "bessai-web" / "data" / "cmg_data.json"
+_FALLBACK_CMG_PATH = Path(os.environ.get("CEN_CMG_DATA_PATH", str(_DEFAULT_CMG_PATH)))
 
 # Nodes available in the CEN dataset
 CEN_NODES = [
-    "Maitencillo", "Polpaico", "Lo_Aguirre", "Cardones",
-    "Crucero", "Charrua", "Quillota", "Hualpen",
+    "Maitencillo",
+    "Polpaico",
+    "Lo_Aguirre",
+    "Cardones",
+    "Crucero",
+    "Charrua",
+    "Quillota",
+    "Hualpen",
 ]
 
 
@@ -98,6 +102,7 @@ def load_cmg_dataset(
 
     # Group by calendar date (first 10 chars of ISO timestamp)
     from collections import defaultdict
+
     by_day: dict[str, list[float]] = defaultdict(list)
     for pt in points:
         date_key = pt["t"][:10]
@@ -111,6 +116,7 @@ def load_cmg_dataset(
 # ---------------------------------------------------------------------------
 # Environment
 # ---------------------------------------------------------------------------
+
 
 class BESSArbitrageEnvCEN:
     """
@@ -157,11 +163,11 @@ class BESSArbitrageEnvCEN:
         # Lazy gymnasium import (optional dep for non-training code)
         try:
             import gymnasium as gym
+
             self._gym = gym
         except ImportError as exc:
             raise ImportError(
-                "gymnasium is required for the RL environment. "
-                "Install with: pip install gymnasium"
+                "gymnasium is required for the RL environment. Install with: pip install gymnasium"
             ) from exc
 
         self.capacity_kwh = float(capacity_kwh)
@@ -243,9 +249,7 @@ class BESSArbitrageEnvCEN:
 
         return self._get_obs(), {}
 
-    def step(
-        self, action: np.ndarray
-    ) -> tuple[np.ndarray, float, bool, bool, dict]:
+    def step(self, action: np.ndarray) -> tuple[np.ndarray, float, bool, bool, dict]:
         action_scalar = float(np.clip(action, -1.0, 1.0).flat[0])
 
         power_kw = action_scalar * self.max_power_kw  # + = charge, - = discharge
@@ -265,7 +269,9 @@ class BESSArbitrageEnvCEN:
 
         # Actual power (limited by SOC bounds)
         actual_energy = (new_soc - self._soc) * self.capacity_kwh
-        actual_power_kw = actual_energy / dt_h * self.efficiency if power_kw > 0 else actual_energy / dt_h
+        actual_power_kw = (
+            actual_energy / dt_h * self.efficiency if power_kw > 0 else actual_energy / dt_h
+        )
 
         # Revenue (discharge = negative power → sell at CMg)
         energy_traded_mwh = -actual_energy / 1000.0  # MWh sold (positive when discharging)
@@ -287,7 +293,7 @@ class BESSArbitrageEnvCEN:
         self._prev_price = cmg
         self._step += 1
 
-        terminated = (self._step >= self._total_steps)
+        terminated = self._step >= self._total_steps
         truncated = False
 
         info = {
@@ -331,8 +337,8 @@ class BESSArbitrageEnvCEN:
         cmg_norm = float(np.clip(cmg / self._max_price, 0.0, 1.0))
         cmg_delta = float(np.clip((cmg - self._prev_price) / (self._max_price + 1e-6), -1.0, 1.0))
         step_frac = float(step_idx / max(self._total_steps - 1, 1))
-        energy_left = float(self._soc)        # how much charge is available
-        cap_left = float(1.0 - self._soc)    # headroom for charging
+        energy_left = float(self._soc)  # how much charge is available
+        cap_left = float(1.0 - self._soc)  # headroom for charging
 
         obs = np.array(
             [

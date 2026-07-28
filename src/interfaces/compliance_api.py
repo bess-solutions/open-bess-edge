@@ -17,7 +17,7 @@ Integrated into the existing HealthServer on the same port (HEALTH_PORT).
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler
 from typing import Any
 
@@ -51,7 +51,7 @@ def update_compliance_state(
     _compliance_state.update(
         {
             "site_id": site_id,
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "all_ok": all_ok,
             "compliance_score": round(score, 1),
             "violations": violations,
@@ -81,20 +81,23 @@ def make_compliance_handler(site_id: str, version: str) -> type[BaseHTTPRequestH
             if self.path == "/compliance/status":
                 ok = _compliance_state["all_ok"]
                 code = 200 if ok else 503
-                self._send_json(code, {
-                    "status": "compliant" if ok else "non_compliant",
-                    "compliance_score": _compliance_state["compliance_score"],
-                    "norm_ref": _compliance_state["norm_ref"],
-                    "timestamp": _compliance_state["timestamp"],
-                    "site_id": _compliance_state["site_id"],
-                })
+                self._send_json(
+                    code,
+                    {
+                        "status": "compliant" if ok else "non_compliant",
+                        "compliance_score": _compliance_state["compliance_score"],
+                        "norm_ref": _compliance_state["norm_ref"],
+                        "timestamp": _compliance_state["timestamp"],
+                        "site_id": _compliance_state["site_id"],
+                    },
+                )
 
             elif self.path == "/compliance/report":
                 report = {
                     "report_type": "NTSyCS_COMPLIANCE_REPORT",
                     "version": version,
                     "site_id": site_id,
-                    "generated_at": datetime.utcnow().isoformat() + "Z",
+                    "generated_at": datetime.now(timezone.utc).isoformat(),
                     "norm_ref": _compliance_state["norm_ref"],
                     "compliance_score": _compliance_state["compliance_score"],
                     "all_gaps_compliant": _compliance_state["all_ok"],
@@ -111,8 +114,8 @@ def make_compliance_handler(site_id: str, version: str) -> type[BaseHTTPRequestH
                         "GAP-009": "IEC 62443 SL-2 — RBAC + HMAC",
                         "GAP-010": "NTCSE — THD/Flicker quality gate",
                         "GAP-011": "NTSyCS Cap.4.4 — Q/V droop",
-                        "SEC-01":  "Ley 21.663/2024 — CSIRT cybersecurity",
-                        "SC-01":   "CEN 2024 — Servicios Complementarios",
+                        "SEC-01": "Ley 21.663/2024 — CSIRT cybersecurity",
+                        "SC-01": "CEN 2024 — Servicios Complementarios",
                     },
                 }
                 self._send_json(200, report)

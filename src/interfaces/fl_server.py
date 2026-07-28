@@ -19,6 +19,7 @@ Usage::
     server = BESSAIFLServer(min_clients=2)
     server.start(server_address="0.0.0.0:8080", num_rounds=5)
 """
+
 from __future__ import annotations
 
 import time
@@ -38,6 +39,7 @@ FEDERATED_MODELS_DIR = Path("models/federated")
 # ─────────────────────────────────────────────────────────────────────────────
 # Data classes
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class FLRoundResult:
     """Result from one federated learning aggregation round.
@@ -77,6 +79,7 @@ class FLRoundResult:
 # ─────────────────────────────────────────────────────────────────────────────
 # FedAvg Aggregator (pure Python, no flwr dependency)
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class FedAvgAggregator:
     """Weighted Federated Averaging (FedAvg) algorithm.
@@ -126,6 +129,7 @@ class FedAvgAggregator:
 # ─────────────────────────────────────────────────────────────────────────────
 # FL Server
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class BESSAIFLServer:
     """Federated Learning server for BESSAI multi-site policy aggregation.
@@ -183,7 +187,10 @@ class BESSAIFLServer:
 
         # Weighted average loss
         total = sum(client_samples) or 1
-        avg_loss = sum(loss_i * n_i for loss_i, n_i in zip(client_losses, client_samples, strict=False)) / total
+        avg_loss = (
+            sum(loss_i * n_i for loss_i, n_i in zip(client_losses, client_samples, strict=False))
+            / total
+        )
 
         result = FLRoundResult(
             round_num=self._current_round,
@@ -214,8 +221,7 @@ class BESSAIFLServer:
         if self._global_weights:
             np.savez(str(path), *self._global_weights)
             np.savez(str(latest), *self._global_weights)
-            log.info("fl_server.weights_saved", path=str(latest),
-                     round_num=self._current_round)
+            log.info("fl_server.weights_saved", path=str(latest), round_num=self._current_round)
         return latest
 
     # ── Status ────────────────────────────────────────────────────────────────
@@ -241,13 +247,21 @@ class BESSAIFLServer:
             class _FedAvgStrategy(fl.server.strategy.FedAvg):
                 def aggregate_fit(self, server_round, results, failures):
                     agg, metrics = super().aggregate_fit(server_round, results, failures)
-                    log.info("fl_server.flower_round", round_num=server_round,
-                             n_results=len(results), n_failures=len(failures))
+                    log.info(
+                        "fl_server.flower_round",
+                        round_num=server_round,
+                        n_results=len(results),
+                        n_failures=len(failures),
+                    )
                     return agg, metrics
 
             rounds = num_rounds or self.max_rounds
-            log.info("fl_server.starting", address=server_address, rounds=rounds,
-                     min_clients=self.min_clients)
+            log.info(
+                "fl_server.starting",
+                address=server_address,
+                rounds=rounds,
+                min_clients=self.min_clients,
+            )
             fl.server.start_server(
                 server_address=server_address,
                 config=fl.server.ServerConfig(num_rounds=rounds),
@@ -258,5 +272,7 @@ class BESSAIFLServer:
                 ),
             )
         except ImportError:
-            log.warning("fl_server.flwr_not_installed",
-                        msg="Install flwr to use Flower server. Using standalone mode.")
+            log.warning(
+                "fl_server.flwr_not_installed",
+                msg="Install flwr to use Flower server. Using standalone mode.",
+            )

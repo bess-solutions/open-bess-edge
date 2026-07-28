@@ -40,7 +40,7 @@ import structlog
 log: structlog.BoundLogger = structlog.get_logger(__name__)
 
 # Minimum requirements for SC eligibility (CEN 2024)
-_MIN_CAPACITY_FOR_PFR_MW: float = 0.1   # 100 kW
+_MIN_CAPACITY_FOR_PFR_MW: float = 0.1  # 100 kW
 _MIN_SOC_FOR_SC_PCT: float = 15.0
 
 
@@ -102,13 +102,14 @@ class ServiciosComplementarios:
 
         # Pricing — from environment, never hardcoded
         self._pfr_price = _price("SC_PFR_PRICE_USD_MWH", 1.5)
-        self._r2_price  = _price("SC_R2_PRICE_USD_MWH",  2.0)
-        self._r3_price  = _price("SC_R3_PRICE_USD_MWH",  2.5)
-        self._qv_price  = _price("SC_QV_PRICE_USD_MWH",  0.8)
+        self._r2_price = _price("SC_R2_PRICE_USD_MWH", 2.0)
+        self._r3_price = _price("SC_R3_PRICE_USD_MWH", 2.5)
+        self._qv_price = _price("SC_QV_PRICE_USD_MWH", 0.8)
 
         log.info(
             "sc.initialized",
-            p_nom_kw=p_nom_kw, q_max_kvar=q_max_kvar,
+            p_nom_kw=p_nom_kw,
+            q_max_kvar=q_max_kvar,
             norm_ref="CEN Res. 2024 — Servicios Complementarios",
         )
 
@@ -136,12 +137,26 @@ class ServiciosComplementarios:
             reasons.append(f"Power {p_available_kw:.0f} kW < PFR minimum 100 kW")
 
         eligible = pfr_ok or r2_ok or r3_ok or qv_ok
-        log.info("sc.eligibility", eligible=eligible, soc=soc, p_kw=p_available_kw,
-                 pfr=pfr_ok, r2=r2_ok, r3=r3_ok, qv=qv_ok, norm_ref="CEN Res. 2024")
-        return SCEligibility(eligible=eligible, pfr_eligible=pfr_ok,
-                             r2_eligible=r2_ok, r3_eligible=r3_ok,
-                             qv_eligible=qv_ok, reasons=reasons,
-                             available_capacity_kw=p_available_kw)
+        log.info(
+            "sc.eligibility",
+            eligible=eligible,
+            soc=soc,
+            p_kw=p_available_kw,
+            pfr=pfr_ok,
+            r2=r2_ok,
+            r3=r3_ok,
+            qv=qv_ok,
+            norm_ref="CEN Res. 2024",
+        )
+        return SCEligibility(
+            eligible=eligible,
+            pfr_eligible=pfr_ok,
+            r2_eligible=r2_ok,
+            r3_eligible=r3_ok,
+            qv_eligible=qv_ok,
+            reasons=reasons,
+            available_capacity_kw=p_available_kw,
+        )
 
     def compute_offer(self, soc: float, p_available_kw: float) -> SCOffer:
         elig = self.check_eligibility(soc, p_available_kw)
@@ -149,27 +164,48 @@ class ServiciosComplementarios:
             return SCOffer(0, 0, 0, 0, 0)
 
         pfr_kw = p_available_kw * self._pfr_frac if elig.pfr_eligible else 0.0
-        r3_kw  = p_available_kw * self._r3_frac  if elig.r3_eligible  else 0.0
-        r2_kw  = max(0.0, p_available_kw - pfr_kw - r3_kw) if elig.r2_eligible else 0.0
+        r3_kw = p_available_kw * self._r3_frac if elig.r3_eligible else 0.0
+        r2_kw = max(0.0, p_available_kw - pfr_kw - r3_kw) if elig.r2_eligible else 0.0
         qv_kvar = self._q_max_kvar if elig.qv_eligible else 0.0
         total_mw = (pfr_kw + r2_kw + r3_kw) / 1000.0
 
-        log.info("sc.offer", pfr_kw=pfr_kw, r2_kw=r2_kw, r3_kw=r3_kw,
-                 qv_kvar=qv_kvar, total_mw=round(total_mw, 3))
-        return SCOffer(pfr_offer_kw=pfr_kw, r2_offer_kw=r2_kw,
-                       r3_offer_kw=r3_kw, qv_offer_kvar=qv_kvar, total_sc_mw=total_mw)
+        log.info(
+            "sc.offer",
+            pfr_kw=pfr_kw,
+            r2_kw=r2_kw,
+            r3_kw=r3_kw,
+            qv_kvar=qv_kvar,
+            total_mw=round(total_mw, 3),
+        )
+        return SCOffer(
+            pfr_offer_kw=pfr_kw,
+            r2_offer_kw=r2_kw,
+            r3_offer_kw=r3_kw,
+            qv_offer_kvar=qv_kvar,
+            total_sc_mw=total_mw,
+        )
 
     def estimate_monthly_revenue(self, offer: SCOffer) -> SCRevenueEstimate:
         hours = 730.0
         pfr = (offer.pfr_offer_kw / 1000) * self._pfr_price * hours
-        r2  = (offer.r2_offer_kw  / 1000) * self._r2_price  * hours
-        r3  = (offer.r3_offer_kw  / 1000) * self._r3_price  * hours
-        qv  = (offer.qv_offer_kvar / 1000) * self._qv_price * hours
+        r2 = (offer.r2_offer_kw / 1000) * self._r2_price * hours
+        r3 = (offer.r3_offer_kw / 1000) * self._r3_price * hours
+        qv = (offer.qv_offer_kvar / 1000) * self._qv_price * hours
         total = pfr + r2 + r3 + qv
 
-        log.info("sc.revenue", pfr=round(pfr, 0), r2=round(r2, 0),
-                 r3=round(r3, 0), qv=round(qv, 0), monthly=round(total, 0))
-        return SCRevenueEstimate(pfr_usd=round(pfr, 2), r2_usd=round(r2, 2),
-                                  r3_usd=round(r3, 2), qv_usd=round(qv, 2),
-                                  total_monthly_usd=round(total, 2),
-                                  total_annual_usd=round(total * 12, 2))
+        log.info(
+            "sc.revenue",
+            pfr=round(pfr, 0),
+            r2=round(r2, 0),
+            r3=round(r3, 0),
+            qv=round(qv, 0),
+            monthly=round(total, 0),
+        )
+        return SCRevenueEstimate(
+            pfr_usd=round(pfr, 2),
+            r2_usd=round(r2, 2),
+            r3_usd=round(r3, 2),
+            qv_usd=round(qv, 2),
+            total_monthly_usd=round(total, 2),
+            total_annual_usd=round(total * 12, 2),
+        )

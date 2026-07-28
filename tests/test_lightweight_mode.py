@@ -31,6 +31,7 @@ from src.core.lightweight_mode import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _lwm(force: bool = False, env_val: str | None = None) -> LightweightModeManager:
     """Build a manager, optionally injecting BESSAI_LIGHTWEIGHT into env."""
     if env_val is not None:
@@ -46,6 +47,7 @@ def _lwm(force: bool = False, env_val: str | None = None) -> LightweightModeMana
 # ---------------------------------------------------------------------------
 # Activation logic
 # ---------------------------------------------------------------------------
+
 
 class TestActivation:
     def test_inactive_by_default(self):
@@ -78,6 +80,7 @@ class TestActivation:
 # ---------------------------------------------------------------------------
 # should_enable()
 # ---------------------------------------------------------------------------
+
 
 class TestShouldEnable:
     # --- inactive mode: everything enabled ---
@@ -147,6 +150,7 @@ class TestShouldEnable:
 # status_dict()
 # ---------------------------------------------------------------------------
 
+
 class TestStatusDict:
     def test_keys_present(self):
         lwm = _lwm()
@@ -183,6 +187,7 @@ class TestStatusDict:
 # ---------------------------------------------------------------------------
 # Module-level helpers
 # ---------------------------------------------------------------------------
+
 
 class TestModuleHelpers:
     def test_is_lightweight_active_false_by_default(self):
@@ -222,6 +227,7 @@ class TestModuleHelpers:
 # ---------------------------------------------------------------------------
 # Property immutability
 # ---------------------------------------------------------------------------
+
 
 class TestImmutability:
     def test_disabled_components_is_frozenset(self):

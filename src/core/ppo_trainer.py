@@ -48,6 +48,7 @@ log = structlog.get_logger(__name__)
 # Optional dependencies — fail-safe imports
 try:
     import numpy as np  # noqa: F401
+
     _HAS_NUMPY = True
 except ImportError:
     _HAS_NUMPY = False
@@ -55,6 +56,7 @@ except ImportError:
 try:
     import gymnasium as gym  # noqa: F401
     from gymnasium import spaces  # noqa: F401
+
     _HAS_GYM = True
 except ImportError:
     _HAS_GYM = False
@@ -62,6 +64,7 @@ except ImportError:
 try:
     from stable_baselines3 import PPO  # noqa: F401
     from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback  # noqa: F401
+
     _HAS_SB3 = True
 except ImportError:
     _HAS_SB3 = False
@@ -76,40 +79,42 @@ class TrainingConfig:
     These values are derived from the Phase 2 imitation learning run
     and validated on 6 months of CEN historical data (2025-01 → 2025-06).
     """
+
     # PPO algo
     learning_rate: float = 3e-4
-    n_steps: int = 2048           # rollout buffer size
+    n_steps: int = 2048  # rollout buffer size
     batch_size: int = 64
     n_epochs: int = 10
-    gamma: float = 0.99           # discount factor
-    gae_lambda: float = 0.95      # GAE lambda
-    clip_range: float = 0.2       # PPO clip
-    ent_coef: float = 0.01        # entropy bonus (exploration)
-    vf_coef: float = 0.5          # value function coefficient
+    gamma: float = 0.99  # discount factor
+    gae_lambda: float = 0.95  # GAE lambda
+    clip_range: float = 0.2  # PPO clip
+    ent_coef: float = 0.01  # entropy bonus (exploration)
+    vf_coef: float = 0.5  # value function coefficient
 
     # Training
     total_timesteps: int = 500_000
-    eval_freq: int = 10_000       # evaluate every N steps
+    eval_freq: int = 10_000  # evaluate every N steps
     n_eval_episodes: int = 10
     checkpoint_freq: int = 50_000
 
     # Environment
-    max_episode_steps: int = 96   # 24h × 4 (15-min windows)
-    soc_min: float = 10.0         # % SOC hard floor
-    soc_max: float = 95.0         # % SOC hard ceiling
-    p_nom_kw: float = 1000.0      # kW nameplate (overridden from env)
+    max_episode_steps: int = 96  # 24h × 4 (15-min windows)
+    soc_min: float = 10.0  # % SOC hard floor
+    soc_max: float = 95.0  # % SOC hard ceiling
+    p_nom_kw: float = 1000.0  # kW nameplate (overridden from env)
     degradation_cost_usd_kwh: float = 0.05  # USD/kWh cycle cost
 
     # Reward shaping
-    w_revenue: float = 1.0        # weight: CMg arbitrage revenue
-    w_safety: float = -5.0        # penalty: safety violation
-    w_degradation: float = -0.1   # penalty: cycle aging
-    w_soc_balance: float = 0.2    # bonus: end-of-day SOC near 50%
+    w_revenue: float = 1.0  # weight: CMg arbitrage revenue
+    w_safety: float = -5.0  # penalty: safety violation
+    w_degradation: float = -0.1  # penalty: cycle aging
+    w_soc_balance: float = 0.2  # bonus: end-of-day SOC near 50%
 
 
 @dataclass
 class TrainingResult:
     """Summary of a PPO training run."""
+
     total_timesteps: int = 0
     training_duration_s: float = 0.0
     final_mean_reward: float = 0.0
@@ -155,6 +160,7 @@ class BESSDispatchEnv:
 
         if _HAS_GYM and _HAS_NUMPY:
             import numpy as np  # noqa: F811
+
             self.observation_space = spaces.Box(
                 low=np.array([-1.0] * 8, dtype=np.float32),
                 high=np.array([1.0] * 8, dtype=np.float32),
@@ -169,6 +175,7 @@ class BESSDispatchEnv:
     def _generate_synthetic_cmg(self) -> list[float]:
         """Generate synthetic CMg series for training without real data."""
         import math
+
         cmg = []
         for i in range(self._cfg.max_episode_steps * 10):
             hour = (i * 0.25) % 24
@@ -183,20 +190,24 @@ class BESSDispatchEnv:
         import math
 
         import numpy as np  # noqa: F811
+
         i = self._step % len(self._cmg)
         cmg_now = self._cmg[i]
         cmg_next = self._cmg[(i + 1) % len(self._cmg)]
         hour = (self._step * 0.25) % 24
-        return np.array([
-            (self._soc - 50.0) / 50.0,         # normalized SOC
-            0.0,                                 # p_kw (last action)
-            (cmg_now - 45.0) / 30.0,            # normalized CMg now
-            (cmg_next - 45.0) / 30.0,           # normalized CMg t+1
-            math.sin(2 * math.pi * hour / 24),  # hour_sin
-            math.cos(2 * math.pi * hour / 24),  # hour_cos
-            0.0,                                 # temp_c (normalized)
-            0.0,                                 # f_hz deviation
-        ], dtype=np.float32)
+        return np.array(
+            [
+                (self._soc - 50.0) / 50.0,  # normalized SOC
+                0.0,  # p_kw (last action)
+                (cmg_now - 45.0) / 30.0,  # normalized CMg now
+                (cmg_next - 45.0) / 30.0,  # normalized CMg t+1
+                math.sin(2 * math.pi * hour / 24),  # hour_sin
+                math.cos(2 * math.pi * hour / 24),  # hour_cos
+                0.0,  # temp_c (normalized)
+                0.0,  # f_hz deviation
+            ],
+            dtype=np.float32,
+        )
 
     def reset(self, seed: int | None = None) -> tuple[Any, dict]:
         self._step = 0
@@ -245,11 +256,17 @@ class BESSDispatchEnv:
             soc_bonus = cfg.w_soc_balance * (1.0 - abs(self._soc - 50.0) / 50.0)
             reward += soc_bonus
 
-        return self._obs(), reward, terminated, False, {
-            "soc": self._soc,
-            "revenue_usd": revenue_usd,
-            "safety_ok": safety_ok,
-        }
+        return (
+            self._obs(),
+            reward,
+            terminated,
+            False,
+            {
+                "soc": self._soc,
+                "revenue_usd": revenue_usd,
+                "safety_ok": safety_ok,
+            },
+        )
 
     def render(self) -> None:
         pass  # no-op for headless training
@@ -305,6 +322,7 @@ class PPOTrainer:
 
         try:
             import csv
+
             cmg = []
             with open(self._data_path, newline="", encoding="utf-8") as f:
                 reader = csv.DictReader(f)
@@ -385,6 +403,7 @@ class PPOTrainer:
         # Wrap env for SB3
         try:
             from stable_baselines3.common.env_checker import check_env
+
             check_env(env)  # type: ignore[arg-type]
         except Exception:
             pass
@@ -474,8 +493,14 @@ class PPOTrainer:
                 "training_timesteps": self._result.total_timesteps,
                 "p_nom_kw": self._cfg.p_nom_kw,
                 "observation_features": [
-                    "soc_pct", "p_kw", "cmg_now", "cmg_next",
-                    "hour_sin", "hour_cos", "temp_c", "f_hz"
+                    "soc_pct",
+                    "p_kw",
+                    "cmg_now",
+                    "cmg_next",
+                    "hour_sin",
+                    "hour_cos",
+                    "temp_c",
+                    "f_hz",
                 ],
                 "action": "p_kw_normalized_-1_to_1",
                 "exported_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),

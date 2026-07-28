@@ -1,14 +1,19 @@
 # CHANGELOG — BESSAI Edge Gateway (`open-bess-edge`)
 
-> **📌 NOTA PARA AGENTES IA — Leer antes de continuar el trabajo**
->
-> Este documento es el punto de entrada para cualquier agente IA que tome control de este repositorio.
-> Revisa la seción **[AGENT HANDOFF]** antes de escribir cualquier código.
+All notable changes to this project will be documented in this file.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-
 ## [Unreleased]
+
+### 🛡️ Security & OT Hardening (v2.17.1)
+- **src/core/main.py**: GCP Pub/Sub is now 100% optional — offline & standalone edge deployments supported without requiring `GCP_PROJECT_ID`.
+- **src/core/config.py**: Hardened default network bindings for `SEP2_HOST` and `IEC104_HOST` to `127.0.0.1` for OT security (configurable via `.env`).
+- **docker-compose.yml**: Disabled Grafana anonymous login by default (`GF_AUTH_ANONYMOUS_ENABLED: false`).
+- **src/interfaces/compliance_api.py**: Fixed `datetime.utcnow()` deprecation for Python 3.12 compatibility.
+- **pyproject.toml**: Synchronized version tag to `2.17.1`.
 
 ### 🤖 CI/CD
 - add BEP-0200 drl-market-tests job (Job 11) to CI pipeline (`635fead6`, @BESS Solutions)

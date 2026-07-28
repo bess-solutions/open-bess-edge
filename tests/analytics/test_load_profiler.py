@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2025-2026 BESS Solutions. All rights reserved.
-"""Tests para src/analytics/load_profiler.py — Mercado México (CFE GDMTH)."""
+"""Tests para src/analytics/load_profiler.py — Mercado Chile."""
+
 from __future__ import annotations
 
 import numpy as np
@@ -10,8 +11,14 @@ from src.analytics import LoadProfiler, LoadSummary
 
 # ── Helpers / Fixtures ────────────────────────────────────────────────────────
 
-def make_df(start: str = "2024-01-15", days: int = 1, resolution_min: int = 15,
-            base_kw: float = 100.0, seed: int = 0) -> pd.DataFrame:
+
+def make_df(
+    start: str = "2024-01-15",
+    days: int = 1,
+    resolution_min: int = 15,
+    base_kw: float = 100.0,
+    seed: int = 0,
+) -> pd.DataFrame:
     """Genera un DataFrame de prueba con demanda constante + ruido pequeño."""
     rng = np.random.default_rng(seed)
     freq = f"{resolution_min}min"
@@ -27,10 +34,11 @@ def make_csv_string(df: pd.DataFrame) -> str:
 
 # ── Tests: Ingesta ────────────────────────────────────────────────────────────
 
+
 class TestIngestion:
     def test_from_dataframe_loads_correctly(self):
         df = make_df(days=1)
-        p = LoadProfiler.from_dataframe(df, market="mexico")
+        p = LoadProfiler.from_dataframe(df, market="chile")
         result = p.export_profile()
         assert len(result) == len(df)
 
@@ -38,7 +46,7 @@ class TestIngestion:
         df = make_df(days=1)
         csv_path = tmp_path / "test_load.csv"
         csv_path.write_text(df.to_csv(index=False))
-        p = LoadProfiler.from_csv(csv_path, market="mexico")
+        p = LoadProfiler.from_csv(csv_path, market="chile")
         result = p.export_profile()
         assert len(result) == len(df)
 
@@ -62,12 +70,13 @@ class TestIngestion:
             LoadProfiler.from_dataframe(df, market="noexiste")
 
     def test_assert_loaded_raises_before_load(self):
-        p = LoadProfiler(market="mexico")
+        p = LoadProfiler(market="chile")
         with pytest.raises(RuntimeError, match="No hay datos"):
             p.export_profile()
 
 
 # ── Tests: Limpieza ───────────────────────────────────────────────────────────
+
 
 class TestCleaning:
     def test_clean_fills_gaps_linear(self):
@@ -87,7 +96,7 @@ class TestCleaning:
 
     def test_clean_treats_zeros_as_nan_and_interpolates(self):
         df = make_df(days=1, base_kw=100.0)
-        df.loc[20:24, "kw"] = 0.0   # ceros falsos (corte)
+        df.loc[20:24, "kw"] = 0.0  # ceros falsos (corte)
         p = LoadProfiler.from_dataframe(df).clean(zero_threshold_kw=1.0)
         result = p.export_profile()
         # Los ceros deben haber sido interpolados a valores > 0
@@ -96,13 +105,14 @@ class TestCleaning:
 
 # ── Tests: Resampleo ──────────────────────────────────────────────────────────
 
+
 class TestResampling:
     def test_resample_to_15min_preserves_count(self):
-        df = make_df(days=1, resolution_min=5)   # datos a 5-min
+        df = make_df(days=1, resolution_min=5)  # datos a 5-min
         p = LoadProfiler.from_dataframe(df).resample("15min")
         result = p.export_profile()
         # 24h × 4 periodos/h = 96 registros a 15-min por día
-        assert 90 <= len(result) <= 100   # margen por bordes
+        assert 90 <= len(result) <= 100  # margen por bordes
 
     def test_resample_to_1h(self):
         df = make_df(days=1, resolution_min=15)
@@ -120,19 +130,20 @@ class TestResampling:
 
 # ── Tests: Etiquetado tarifario CFE GDMTH ────────────────────────────────────
 
+
 class TestTariffTagging:
     """Verifica la lógica tarifaria CFE GDMTH para México."""
 
     def _classify(self, ts_str: str) -> str:
-        p = LoadProfiler(market="mexico")
+        p = LoadProfiler(market="chile")
         return p._classify_period(pd.Timestamp(ts_str))
 
     # ── PUNTA: Lunes-Viernes 18:00-21:59
     def test_punta_weekday_evening(self):
-        assert self._classify("2024-01-15 19:00:00") == "PUNTA"   # Lunes 19h
+        assert self._classify("2024-01-15 19:00:00") == "PUNTA"  # Lunes 19h
 
     def test_punta_starts_at_18(self):
-        assert self._classify("2024-01-15 18:00:00") == "PUNTA"   # Lunes 18h
+        assert self._classify("2024-01-15 18:00:00") == "PUNTA"  # Lunes 18h
 
     def test_punta_ends_before_22(self):
         assert self._classify("2024-01-15 22:00:00") == "INTERMEDIA"  # Lunes 22h → no es Punta
@@ -170,6 +181,7 @@ class TestTariffTagging:
 
 # ── Tests: Summary / Dimensionamiento ────────────────────────────────────────
 
+
 class TestSummary:
     def test_summary_returns_load_summary(self):
         df = make_df(days=7)
@@ -186,11 +198,11 @@ class TestSummary:
         df = make_df(days=7)
         s = LoadProfiler.from_dataframe(df).summary()
         total_from_periods = sum(s.energy_kwh_by_period.values())
-        assert abs(total_from_periods - s.energy_kwh_total) < 1.0   # tolerancia 1 kWh
+        assert abs(total_from_periods - s.energy_kwh_total) < 1.0  # tolerancia 1 kWh
 
     def test_estimated_cost_positive_if_config_has_prices(self):
         df = make_df(days=7)
-        s = LoadProfiler.from_dataframe(df, market="mexico").summary()
+        s = LoadProfiler.from_dataframe(df, market="chile").summary()
         assert s.estimated_monthly_cost_mxn is not None
         assert s.estimated_monthly_cost_mxn > 0
 
@@ -213,14 +225,15 @@ class TestSummary:
 
 # ── Tests: Pipeline completo (integración ligera) ─────────────────────────────
 
+
 class TestFullPipeline:
     def test_fluent_pipeline_end_to_end(self):
         """Pipeline encadenado completo sin errores."""
         df = make_df(days=14, resolution_min=5, base_kw=200.0)
-        df.loc[100:105, "kw"] = float("nan")   # hueco
+        df.loc[100:105, "kw"] = float("nan")  # hueco
 
         result = (
-            LoadProfiler.from_dataframe(df, market="mexico")
+            LoadProfiler.from_dataframe(df, market="chile")
             .clean(fill_method="linear", zero_threshold_kw=5.0)
             .resample("15min")
             .tag_periods()

@@ -51,8 +51,8 @@ log = structlog.get_logger(__name__)
 # Based on BESS break-even analysis: battery embodied CO₂ (60 kgCO₂/kWh)
 # amortised over 4000 full-cycles at 80% DoD.
 # Net benefit only positive when grid EF > ~30 g/kWh.
-_VIABILITY_LOW_G_KWH: float = 80.0    # EF < 80 → low commercial carbon benefit
-_VIABILITY_MID_G_KWH: float = 200.0   # EF 80–200 → moderate benefit
+_VIABILITY_LOW_G_KWH: float = 80.0  # EF < 80 → low commercial carbon benefit
+_VIABILITY_MID_G_KWH: float = 200.0  # EF 80–200 → moderate benefit
 _VIABILITY_HIGH_G_KWH: float = 400.0  # EF > 400 → high benefit (coal-heavy grid)
 
 SUPPORTED_REGIONS = frozenset(GRID_EMISSION_FACTORS_G_KWH.keys())
@@ -152,9 +152,9 @@ class LCAEngine:
 
         # Init metrics
         CARBON_INTENSITY_G_KWH.labels(site_id=self.site_id).set(self._grid_ef)
-        CARBON_VIABILITY_SCORE.labels(
-            site_id=self.site_id, region=self.config.region.upper()
-        ).set(self.carbon_viability_score)
+        CARBON_VIABILITY_SCORE.labels(site_id=self.site_id, region=self.config.region.upper()).set(
+            self.carbon_viability_score
+        )
 
         log.info(
             "lca_engine.init",
@@ -274,10 +274,10 @@ class LCAEngine:
     def carbon_viability_label(self) -> str:
         """Human-readable label for carbon_viability_score."""
         return [
-            "marginal",   # 0
-            "low",        # 1
-            "medium",     # 2
-            "high",       # 3
+            "marginal",  # 0
+            "low",  # 1
+            "medium",  # 2
+            "high",  # 3
         ][self.carbon_viability_score]
 
     def viability_report(self) -> dict:

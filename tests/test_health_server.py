@@ -29,6 +29,7 @@ from src.interfaces.health import HealthServer
 # Construction
 # ---------------------------------------------------------------------------
 
+
 class TestHealthServerConstruction:
     def test_default_state(self):
         server = HealthServer(site_id="TEST-001")
@@ -57,6 +58,7 @@ class TestHealthServerConstruction:
 # Route registration
 # ---------------------------------------------------------------------------
 
+
 class TestRoutesRegistered:
     def test_health_route_registered(self):
         server = HealthServer(site_id="T")
@@ -78,6 +80,7 @@ class TestRoutesRegistered:
 # Handler: /health
 # ---------------------------------------------------------------------------
 
+
 class TestHandleHealth:
     @pytest.fixture()
     def server(self):
@@ -98,8 +101,7 @@ class TestHandleHealth:
         req = make_mocked_request("GET", "/health")
         resp = await server._handle_health(req)
         payload = json.loads(resp.text)
-        for key in ["status", "site_id", "version", "uptime_s",
-                    "last_cycle", "safety_status"]:
+        for key in ["status", "site_id", "version", "uptime_s", "last_cycle", "safety_status"]:
             assert key in payload, f"Missing key: {key}"
 
     async def test_health_status_healthy(self, server: HealthServer):
@@ -158,6 +160,7 @@ class TestHandleHealth:
 # Handler: /metrics
 # ---------------------------------------------------------------------------
 
+
 class TestHandleMetrics:
     async def test_metrics_returns_200(self):
         server = HealthServer(site_id="T")
@@ -182,6 +185,7 @@ class TestHandleMetrics:
 # Handler: / (redirect)
 # ---------------------------------------------------------------------------
 
+
 class TestHandleRoot:
     async def test_root_raises_redirect(self):
         server = HealthServer(site_id="T")
@@ -193,6 +197,7 @@ class TestHandleRoot:
 # ---------------------------------------------------------------------------
 # Mutable state
 # ---------------------------------------------------------------------------
+
 
 class TestMutableState:
     async def test_toggle_last_cycle_ok_changes_status(self):

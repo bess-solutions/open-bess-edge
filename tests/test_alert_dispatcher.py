@@ -26,6 +26,7 @@ from src.core.alert_dispatcher import AlertDispatcher, AlertSeverity
 # Helpers / fixtures
 # ---------------------------------------------------------------------------
 
+
 def _dispatcher(**env) -> AlertDispatcher:
     """Create an AlertDispatcher with controlled env vars."""
     for k, v in env.items():
@@ -40,6 +41,7 @@ def _dispatcher(**env) -> AlertDispatcher:
 # ---------------------------------------------------------------------------
 # AlertSeverity ordering
 # ---------------------------------------------------------------------------
+
 
 class TestAlertSeverityOrdering:
     def test_critical_ge_all(self):
@@ -75,6 +77,7 @@ class TestAlertSeverityOrdering:
 # ---------------------------------------------------------------------------
 # Severity filtering — no channels configured (log-only)
 # ---------------------------------------------------------------------------
+
 
 class TestSeverityFiltering:
     def test_warning_passes_default_threshold(self):
@@ -134,6 +137,7 @@ class TestSeverityFiltering:
 # ---------------------------------------------------------------------------
 # Slack channel
 # ---------------------------------------------------------------------------
+
 
 class TestSlackChannel:
     def _dispatcher_with_slack(self) -> AlertDispatcher:
@@ -229,6 +233,7 @@ class TestSlackChannel:
 # Email channel
 # ---------------------------------------------------------------------------
 
+
 class TestEmailChannel:
     def _dispatcher_with_email(self) -> AlertDispatcher:
         return _dispatcher(
@@ -293,6 +298,7 @@ class TestEmailChannel:
 # Tags handling
 # ---------------------------------------------------------------------------
 
+
 class TestTagsHandling:
     def test_send_with_empty_tags(self):
         dispatcher = AlertDispatcher()
@@ -353,6 +359,7 @@ class TestTagsHandling:
 # ---------------------------------------------------------------------------
 # No channels configured
 # ---------------------------------------------------------------------------
+
 
 class TestLogOnlyMode:
     def test_no_channels_no_exception(self):

@@ -121,6 +121,17 @@ class ONNXDispatcher:
             return
 
         if not self.model_path.exists():
+            try:
+                from src.core.model_registry import ModelRegistryClient
+
+                client = ModelRegistryClient()
+                resolved = client.get_model(self.model_path.name)
+                if resolved.exists():
+                    self.model_path = resolved
+            except Exception as e:
+                log.warning("onnx_dispatcher.registry_resolve_error", error=str(e))
+
+        if not self.model_path.exists():
             log.warning(
                 "onnx_dispatcher.model_not_found",
                 path=str(self.model_path),

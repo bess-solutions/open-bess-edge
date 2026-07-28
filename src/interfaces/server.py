@@ -298,9 +298,7 @@ class BESSAIServer:
         t = self._telemetry
         payload = asdict(t)
         payload["timestamp_utc"] = (
-            time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(t.timestamp))
-            if t.timestamp
-            else None
+            time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(t.timestamp)) if t.timestamp else None
         )
         return web.Response(
             text=json.dumps(payload, indent=2),
@@ -368,8 +366,12 @@ class BESSAIServer:
             site_id=self._site_id,
             version=self._version,
             endpoints=[
-                "/health", "/metrics", "/compliance/status",
-                "/compliance/report", "/fleet/summary", "/api/v1/telemetry",
+                "/health",
+                "/metrics",
+                "/compliance/status",
+                "/compliance/report",
+                "/fleet/summary",
+                "/api/v1/telemetry",
             ],
         )
         try:

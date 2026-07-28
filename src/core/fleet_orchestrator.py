@@ -132,7 +132,11 @@ class SiteProxy:
         try:
             connector = aiohttp.TCPConnector(ssl=self.ssl_context)
             async with aiohttp.ClientSession(connector=connector) as session:
-                url = f"https://{self.host}:8000/api/v1/telemetry" if self.ssl_context else f"http://{self.host}:8000/api/v1/telemetry"
+                url = (
+                    f"https://{self.host}:8000/api/v1/telemetry"
+                    if self.ssl_context
+                    else f"http://{self.host}:8000/api/v1/telemetry"
+                )
                 async with session.get(url, timeout=3.0) as resp:
                     resp.raise_for_status()
                     data = await resp.json()
@@ -169,11 +173,20 @@ class SiteProxy:
         try:
             connector = aiohttp.TCPConnector(ssl=self.ssl_context)
             async with aiohttp.ClientSession(connector=connector) as session:
-                url = f"https://{self.host}:8000/api/v1/setpoint" if self.ssl_context else f"http://{self.host}:8000/api/v1/setpoint"
+                url = (
+                    f"https://{self.host}:8000/api/v1/setpoint"
+                    if self.ssl_context
+                    else f"http://{self.host}:8000/api/v1/setpoint"
+                )
                 payload = {"target_kw": target_kw, "strategy": strategy}
                 async with session.post(url, json=payload, timeout=3.0) as resp:
                     resp.raise_for_status()
-                    log.info("site_proxy.dispatched", site_id=self.site_id, target_kw=target_kw, strategy=strategy)
+                    log.info(
+                        "site_proxy.dispatched",
+                        site_id=self.site_id,
+                        target_kw=target_kw,
+                        strategy=strategy,
+                    )
         except Exception as exc:
             log.warning("site_proxy.dispatch_error", site_id=self.site_id, error=str(exc))
 

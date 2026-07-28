@@ -5,6 +5,7 @@ tests/test_fleet_coordinator.py
 =================================
 Test suite for FleetCoordinator and FleetSiteState (Phase 2 — Fleet Mode).
 """
+
 from __future__ import annotations
 
 import time
@@ -13,6 +14,7 @@ import pytest
 from src.interfaces.fleet_coordinator import FleetCoordinator, FleetSiteState
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
+
 
 def make_site(site_id="SITE-01", soc=60.0, power_kw=500.0, temp=None) -> FleetSiteState:
     return FleetSiteState(
@@ -40,8 +42,8 @@ def three_site_coord() -> FleetCoordinator:
 
 # ── FleetSiteState tests ──────────────────────────────────────────────────────
 
-class TestFleetSiteState:
 
+class TestFleetSiteState:
     def test_available_discharge_at_normal_soc(self):
         site = make_site(soc=60.0, power_kw=500.0)
         assert site.available_discharge_kw > 0
@@ -87,8 +89,8 @@ class TestFleetSiteState:
 
 # ── FleetCoordinator tests ────────────────────────────────────────────────────
 
-class TestFleetCoordinator:
 
+class TestFleetCoordinator:
     def test_register_and_count(self, coord):
         coord.register_site(make_site("A"))
         coord.register_site(make_site("B"))

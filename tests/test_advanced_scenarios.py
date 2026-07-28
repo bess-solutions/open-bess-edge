@@ -37,6 +37,7 @@ from src.interfaces.lca_engine import LCAConfig, LCAEngine
 # 1. LCAEngine — carbon_viability_score
 # ---------------------------------------------------------------------------
 
+
 class TestCarbonViabilityScore:
     """Validate the 0-3 carbon viability scoring system."""
 
@@ -94,16 +95,19 @@ class TestCarbonViabilityScore:
         engine = LCAEngine(config=LCAConfig(region="PL"))
         assert engine.carbon_viability_score == 3
 
-    @pytest.mark.parametrize("ef, expected_score", [
-        (10.0, 0),    # well below 80
-        (79.9, 0),    # just below low threshold
-        (80.0, 1),    # exactly at low threshold
-        (199.9, 1),   # just below mid threshold
-        (200.0, 2),   # exactly at mid threshold
-        (399.9, 2),   # just below high threshold
-        (400.0, 3),   # exactly at high threshold
-        (999.0, 3),   # well above high threshold
-    ])
+    @pytest.mark.parametrize(
+        "ef, expected_score",
+        [
+            (10.0, 0),  # well below 80
+            (79.9, 0),  # just below low threshold
+            (80.0, 1),  # exactly at low threshold
+            (199.9, 1),  # just below mid threshold
+            (200.0, 2),  # exactly at mid threshold
+            (399.9, 2),  # just below high threshold
+            (400.0, 3),  # exactly at high threshold
+            (999.0, 3),  # well above high threshold
+        ],
+    )
     def test_score_boundaries(self, ef: float, expected_score: int):
         """Boundary conditions for the four scoring tiers."""
         engine = LCAEngine(config=LCAConfig(grid_emission_factor=ef))
@@ -132,8 +136,14 @@ class TestViabilityReport:
     def test_report_has_required_keys(self):
         engine = LCAEngine(config=LCAConfig(region="CL"))
         report = engine.viability_report()
-        for key in ["region", "grid_ef_g_kwh", "viability_score", "viability_label",
-                    "cumulative_co2_avoided_kg", "equivalent_trees"]:
+        for key in [
+            "region",
+            "grid_ef_g_kwh",
+            "viability_score",
+            "viability_label",
+            "cumulative_co2_avoided_kg",
+            "equivalent_trees",
+        ]:
             assert key in report
 
     def test_marginal_report_includes_warning(self):
@@ -165,6 +175,7 @@ class TestViabilityReport:
 # ---------------------------------------------------------------------------
 # 2. LCAEngine — strict_region
 # ---------------------------------------------------------------------------
+
 
 class TestStrictRegion:
     def test_strict_raises_on_unknown(self):
@@ -200,6 +211,7 @@ class TestStrictRegion:
 # 3. AlertManager — CRITICAL dedup behaviour
 # ---------------------------------------------------------------------------
 
+
 class TestCriticalAlertDedup:
     """Critical alerts should be re-fired after the dedup window expires.
     Within the window, the dedup suppresses repeats — but the FIRST alert
@@ -217,7 +229,7 @@ class TestCriticalAlertDedup:
         mgr = AlertManager(dedup_window_s=3600.0)
         mgr.fire(AlertLevel.CRITICAL, "OVERTEMP")
         result = mgr.fire(AlertLevel.CRITICAL, "OVERTEMP")
-        assert result is None           # suppressed
+        assert result is None  # suppressed
         assert mgr.has_critical is True  # but original still active!
 
     def test_critical_after_window_refired(self):
@@ -243,7 +255,7 @@ class TestCriticalAlertDedup:
         """After resolving CRITICAL alert, it can be fired again regardless of window."""
         mgr = AlertManager(dedup_window_s=3600.0)
         mgr.fire(AlertLevel.CRITICAL, "OVERTEMP")
-        mgr.resolve("OVERTEMP")         # resolve clears _active
+        mgr.resolve("OVERTEMP")  # resolve clears _active
         result = mgr.fire(AlertLevel.CRITICAL, "OVERTEMP")  # new fire
         assert result is not None
         assert mgr.has_critical is True
@@ -273,7 +285,7 @@ class TestCriticalAlertDedup:
         mgr = AlertManager(dedup_window_s=3600.0)
         mgr.fire(AlertLevel.WARNING, "SENSOR_FAULT")
         result = mgr.fire(AlertLevel.CRITICAL, "SENSOR_FAULT")  # same name → deduped
-        assert result is None          # suppressed because name already active
+        assert result is None  # suppressed because name already active
         # WARNING remains the level stored — not silently upgraded
         assert mgr._active["SENSOR_FAULT"].level == AlertLevel.WARNING
 
@@ -282,55 +294,44 @@ class TestCriticalAlertDedup:
 # 4. FleetSiteState.injection_kw
 # ---------------------------------------------------------------------------
 
+
 class TestInjectionKw:
     """injection_kw is always non-negative and equal to available_discharge_kw."""
 
     def test_injection_kw_equals_discharge_kw(self):
-        site = FleetSiteState(
-            site_id="S1", node="Maitencillo",
-            soc_pct=70.0, max_power_kw=500.0
-        )
+        site = FleetSiteState(site_id="S1", node="Maitencillo", soc_pct=70.0, max_power_kw=500.0)
         assert site.injection_kw == pytest.approx(site.available_discharge_kw)
 
     def test_injection_kw_is_non_negative(self):
         """Even at lowest SOC, injection_kw >= 0."""
         for soc in [0.0, 5.0, 10.0, 50.0, 100.0]:
-            site = FleetSiteState(
-                site_id="T", node="N", soc_pct=soc, max_power_kw=500.0
-            )
+            site = FleetSiteState(site_id="T", node="N", soc_pct=soc, max_power_kw=500.0)
             assert site.injection_kw >= 0.0
 
     def test_injection_kw_zero_at_soc_floor(self):
-        site = FleetSiteState(
-            site_id="T", node="N", soc_pct=10.0, max_power_kw=500.0
-        )
+        site = FleetSiteState(site_id="T", node="N", soc_pct=10.0, max_power_kw=500.0)
         assert site.injection_kw == pytest.approx(0.0)
 
     def test_injection_kw_in_to_dict(self):
-        site = FleetSiteState(
-            site_id="T", node="N", soc_pct=70.0, max_power_kw=500.0
-        )
+        site = FleetSiteState(site_id="T", node="N", soc_pct=70.0, max_power_kw=500.0)
         d = site.to_dict()
         assert "injection_kw" in d
         assert d["injection_kw"] >= 0.0
 
     def test_injection_kw_to_dict_matches_property(self):
-        site = FleetSiteState(
-            site_id="T", node="N", soc_pct=75.0, max_power_kw=500.0
-        )
+        site = FleetSiteState(site_id="T", node="N", soc_pct=75.0, max_power_kw=500.0)
         d = site.to_dict()
         assert d["injection_kw"] == pytest.approx(site.injection_kw, abs=0.1)
 
     def test_injection_kw_never_negative_for_any_config(self):
         """Fuzz: random SOC values — injection_kw always >= 0."""
         import random
+
         rng = random.Random(42)
         for _ in range(50):
             soc = rng.uniform(0.0, 100.0)
             max_kw = rng.uniform(50.0, 5000.0)
-            site = FleetSiteState(
-                site_id="T", node="N", soc_pct=soc, max_power_kw=max_kw
-            )
+            site = FleetSiteState(site_id="T", node="N", soc_pct=soc, max_power_kw=max_kw)
             assert site.injection_kw >= 0.0
 
 
@@ -338,19 +339,22 @@ class TestInjectionKw:
 # 5. FleetCoordinator — Stress test (100 sites)
 # ---------------------------------------------------------------------------
 
+
 class TestFleetCoordinatorStress:
     """Performance: 100 registered sites must compute in < 100 ms."""
 
     def _register_n_sites(self, n: int) -> FleetCoordinator:
         coord = FleetCoordinator(min_flex_kw=0.0)
         for i in range(n):
-            coord.register_site(FleetSiteState(
-                site_id=f"SITE-{i:04d}",
-                node=f"Node-{i}",
-                soc_pct=50.0 + (i % 40),   # varied SOC 50-90%
-                max_power_kw=500.0,
-                temperature_c=25.0 + (i % 10),  # varied temp 25-34°C
-            ))
+            coord.register_site(
+                FleetSiteState(
+                    site_id=f"SITE-{i:04d}",
+                    node=f"Node-{i}",
+                    soc_pct=50.0 + (i % 40),  # varied SOC 50-90%
+                    max_power_kw=500.0,
+                    temperature_c=25.0 + (i % 10),  # varied temp 25-34°C
+                )
+            )
         return coord
 
     def test_100_sites_registration_fast(self):
@@ -388,9 +392,7 @@ class TestFleetCoordinatorStress:
         """Total absolute setpoints must not exceed total available flex."""
         coord = self._register_n_sites(100)
         total_flex = coord.total_flex_kw("discharge")
-        setpoints = coord.compute_setpoints(
-            dispatch_kw=total_flex * 2, mode="discharge"
-        )
+        setpoints = coord.compute_setpoints(dispatch_kw=total_flex * 2, mode="discharge")
         total_allocated = sum(abs(sp.power_kw) for sp in setpoints)
         assert total_allocated <= total_flex + 1.0  # allow rounding
 
@@ -399,21 +401,32 @@ class TestFleetCoordinatorStress:
         coord = FleetCoordinator(min_flex_kw=0.0)
         now = time.time()
         for i in range(50):
-            coord.register_site(FleetSiteState(
-                site_id=f"ACTIVE-{i}", node="N", soc_pct=70.0, max_power_kw=500.0,
-                last_seen=now
-            ))
+            coord.register_site(
+                FleetSiteState(
+                    site_id=f"ACTIVE-{i}",
+                    node="N",
+                    soc_pct=70.0,
+                    max_power_kw=500.0,
+                    last_seen=now,
+                )
+            )
         for i in range(50):
-            coord.register_site(FleetSiteState(
-                site_id=f"STALE-{i}", node="N", soc_pct=70.0, max_power_kw=500.0,
-                last_seen=now - 400  # stale
-            ))
+            coord.register_site(
+                FleetSiteState(
+                    site_id=f"STALE-{i}",
+                    node="N",
+                    soc_pct=70.0,
+                    max_power_kw=500.0,
+                    last_seen=now - 400,  # stale
+                )
+            )
         assert coord.n_active_sites == 50
 
 
 # ---------------------------------------------------------------------------
 # 6. Integration: FleetCoordinator overtemp → AlertManager → HealthServer
 # ---------------------------------------------------------------------------
+
 
 class TestIntegrationOvertempFlow:
     """
@@ -432,19 +445,25 @@ class TestIntegrationOvertempFlow:
 
     def test_overtemp_site_detected_in_summary(self):
         coord, _, _ = self._setup()
-        coord.register_site(FleetSiteState(
-            site_id="HOT-SITE", node="Maitencillo",
-            soc_pct=70.0, max_power_kw=500.0, temperature_c=50.0  # overtemp
-        ))
+        coord.register_site(
+            FleetSiteState(
+                site_id="HOT-SITE",
+                node="Maitencillo",
+                soc_pct=70.0,
+                max_power_kw=500.0,
+                temperature_c=50.0,  # overtemp
+            )
+        )
         summary = coord.fleet_summary()
         assert "HOT-SITE" in summary["overtemp_sites"]
 
     def test_alertmanager_critical_on_overtemp_detection(self):
         coord, mgr, _ = self._setup()
-        coord.register_site(FleetSiteState(
-            site_id="HOT-SITE", node="N",
-            soc_pct=70.0, max_power_kw=500.0, temperature_c=50.0
-        ))
+        coord.register_site(
+            FleetSiteState(
+                site_id="HOT-SITE", node="N", soc_pct=70.0, max_power_kw=500.0, temperature_c=50.0
+            )
+        )
         # Business logic: iterate sites and fire CRITICAL for overtemp
         summary = coord.fleet_summary()
         for site_id in summary["overtemp_sites"]:
@@ -456,10 +475,11 @@ class TestIntegrationOvertempFlow:
     async def test_healthserver_degraded_when_critical_alert(self):
         coord, mgr, server = self._setup()
         # Register an overtemp site
-        coord.register_site(FleetSiteState(
-            site_id="HOT-SITE", node="N",
-            soc_pct=70.0, max_power_kw=500.0, temperature_c=50.0
-        ))
+        coord.register_site(
+            FleetSiteState(
+                site_id="HOT-SITE", node="N", soc_pct=70.0, max_power_kw=500.0, temperature_c=50.0
+            )
+        )
         # Fire critical alert
         summary = coord.fleet_summary()
         for site_id in summary["overtemp_sites"]:
@@ -478,10 +498,11 @@ class TestIntegrationOvertempFlow:
 
     async def test_healthserver_healthy_after_alert_resolved(self):
         coord, mgr, server = self._setup()
-        coord.register_site(FleetSiteState(
-            site_id="HOT-SITE", node="N",
-            soc_pct=70.0, max_power_kw=500.0, temperature_c=50.0
-        ))
+        coord.register_site(
+            FleetSiteState(
+                site_id="HOT-SITE", node="N", soc_pct=70.0, max_power_kw=500.0, temperature_c=50.0
+            )
+        )
         summary = coord.fleet_summary()
         for site_id in summary["overtemp_sites"]:
             mgr.fire(AlertLevel.CRITICAL, f"OVERTEMP_{site_id}")
@@ -500,10 +521,15 @@ class TestIntegrationOvertempFlow:
     def test_multiple_overtemp_sites_all_fire_alerts(self):
         coord, mgr, _ = self._setup()
         for i in range(5):
-            coord.register_site(FleetSiteState(
-                site_id=f"HOT-{i}", node="N",
-                soc_pct=70.0, max_power_kw=500.0, temperature_c=50.0
-            ))
+            coord.register_site(
+                FleetSiteState(
+                    site_id=f"HOT-{i}",
+                    node="N",
+                    soc_pct=70.0,
+                    max_power_kw=500.0,
+                    temperature_c=50.0,
+                )
+            )
         summary = coord.fleet_summary()
         for site_id in summary["overtemp_sites"]:
             mgr.fire(AlertLevel.CRITICAL, f"OVERTEMP_{site_id}")
@@ -512,10 +538,15 @@ class TestIntegrationOvertempFlow:
 
     def test_normal_temperature_does_not_trigger_alert(self):
         coord, mgr, _ = self._setup()
-        coord.register_site(FleetSiteState(
-            site_id="COOL-SITE", node="N",
-            soc_pct=70.0, max_power_kw=500.0, temperature_c=35.0  # normal
-        ))
+        coord.register_site(
+            FleetSiteState(
+                site_id="COOL-SITE",
+                node="N",
+                soc_pct=70.0,
+                max_power_kw=500.0,
+                temperature_c=35.0,  # normal
+            )
+        )
         summary = coord.fleet_summary()
         # No overtemp sites → no alerts fired
         for site_id in summary["overtemp_sites"]:
@@ -525,15 +556,21 @@ class TestIntegrationOvertempFlow:
 
     def test_mixed_fleet_only_hot_sites_alert(self):
         coord, mgr, _ = self._setup()
-        coord.register_site(FleetSiteState(
-            site_id="COOL-1", node="N", soc_pct=70.0, max_power_kw=500.0, temperature_c=30.0
-        ))
-        coord.register_site(FleetSiteState(
-            site_id="HOT-1", node="N", soc_pct=70.0, max_power_kw=500.0, temperature_c=55.0
-        ))
-        coord.register_site(FleetSiteState(
-            site_id="COOL-2", node="N", soc_pct=70.0, max_power_kw=500.0, temperature_c=25.0
-        ))
+        coord.register_site(
+            FleetSiteState(
+                site_id="COOL-1", node="N", soc_pct=70.0, max_power_kw=500.0, temperature_c=30.0
+            )
+        )
+        coord.register_site(
+            FleetSiteState(
+                site_id="HOT-1", node="N", soc_pct=70.0, max_power_kw=500.0, temperature_c=55.0
+            )
+        )
+        coord.register_site(
+            FleetSiteState(
+                site_id="COOL-2", node="N", soc_pct=70.0, max_power_kw=500.0, temperature_c=25.0
+            )
+        )
         summary = coord.fleet_summary()
         for site_id in summary["overtemp_sites"]:
             mgr.fire(AlertLevel.CRITICAL, f"OVERTEMP_{site_id}")

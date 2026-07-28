@@ -35,6 +35,7 @@ Run
 from __future__ import annotations
 
 import asyncio
+from contextlib import AsyncExitStack
 import logging
 import os
 import signal
@@ -85,6 +86,7 @@ except ImportError:  # gymnasium not installed or bessai-agents not present
 # Plan de Inmortalidad Eje 1 — WatchdogManager (optional, fail-safe)
 try:
     from src.core.watchdog_manager import WatchdogManager as _WatchdogManager
+
     _WATCHDOG_MANAGER_AVAILABLE = True
 except ImportError:
     _WATCHDOG_MANAGER_AVAILABLE = False
@@ -94,6 +96,7 @@ except ImportError:
 # If disabled via BESSAI_COMPLIANCE_ENABLED=false, runs in rule-based mode only.
 try:
     from src.core.compliance_stack import ComplianceStack as _ComplianceStack
+
     _COMPLIANCE_AVAILABLE = True
 except ImportError:
     _COMPLIANCE_AVAILABLE = False
@@ -314,21 +317,23 @@ async def main() -> None:  # noqa: C901
     guard = SafetyGuard(watchdog_interval_s=1.0)
     watchdog_ref: list[asyncio.Task[None]] = []  # mutable single-element ref
 
-    if not _cfg.GCP_PROJECT_ID:
-        raise ValueError(
-            "GCP_PROJECT_ID is required. Set it in config/.env or as an environment variable."
+    _has_gcp = bool(_cfg.GCP_PROJECT_ID and _cfg.GCP_PUBSUB_TOPIC)
+    if not _has_gcp:
+        log.info(
+            "pubsub.disabled",
+            tip="Set GCP_PROJECT_ID and GCP_PUBSUB_TOPIC in config/.env for GCP cloud publishing",
         )
-    if not _cfg.GCP_PUBSUB_TOPIC:
-        raise ValueError(
-            "GCP_PUBSUB_TOPIC is required. Set it in config/.env or as an environment variable."
-        )
-    async with (
-        PubSubPublisher(
-            project_id=_cfg.GCP_PROJECT_ID,
-            topic_name=_cfg.GCP_PUBSUB_TOPIC,
-        ) as publisher,
-        health_server.run(),
-    ):
+
+    async with AsyncExitStack() as stack:
+        publisher: PubSubPublisher | None = None
+        if _has_gcp:
+            publisher = await stack.enter_async_context(
+                PubSubPublisher(
+                    project_id=_cfg.GCP_PROJECT_ID,  # type: ignore[arg-type]
+                    topic_name=_cfg.GCP_PUBSUB_TOPIC,  # type: ignore[arg-type]
+                )
+            )
+        await stack.enter_async_context(health_server.run())
         _mqtt_broker = os.getenv("MQTT_BROKER_URL")
         mqtt_pub: MQTTPublisher | None = None
         if _mqtt_broker:
@@ -446,8 +451,12 @@ async def main() -> None:  # noqa: C901
 
         # ── Step 5g — CapacityAllocator (v2.17.0 SS.CC.) ────────────
         _capacity_allocator = CapacityAllocator(
-            capacity_kwh=float(_cfg.SEP2_MAX_WH) / 1000.0 if hasattr(_cfg, "SEP2_MAX_WH") else 1000.0,
-            max_power_kw=float(_cfg.BESSAI_P_NOM_KW) if hasattr(_cfg, "BESSAI_P_NOM_KW") else 500.0,
+            capacity_kwh=float(_cfg.SEP2_MAX_WH) / 1000.0
+            if hasattr(_cfg, "SEP2_MAX_WH")
+            else 1000.0,
+            max_power_kw=float(_cfg.BESSAI_P_NOM_KW)
+            if hasattr(_cfg, "BESSAI_P_NOM_KW")
+            else 500.0,
         )
         log.info("capacity_allocator.initialized", max_power_kw=_capacity_allocator.max_power_kw)
 
@@ -489,7 +498,9 @@ async def main() -> None:  # noqa: C901
                         float(telemetry["active_power"]) / 1000.0
                     )
                 if "frequency" in telemetry:
-                    GRID_FREQUENCY_HZ.labels(site_id=_cfg.SITE_ID).set(float(telemetry["frequency"]))
+                    GRID_FREQUENCY_HZ.labels(site_id=_cfg.SITE_ID).set(
+                        float(telemetry["frequency"])
+                    )
                 if "ac_voltage" in telemetry:
                     GRID_VOLTAGE_V.labels(site_id=_cfg.SITE_ID).set(float(telemetry["ac_voltage"]))
 
@@ -517,7 +528,11 @@ async def main() -> None:  # noqa: C901
                         # Feed compliance state into BESSAIServer (/compliance/* endpoints)
                         health_server.set_compliance_state(
                             all_ok=_compliance_result.all_ok,
-                            score=getattr(_compliance_result, "score", 100.0 if _compliance_result.all_ok else 0.0),
+                            score=getattr(
+                                _compliance_result,
+                                "score",
+                                100.0 if _compliance_result.all_ok else 0.0,
+                            ),
                             violations=list(getattr(_compliance_result, "violations", [])),
                             cycle=cycle,
                         )
@@ -538,7 +553,9 @@ async def main() -> None:  # noqa: C901
                 # ── STEP 2c: Capacity Allocator (SS.CC.) ──────────────────
                 _soc_pct_alloc = float(telemetry.get("soc", 50.0))
                 sscc_stack = _capacity_allocator.allocate(soc_pct=_soc_pct_alloc)
-                BESS_SSCC_RESERVED_KW.labels(site_id=_cfg.SITE_ID).set(sscc_stack.total_reserved_kw)
+                BESS_SSCC_RESERVED_KW.labels(site_id=_cfg.SITE_ID).set(
+                    sscc_stack.total_reserved_kw
+                )
                 span.set_attribute("sscc_reserved_kw", sscc_stack.total_reserved_kw)
 
                 health_server.set_cycle(cycle, ok=True, safety_status="ok")
@@ -547,20 +564,21 @@ async def main() -> None:  # noqa: C901
                 _ensure_watchdog(guard, driver, watchdog_ref)
 
                 # ── STEP 4: Publicación ───────────────────────────────────
-                try:
-                    msg_id = await publisher.publish(telemetry)
-                    log.info(
-                        "cycle.published",
-                        cycle=cycle,
-                        message_id=msg_id,
-                        telemetry=telemetry,
-                    )
-                except Exception as exc:
-                    log.error(
-                        "cycle.publish_failed",
-                        cycle=cycle,
-                        error=str(exc),
-                    )
+                if publisher is not None:
+                    try:
+                        msg_id = await publisher.publish(telemetry)
+                        log.info(
+                            "cycle.published",
+                            cycle=cycle,
+                            message_id=msg_id,
+                            telemetry=telemetry,
+                        )
+                    except Exception as exc:
+                        log.error(
+                            "cycle.publish_failed",
+                            cycle=cycle,
+                            error=str(exc),
+                        )
                     PUBLISH_ERRORS_TOTAL.labels(site_id=_cfg.SITE_ID).inc()
                     span.record_exception(exc)
 
@@ -656,13 +674,15 @@ async def main() -> None:  # noqa: C901
                     time.monotonic() - cycle_start
                 )
                 # Feed telemetry into BESSAIServer (/api/v1/telemetry endpoint)
-                health_server.set_telemetry({
-                    "site_id": _cfg.SITE_ID,
-                    "soc_pct": float(telemetry.get("soc", 0.0)),
-                    "p_kw": float(telemetry.get("active_power", 0.0)) / 1000.0,
-                    "temp_c": float(telemetry.get("temp_c", 25.0)),
-                    "safety_ok": is_safe,
-                })
+                health_server.set_telemetry(
+                    {
+                        "site_id": _cfg.SITE_ID,
+                        "soc_pct": float(telemetry.get("soc", 0.0)),
+                        "p_kw": float(telemetry.get("active_power", 0.0)) / 1000.0,
+                        "temp_c": float(telemetry.get("temp_c", 25.0)),
+                        "safety_ok": is_safe,
+                    }
+                )
 
                 # ── STEP 5: Ritmo ─────────────────────────────────────────
                 await asyncio.sleep(_cfg.WATCHDOG_TIMEOUT)

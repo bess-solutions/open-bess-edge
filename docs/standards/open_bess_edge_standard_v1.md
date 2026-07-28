@@ -38,6 +38,21 @@ Este documento establece los requisitos técnicos mínimos y aspiracionales para
 | **EMS / DERMS Local** | Orquesta la operación del BESS: despacho, respuesta a consignas CEN, lógica de isla, fallback 24-48h sin conectividad | IEEE 1547.8, estándar propio BESSAI |
 | **UPS de Control** | Alimentación ininterrumpida para sistemas de control, comunicaciones y ciberseguridad | IEC 62040, IEEE 446 |
 
+#### 2.2.1 Firewall Industrial + DMZ de Referencia
+
+La segmentación perimetral e interna debe basarse en un diseño stateful y de inspección profunda de paquetes (DPI) para protocolos industriales (Modbus, DNP3, IEC 61850).
+* **Hardware de Referencia**: Fortinet FortiGate Rugged series (ej. FortiGate 60F-Rugged o Cisco IE 3400/4000).
+* **Configuración de DMZ**: El gateway de edge y el servidor MCP residen en una DMZ dedicada. Las interfaces OT (inversores, BMS) y el SCADA local residen en la zona OT interna protegida.
+* **Políticas de Tráfico**: Allowlist estricto donde solo el servidor MCP y el SCADA Planta tienen permiso de iniciar lecturas Modbus/TCP en el puerto 502 hacia el rango IP del BMS/PCS. Toda comunicación externa (hacia la nube o BESSAI Swarm) debe ir cifrada con TLS 1.3.
+
+#### 2.2.2 Sistema de UPS de Control: Especificaciones Técnicas Mínimas
+
+Para garantizar la autonomía de control, adquisición de datos y seguridad local durante pérdidas de suministro AC:
+* **Autonomía Mínima**: 2 horas a plena carga de los sistemas de control (EMS, Gateway, Firewall, switches y relés de protección).
+* **Tecnología**: On-line doble conversión (IEC 62040-3 Clase VFI).
+* **Integración de Comunicaciones**: Tarjeta de red SNMP/Modbus TCP para reportar en tiempo real: estado de carga de batería, tensión de entrada/salida, temperatura de celdas de UPS, y alarmas de falla.
+* **Acciones de Fallback**: Si el nivel de batería de la UPS disminuye por debajo del 15%, el EMS local debe iniciar un apagado seguro (graceful shutdown) del gateway e instrumentación OT, dejando registro persistente del estado del BESS en la flash.
+
 ### 2.3 Diagrama de Capas del Sistema
 
 ```
@@ -105,18 +120,28 @@ BESS_ALARMS.ACTIVE       # Alarmas Activas (bitmap)
 BESS_ALARMS.FAULT        # Fallas Activas (bitmap)
 ```
 
+### 3.3 Modelo de Datos LF Energy BDF (Battery Data Format) y Mapeo Modbus
+
+Para garantizar la interoperabilidad con plataformas abiertas de la Linux Foundation Energy (LFE), se adopta la especificación **LF Energy BDF v1.0** para el modelamiento de la batería. A continuación se define la equivalencia de mapeo hacia registros Modbus TCP (Holding Registers, 16 bits por registro, direccionamiento basado en 0):
+
+| Entidad BDF | Variable BDF | Descripción | Registro Modbus | Tipo de Dato | Escala | Unidad |
+|---|---|---|---|---|---|---|
+| **BatterySystem** | `soc` | Estado de carga del sistema | 3000 | UINT16 | 0.01 | % |
+| **BatterySystem** | `soh` | Estado de salud del sistema | 3002 | UINT16 | 0.01 | % |
+| **BatterySystem** | `voltage` | Tensión total DC del sistema | 3004 | UINT32 (2 reg) | 0.1 | V |
+| **BatterySystem** | `current` | Corriente DC del sistema | 3006 | INT32 (2 reg) | 0.1 | A |
+| **BatterySystem** | `active_power` | Potencia activa instantánea | 3008 | INT32 (2 reg) | 1.0 | W |
+| **BatterySystem** | `reactive_power` | Potencia reactiva instantánea | 3010 | INT32 (2 reg) | 1.0 | VAR |
+| **BatterySystem** | `alarm_bitmap` | Mapa de bits de alarmas del sistema | 3012 | UINT32 (2 reg) | 1 | Bitmask |
+| **BatteryModule** | `mod_temp_max` | Temperatura máxima de módulo | 3100 | INT16 | 0.1 | °C |
+| **BatteryModule** | `mod_temp_min` | Temperatura mínima de módulo | 3101 | INT16 | 0.1 | °C |
+| **BatteryCell** | `cell_volt_max` | Tensión máxima de celda | 3200 | UINT16 | 0.001 | V |
+| **BatteryCell** | `cell_volt_min` | Tensión mínima de celda | 3201 | UINT16 | 0.001 | V |
+
 ---
 
 ## 4. Telemetría — Perfiles de Datos
 
-### 4.1 Perfil Base (Obligatorio — Todos los sistemas)
-
-Frecuencia mínima: **1 dato por segundo (1 Hz)** para alarmas y protecciones; **1 dato por minuto** para telemetría de estado.
-
-| Variable | Unidad | Fuente | Destino |
-|---|---|---|---|
-| SOC (Estado de Carga) | % | BMS | SCADA Planta + SCADA SE |
-| SOH (Estado de Salud) | % | BMS | SCADA Planta + Nube |
 | Potencia Activa (P) | kW | PCS/Medidor | SCADA Planta + SCADA SE + CEN |
 | Potencia Reactiva (Q) | kVAR | PCS/Medidor | SCADA Planta + SCADA SE |
 | Tensión por Rack (V) | V DC | BMS por rack | SCADA Planta |

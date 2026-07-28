@@ -30,6 +30,7 @@ from src.interfaces.fleet_coordinator import (
 # Helper factories
 # ---------------------------------------------------------------------------
 
+
 def _site(
     site_id: str = "S1",
     node: str = "Maitencillo",
@@ -59,6 +60,7 @@ def _coord(**kwargs) -> FleetCoordinator:
 # ---------------------------------------------------------------------------
 # FleetSiteState properties
 # ---------------------------------------------------------------------------
+
 
 class TestFleetSiteStateProperties:
     # available_discharge_kw
@@ -135,9 +137,16 @@ class TestFleetSiteStateProperties:
     def test_to_dict_contains_required_keys(self):
         s = _site()
         d = s.to_dict()
-        for key in ["site_id", "node", "soc_pct", "max_power_kw",
-                    "available_discharge_kw", "available_charge_kw",
-                    "is_stale", "is_overtemperature"]:
+        for key in [
+            "site_id",
+            "node",
+            "soc_pct",
+            "max_power_kw",
+            "available_discharge_kw",
+            "available_charge_kw",
+            "is_stale",
+            "is_overtemperature",
+        ]:
             assert key in d
 
     def test_to_dict_values_rounded(self):
@@ -149,6 +158,7 @@ class TestFleetSiteStateProperties:
 # ---------------------------------------------------------------------------
 # SiteSetpoint
 # ---------------------------------------------------------------------------
+
 
 class TestSiteSetpoint:
     def test_to_dict_keys(self):
@@ -167,6 +177,7 @@ class TestSiteSetpoint:
 # ---------------------------------------------------------------------------
 # FleetCoordinator — site management
 # ---------------------------------------------------------------------------
+
 
 class TestSiteManagement:
     def test_register_site_increments_n_sites(self):
@@ -215,6 +226,7 @@ class TestSiteManagement:
 # FleetCoordinator — active_sites filtering
 # ---------------------------------------------------------------------------
 
+
 class TestActiveSites:
     def test_fresh_sites_are_active(self):
         coord = _coord()
@@ -243,6 +255,7 @@ class TestActiveSites:
 # ---------------------------------------------------------------------------
 # FleetCoordinator — aggregation
 # ---------------------------------------------------------------------------
+
 
 class TestAggregation:
     def test_total_flex_discharge_zero_no_sites(self):
@@ -283,6 +296,7 @@ class TestAggregation:
 # ---------------------------------------------------------------------------
 # FleetCoordinator — compute_setpoints()
 # ---------------------------------------------------------------------------
+
 
 class TestComputeSetpoints:
     def test_no_active_sites_returns_empty(self):
@@ -347,13 +361,22 @@ class TestComputeSetpoints:
 # FleetCoordinator — fleet_summary()
 # ---------------------------------------------------------------------------
 
+
 class TestFleetSummary:
     def test_summary_keys(self):
         coord = _coord()
         s = coord.fleet_summary()
-        for key in ["n_sites", "n_active", "stale_sites", "overtemp_sites",
-                    "fleet_avg_soc_pct", "total_discharge_flex_kw",
-                    "total_charge_flex_kw", "program_id", "sites"]:
+        for key in [
+            "n_sites",
+            "n_active",
+            "stale_sites",
+            "overtemp_sites",
+            "fleet_avg_soc_pct",
+            "total_discharge_flex_kw",
+            "total_charge_flex_kw",
+            "program_id",
+            "sites",
+        ]:
             assert key in s
 
     def test_summary_n_sites(self):
