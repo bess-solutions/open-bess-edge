@@ -54,6 +54,32 @@ __all__ = ["BESSAIServer"]
 log = structlog.get_logger(__name__)
 _VERSION = "2.14.0"
 
+# Rate limiter storage: IP -> (window_start_time, count)
+_RATE_LIMIT_STORE: dict[str, tuple[float, int]] = {}
+_MAX_REQUESTS_PER_MIN = 300
+
+
+@web.middleware
+async def _rate_limit_middleware(request: web.Request, handler: Any) -> web.StreamResponse:  # noqa: C901
+    ip = request.remote or "127.0.0.1"
+    now = time.time()
+    window_start, count = _RATE_LIMIT_STORE.get(ip, (now, 0))
+
+    if now - window_start > 60.0:
+        _RATE_LIMIT_STORE[ip] = (now, 1)
+        return await handler(request)
+
+    if count >= _MAX_REQUESTS_PER_MIN:
+        log.warning("server.rate_limit_exceeded", ip=ip)
+        return web.Response(
+            text=json.dumps({"error": "too_many_requests", "detail": "Rate limit exceeded (300 req/min)"}),
+            content_type="application/json",
+            status=429,
+        )
+
+    _RATE_LIMIT_STORE[ip] = (window_start, count + 1)
+    return await handler(request)
+
 
 @dataclass
 class _ComplianceSnapshot:
@@ -313,33 +339,6 @@ class BESSAIServer:
             content_type="application/json",
             status=404,
         )
-
-# Rate limiter storage: IP -> (window_start_time, count)
-_RATE_LIMIT_STORE: dict[str, tuple[float, int]] = {}
-_MAX_REQUESTS_PER_MIN = 300
-
-
-@web.middleware
-async def _rate_limit_middleware(request: web.Request, handler: Any) -> web.StreamResponse:  # noqa: C901
-    ip = request.remote or "127.0.0.1"
-    now = time.time()
-    window_start, count = _RATE_LIMIT_STORE.get(ip, (now, 0))
-
-    if now - window_start > 60.0:
-        _RATE_LIMIT_STORE[ip] = (now, 1)
-        return await handler(request)
-
-    if count >= _MAX_REQUESTS_PER_MIN:
-        log.warning("server.rate_limit_exceeded", ip=ip)
-        return web.Response(
-            text=json.dumps({"error": "too_many_requests", "detail": "Rate limit exceeded (300 req/min)"}),
-            content_type="application/json",
-            status=429,
-        )
-
-    _RATE_LIMIT_STORE[ip] = (window_start, count + 1)
-    return await handler(request)
-
 
     async def _handle_setpoint(self, request: web.Request) -> web.Response:
         totp_auth = TOTPAuth(site_id=self._site_id)
