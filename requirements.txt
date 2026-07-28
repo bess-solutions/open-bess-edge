@@ -113,9 +113,5 @@ pyotp>=2.9.0
 # ---------------------------------------------------------------------------
 # v2.x — BESSAIEvolve v2: CMA-ES + NSGA-II (optional, numpy fallback available)
 # ---------------------------------------------------------------------------
-# Hansen's CMA-ES library — better convergence than numpy fallback
-# Install with: pip install fastmcp>=2.14.1
-fastmcp>=2.14.1
-mcp>=1.24.0
 # SHAP for XAI explanations (already in requirements-dev.txt, optional here)
 # shap>=0.45.0
