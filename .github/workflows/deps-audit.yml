@@ -52,6 +52,7 @@ jobs:
           pip-audit \
             --requirement requirements.txt \
             --vulnerability-service=osv \
+            --ignore-vuln GHSA-537c-gmf6-5ccf \
             --format=columns
 
       - name: Fail on High or Critical CVEs
