@@ -15,10 +15,15 @@ import json
 import struct
 import asyncio
 from pathlib import Path
-import numpy as np
+import typing
+import mcp.types
 import mcp.shared.exceptions
+
 if not hasattr(mcp.shared.exceptions, "McpError") and hasattr(mcp.shared.exceptions, "MCPError"):
     setattr(mcp.shared.exceptions, "McpError", getattr(mcp.shared.exceptions, "MCPError"))
+
+if not hasattr(mcp.types, "AnyFunction"):
+    setattr(mcp.types, "AnyFunction", typing.Callable[..., typing.Any])
 
 from fastmcp import FastMCP
 
