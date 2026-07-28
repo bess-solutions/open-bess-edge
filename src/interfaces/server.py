@@ -47,6 +47,7 @@ import structlog
 from aiohttp import web
 
 from src.interfaces.metrics import generate_metrics
+from src.interfaces.totp_auth import TOTPAuth
 
 __all__ = ["BESSAIServer"]
 
@@ -313,7 +314,54 @@ class BESSAIServer:
             status=404,
         )
 
+# Rate limiter storage: IP -> (window_start_time, count)
+_RATE_LIMIT_STORE: dict[str, tuple[float, int]] = {}
+_MAX_REQUESTS_PER_MIN = 300
+
+
+@web.middleware
+async def _rate_limit_middleware(request: web.Request, handler: Any) -> web.StreamResponse:  # noqa: C901
+    ip = request.remote or "127.0.0.1"
+    now = time.time()
+    window_start, count = _RATE_LIMIT_STORE.get(ip, (now, 0))
+
+    if now - window_start > 60.0:
+        _RATE_LIMIT_STORE[ip] = (now, 1)
+        return await handler(request)
+
+    if count >= _MAX_REQUESTS_PER_MIN:
+        log.warning("server.rate_limit_exceeded", ip=ip)
+        return web.Response(
+            text=json.dumps({"error": "too_many_requests", "detail": "Rate limit exceeded (300 req/min)"}),
+            content_type="application/json",
+            status=429,
+        )
+
+    _RATE_LIMIT_STORE[ip] = (window_start, count + 1)
+    return await handler(request)
+
+
     async def _handle_setpoint(self, request: web.Request) -> web.Response:
+        totp_auth = TOTPAuth(site_id=self._site_id)
+        if totp_auth.is_enabled:
+            header_token = request.headers.get("X-TOTP-Code") or request.headers.get("X-TOTP-Token")
+            try:
+                body_data = await request.json()
+            except Exception:
+                body_data = {}
+            json_token = body_data.get("totp_code") or body_data.get("totp_token")
+            token = str(header_token or json_token or "")
+            if not totp_auth.verify(token):
+                log.warning("server.setpoint_unauthorized", reason="invalid_or_missing_totp")
+                return web.Response(
+                    text=json.dumps({
+                        "error": "unauthorized",
+                        "detail": "Invalid or missing TOTP/MFA token (IEC 62443-3-3 SR 1.3)",
+                    }),
+                    content_type="application/json",
+                    status=401,
+                )
+
         try:
             data = await request.json()
             target_kw = float(data.get("target_kw", 0.0))
@@ -336,7 +384,7 @@ class BESSAIServer:
     # ------------------------------------------------------------------
 
     def _build_app(self) -> web.Application:
-        app = web.Application()
+        app = web.Application(middlewares=[_rate_limit_middleware])
         app.router.add_get("/", self._handle_root)
         app.router.add_get("/health", self._handle_health)
         app.router.add_get("/metrics", self._handle_metrics)
@@ -346,7 +394,6 @@ class BESSAIServer:
         app.router.add_get("/fleet/sites", self._handle_fleet_sites)
         app.router.add_get("/api/v1/telemetry", self._handle_telemetry)
         app.router.add_post("/api/v1/setpoint", self._handle_setpoint)
-        # Wildcard for not found (aiohttp doesn't have native 404 middleware by default)
         return app
 
     # ------------------------------------------------------------------
