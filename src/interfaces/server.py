@@ -63,6 +63,13 @@ _MAX_REQUESTS_PER_MIN = 300
 async def _rate_limit_middleware(request: web.Request, handler: Any) -> web.StreamResponse:  # noqa: C901
     ip = request.remote or "127.0.0.1"
     now = time.time()
+
+    # Periodic memory cleanup if store grows
+    if len(_RATE_LIMIT_STORE) > 1000:
+        expired = [k for k, (v_time, _) in _RATE_LIMIT_STORE.items() if now - v_time > 120.0]
+        for k in expired:
+            _RATE_LIMIT_STORE.pop(k, None)
+
     window_start, count = _RATE_LIMIT_STORE.get(ip, (now, 0))
 
     if now - window_start > 60.0:
@@ -72,7 +79,9 @@ async def _rate_limit_middleware(request: web.Request, handler: Any) -> web.Stre
     if count >= _MAX_REQUESTS_PER_MIN:
         log.warning("server.rate_limit_exceeded", ip=ip)
         return web.Response(
-            text=json.dumps({"error": "too_many_requests", "detail": "Rate limit exceeded (300 req/min)"}),
+            text=json.dumps(
+                {"error": "too_many_requests", "detail": "Rate limit exceeded (300 req/min)"}
+            ),
             content_type="application/json",
             status=429,
         )
@@ -155,6 +164,9 @@ class BESSAIServer:
 
         # Per-site telemetry cache (for /fleet/sites)
         self._site_telemetries: list[dict[str, Any]] = []
+
+        # TOTP Authentication verifier
+        self._totp_auth = TOTPAuth(site_id=site_id)
 
         self._app = self._build_app()
 
@@ -341,28 +353,40 @@ class BESSAIServer:
         )
 
     async def _handle_setpoint(self, request: web.Request) -> web.Response:
-        totp_auth = TOTPAuth(site_id=self._site_id)
-        if totp_auth.is_enabled:
-            header_token = request.headers.get("X-TOTP-Code") or request.headers.get("X-TOTP-Token")
-            try:
-                body_data = await request.json()
-            except Exception:
-                body_data = {}
-            json_token = body_data.get("totp_code") or body_data.get("totp_token")
+        try:
+            data = await request.json()
+        except Exception:
+            data = {}
+
+        if self._totp_auth.is_enabled:
+            header_token = request.headers.get("X-TOTP-Code") or request.headers.get(
+                "X-TOTP-Token"
+            )
+            json_token = (
+                data.get("totp_code") or data.get("totp_token") if isinstance(data, dict) else None
+            )
             token = str(header_token or json_token or "")
-            if not totp_auth.verify(token):
+            if not self._totp_auth.verify(token):
                 log.warning("server.setpoint_unauthorized", reason="invalid_or_missing_totp")
                 return web.Response(
-                    text=json.dumps({
-                        "error": "unauthorized",
-                        "detail": "Invalid or missing TOTP/MFA token (IEC 62443-3-3 SR 1.3)",
-                    }),
+                    text=json.dumps(
+                        {
+                            "error": "unauthorized",
+                            "detail": "Invalid or missing TOTP/MFA token (IEC 62443-3-3 SR 1.3)",
+                        }
+                    ),
                     content_type="application/json",
                     status=401,
                 )
 
+        if not isinstance(data, dict):
+            return web.Response(
+                text=json.dumps({"error": "bad request", "detail": "Expected JSON object"}),
+                content_type="application/json",
+                status=400,
+            )
+
         try:
-            data = await request.json()
             target_kw = float(data.get("target_kw", 0.0))
             strategy = str(data.get("strategy", ""))
             log.info("server.setpoint_received", target_kw=target_kw, strategy=strategy)
