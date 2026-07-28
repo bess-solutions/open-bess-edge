@@ -167,7 +167,7 @@ def scrape_cmg(n_days: int = 30) -> pd.DataFrame | None:
     all_data = []
 
     # API key is required by the Coordinator portal
-    api_key = "2b44048b9df6f8c42f3ff9aa1c153f32" # Default public portal key
+    api_key = os.getenv("CEN_API_KEY", "")
 
     while page <= total_pages:
         params = {
