@@ -32,7 +32,7 @@ def test_scrape_cmg_reads_env_key(mock_get):
                 "fecha": "2026-06-01",
                 "hora": 12,
                 "nombre_barra": "BAQUEDANO 220KV",
-                "cmg": 45.2,
+                "cmg_usd_mwh_": 45.2,
             }
         ],
     }
