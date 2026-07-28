@@ -15,39 +15,8 @@ import json
 import struct
 import asyncio
 from pathlib import Path
-import sys
-import types
-import contextvars
-import typing
-import mcp
-import mcp.types
-import mcp.shared.exceptions
-import mcp.server.lowlevel.server
-import mcp.server.session
-
-if not hasattr(mcp, "McpError") and hasattr(mcp, "MCPError"):
-    setattr(mcp, "McpError", getattr(mcp, "MCPError"))
-
-if not hasattr(mcp.shared.exceptions, "McpError") and hasattr(mcp.shared.exceptions, "MCPError"):
-    setattr(mcp.shared.exceptions, "McpError", getattr(mcp.shared.exceptions, "MCPError"))
-
-if not hasattr(mcp.types, "AnyFunction"):
-    setattr(mcp.types, "AnyFunction", typing.Callable[..., typing.Any])
-
-if not hasattr(mcp.server.lowlevel.server, "request_ctx"):
-    setattr(mcp.server.lowlevel.server, "request_ctx", contextvars.ContextVar("request_ctx", default=None))
-
-if not hasattr(mcp.server.lowlevel.server, "RequestT"):
-    setattr(mcp.server.lowlevel.server, "RequestT", typing.TypeVar("RequestT"))
-
-if "mcp.shared.session" not in sys.modules:
-    sys.modules["mcp.shared.session"] = mcp.server.session
-
-if not hasattr(mcp.server.session, "RequestResponder"):
-    class RequestResponder:
-        pass
-    setattr(mcp.server.session, "RequestResponder", RequestResponder)
-
+import pandas as pd
+import numpy as np
 from fastmcp import FastMCP
 
 # Add root directory to sys.path to resolve src imports

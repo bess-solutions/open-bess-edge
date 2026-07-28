@@ -27,7 +27,7 @@ locust>=2.28.0
 pandas>=2.0.0
 
 # --- Model Context Protocol (MCP) ---
-mcp>=0.1.0
+mcp>=0.1.0,<1.2.0
 fastmcp>=0.1.0
 pyarrow>=12.0
 
