@@ -15,10 +15,12 @@ import json
 import struct
 import asyncio
 from pathlib import Path
+import contextvars
 import typing
 import mcp
 import mcp.types
 import mcp.shared.exceptions
+import mcp.server.lowlevel.server
 
 if not hasattr(mcp, "McpError") and hasattr(mcp, "MCPError"):
     setattr(mcp, "McpError", getattr(mcp, "MCPError"))
@@ -28,6 +30,9 @@ if not hasattr(mcp.shared.exceptions, "McpError") and hasattr(mcp.shared.excepti
 
 if not hasattr(mcp.types, "AnyFunction"):
     setattr(mcp.types, "AnyFunction", typing.Callable[..., typing.Any])
+
+if not hasattr(mcp.server.lowlevel.server, "request_ctx"):
+    setattr(mcp.server.lowlevel.server, "request_ctx", contextvars.ContextVar("request_ctx", default=None))
 
 from fastmcp import FastMCP
 
