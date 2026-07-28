@@ -16,8 +16,12 @@ import struct
 import asyncio
 from pathlib import Path
 import typing
+import mcp
 import mcp.types
 import mcp.shared.exceptions
+
+if not hasattr(mcp, "McpError") and hasattr(mcp, "MCPError"):
+    setattr(mcp, "McpError", getattr(mcp, "MCPError"))
 
 if not hasattr(mcp.shared.exceptions, "McpError") and hasattr(mcp.shared.exceptions, "MCPError"):
     setattr(mcp.shared.exceptions, "McpError", getattr(mcp.shared.exceptions, "MCPError"))
