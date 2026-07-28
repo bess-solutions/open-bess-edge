@@ -12,10 +12,10 @@ Covers:
 - FLCoordinator initialization and local simulation start
 """
 
-import numpy as np
-import pytest
 from pathlib import Path
 
+import numpy as np
+import pytest
 from src.core.fl_coordinator import BESSFlowerClient, FLCoordinator
 
 

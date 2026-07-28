@@ -8,10 +8,9 @@ Unit tests for ``scripts.bessai_data_scraper``.
 """
 
 import os
-from unittest.mock import patch, MagicMock
-import pytest
+from unittest.mock import MagicMock, patch
 
-from scripts.bessai_data_scraper import scrape_cmg, _date_range
+from scripts.bessai_data_scraper import _date_range, scrape_cmg
 
 
 def test_date_range():
