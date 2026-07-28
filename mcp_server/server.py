@@ -34,6 +34,9 @@ if not hasattr(mcp.types, "AnyFunction"):
 if not hasattr(mcp.server.lowlevel.server, "request_ctx"):
     setattr(mcp.server.lowlevel.server, "request_ctx", contextvars.ContextVar("request_ctx", default=None))
 
+if not hasattr(mcp.server.lowlevel.server, "RequestT"):
+    setattr(mcp.server.lowlevel.server, "RequestT", typing.TypeVar("RequestT"))
+
 from fastmcp import FastMCP
 
 # Add root directory to sys.path to resolve src imports
