@@ -175,7 +175,7 @@ class Settings(BaseSettings):
         description="TCP port for the IEEE 2030.5 (SEP 2.0) server.",
     )
     SEP2_HOST: str = Field(
-        default="0.0.0.0",  # nosec B104 — configurable via env var SEP2_HOST; defaults to all interfaces for container deployments
+        default="127.0.0.1",  # Configurable via env var SEP2_HOST; default 127.0.0.1 for local/OT security
         description="Bind address for the IEEE 2030.5 server.",
     )
     SEP2_TLS_CERT: str | None = Field(
@@ -248,7 +248,7 @@ class Settings(BaseSettings):
         description="Path to CEN CA certificate PEM for server verification.",
     )
     IEC104_HOST: str = Field(
-        default="0.0.0.0",  # nosec B104
+        default="127.0.0.1",  # Configurable via env var IEC104_HOST; default 127.0.0.1 for local/OT security
         description="Bind address for the IEC 60870-5-104 SCADA server (GAP-004).",
     )
     IEC104_PORT: int = Field(

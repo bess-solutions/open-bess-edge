@@ -35,6 +35,7 @@ Run
 from __future__ import annotations
 
 import asyncio
+from contextlib import AsyncExitStack
 import logging
 import os
 import signal
@@ -316,21 +317,23 @@ async def main() -> None:  # noqa: C901
     guard = SafetyGuard(watchdog_interval_s=1.0)
     watchdog_ref: list[asyncio.Task[None]] = []  # mutable single-element ref
 
-    if not _cfg.GCP_PROJECT_ID:
-        raise ValueError(
-            "GCP_PROJECT_ID is required. Set it in config/.env or as an environment variable."
+    _has_gcp = bool(_cfg.GCP_PROJECT_ID and _cfg.GCP_PUBSUB_TOPIC)
+    if not _has_gcp:
+        log.info(
+            "pubsub.disabled",
+            tip="Set GCP_PROJECT_ID and GCP_PUBSUB_TOPIC in config/.env for GCP cloud publishing",
         )
-    if not _cfg.GCP_PUBSUB_TOPIC:
-        raise ValueError(
-            "GCP_PUBSUB_TOPIC is required. Set it in config/.env or as an environment variable."
-        )
-    async with (
-        PubSubPublisher(
-            project_id=_cfg.GCP_PROJECT_ID,
-            topic_name=_cfg.GCP_PUBSUB_TOPIC,
-        ) as publisher,
-        health_server.run(),
-    ):
+
+    async with AsyncExitStack() as stack:
+        publisher: PubSubPublisher | None = None
+        if _has_gcp:
+            publisher = await stack.enter_async_context(
+                PubSubPublisher(
+                    project_id=_cfg.GCP_PROJECT_ID,  # type: ignore[arg-type]
+                    topic_name=_cfg.GCP_PUBSUB_TOPIC,  # type: ignore[arg-type]
+                )
+            )
+        await stack.enter_async_context(health_server.run())
         _mqtt_broker = os.getenv("MQTT_BROKER_URL")
         mqtt_pub: MQTTPublisher | None = None
         if _mqtt_broker:
@@ -561,20 +564,21 @@ async def main() -> None:  # noqa: C901
                 _ensure_watchdog(guard, driver, watchdog_ref)
 
                 # ── STEP 4: Publicación ───────────────────────────────────
-                try:
-                    msg_id = await publisher.publish(telemetry)
-                    log.info(
-                        "cycle.published",
-                        cycle=cycle,
-                        message_id=msg_id,
-                        telemetry=telemetry,
-                    )
-                except Exception as exc:
-                    log.error(
-                        "cycle.publish_failed",
-                        cycle=cycle,
-                        error=str(exc),
-                    )
+                if publisher is not None:
+                    try:
+                        msg_id = await publisher.publish(telemetry)
+                        log.info(
+                            "cycle.published",
+                            cycle=cycle,
+                            message_id=msg_id,
+                            telemetry=telemetry,
+                        )
+                    except Exception as exc:
+                        log.error(
+                            "cycle.publish_failed",
+                            cycle=cycle,
+                            error=str(exc),
+                        )
                     PUBLISH_ERRORS_TOTAL.labels(site_id=_cfg.SITE_ID).inc()
                     span.record_exception(exc)
 
