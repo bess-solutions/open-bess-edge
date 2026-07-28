@@ -190,6 +190,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
+- **security**: update fastmcp to >=2.14.2 and mcp to >=1.24.0 to resolve all pip-audit CVEs (`eebc3ace`, @BESS Solutions)
 - **ci**: ensure mypy and pip-audit steps pass cleanly in GitHub Actions (`da569936`, @BESS Solutions)
 - **deps**: pin mcp<1.2.0 for fastmcp version compatibility (`2e3d05da`, @BESS Solutions)
 - **mcp**: add RequestResponder compatibility class for fastmcp (`f2521de2`, @BESS Solutions)
