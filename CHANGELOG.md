@@ -190,6 +190,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
+- **mcp**: add McpError compatibility alias for fastmcp import (`3f082e7b`, @BESS Solutions)
 - **server**: add missing last_cycle_ok attribute to BESSAIServer (`f8e92103`, @BESS Solutions)
 - **mypy**: update python_version to 3.12 in pyproject.toml to resolve numpy type syntax error (`5d9c4e2f`, @BESS Solutions)
 - **ci**: update PYTHON_VERSION to 3.12 to fix numpy syntax error in mypy typecheck (`2b8ea423`, @BESS Solutions)
