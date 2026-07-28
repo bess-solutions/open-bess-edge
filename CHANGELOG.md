@@ -190,6 +190,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
+- **deps**: pin mcp<1.2.0 for fastmcp version compatibility (`2e3d05da`, @BESS Solutions)
 - **mcp**: add RequestResponder compatibility class for fastmcp (`f2521de2`, @BESS Solutions)
 - **mcp**: add mcp.shared.session module alias for fastmcp lowlevel session (`d8cbdb92`, @BESS Solutions)
 - **mcp**: add RequestT compatibility alias for fastmcp server lowlevel (`9a384a39`, @BESS Solutions)
