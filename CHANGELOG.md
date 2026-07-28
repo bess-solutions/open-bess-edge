@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🔨 Refactoring
+- **repo**: enforce pure production standard on open-bess-edge (remove experimental/ sandbox modules) (`d6229ca7`, @BESS Solutions)
+
 ### 🛡️ Security & OT Hardening (v2.17.1)
 - **src/core/main.py**: GCP Pub/Sub is now 100% optional — offline & standalone edge deployments supported without requiring `GCP_PROJECT_ID`.
 - **src/core/config.py**: Hardened default network bindings for `SEP2_HOST` and `IEC104_HOST` to `127.0.0.1` for OT security (configurable via `.env`).
