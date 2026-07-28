@@ -190,6 +190,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
+- **deps**: update pathspec to >=0.12.1,<0.13.0 to resolve dependency resolution conflict with flwr (`fccf13ef`, @BESS Solutions)
 - **security**: resolve double JSON read bug in setpoint handler, sync Grafana docker compose security & update requirements for CI (`9687df19`, @BESS Solutions)
 - **scraper**: add missing import os in bessai_data_scraper.py and add unit test (`c2bd26c3`, @BESS Solutions)
 - **main**: resolve undefined exc variable in publish error handler and format imports with ruff (`4a690740`, @BESS Solutions)
