@@ -160,7 +160,7 @@ indent-style = "space"
 # Mypy — strict-ish type checking
 # ---------------------------------------------------------------------------
 [tool.mypy]
-python_version         = "3.10"
+python_version         = "3.12"
 warn_return_any        = true
 warn_unused_configs    = true
 ignore_missing_imports = true
