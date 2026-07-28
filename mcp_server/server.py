@@ -43,6 +43,11 @@ if not hasattr(mcp.server.lowlevel.server, "RequestT"):
 if "mcp.shared.session" not in sys.modules:
     sys.modules["mcp.shared.session"] = mcp.server.session
 
+if not hasattr(mcp.server.session, "RequestResponder"):
+    class RequestResponder:
+        pass
+    setattr(mcp.server.session, "RequestResponder", RequestResponder)
+
 from fastmcp import FastMCP
 
 # Add root directory to sys.path to resolve src imports
