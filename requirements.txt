@@ -75,7 +75,7 @@ gymnasium>=0.29.0
 # v0.7.0 — Federated Learning client
 # ---------------------------------------------------------------------------
 # Flower FL framework (client runs on edge, server in aggregation tier)
-flwr>=1.10.0
+flwr>=1.15.0
 
 # ---------------------------------------------------------------------------
 # v0.8.0 — DataLake Publisher (optional — falls back to JSONL without it)
