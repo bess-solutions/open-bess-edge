@@ -155,6 +155,7 @@ class BESSAIServer:
         self._start_time = time.monotonic()
 
         # Mutable state — updated by main loop each cycle
+        self.last_cycle_ok: bool = True
         self._compliance = _ComplianceSnapshot()
         self._fleet = _FleetSnapshot()
         self._telemetry = _TelemetrySnapshot(site_id=site_id)
