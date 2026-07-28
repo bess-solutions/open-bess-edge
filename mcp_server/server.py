@@ -15,12 +15,15 @@ import json
 import struct
 import asyncio
 from pathlib import Path
+import sys
+import types
 import contextvars
 import typing
 import mcp
 import mcp.types
 import mcp.shared.exceptions
 import mcp.server.lowlevel.server
+import mcp.server.session
 
 if not hasattr(mcp, "McpError") and hasattr(mcp, "MCPError"):
     setattr(mcp, "McpError", getattr(mcp, "MCPError"))
@@ -36,6 +39,9 @@ if not hasattr(mcp.server.lowlevel.server, "request_ctx"):
 
 if not hasattr(mcp.server.lowlevel.server, "RequestT"):
     setattr(mcp.server.lowlevel.server, "RequestT", typing.TypeVar("RequestT"))
+
+if "mcp.shared.session" not in sys.modules:
+    sys.modules["mcp.shared.session"] = mcp.server.session
 
 from fastmcp import FastMCP
 
