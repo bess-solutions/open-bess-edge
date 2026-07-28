@@ -216,6 +216,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - remove deprecated fetch_cmg_evolution.py (superseded by bessai_data_scraper.py) (`1f734cd4`, @BESS Solutions)
 
 ### ✨ New Features
+- **security**: enforce TOTP/MFA gate on setpoint endpoint, add rate limiting & remove Grafana default password (`d18ac69a`, @BESS Solutions)
 - **hardware**: mapping visual feedback de Watchdog Heartbeat a LED_BUILTIN Arduino e integrar FC06 a bridge (`3767f377`, @testeadoroficial)
 - **observability**: add docker-compose for prometheus/grafana and create L2 support playbook (`98a702e3`, @testeadoroficial)
 - **pilot**: battery degradation metrics, readiness probe and stricter locust SLA (`572916a6`, @testeadoroficial)
