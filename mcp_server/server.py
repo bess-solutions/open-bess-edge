@@ -15,8 +15,11 @@ import json
 import struct
 import asyncio
 from pathlib import Path
-import pandas as pd
 import numpy as np
+import mcp.shared.exceptions
+if not hasattr(mcp.shared.exceptions, "McpError") and hasattr(mcp.shared.exceptions, "MCPError"):
+    setattr(mcp.shared.exceptions, "McpError", getattr(mcp.shared.exceptions, "MCPError"))
+
 from fastmcp import FastMCP
 
 # Add root directory to sys.path to resolve src imports
