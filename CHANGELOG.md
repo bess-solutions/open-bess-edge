@@ -190,6 +190,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
+- **ci**: update actions/cache reference to v4 and ignore GHSA-537c-gmf6-5ccf in deps-audit (`4d9b74ec`, @BESS Solutions)
 - **ci**: resolve flwr and cryptography dependency resolution and update pip-audit ignore list (`856edcfc`, @BESS Solutions)
 - **security**: update flwr to >=1.15.0 and cryptography to >=48.0.1 for clean pip-audit vulnerability pass (`fe10f154`, @BESS Solutions)
 - **security**: update cryptography to >=48.0.1 to fix GHSA-537c-gmf6-5ccf vulnerability in pip-audit (`470fc79b`, @BESS Solutions)
