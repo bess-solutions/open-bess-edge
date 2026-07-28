@@ -187,6 +187,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
+- **main**: resolve undefined exc variable in publish error handler and format imports with ruff (`4a690740`, @BESS Solutions)
 - **tests**: ONNX latency auto-detect input shape, dry-run xfail for Py3.14 venv (`b38cc423`, @BESS Solutions)
 - repair 6 broken internal links (exhaustive link scan) (`1790f17e`, @BESS Solutions)
 - remove broken image in quickstart_5min.md (`aeedafdb`, @BESS Solutions)
