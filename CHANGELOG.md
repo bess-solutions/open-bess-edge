@@ -190,6 +190,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
+- **mcp**: add RequestT compatibility alias for fastmcp server lowlevel (`9a384a39`, @BESS Solutions)
 - **mcp**: add request_ctx compatibility alias for fastmcp server dependencies (`710a9bda`, @BESS Solutions)
 - **mcp**: add top-level mcp.McpError compatibility alias for fastmcp (`e8b0493c`, @BESS Solutions)
 - **mcp**: add AnyFunction compatibility alias for fastmcp import (`e5575799`, @BESS Solutions)
