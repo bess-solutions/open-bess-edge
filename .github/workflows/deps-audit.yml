@@ -45,13 +45,11 @@ jobs:
         run: |
           pip-audit \
             --requirement requirements.txt \
-            --vulnerability-service=osv \
             --format=json \
             --output=audit-results.json || true
           # Report summary
           pip-audit \
             --requirement requirements.txt \
-            --vulnerability-service=osv \
             --ignore-vuln GHSA-537c-gmf6-5ccf \
             --ignore-vuln PYSEC-2022-42969 \
             --format=columns || true
