@@ -191,6 +191,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
+- **ci**: bump trivy-action to secure v0.36.0 (resolves missing setup-trivy@v0.2.1 tag issue) (`dd539deb`, @BESS Solutions)
 - **ci**: fix trivy permissions, split DRL pip install, and increase locust SLA threshold to 1.0s (`17f168f8`, @BESS Solutions)
 - **deps-audit**: remove invalid hashFiles expression at job level (`d378187a`, @BESS Solutions)
 - **deps-audit**: add continue-on-error: true to Fail on High or Critical CVEs step (`39c2638f`, @BESS Solutions)
