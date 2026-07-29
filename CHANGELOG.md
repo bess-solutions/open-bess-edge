@@ -192,6 +192,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
+- **workflows**: disable publish_results on openssf scorecard to prevent API publication error (`7d71acb5`, @BESS Solutions)
 - **workflows**: fix submodule gitlink and add bandit-sarif-formatter to compliance report (`221e975d`, @BESS Solutions)
 - **ci**: fix rate limit tests, disable rate limits in Locust test, and suppress Bandit exit failure (`bb1791e7`, @BESS Solutions)
 - **workflows**: update trivy-action to v0.36.0, fix scorecard permissions, add env vars, and correct test file paths (`3d75441b`, @BESS Solutions)
