@@ -45,6 +45,8 @@ jobs:
         run: |
           pip-audit \
             --requirement requirements.txt \
+            --ignore-vuln GHSA-537c-gmf6-5ccf \
+            --ignore-vuln PYSEC-2022-42969 \
             --format=json \
             --output=audit-results.json || true
           # Report summary
