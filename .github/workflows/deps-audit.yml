@@ -103,7 +103,6 @@ jobs:
   verify-hashes:
     name: Verify Dependency Hash Integrity
     runs-on: ubuntu-latest
-    if: hashFiles('requirements.hash.txt') != ''
 
     steps:
       - name: Checkout
@@ -116,8 +115,12 @@ jobs:
 
       - name: Install with hash verification
         run: |
-          pip install \
-            --require-hashes \
-            --no-deps \
-            -r requirements.hash.txt
-          echo "✅ All package hashes verified."
+          if [ -s requirements.hash.txt ]; then
+            pip install \
+              --require-hashes \
+              --no-deps \
+              -r requirements.hash.txt
+            echo "✅ All package hashes verified."
+          else
+            echo "requirements.hash.txt is empty or missing, skipping hash verification."
+          fi
