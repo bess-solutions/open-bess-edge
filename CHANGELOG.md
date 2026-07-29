@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **pyproject.toml**: Synchronized version tag to `2.17.1`.
 
 ### 🤖 CI/CD
+- **deps-audit**: trigger fresh dependency security audit scan on main (`89df6c61`, @BESS Solutions)
 - add BEP-0200 drl-market-tests job (Job 11) to CI pipeline (`635fead6`, @BESS Solutions)
 
 ### 🚀 Feat — v2.15.0: BESSAIServer integrado en main.py (2026-03-02)
