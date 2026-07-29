@@ -57,7 +57,7 @@ _VERSION = "2.14.0"
 # Rate limiter storage: IP -> (window_start_time, count)
 _RATE_LIMIT_STORE: dict[str, tuple[float, int]] = {}
 _MAX_REQUESTS_PER_MIN = 300
-
+# BESSAI Unified Server middleware
 
 @web.middleware
 async def _rate_limit_middleware(request: web.Request, handler: Any) -> web.StreamResponse:  # noqa: C901
