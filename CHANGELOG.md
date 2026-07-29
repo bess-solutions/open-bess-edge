@@ -191,6 +191,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
+- **workflows**: update trivy-action to v0.36.0, fix scorecard permissions, add env vars, and correct test file paths (`3d75441b`, @BESS Solutions)
 - **server**: bypass rate limiting for health, metrics, and local loopback traffic (`efae474c`, @BESS Solutions)
 - **ci**: bump trivy-action to secure v0.36.0 (resolves missing setup-trivy@v0.2.1 tag issue) (`dd539deb`, @BESS Solutions)
 - **ci**: fix trivy permissions, split DRL pip install, and increase locust SLA threshold to 1.0s (`17f168f8`, @BESS Solutions)
