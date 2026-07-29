@@ -115,9 +115,11 @@ jobs:
       - name: Start BESSAI Edge Server in background
         env:
           PYTHONPATH: ${{ github.workspace }}
+          BESSAI_DISABLE_RATE_LIMIT: "true"
         run: |
-          python demo_server.py &
+          python demo_server.py > demo_server.log 2>&1 &
           sleep 5
+          cat demo_server.log
 
       - name: Run Locust load test
         run: |

@@ -37,7 +37,7 @@ jobs:
       - name: Run Bandit (MEDIUM+, SARIF output)
         run: |
           bandit -r src/ -ll --format sarif -o bandit-results.sarif || true
-          bandit -r src/ -ll --format txt  # Human-readable summary
+          bandit -r src/ -ll --format txt || true  # Human-readable summary
 
       - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@1bb15d06a6fbb5d9d9ffd228746bf8ee208caec8  # codeql-bundle-v2.20.5

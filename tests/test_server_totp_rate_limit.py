@@ -82,11 +82,11 @@ async def test_rate_limiter_enforces_limit(reset_rate_limit):
     async with TestClient(TestServer(app)) as client:
         # First 300 requests should be 200 OK
         for _ in range(300):
-            resp = await client.get("/health")
+            resp = await client.get("/fleet/summary")
             assert resp.status == 200
 
         # 301st request should return 429 Too Many Requests
-        resp_blocked = await client.get("/health")
+        resp_blocked = await client.get("/fleet/summary")
         assert resp_blocked.status == 429
         body = await resp_blocked.json()
         assert body["error"] == "too_many_requests"

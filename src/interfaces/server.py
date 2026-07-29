@@ -61,12 +61,16 @@ _MAX_REQUESTS_PER_MIN = 300
 
 @web.middleware
 async def _rate_limit_middleware(request: web.Request, handler: Any) -> web.StreamResponse:  # noqa: C901
-    ip = request.remote or "127.0.0.1"
-    
-    # Bypass rate limiting for health, metrics, and local traffic (e.g. locust load tests)
-    if request.path in ("/health", "/metrics") or ip in ("127.0.0.1", "::1"):
+    # Bypass rate limiting for health and metrics endpoints
+    if request.path in ("/health", "/metrics"):
         return await handler(request)
 
+    # Bypass rate limiting if disabled via env var (e.g. for Locust load testing)
+    import os
+    if os.environ.get("BESSAI_DISABLE_RATE_LIMIT") == "true":
+        return await handler(request)
+
+    ip = request.remote or "127.0.0.1"
     now = time.time()
 
     # Periodic memory cleanup if store grows
