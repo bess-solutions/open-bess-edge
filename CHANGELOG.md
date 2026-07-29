@@ -191,6 +191,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
+- **deps-audit**: remove invalid hashFiles expression at job level (`d378187a`, @BESS Solutions)
 - **deps-audit**: add continue-on-error: true to Fail on High or Critical CVEs step (`39c2638f`, @BESS Solutions)
 - **ci**: set trivy exit-code to 0 so container scan results upload without failing CI (`f065c57d`, @BESS Solutions)
 - **deps-audit**: add continue-on-error to audit step so pip-audit warnings don't break pipeline (`cf7e551d`, @BESS Solutions)
