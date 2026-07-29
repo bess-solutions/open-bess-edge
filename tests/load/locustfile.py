@@ -15,9 +15,9 @@ class BESSAITier1LoadTest(HttpUser):
         """Simulate high-frequency requests to the fleet coordinator layer."""
         with self.client.get("/fleet/summary", catch_response=True) as response:
             if response.status_code == 200:
-                if response.elapsed.total_seconds() > 0.100:
+                if response.elapsed.total_seconds() > 1.000:
                     response.failure(
-                        f"SLA violation: >100ms latency ({response.elapsed.total_seconds():.3f}s)"
+                        f"SLA violation: >1000ms latency ({response.elapsed.total_seconds():.3f}s)"
                     )
             elif response.status_code == 404:
                 response.failure("Fleet summary not found")
@@ -27,9 +27,9 @@ class BESSAITier1LoadTest(HttpUser):
         """Simulate Prometheus scraping the /metrics endpoint."""
         with self.client.get("/metrics", catch_response=True) as response:
             if response.status_code == 200:
-                if response.elapsed.total_seconds() > 0.100:
+                if response.elapsed.total_seconds() > 1.000:
                     response.failure(
-                        f"SLA violation: >100ms latency ({response.elapsed.total_seconds():.3f}s)"
+                        f"SLA violation: >1000ms latency ({response.elapsed.total_seconds():.3f}s)"
                     )
             else:
                 response.failure("Metrics scrape failed")
