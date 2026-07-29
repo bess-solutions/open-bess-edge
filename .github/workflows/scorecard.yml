@@ -23,8 +23,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
-        with:
-          persist-credentials: false
 
       - name: Run analysis
         uses: ossf/scorecard-action@ff5dd8929f96a8a4dc67d13f32b8c75057829621  # v2.4.0
