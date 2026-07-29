@@ -191,6 +191,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
+- **deps-audit**: remove failing osv vulnerability service flag from pip-audit (`44586c66`, @BESS Solutions)
 - **ci**: remove invalid persist-credentials in scorecard and add resiliency to deps-audit (`01007497`, @BESS Solutions)
 - **ci**: make optional repo checkout resilient and fix scorecard publish token failure (`4cb64d5a`, @BESS Solutions)
 - **deps**: align cryptography to >=46.0.7,<47.0.0 for flwr compatibility and update deps-audit ignore (`726fb1ec`, @BESS Solutions)
