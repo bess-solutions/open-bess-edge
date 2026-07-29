@@ -1,6 +1,6 @@
 name: Dependency Security Audit
 
-# IEC 62443-2-3 SR 2.2 + OpenSSF Gold Badge: automated CVE scanning
+# IEC 62443-2-3 SR 2.2 + OpenSSF Gold Badge: automated CVE scanning (BESSAI-STD-048)
 # Runs weekly on Monday and on every push that touches dependencies.
 
 # OpenSSF Scorecard: Token-Permissions — restrict default token to read-only
