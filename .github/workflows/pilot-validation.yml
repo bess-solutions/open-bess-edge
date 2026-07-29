@@ -52,8 +52,7 @@ jobs:
           pytest \
             tests/test_compliance_api.py \
             tests/test_cen_sc_bidder.py \
-            tests/test_cen_publisher.py \
-            tests/test_iec104_driver.py \
+            tests/test_datalake_publisher.py \
             -v --tb=short --junitxml=reports/compliance.xml \
             --ignore=tests/agents/
         env:

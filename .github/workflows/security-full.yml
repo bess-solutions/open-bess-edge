@@ -157,10 +157,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build image for scanning
-        run: docker build -t bessai-edge:scan .
+        run: docker build -f infrastructure/docker/Dockerfile -t bessai-edge:scan .
 
       - name: Trivy — vulnerability scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
         with:
           image-ref: "bessai-edge:scan"
           format: "sarif"
@@ -176,7 +176,7 @@ jobs:
         continue-on-error: true
 
       - name: Trivy — misconfig scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
         with:
           scan-type: "config"
           scan-ref: "."
