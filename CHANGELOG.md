@@ -191,6 +191,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
+- **deps-audit**: add continue-on-error to audit step so pip-audit warnings don't break pipeline (`cf7e551d`, @BESS Solutions)
 - **deps-audit**: pass ignore-vuln flags to initial JSON generation step (`b55262d0`, @BESS Solutions)
 - **deps-audit**: add file exists safety check in CVE audit evaluation step (`5d7208d8`, @BESS Solutions)
 - **deps-audit**: remove failing osv vulnerability service flag from pip-audit (`44586c66`, @BESS Solutions)
