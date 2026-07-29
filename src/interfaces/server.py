@@ -59,6 +59,7 @@ _RATE_LIMIT_STORE: dict[str, tuple[float, int]] = {}
 _MAX_REQUESTS_PER_MIN = 300
 # BESSAI Unified Server middleware
 
+
 @web.middleware
 async def _rate_limit_middleware(request: web.Request, handler: Any) -> web.StreamResponse:  # noqa: C901
     # Bypass rate limiting for health and metrics endpoints
@@ -67,6 +68,7 @@ async def _rate_limit_middleware(request: web.Request, handler: Any) -> web.Stre
 
     # Bypass rate limiting if disabled via env var (e.g. for Locust load testing)
     import os
+
     if os.environ.get("BESSAI_DISABLE_RATE_LIMIT") == "true":
         return await handler(request)
 
