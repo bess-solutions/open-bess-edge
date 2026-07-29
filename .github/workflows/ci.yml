@@ -421,6 +421,7 @@ jobs:
 
       - name: Check out bessai-web for CMg data (if not cached)
         if: steps.cmg-cache.outputs.cache-hit != 'true'
+        continue-on-error: true
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
           repository: bess-solutions/bessai-web
