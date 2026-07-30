@@ -11,7 +11,7 @@
 # ---------------------------------------------------------------------------
 # Industrial Protocol — Modbus
 # ---------------------------------------------------------------------------
-pymodbus>=3.7.0
+pymodbus>=3.10.0,<4.0.0  # ver docs/mcp_server.md — <3.10 rompe el driver (device_id), >=4.0 elimina ModbusDeviceContext/ModbusServerContext
 
 # ---------------------------------------------------------------------------
 # Data validation & settings management

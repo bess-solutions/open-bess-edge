@@ -14,8 +14,8 @@ import asyncio
 import logging
 import struct
 
-from pymodbus.datastore import ModbusSequentialDataBlock, ModbusServerContext, ModbusSlaveContext
-from pymodbus.device import ModbusDeviceIdentification
+from pymodbus.datastore import ModbusSequentialDataBlock, ModbusServerContext, ModbusDeviceContext
+from pymodbus.pdu.device import ModbusDeviceIdentification
 from pymodbus.server import StartAsyncTcpServer
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -95,15 +95,23 @@ def _make_block() -> ModbusSequentialDataBlock:
     # ── Watchdog heartbeat (RW) ───────────────────────────────────────────────
     data[40900] = 0
 
-    return ModbusSequentialDataBlock(0, data)
+    # NOTA (fix 30-jul-2026): en pymodbus >= 3.10, ModbusSequentialDataBlock
+    # resta 1 internamente a la dirección inicial (SimData(address-1, ...)).
+    # Se pasa 1 en vez de 0 para preservar el mapeo original (registro lógico i -> data[i]).
+    return ModbusSequentialDataBlock(1, data)
 
 
 async def run_server() -> None:
     block = _make_block()
 
     # One slave for all unit IDs (gateway uses 3, gateway-sim uses 1)
-    slave = ModbusSlaveContext(hr=block)
-    context = ModbusServerContext(slaves={1: slave, 3: slave}, single=False)
+    # NOTA (fix 30-jul-2026): pymodbus >= 3.10 rechaza que dos device_id
+    # distintos compartan la misma instancia de ModbusDeviceContext
+    # ("device_id: 3 in multiple SimDevice entries"). Se crea un segundo
+    # contexto independiente (mismos valores) para el unit id 3.
+    slave = ModbusDeviceContext(hr=block)
+    slave3 = ModbusDeviceContext(hr=_make_block())
+    context = ModbusServerContext(devices={1: slave, 3: slave3}, single=False)
 
     identity = ModbusDeviceIdentification()
     identity.VendorName = "BESSAI-SIM"

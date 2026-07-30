@@ -92,7 +92,7 @@ all-checks: lint type-check security test ## Run all quality checks (CI equivale
 # ── Runtime ────────────────────────────────────────────────────────────────────
 
 simulate: ## Run gateway with built-in Modbus simulator (no real hardware needed)
-	$(PYTHON) -m src.gateway --simulator
+	BESSAI_MODE=demo $(PYTHON) -m src.core.main
 	@echo "Simulator running. Health: http://localhost:8000/health"
 
 health: ## Check all subsystem health (requires running instance)
