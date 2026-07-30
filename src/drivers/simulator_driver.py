@@ -35,7 +35,6 @@ Environment variable::
 from __future__ import annotations
 
 import asyncio
-import json
 import math
 import os
 import random
@@ -46,6 +45,7 @@ from typing import Any
 import structlog
 
 from src.drivers.base import DataProviderError
+from src.drivers.codec import RegisterCodec
 
 __all__ = ["SimulatorDriver", "SimMode"]
 
@@ -178,9 +178,8 @@ class SimulatorDriver:
                 path=str(profile_path),
             )
             return
-        with profile_path.open() as f:
-            data = json.load(f)
-        self._tags = data.get("registers", {})
+        self._codec = RegisterCodec(profile_path)
+        self._tags = self._codec.registers
         self._writable = {k for k, v in self._tags.items() if v.get("access") == "RW"}
         log.info(
             "simulator.profile_loaded",
