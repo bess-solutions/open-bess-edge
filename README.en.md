@@ -241,13 +241,14 @@ Health  → http://localhost:8000/health
 
 | Standard | Status | Evidence |
 |---|---|---|
-| IEC 62443 SL-1 | ✅ Compliant | [iec62443_mapping.md](docs/compliance/iec62443_mapping.md) |
-| IEC 62443 SL-2 | ✅ Compliant | `SL2SecurityGate` — RBAC + HMAC-SHA256 |
+| IEC 62443 SL-1 | ✅ Compliant | [iec62443_mapping.md](docs/compliance/iec62443_mapping.md) & MFA (`totp_auth.py`) |
+| IEC 62443 SL-2 | ⚠️ Partial | mTLS (`ot_tls_config.py`) and API request rate-limiting (`server.py`) |
 | NTSyCS Cap. 4.2 | ✅ GAP-001 | Ramp rate ≤10%/min (`SafetyGuard`) |
 | NTSyCS Cap. 4.3 | ✅ GAP-002 | PFR droop < 2s (`FrequencyResponseAgent`) |
 | NTSyCS Cap. 4.4 | ✅ GAP-011 | Q/V droop (`ReactiveController`) |
 | NTSyCS Cap. 6.1 | ✅ GAP-003 | mTLS telemetry to CEN (`CENPublisher`) |
 | NTSyCS Cap. 6.2 | ✅ GAP-004 | SCADA IEC 60870-5-104 (`IEC104Driver`) |
 | Decreto 88/2023 | ✅ GAP-007 | Anti-arbitrage PMGD (`PMGDComplianceEngine`) |
-| Ley 21.663/2024 | ✅ | Cyber incident notification CSIRT ≤3h (`SecurityNotifier`) |
+| Ley 21.663/2024 | 📋 Roadmap | Automated CSIRT incident alerts under design |
 | IEEE 2030.5 / SEP 2.0 | ✅ 10 endpoints | [BEP-0100](docs/bep/BEP-0100.md) |
+

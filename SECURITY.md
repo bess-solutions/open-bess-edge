@@ -45,10 +45,11 @@ BESSAI Edge Gateway implements:
 
 | Standard | Implementation |
 |---|---|
-| IEC 62443 SL-2 | `SL2SecurityGate` — RBAC, HMAC-SHA256, rate limiting |
-| Ley Marco Ciberseguridad 21.663/2024 | `SecurityNotifier` — CSIRT notification ≤3h |
+| IEC 62443 SL-2 | mTLS (`ot_tls_config.py`), TOTP MFA (`totp_auth.py`), request rate-limiting (`server.py`) |
+| Ley Marco Ciberseguridad 21.663/2024 | Roadmap — automated CSIRT security alerts under design |
 | OWASP Top 10 | No hardcoded secrets, input validation, structured logging |
 | Apache 2.0 License | Open source — contributions welcome |
+
 
 ## Responsible Disclosure
 

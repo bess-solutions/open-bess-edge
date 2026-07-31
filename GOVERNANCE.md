@@ -3,6 +3,9 @@
 > **Status:** Active · **Last updated:** 2026-02-22 · **License:** Apache 2.0  
 > **Governance model:** Multi-stakeholder (Technical Steering Committee + BEP process)
 
+> [!NOTE]
+> **Roadmap status:** This governance model represents our strategic roadmap as we transition to a multi-stakeholder open-source project. Currently, the project is maintained solely by BESS Solutions SpA's engineering team, and the elaborate structures (TSC elections, veto, formal BEP veto) are drafts that will be fully activated as external contributions scale.
+
 ---
 
 ## Vision

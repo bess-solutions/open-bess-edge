@@ -220,13 +220,14 @@ docker compose -f infrastructure/docker/docker-compose.yml --profile simulator -
 
 | Norma / Estándar | Estado | Evidencia y Componente |
 |---|---|---|
-| **IEC 62443 SL-1** | ✅ Cumplido | Mapeo de control perimetral y segmentación industrial |
-| **IEC 62443 SL-2** | ✅ Cumplido | `SL2SecurityGate` — Autenticación robusta y firmas HMAC-SHA256 |
+| **IEC 62443 SL-1** | ✅ Cumplido | [Mapeo de control perimetral](docs/compliance/iec62443_mapping.md) y MFA local (`totp_auth.py`) |
+| **IEC 62443 SL-2** | ⚠️ Parcial | mTLS en drivers (`ot_tls_config.py`) y limitador de tasa de peticiones en API (`server.py`) |
 | **NTSyCS Cap. 4.2** | ✅ GAP-001 | Control estricto de rampa de potencia ≤10%/min (`SafetyGuard`) |
 | **NTSyCS Cap. 4.3** | ✅ GAP-002 | Respuesta rápida a frecuencia (droop PFR < 2s, `FrequencyResponseAgent`) |
 | **NTSyCS Cap. 4.4** | ✅ GAP-011 | Control de voltaje reactivo Q/V droop (`ReactiveController`) |
 | **NTSyCS Cap. 6.1** | ✅ GAP-003 | Enlace seguro mediante mTLS para datos hacia el CEN (`CENPublisher`) |
 | **NTSyCS Cap. 6.2** | ✅ GAP-004 | Telecontrol SCADA por enlace directo IEC 60870-5-104 (`IEC104Driver`) |
 | **Decreto 88 / PMGD** | ✅ GAP-007 | Lógica anti-arbitraje y límites PMGD (`PMGDComplianceEngine`) |
-| **Ley 21.663 (Ciberseguridad)** | ✅ | Notificación automatizada de incidentes al CSIRT ≤3h (`SecurityNotifier`) |
+| **Ley 21.663 (Ciberseguridad)** | 📋 Roadmap | Integración automatizada de alertas de incidentes al CSIRT bajo diseño |
 | **IEEE 2030.5 / SEP 2.0** | ✅ 10 Endpoints | Servidor integrado para interconexión inteligente ([BEP-0100](docs/bep/BEP-0100.md)) |
+

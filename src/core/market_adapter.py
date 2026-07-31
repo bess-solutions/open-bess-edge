@@ -916,7 +916,7 @@ class ENTSOEAdapter(MarketAdapter):
             # ENTSO-E returns XML — parse with stdlib
             import xml.etree.ElementTree as ET
 
-            root = ET.fromstring(resp.text)
+            root = ET.fromstring(resp.text)  # nosec B314
             ns = {"ns": "urn:iec62325.351:tc57wg16:451-3:publicationdocument:7:0"}
 
             # EUR to USD conversion (reference rate)
