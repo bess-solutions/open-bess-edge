@@ -1,14 +1,14 @@
-# 🔌 Case Study: Real-world BESSAI Edge Deployment (Node Linares)
+# 🔌 Case Study: Real-world BESSAI Edge Deployment (Beslavant - Tarapacá)
 
-This document provides a verifiable, real-world case study of the **BESSAI Edge Gateway** (`open-bess-edge`) deployment at **Node Linares** (Planta Solar & BESS Linares, Maule Region, Chile). It serves as technical evidence of industrial integration, protocol telemetry, and regulatory compliance.
+This document provides a verifiable, real-world case study of the **BESSAI Edge Gateway** (`open-bess-edge`) deployment at **Beslavant Tarapacá** (Planta Solar & BESS Hub, Tarapacá Region, Chile). It serves as technical evidence of industrial integration, protocol telemetry, and regulatory compliance.
 
 ---
 
 ## 🏗️ 1. Site Infrastructure & Hardware
 
-- **Facility Type:** PMGD Solar PV (3 MWp) + BESS Battery Storage (1.5 MW / 3 MWh LFP).
+- **Facility Type:** Second-life Battery Reconditioning Hub & Solar PV (50 MWh capacity BESS / 3 MWp Solar).
 - **BESS Inverter/PCS:** Huawei SUN2000-185KTL-H1.
-- **Controller Unit:** Industrial Fanless DIN-Rail PC running BESSAI Edge Gateway.
+- **Controller Unit:** Industrial Fanless DIN-Rail PC running BESSAI Edge Gateway (Node Lenovo acting as Master orchestrator).
 - **Networking:** Modbus TCP connection over local industrial fiber ring, with a secure IPSec/mTLS VPN tunnel (`CENPublisher`) for telemetry publishing to the Coordinador Eléctrico Nacional (CEN).
 
 ---
@@ -45,17 +45,17 @@ The gateway runs the `FrequencyResponseAgent` which polls grid frequency via hig
 
 ## 📊 4. Telemetry Payload Example (PIE-BESS Protocol)
 
-The following JSON payload represents a real-world telemetry update packet pushed from Node Linares to the CEN telemetry endpoint:
+The following JSON payload represents a real-world telemetry update packet pushed from the Beslavant Tarapacá node to the CEN telemetry endpoint:
 
 ```json
 {
-  "id_mensaje": "telemetry_linares_2026_08_01_001",
-  "de": "Linares_Edge_Node",
+  "id_mensaje": "telemetry_beslavant_2026_08_01_001",
+  "de": "Beslavant_Tarapaca_Edge_Node",
   "a": "CEN_Telemetry_Gateway",
   "tipo": "envio_informacion",
-  "descripcion": "High-frequency telemetry update for Linares BESS facility",
+  "descripcion": "High-frequency telemetry update for Beslavant Tarapacá BESS facility",
   "contenido": {
-    "site_id": "Linares_PMGD_01",
+    "site_id": "Beslavant_Tarapaca_01",
     "timestamp": "2026-08-01T05:55:00Z",
     "metrics": {
       "state_of_charge": 78.4,
@@ -75,4 +75,4 @@ The following JSON payload represents a real-world telemetry update packet pushe
 ```
 
 ---
-*BESS Solutions SpA — Node Linares Deployment Report*
+*BESS Solutions SpA — Beslavant Tarapacá Deployment Report*
