@@ -153,6 +153,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### 📚 Documentation
+- **compliance**: agregar caso de estudio y telemetria real del Nodo Linares (`d523ece1`, @BESS Solutions)
 - add technical study on Edge AI implementation for Open BESS Edge (`6dad6bbb`, @BESSAI Node Linares)
 - **hardware**: reemplazar diagrama mermaid por ilustracion vectorial amigable del breadboard (`c9520125`, @testeadoroficial)
 - **hardware**: agregar diagrama relacional Mermaid al wiring diagram (`7d9def4d`, @testeadoroficial)
