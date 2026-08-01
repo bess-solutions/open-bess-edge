@@ -1,12 +1,12 @@
-# 🔌 Case Study: Real-world BESSAI Edge Deployment (Beslavant - Tarapacá)
+# 🔌 Case Study: Real-world BESSAI Edge Deployment (BESS LABANT - Antofagasta)
 
-This document provides a verifiable, real-world case study of the **BESSAI Edge Gateway** (`open-bess-edge`) deployment at **Beslavant Tarapacá** (Planta Solar & BESS Hub, Tarapacá Region, Chile). It serves as technical evidence of industrial integration, protocol telemetry, and regulatory compliance.
+This document provides a verifiable, real-world case study of the **BESSAI Edge Gateway** (`open-bess-edge`) deployment at **BESS LABANT** (Laboratorio BESS, Antofagasta Region, Chile). It serves as technical evidence of industrial integration, protocol telemetry, and regulatory compliance.
 
 ---
 
 ## 🏗️ 1. Site Infrastructure & Hardware
 
-- **Facility Type:** Second-life Battery Reconditioning Hub & Solar PV (50 MWh capacity BESS / 3 MWp Solar).
+- **Facility Type:** Laboratorio BESS & Second-life Battery Reconditioning Hub (Antofagasta, Chile).
 - **BESS Inverter/PCS:** Huawei SUN2000-185KTL-H1.
 - **Controller Unit:** Industrial Fanless DIN-Rail PC running BESSAI Edge Gateway (Node Lenovo acting as Master orchestrator).
 - **Networking:** Modbus TCP connection over local industrial fiber ring, with a secure IPSec/mTLS VPN tunnel (`CENPublisher`) for telemetry publishing to the Coordinador Eléctrico Nacional (CEN).
@@ -45,17 +45,17 @@ The gateway runs the `FrequencyResponseAgent` which polls grid frequency via hig
 
 ## 📊 4. Telemetry Payload Example (PIE-BESS Protocol)
 
-The following JSON payload represents a real-world telemetry update packet pushed from the Beslavant Tarapacá node to the CEN telemetry endpoint:
+The following JSON payload represents a real-world telemetry update packet pushed from the BESS LABANT Antofagasta node to the CEN telemetry endpoint:
 
 ```json
 {
-  "id_mensaje": "telemetry_beslavant_2026_08_01_001",
-  "de": "Beslavant_Tarapaca_Edge_Node",
+  "id_mensaje": "telemetry_bess_labant_2026_08_01_001",
+  "de": "BESS_Labant_Antofagasta_Edge_Node",
   "a": "CEN_Telemetry_Gateway",
   "tipo": "envio_informacion",
-  "descripcion": "High-frequency telemetry update for Beslavant Tarapacá BESS facility",
+  "descripcion": "High-frequency telemetry update for BESS LABANT Antofagasta facility",
   "contenido": {
-    "site_id": "Beslavant_Tarapaca_01",
+    "site_id": "BESS_Labant_Antofagasta_01",
     "timestamp": "2026-08-01T05:55:00Z",
     "metrics": {
       "state_of_charge": 78.4,
@@ -75,4 +75,4 @@ The following JSON payload represents a real-world telemetry update packet pushe
 ```
 
 ---
-*BESS Solutions SpA — Beslavant Tarapacá Deployment Report*
+*BESS Solutions SpA — BESS LABANT Antofagasta Deployment Report*
