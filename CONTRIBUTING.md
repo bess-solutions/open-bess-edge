@@ -24,6 +24,16 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 
 ---
 
+## 🤖 Automated Bot & Swarm Commit Identity
+
+To maintain complete transparency and eliminate ambiguity for external auditors:
+- All automated background tasks, sync daemons, CI release bots, and swarm nodes MUST use an explicit bot identity:
+  - **Name:** `bess-bot[bot]`
+  - **Email:** `bot@bess-solutions.cl`
+- Automated processes must NEVER use human names or physical facility site names as Git commit authors.
+
+---
+
 ## How to Report Issues
 
 - **Bug reports:** Use the [Bug Report template](.github/ISSUE_TEMPLATE/bug_report.yml)
