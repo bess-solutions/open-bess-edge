@@ -33,7 +33,7 @@ BESSAI es una plataforma de cómputo en el borde (edge computing) lista para pro
 - **Publicación multicanal segura**: envío de telemetría a GCP Pub/Sub, MQTT con TLS y OpenTelemetry.
 - **Integración de arquitectura completa**: desde racks de baterías BT, inversores bidireccionales, transformadores elevadores, celdas de media tensión (MT), relés de protección, SCADA de planta, hasta el firewall industrial perimetral.
 
-> **Despliegue de referencia:** BESS Huawei SUN2000 de 200 kWh / 100 kW en Santiago de Chile, realizando arbitraje real en el mercado spot chileno del SEN (CMg) en producción activa.
+> **Entorno de Prueba y Simulación:** Hardware-in-the-Loop (HIL) y simulación Modbus TCP con perfiles de equipos industriales (Huawei, SMA, Sungrow, Victron, BYD, Tesla), evaluando arbitraje con datos de costos marginales ($CMg$) del SEN Chile.
 
 ---
 
