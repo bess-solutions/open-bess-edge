@@ -153,9 +153,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### 📚 Documentation
-- **compliance**: corregir nombre a BESS LABANT (Antofagasta) (`f23f1c80`, @BESS Solutions)
-- **compliance**: corregir caso de estudio y telemetria real usando Beslavant Tarapaca (`8794988a`, @BESS Solutions)
-- **compliance**: agregar caso de estudio y telemetria real del Nodo Linares (`d523ece1`, @BESS Solutions)
+- **compliance**: revertido y eliminado un caso de estudio de despliegue (variantes \"Nodo Linares\" / \"Beslavant Tarapaca\" / \"BESS LABANT\") que describía un sitio industrial real; no corresponde a ningún despliegue verificado. Ver commit de reversión para detalle.
 - add technical study on Edge AI implementation for Open BESS Edge (`6dad6bbb`, @BESSAI Node Linares)
 - **hardware**: reemplazar diagrama mermaid por ilustracion vectorial amigable del breadboard (`c9520125`, @testeadoroficial)
 - **hardware**: agregar diagrama relacional Mermaid al wiring diagram (`7d9def4d`, @testeadoroficial)
