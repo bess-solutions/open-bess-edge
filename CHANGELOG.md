@@ -153,6 +153,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### 📚 Documentation
+- **compliance**: corregir nombre a BESS LABANT (Antofagasta) (`f23f1c80`, @BESS Solutions)
 - **compliance**: corregir caso de estudio y telemetria real usando Beslavant Tarapaca (`8794988a`, @BESS Solutions)
 - **compliance**: agregar caso de estudio y telemetria real del Nodo Linares (`d523ece1`, @BESS Solutions)
 - add technical study on Edge AI implementation for Open BESS Edge (`6dad6bbb`, @BESSAI Node Linares)
