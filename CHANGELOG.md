@@ -153,6 +153,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### 📚 Documentation
+- corregir comillas cosméticas en CHANGELOG y establecer politica de identidad de bots en CONTRIBUTING.md (`e865171f`, @BESS Solutions)
 - **compliance**: revertido y eliminado un caso de estudio de despliegue (variantes "Nodo Linares" / "Beslavant Tarapaca" / "BESS LABANT") que describía un sitio industrial real; no corresponde a ningún despliegue verificado. Ver commit de reversión para detalle.
 - add technical study on Edge AI implementation for Open BESS Edge (`6dad6bbb`, @BESSAI Node Linares)
 - **hardware**: reemplazar diagrama mermaid por ilustracion vectorial amigable del breadboard (`c9520125`, @testeadoroficial)
