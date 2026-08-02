@@ -913,10 +913,14 @@ class ENTSOEAdapter(MarketAdapter):
             if resp is None:
                 return []
 
-            # ENTSO-E returns XML — parse with stdlib
-            import xml.etree.ElementTree as ET
+            # ENTSO-E returns XML from an external network response — parsed
+            # with defusedxml (not stdlib ElementTree) because this input is
+            # untrusted. Bandit B314 was previously silenced here with a bare
+            # `# nosec` instead of being fixed; this replaces that suppression
+            # with an actual XXE-safe parser, so no nosec is needed.
+            from defusedxml import ElementTree as ET
 
-            root = ET.fromstring(resp.text)  # nosec B314
+            root = ET.fromstring(resp.text)
             ns = {"ns": "urn:iec62325.351:tc57wg16:451-3:publicationdocument:7:0"}
 
             # EUR to USD conversion (reference rate)
