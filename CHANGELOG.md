@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🧪 Tests
+- **watchdog**: increase sleep interval to prevent timing flake in test_run_heals_disconnected_driver (`dbd29a46`, @BESS Solutions)
+
 ### 🔨 Refactoring
 - **compliance**: unificar reclamos regulatorios, corregir CI security gates y agregar matriz de trazabilidad (`55247594`, @BESS Solutions)
 - **repo**: enforce pure production standard on open-bess-edge (remove experimental/ sandbox modules) (`d6229ca7`, @BESS Solutions)
