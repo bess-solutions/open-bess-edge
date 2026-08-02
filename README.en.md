@@ -4,7 +4,7 @@
 
 **Industrial-grade open-source edge gateway for secure, AI-optimized Battery Energy Storage System (BESS) management.**
 
-*Self-evolving arbitrage intelligence · IEC 62443 SL-1→SL-3 · IEC 61850 · DNP3 · IEC 60870-5-104 · IEEE 1547-2018 IBR/GFM · NTSyCS Chile*
+*Self-evolving arbitrage intelligence · IEC 62443 Architecture & Roadmap (SL-1/SL-2) · IEC 61850 · DNP3 · IEC 60870-5-104 · IEEE 1547-2018 IBR/GFM · NTSyCS Chile*
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
@@ -12,8 +12,8 @@
 [![Docker](https://img.shields.io/badge/Docker-amd64%20%7C%20arm64-2496ED?logo=docker&logoColor=white)](https://ghcr.io/bess-solutions/open-bess-edge)
 [![IEC 62443](https://img.shields.io/badge/IEC_62443-SL--1%2FSL--2%2FSL--3_Roadmap-orange)](docs/compliance/iec62443_mapping.md)
 [![IEEE 1547](https://img.shields.io/badge/IEEE_1547--2018-IBR%2FGFM_Ready-green)](docs/compliance/ieee1547_mapping.md)
-[![NTSyCS](https://img.shields.io/badge/NTSyCS-11_GAPs_Closed-brightgreen)](docs/compliance/ntscys_compliance.md)
-[![Tests](https://img.shields.io/badge/tests-1234_passing-brightgreen)](tests/)
+[![NTSyCS](https://img.shields.io/badge/NTSyCS-Matrix_(6_Verified%20%2F%205_Roadmap)-blue)](docs/compliance/ntscys_compliance.md)
+[![Tests](https://img.shields.io/badge/tests-1243_passing-brightgreen)](tests/)
 [![Version](https://img.shields.io/badge/version-v2.17.1-blue)](.)
 
 [**Leer en Español 🇪🇸**](README.md) · [**Documentation**](https://bess-solutions.github.io/open-bess-edge) · [**Quick Start**](#-quick-start) · [**MCP Server**](docs/mcp_server.md) · [**BEP Proposals**](docs/bep/BEP-0001.md) · [**Roadmap**](#-roadmap)
@@ -29,11 +29,11 @@ BESSAI is a production-ready edge computing platform that sits between your Batt
 - **Real-time telemetry** collection from inverters and BMS (Modbus TCP, IEC 61850, DNP3, IEC 60870-5-104).
 - **AI-powered dispatch** decisions via a Deep Reinforcement Learning (DRL) arbitrage agent (ONNX inference, no cloud connection required for local execution).
 - **Autonomous self-improvement** via BESSAIEvolve — an evolutionary parameter search weekly cycle.
-- **Safety enforcement** with IEC 62443 SL-1/SL-2 compliant guardrails (SafetyGuard).
+- **Safety enforcement** with IEC 62443 SL-1/SL-2 architecture alignment (SafetyGuard).
 - **Multi-cloud publishing** to GCP Pub/Sub, MQTT, and OpenTelemetry.
 - **Full system architecture integration**: from BT battery racks, bidirectional inverters, step-up transformers, MT cells, protection relays, plant SCADA, substation SCADA, to industrial firewalls.
 
-> **Reference deployment:** 200kWh / 100kW Huawei SUN2000 BESS, Santiago Chile — arbitraging the Chilean SEN spot market (CMg) in production since 2025.
+> **Test & Simulation Environment:** Hardware-in-the-Loop (HIL) and Modbus TCP simulation with industrial equipment profiles (Huawei, SMA, Sungrow, Victron, BYD, Tesla), evaluating arbitrage with Chilean SEN marginal cost ($CMg$) historical data.
 
 ---
 

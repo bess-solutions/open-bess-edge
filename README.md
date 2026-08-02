@@ -4,7 +4,7 @@
 
 **Gateway de borde de grado industrial y código abierto para la gestión segura y optimizada por IA de Sistemas de Almacenamiento de Energía en Baterías (BESS).**
 
-*Inteligencia de arbitraje autoevolutiva · Cumplimiento IEC 62443 SL-1→SL-3 · IEC 61850 · DNP3 · IEC 60870-5-104 · IEEE 1547-2018 IBR/GFM · NTSyCS Chile*
+*Inteligencia de arbitraje autoevolutiva · Arquitectura y Roadmap IEC 62443 (SL-1/SL-2) · IEC 61850 · DNP3 · IEC 60870-5-104 · IEEE 1547-2018 IBR/GFM · NTSyCS Chile*
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
@@ -12,8 +12,8 @@
 [![Docker](https://img.shields.io/badge/Docker-amd64%20%7C%20arm64-2496ED?logo=docker&logoColor=white)](https://ghcr.io/bess-solutions/open-bess-edge)
 [![IEC 62443](https://img.shields.io/badge/IEC_62443-SL--1%2FSL--2%2FSL--3_Roadmap-orange)](docs/compliance/iec62443_mapping.md)
 [![IEEE 1547](https://img.shields.io/badge/IEEE_1547--2018-IBR%2FGFM_Ready-green)](docs/compliance/ieee1547_mapping.md)
-[![NTSyCS](https://img.shields.io/badge/NTSyCS-11_GAPs_Closed-brightgreen)](docs/compliance/ntscys_compliance.md)
-[![Tests](https://img.shields.io/badge/tests-1234_passing-brightgreen)](tests/)
+[![NTSyCS](https://img.shields.io/badge/NTSyCS-Matrix_(6_Verified%20%2F%205_Roadmap)-blue)](docs/compliance/ntscys_compliance.md)
+[![Tests](https://img.shields.io/badge/tests-1243_passing-brightgreen)](tests/)
 [![Version](https://img.shields.io/badge/version-v2.17.1-blue)](.)
 
 [**Read in English 🇬🇧**](README.en.md) · [**Documentación**](https://bess-solutions.github.io/open-bess-edge) · [**Inicio Rápido**](#-inicio-rápido) · [**Servidor MCP**](docs/mcp_server.md) · [**Propuestas BEP**](docs/bep/BEP-0001.md) · [**Mapa de Ruta**](#-mapa-de-ruta)
@@ -29,7 +29,7 @@ BESSAI es una plataforma de cómputo en el borde (edge computing) lista para pro
 - **Telemetría en tiempo real**: recolección directa desde inversores y BMS mediante protocolos industriales (Modbus TCP, IEC 61850, DNP3, IEC 60870-5-104).
 - **Despacho optimizado por IA**: toma de decisiones en tiempo real usando un agente de Aprendizaje por Refuerzo Profundo (DRL) ejecutado localmente mediante ONNX (sin necesidad de conexión a internet para la toma de decisiones).
 - **Autoevolución autónoma**: optimización de parámetros semanal mediante ciclos evolutivos a través de BESSAIEvolve.
-- **Seguridad y resiliencia física**: aplicación de límites y guardas operacionales en el Gateway mediante la lógica `SafetyGuard` compatible con el estándar internacional de ciberseguridad industrial IEC 62443 SL-1 y SL-2.
+- **Seguridad y resiliencia física**: aplicación de límites y guardas operacionales en el Gateway mediante la lógica `SafetyGuard` alineada con la arquitectura de ciberseguridad industrial IEC 62443 (Roadmap SL-1/SL-2).
 - **Publicación multicanal segura**: envío de telemetría a GCP Pub/Sub, MQTT con TLS y OpenTelemetry.
 - **Integración de arquitectura completa**: desde racks de baterías BT, inversores bidireccionales, transformadores elevadores, celdas de media tensión (MT), relés de protección, SCADA de planta, hasta el firewall industrial perimetral.
 
