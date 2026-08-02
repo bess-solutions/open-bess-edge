@@ -97,7 +97,7 @@ flwr>=1.15.0
 # Install to enable MQTT publishing to Mosquitto, Home Assistant, AWS IoT Core,
 # Azure IoT Hub, or any standard MQTT broker.
 # If not installed, the gateway falls back gracefully to GCP Pub/Sub only.
-paho-mqtt>=2.0.0
+paho-mqtt>=2.1.0
 
 # ---------------------------------------------------------------------------
 # Security & Crypto
