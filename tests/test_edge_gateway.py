@@ -18,7 +18,14 @@ from cryptography.hazmat.primitives import serialization
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
-from core.fl_coordinator import BESSFlowerClient
+try:
+    from core.fl_coordinator import BESSFlowerClient
+
+    _FLWR_AVAILABLE = True
+except ImportError:
+    BESSFlowerClient = None
+    _FLWR_AVAILABLE = False
+
 from core.hardware_registry import HardwareRegistry
 from core.onnx_inference import ONNXInferenceEngine
 
@@ -41,6 +48,7 @@ class TestEdgeGatewayModules(unittest.TestCase):
         if self.certs_dir.exists() and not os.listdir(self.certs_dir):
             os.rmdir(self.certs_dir)
 
+    @unittest.skipUnless(_FLWR_AVAILABLE, "flwr no instalado (ver requirements-federated.txt)")
     def test_fl_coordinator_key_generation_and_signatures(self):
         """Valida la generación de llaves Ed25519 y la firma criptográfica de parámetros."""
         client = BESSFlowerClient(node_id="test_node", private_key_path=str(self.private_key_path))
@@ -65,6 +73,7 @@ class TestEdgeGatewayModules(unittest.TestCase):
 
         self.assertTrue(verification, "La firma criptográfica Ed25519 de parámetros falló.")
 
+    @unittest.skipUnless(_FLWR_AVAILABLE, "flwr no instalado (ver requirements-federated.txt)")
     def test_fl_coordinator_fit_and_evaluate_payloads(self):
         """Valida que fit y evaluate agreguen las firmas Ed25519 a las métricas."""
         client = BESSFlowerClient(node_id="test_node", private_key_path=str(self.private_key_path))

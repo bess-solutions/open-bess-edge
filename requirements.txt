@@ -76,8 +76,17 @@ gymnasium>=0.29.0
 # ---------------------------------------------------------------------------
 # v0.7.0 — Federated Learning client
 # ---------------------------------------------------------------------------
-# Flower FL framework (client runs on edge, server in aggregation tier)
-flwr>=1.15.0
+# Flower FL framework moved to requirements-federated.txt (optional install).
+# flwr<=1.32.1 hard-pins cryptography<47.0.0 (see its own METADATA:
+# "Requires-Dist: cryptography>=46.0.7,<47.0.0"), which directly conflicts
+# with the cryptography>=48.0.1 pin below (GHSA-537c-gmf6-5ccf fix). A single
+# requirements.txt cannot satisfy both — `pip install -r requirements.txt`
+# fails outright (ResolutionImpossible) if flwr stays here. Since federated
+# learning (src/interfaces/fl_client.py, fl_server.py, src/core/fl_coordinator.py)
+# is not on the safety-critical dispatch/Modbus path, it's split into its own
+# optional file so the core gateway always installs clean and patched.
+# See requirements-federated.txt for install instructions and the accepted
+# risk this carries until Flower relaxes its own pin upstream.
 
 # ---------------------------------------------------------------------------
 # v0.8.0 — DataLake Publisher (optional — falls back to JSONL without it)
