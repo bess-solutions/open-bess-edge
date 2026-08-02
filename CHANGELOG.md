@@ -197,6 +197,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extend .gitignore PI protection policy v1.1 (`62527583`, @BESSAI sec-ingestor)
 
 ### 🐛 Bug Fixes
+- **deps**: decouple flwr into requirements-federated.txt and make fl_coordinator imports lazy (`af5bc48f`, @BESS Solutions)
 - **deps**: update cryptography pin to >=48.0.1 resolving GHSA-537c-gmf6-5ccf (`6034e6ff`, @BESS Solutions)
 - **security**: replace xml.etree with defusedxml in market_adapter to mitigate XXE vulnerability (`587315ff`, @BESS Solutions)
 - **mcp**: resolve pymodbus version conflict breaking simulator end-to-end (`eedadb74`, @Claude)
