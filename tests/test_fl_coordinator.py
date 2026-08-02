@@ -16,6 +16,11 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+
+pytest.importorskip(
+    "flwr", reason="flwr no instalado (dependencia opcional, ver requirements-federated.txt)"
+)
+
 from src.core.fl_coordinator import BESSFlowerClient, FLCoordinator
 
 

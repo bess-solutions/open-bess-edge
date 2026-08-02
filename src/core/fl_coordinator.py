@@ -12,138 +12,166 @@ import logging
 import os
 import time
 
-import flwr as client
 import numpy as np
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
+
+# flwr is an optional dependency (see requirements-federated.txt) — it hard-pins
+# cryptography<47.0.0 in its own package metadata, which conflicts with the
+# cryptography>=48.0.1 security pin in the base requirements.txt (fix for
+# GHSA-537c-gmf6-5ccf). A single environment cannot satisfy both, so flwr is
+# not installed by default. Import it lazily so this module — and anything
+# that imports it, including tests unrelated to federated learning — doesn't
+# fail just because flwr isn't present in the base environment.
+try:
+    import flwr as client
+
+    _FLWR_AVAILABLE = True
+except ImportError:
+    client = None
+    _FLWR_AVAILABLE = False
 
 # Configurar logs
 logger = logging.getLogger("bess.edge.fl_coordinator")
 logging.basicConfig(level=logging.INFO)
 
 
-class BESSFlowerClient(client.client.NumPyClient):
-    """
-    Cliente de Aprendizaje Federado Flower adaptado para BESSAI.
-    """
+if _FLWR_AVAILABLE:
 
-    def __init__(self, node_id: str, private_key_path: str):
-        self.node_id = node_id
-        self.private_key_path = private_key_path
-        self.private_key = self._load_or_create_ed25519_key()
+    class BESSFlowerClient(client.client.NumPyClient):
+        """
+        Cliente de Aprendizaje Federado Flower adaptado para BESSAI.
+        """
 
-        # Estado inicial del modelo (pesos locales simulando red PPO de despacho)
-        # 3 capas densas representativas de pesos del despacho dinámico
-        self.parameters = [
-            np.random.randn(6, 16).astype(np.float32),  # W1
-            np.random.randn(16, 8).astype(np.float32),  # W2
-            np.random.randn(8, 1).astype(np.float32),  # W_out
-        ]
+        def __init__(self, node_id: str, private_key_path: str):
+            self.node_id = node_id
+            self.private_key_path = private_key_path
+            self.private_key = self._load_or_create_ed25519_key()
 
-    def _load_or_create_ed25519_key(self) -> ed25519.Ed25519PrivateKey:
-        """Carga la clave privada Ed25519 desde el disco o la crea si no existe."""
-        if os.path.exists(self.private_key_path):
-            try:
-                with open(self.private_key_path, "rb") as f:
-                    key_data = f.read()
-                return serialization.load_pem_private_key(key_data, password=None)
-            except Exception as e:
-                logger.error(f"Error cargando clave Ed25519: {e}. Regenerando...")
+            # Estado inicial del modelo (pesos locales simulando red PPO de despacho)
+            # 3 capas densas representativas de pesos del despacho dinámico
+            self.parameters = [
+                np.random.randn(6, 16).astype(np.float32),  # W1
+                np.random.randn(16, 8).astype(np.float32),  # W2
+                np.random.randn(8, 1).astype(np.float32),  # W_out
+            ]
 
-        # Regenerar clave
-        private_key = ed25519.Ed25519PrivateKey.generate()
-        pem = private_key.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.NoEncryption(),
-        )
-        os.makedirs(os.path.dirname(self.private_key_path), exist_ok=True)
-        with open(self.private_key_path, "wb") as f:
-            f.write(pem)
-        logger.info(f"Clave privada Ed25519 generada en {self.private_key_path}")
-        return private_key
+        def _load_or_create_ed25519_key(self) -> ed25519.Ed25519PrivateKey:
+            """Carga la clave privada Ed25519 desde el disco o la crea si no existe."""
+            if os.path.exists(self.private_key_path):
+                try:
+                    with open(self.private_key_path, "rb") as f:
+                        key_data = f.read()
+                    return serialization.load_pem_private_key(key_data, password=None)
+                except Exception as e:
+                    logger.error(f"Error cargando clave Ed25519: {e}. Regenerando...")
 
-    def _sign_parameters(self, parameters: list[np.ndarray]) -> tuple[bytes, bytes]:
-        """Firma criptográficamente los parámetros del modelo usando la clave Ed25519."""
-        # Serializar parámetros a bytes
-        serialized = b"".join([p.tobytes() for p in parameters])
-        signature = self.private_key.sign(serialized)
+            # Regenerar clave
+            private_key = ed25519.Ed25519PrivateKey.generate()
+            pem = private_key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.NoEncryption(),
+            )
+            os.makedirs(os.path.dirname(self.private_key_path), exist_ok=True)
+            with open(self.private_key_path, "wb") as f:
+                f.write(pem)
+            logger.info(f"Clave privada Ed25519 generada en {self.private_key_path}")
+            return private_key
 
-        # Obtener llave pública correspondiente en formato PEM
-        pub_key = self.private_key.public_key()
-        pub_pem = pub_key.public_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo,
-        )
-        return signature, pub_pem
+        def _sign_parameters(self, parameters: list[np.ndarray]) -> tuple[bytes, bytes]:
+            """Firma criptográficamente los parámetros del modelo usando la clave Ed25519."""
+            # Serializar parámetros a bytes
+            serialized = b"".join([p.tobytes() for p in parameters])
+            signature = self.private_key.sign(serialized)
 
-    def get_parameters(
-        self, config: dict[str, bool | bytes | float | int | str]
-    ) -> list[np.ndarray]:
-        """Devuelve los pesos actuales del modelo local."""
-        logger.info(f"[{self.node_id}] get_parameters solicitado por el servidor.")
-        return self.parameters
+            # Obtener llave pública correspondiente en formato PEM
+            pub_key = self.private_key.public_key()
+            pub_pem = pub_key.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo,
+            )
+            return signature, pub_pem
 
-    def fit(
-        self, parameters: list[np.ndarray], config: dict[str, bool | bytes | float | int | str]
-    ) -> tuple[list[np.ndarray], int, dict[str, bool | bytes | float | int | str]]:
-        """Entrena localmente el modelo sobre datos de despacho marginal."""
-        logger.info(f"[{self.node_id}] fit iniciado. Recibidos {len(parameters)} tensores.")
+        def get_parameters(
+            self, config: dict[str, bool | bytes | float | int | str]
+        ) -> list[np.ndarray]:
+            """Devuelve los pesos actuales del modelo local."""
+            logger.info(f"[{self.node_id}] get_parameters solicitado por el servidor.")
+            return self.parameters
 
-        # Simular ajuste de parámetros (local SGD)
-        # En producción, esto entrena con el historial de CMg almacenado en la DB local
-        self.parameters = [
-            p + 0.01 * np.random.randn(*p.shape).astype(np.float32) for p in parameters
-        ]
+        def fit(
+            self, parameters: list[np.ndarray], config: dict[str, bool | bytes | float | int | str]
+        ) -> tuple[list[np.ndarray], int, dict[str, bool | bytes | float | int | str]]:
+            """Entrena localmente el modelo sobre datos de despacho marginal."""
+            logger.info(f"[{self.node_id}] fit iniciado. Recibidos {len(parameters)} tensores.")
 
-        # Firmar los pesos actualizados
-        signature, pub_key_pem = self._sign_parameters(self.parameters)
+            # Simular ajuste de parámetros (local SGD)
+            # En producción, esto entrena con el historial de CMg almacenado en la DB local
+            self.parameters = [
+                p + 0.01 * np.random.randn(*p.shape).astype(np.float32) for p in parameters
+            ]
 
-        # Construir métricas con firma criptográfica
-        metrics = {
-            "node_id": self.node_id,
-            "signature_hex": signature.hex(),
-            "pub_key_pem": pub_key_pem.decode("utf-8"),
-            "timestamp": float(time.time()),
-            "status": "success",
-        }
+            # Firmar los pesos actualizados
+            signature, pub_key_pem = self._sign_parameters(self.parameters)
 
-        # Simular 1000 ejemplos de despacho entrenados
-        num_examples = 1000
-        logger.info(f"[{self.node_id}] fit exitoso. Actualización firmada digitalmente.")
-        return self.parameters, num_examples, metrics
+            # Construir métricas con firma criptográfica
+            metrics = {
+                "node_id": self.node_id,
+                "signature_hex": signature.hex(),
+                "pub_key_pem": pub_key_pem.decode("utf-8"),
+                "timestamp": float(time.time()),
+                "status": "success",
+            }
 
-    def evaluate(
-        self, parameters: list[np.ndarray], config: dict[str, bool | bytes | float | int | str]
-    ) -> tuple[float, int, dict[str, bool | bytes | float | int | str]]:
-        """Evalúa los pesos globales enviados por el agregador contra el setpoint real."""
-        logger.info(f"[{self.node_id}] evaluate iniciado.")
+            # Simular 1000 ejemplos de despacho entrenados
+            num_examples = 1000
+            logger.info(f"[{self.node_id}] fit exitoso. Actualización firmada digitalmente.")
+            return self.parameters, num_examples, metrics
 
-        # Calcular pérdida cuadrática media simulada del setpoint
-        loss = float(np.mean([np.sum(np.square(p)) for p in parameters]) * 0.05)
+        def evaluate(
+            self, parameters: list[np.ndarray], config: dict[str, bool | bytes | float | int | str]
+        ) -> tuple[float, int, dict[str, bool | bytes | float | int | str]]:
+            """Evalúa los pesos globales enviados por el agregador contra el setpoint real."""
+            logger.info(f"[{self.node_id}] evaluate iniciado.")
 
-        # Firmar evaluación
-        signature, pub_key_pem = self._sign_parameters(parameters)
+            # Calcular pérdida cuadrática media simulada del setpoint
+            loss = float(np.mean([np.sum(np.square(p)) for p in parameters]) * 0.05)
 
-        metrics = {
-            "node_id": self.node_id,
-            "loss_signature_hex": signature.hex(),
-            "pub_key_pem": pub_key_pem.decode("utf-8"),
-            "accuracy": 0.94,
-        }
+            # Firmar evaluación
+            signature, pub_key_pem = self._sign_parameters(parameters)
 
-        num_examples = 250
-        logger.info(f"[{self.node_id}] evaluate finalizado. Loss: {loss:.5f}")
-        return loss, num_examples, metrics
+            metrics = {
+                "node_id": self.node_id,
+                "loss_signature_hex": signature.hex(),
+                "pub_key_pem": pub_key_pem.decode("utf-8"),
+                "accuracy": 0.94,
+            }
+
+            num_examples = 250
+            logger.info(f"[{self.node_id}] evaluate finalizado. Loss: {loss:.5f}")
+            return loss, num_examples, metrics
 
 
 class FLCoordinator:
     """
     Coordinador de Aprendizaje Federado para BESS-OPEN-EDGE.
     Gestiona el ciclo de vida de conexión con mTLS y firmas Ed25519.
+
+    Requiere flwr instalado (ver requirements-federated.txt). Sin flwr,
+    __init__ lanza ImportError con un mensaje claro en vez de fallar con
+    un NameError críptico.
     """
 
     def __init__(self, server_address: str, node_id: str, certs_dir: str):
+        if not _FLWR_AVAILABLE:
+            raise ImportError(
+                "FLCoordinator requiere flwr, que es una dependencia opcional. "
+                "Instala con: pip install -r requirements-federated.txt "
+                "(en un entorno separado del gateway principal — ver ese "
+                "archivo para el conflicto de versión con cryptography)."
+            )
+
         self.server_address = server_address
         self.node_id = node_id
         self.certs_dir = certs_dir

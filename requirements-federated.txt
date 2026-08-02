@@ -1,0 +1,25 @@
+# Optional: Federated Learning (src/interfaces/fl_client.py, fl_server.py,
+# src/core/fl_coordinator.py).
+#
+# NOT installed by default via requirements.txt. flwr (all versions through
+# 1.32.1, the latest as of 2026-08) declares its own hard pin:
+#   Requires-Dist: cryptography>=46.0.7,<47.0.0
+# which conflicts with cryptography>=48.0.1 in requirements.txt (the fix for
+# GHSA-537c-gmf6-5ccf). Installing both in one environment is not possible
+# today.
+#
+# ACCEPTED RISK: installing this file downgrades cryptography to a version
+# with a known HIGH-severity CVE (GHSA-537c-gmf6-5ccf). Do this only in an
+# isolated environment for the federated-learning aggregation tier — never
+# on a host that also runs the live Modbus/dispatch gateway or handles
+# real credentials/TLS material. Re-evaluate when Flower relaxes its pin
+# (track: https://github.com/adap/flower/issues) or when this project
+# migrates off flwr.
+#
+# Install with:
+#   pip install -r requirements-federated.txt
+# in its own venv/container, separate from requirements.txt.
+
+-r requirements.txt
+flwr>=1.15.0
+cryptography>=46.0.7,<47.0.0  # overrides the >=48.0.1 pin above — see note
