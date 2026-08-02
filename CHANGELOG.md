@@ -153,6 +153,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### 📚 Documentation
+- **compliance**: harmonize taglines, badges and SafetyGuard roadmap alignment in READMEs (`b0ee667b`, @BESS Solutions)
 - **readme**: clarify reference environment as HIL simulation instead of active production (`78fc6de1`, @BESS Solutions)
 - corregir comillas cosméticas en CHANGELOG y establecer politica de identidad de bots en CONTRIBUTING.md (`e865171f`, @BESS Solutions)
 - **compliance**: revertido y eliminado un caso de estudio de despliegue (variantes "Nodo Linares" / "Beslavant Tarapaca" / "BESS LABANT") que describía un sitio industrial real; no corresponde a ningún despliegue verificado. Ver commit de reversión para detalle.
