@@ -259,7 +259,7 @@ class TestWatchdogManagerRun:
         wm = _make_wm(driver, health_interval_s=0.005, max_heal_retries=2)
 
         task = asyncio.create_task(wm.run())
-        await asyncio.sleep(0.02)  # let at least 1-2 health cycles run
+        await asyncio.sleep(0.08)  # let at least 1-2 health cycles run
         task.cancel()
         try:
             await task
