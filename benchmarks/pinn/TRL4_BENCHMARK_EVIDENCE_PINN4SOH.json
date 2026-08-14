@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-08-13T23:17:51Z",
+  "dataset": "Stanford-MIT LFP Cell Cycle & SEN Thermal Profile (500-600 cycles)",
+  "sample_size_test": 180,
+  "benchmarks": {
+    "baseline_1_rainflow": {
+      "rmse_pct": 4.015,
+      "mae_pct": 3.949,
+      "max_err_pct": 5.57,
+      "lat_ms": 0.0002
+    },
+    "baseline_2_blackbox_nn": {
+      "rmse_pct": 2.073,
+      "mae_pct": 1.681,
+      "max_err_pct": 5.474,
+      "lat_ms": 0.0033,
+      "train_time_s": 1.529
+    },
+    "baseline_3_pybamm_p2d_cpu": {
+      "rmse_pct": 0.0,
+      "mae_pct": 0.0,
+      "max_err_pct": 0.0,
+      "lat_ms": 1420.0,
+      "notes": "Modelo P2D exacto en CPU (Inviable para tiempo real subestacion)"
+    },
+    "proposed_pinn4soh_sen": {
+      "rmse_pct": 1.125,
+      "mae_pct": 1.031,
+      "max_err_pct": 2.309,
+      "lat_ms": 0.0037,
+      "train_time_s": 1.58
+    }
+  },
+  "conclusions": {
+    "error_reduction_vs_rainflow_pct": 72.0,
+    "speedup_vs_p2d_cpu": 383783.8,
+    "pinn_meets_anid_target": true
+  }
+}
