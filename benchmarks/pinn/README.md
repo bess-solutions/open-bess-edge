@@ -1,12 +1,19 @@
-# 🔬 PINN4SOH-SEN — Benchmark Experimental TRL 4
-## Physics-Informed Neural Networks para Predicción de SOH y DCOS en Baterías LFP
+# 🔬 PINN4SOH-SEN — Prototipo de Validación Conceptual TRL 4
+## Physics-Informed Neural Network con Regularización Física de Arrhenius y Monotonicidad para Celdas LFP
 **BESS Solutions SpA · Proyecto ANID Startup Ciencia**
-
-Este directorio contiene el script de benchmarking y los resultados de validación experimental que comparan la red **PINN4SOH-SEN** contra tres líneas base sobre ciclado dinámico de celdas LFP (LiFePO4) bajo perfiles de temperatura y despacho del Sistema Eléctrico Nacional (SEN de Chile).
 
 ---
 
-### 📊 Resultados de Benchmarking (600 Ciclos · Dataset Stanford-MIT LFP + Perfil SEN)
+### 📌 Alcance del Prototipo TRL 4 (Estado de Entrada)
+
+Este repositorio contiene la **prueba de concepto experimental de nivel TRL 4** que valida la viabilidad del enfoque de Redes Neuronales Informadas por la Física (PINN) para la predicción de degradación en celdas de almacenamiento de energía (LFP):
+
+* **Formulación TRL 4 (Entrada)**: Red neuronal que incorpora en su función de pérdida penalizaciones de consistencia física (tasa de degradación térmica regida por la ley de Arrhenius y restricción de monotonicidad termodinámica de capacidad).
+* **Desarrollo I+D Financiado por ANID (Salida TRL 6)**: El proyecto financiado por Startup Ciencia desarrollará el acoplamiento completo de las ecuaciones diferenciales parciales de difusión en estado sólido (Ley de Fick), sobrepotencial interfacial (ecuación de Butler-Volmer) y crecimiento cinético de capa SEI, calibrados con datasets de laboratorio y perfiles de subestaciones del SEN.
+
+---
+
+### 📊 Resultados del Benchmarking TRL 4 (Dataset LFP & Perfil Térmico SEN)
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
@@ -20,24 +27,24 @@ Este directorio contiene el script de benchmarking y los resultados de validaci�
 │ 2. Black-Box NN   │    2.07 %    │    1.63 %    │    4.85 %    │       0.0033 ms       │
 │    (ML Estadístico│              │              │              │                       │
 ├───────────────────┼──────────────┼──────────────┼──────────────┼───────────────────────┤
-│ 3. PyBaMM P2D     │    0.00 %    │    0.00 %    │    0.00 %    │    1.420,0000 ms      │
-│    (Física CPU)   │ (Referencia) │ (Referencia) │ (Referencia) │ (Inviable tiempo real)│
+│ 3. Modelo P2D CPU │    0.00 %    │    0.00 %    │    0.00 %    │    1.420,0000 ms      │
+│    (Física Teórica│ (Referencia) │ (Referencia) │ (Referencia) │ (Inviable tiempo real)│
 ├───────────────────┼──────────────┼──────────────┼──────────────┼───────────────────────┤
 │ 4. PINN4SOH-SEN   │  🌟 1.12 %   │  🌟 0.89 %   │  🌟 2.64 %   │      🌟 0.0037 ms     │
-│    (Propuesta)    │              │              │              │ (Cumple < 100 ms)     │
+│    (Prototipo TRL4│              │              │              │ (Cumple < 100 ms)     │
 └───────────────────┴──────────────┴──────────────┴──────────────┴───────────────────────┘
 ```
 
 ---
 
-### 🚀 Instrucciones de Reproducción Determinística (1 solo comando)
+### 🚀 Instrucciones de Reproducción (1 solo comando)
 
 ```bash
-# 1. Instalar dependencias científicas (si no están instaladas)
+# 1. Instalar dependencias científicas
 pip install numpy scipy torch
 
 # 2. Ejecutar el benchmark
 python benchmarks/pinn/pinn4soh_triple_benchmark.py
 ```
 
-El script ejecutará el entrenamiento en 300 épocas y exportará las métricas a `TRL4_BENCHMARK_EVIDENCE_PINN4SOH.json`.
+El script ejecuta el entrenamiento en 300 épocas y exporta las métricas verificadas a `TRL4_BENCHMARK_EVIDENCE_PINN4SOH.json`.
