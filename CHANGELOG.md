@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **pyproject.toml**: Synchronized version tag to `2.17.1`.
 
 ### 🤖 CI/CD
+- **sweep**: add Sweep AI rules configuration for autonomous contributions (`1e9fe5bd`, @BESSAI Shadow Developer)
 - touch server.py to trigger all workflow pipelines (`8676740a`, @BESS Solutions)
 - **deps-audit**: trigger fresh dependency security audit scan on main (`89df6c61`, @BESS Solutions)
 - add BEP-0200 drl-market-tests job (Job 11) to CI pipeline (`635fead6`, @BESS Solutions)
