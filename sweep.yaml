@@ -1,0 +1,22 @@
+# Sweep AI Configuration for open-bess-edge
+# https://docs.sweep.dev/
+
+branch: 'main'
+gha_enabled: true
+description: >
+  open-bess-edge is the open-source industrial edge gateway for Battery Energy Storage Systems (BESS).
+  Built in Python (asyncio, structlog, pymodbus, FastAPI) following Chilean SEN regulations (NTSyCS)
+  and international cybersecurity standards (IEC 62443 SL-2).
+
+rules:
+  - "Zero Mock Data Rule: All calculations, telemetry models, and drivers must follow real hardware specifications (Modbus maps, SunSpec, 1500V DC architectures)."
+  - "Every driver in `src/drivers/` must have a corresponding unit test in `tests/` with 100% passing tests."
+  - "Use structlog for structured logging instead of standard logging or print statements."
+  - "Ensure strict type annotations across all new functions and dataclasses."
+  - "Grid simulations must align with Chilean Grid Code NTSyCS (50.0 Hz nominal, RoCoF sub-500ms, DS 125/2017)."
+
+sandbox:
+  install:
+    - pip install -r requirements.txt -r requirements-dev.txt
+  check:
+    - pytest tests/ -q
