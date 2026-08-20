@@ -269,6 +269,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - remove deprecated fetch_cmg_evolution.py (superseded by bessai_data_scraper.py) (`1f734cd4`, @BESS Solutions)
 
 ### ✨ New Features
+- **thermal**: add smart liquid cooling & Atacama chiller manager (fixes #42) (`a34745da`, @Thermal Optimization Bot)
 - **security**: add IEC 62443 SL-2 zero-trust Modbus packet guard (`dd76572e`, @OT Cybersec Officer)
 - **prod**: add production readiness validator and security hardening (`c1e7b963`, @Gordon - Docker)
 - **security**: enforce TOTP/MFA gate on setpoint endpoint, add rate limiting & remove Grafana default password (`d18ac69a`, @BESS Solutions)
