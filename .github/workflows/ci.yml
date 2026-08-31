@@ -413,7 +413,7 @@ jobs:
 
       - name: Restore CMg data cache
         id: cmg-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ../bessai-web/data/cmg_data.json
           key: cmg-data-v1
