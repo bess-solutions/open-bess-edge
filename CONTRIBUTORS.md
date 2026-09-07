@@ -32,3 +32,13 @@ We celebrate and acknowledge all individuals, organizations, and automated intel
 ## Contributing to BESSAI
 
 Interested in contributing? Please check our [CONTRIBUTING.md](CONTRIBUTING.md) guide and join the community discussions.
+
+---
+
+## 🔍 Audit & Verification
+
+**Last Infrastructure & Repository Audit:** 2026-09-07  
+**Verified by:** Gordon - Docker AI Assistant (`gordon@docker.ai`)  
+**Audit Scope:** Container hardening, DevOps optimization, security compliance (IEC 62443 SL-2), commercial artifact removal, repository hygiene
+
+✅ **Status:** Infrastructure audit complete. All Docker/container artifacts aligned with open-source mission. Repository cleaned of commercial boilerplate.
