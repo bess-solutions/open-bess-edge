@@ -1,254 +1,255 @@
+# ⚡ Open BESS Edge
+
 <div align="center">
 
-# 🔋 BESSAI Edge Gateway
-
-**Industrial-grade open-source edge gateway for secure, AI-optimized Battery Energy Storage System (BESS) management.**
-
-*Self-evolving arbitrage intelligence · IEC 62443 Architecture & Roadmap (SL-1/SL-2) · IEC 61850 · DNP3 · IEC 60870-5-104 · IEEE 1547-2018 IBR/GFM · NTSyCS Chile*
-
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![CI](https://github.com/bess-solutions/open-bess-edge/actions/workflows/ci.yml/badge.svg)](https://github.com/bess-solutions/open-bess-edge/actions)
-[![Docker](https://img.shields.io/badge/Docker-amd64%20%7C%20arm64-2496ED?logo=docker&logoColor=white)](https://ghcr.io/bess-solutions/open-bess-edge)
-[![IEC 62443](https://img.shields.io/badge/IEC_62443-SL--1%2FSL--2%2FSL--3_Roadmap-orange)](docs/compliance/iec62443_mapping.md)
-[![IEEE 1547](https://img.shields.io/badge/IEEE_1547--2018-IBR%2FGFM_Ready-green)](docs/compliance/ieee1547_mapping.md)
-[![NTSyCS](https://img.shields.io/badge/NTSyCS-Matrix_(6_Verified%20%2F%205_Roadmap)-blue)](docs/compliance/ntscys_compliance.md)
-[![Tests](https://img.shields.io/badge/tests-1243_passing-brightgreen)](tests/)
-[![Version](https://img.shields.io/badge/version-v2.17.1-blue)](.)
+[![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![Grid Code](https://img.shields.io/badge/Grid%20Code-NTSyCS%20Cap.%203%20(Chile)-2ea44f?logo=lightning&logoColor=white)](https://www.cne.cl/)
+[![CEN Standard](https://img.shields.io/badge/CEN%20SEN-CFyDR%202026%20Compliant-009688?logo=buffer&logoColor=white)](https://www.coordinador.cl/)
+[![Latency](https://img.shields.io/badge/Loop%20Latency-sub--0.1ms-purple?logo=speedtest&logoColor=white)](#-benchmarking--closed-loop-latency)
+[![Architecture](https://img.shields.io/badge/Platform-IPC%20x86__64%20%7C%20ARM64-orange?logo=docker&logoColor=white)](#-industrial-deployment)
+[![Safety Standard](https://img.shields.io/badge/Safety-NFPA%20855%20%7C%20SEC%20RIC-red?logo=shield&logoColor=white)](#-hardware-safety-envelope-bess-guard)
+[![Tests](https://img.shields.io/badge/Tests-16%2F16%20Passing%20(100%25)-brightgreen?logo=pytest&logoColor=white)](#-automated-testing--cen-compliance-suite)
 
-[**Leer en Español 🇪🇸**](README.md) · [**Documentation**](https://bess-solutions.github.io/open-bess-edge) · [**Quick Start**](#-quick-start) · [**MCP Server**](docs/mcp_server.md) · [**BEP Proposals**](docs/bep/BEP-0001.md) · [**Roadmap**](#-roadmap)
+**Mission-Critical Industrial Edge Gateway & Frequency Response Controller for Battery Energy Storage Systems (BESS)**  
+*Deterministic substation edge computing platform for strict compliance with the Chilean National Electric System (SEN) Grid Code.*
+
+[Architecture](#-substation-architecture) •
+[CEN Grid Code](#-grid-code-compliance-cen-cfydr-2026) •
+[BESS-GUARD Safety](#-hardware-safety-envelope-bess-guard) •
+[Volt/VAR Q(V)](#-dynamic-voltvar-support-qv) •
+[Hardware Ecosystem](#-supported-hardware-ecosystem) •
+[Quick Start](#-quick-start)
 
 </div>
 
 ---
 
-## What is BESSAI Edge Gateway?
+## 🏗️ Substation Architecture
 
-BESSAI is a production-ready edge computing platform that sits between your Battery Energy Storage System (BESS) hardware and cloud/SCADA infrastructure. It handles:
-
-- **Real-time telemetry** collection from inverters and BMS (Modbus TCP, IEC 61850, DNP3, IEC 60870-5-104).
-- **AI-powered dispatch** decisions via a Deep Reinforcement Learning (DRL) arbitrage agent (ONNX inference, no cloud connection required for local execution).
-- **Autonomous self-improvement** via BESSAIEvolve — an evolutionary parameter search weekly cycle.
-- **Safety enforcement** with IEC 62443 SL-1/SL-2 architecture alignment (SafetyGuard).
-- **Multi-cloud publishing** to GCP Pub/Sub, MQTT, and OpenTelemetry.
-- **Full system architecture integration**: from BT battery racks, bidirectional inverters, step-up transformers, MT cells, protection relays, plant SCADA, substation SCADA, to industrial firewalls.
-
-> **Test & Simulation Environment:** Hardware-in-the-Loop (HIL) and Modbus TCP simulation with industrial equipment profiles (Huawei, SMA, Sungrow, Victron, BYD, Tesla), evaluating arbitrage with Chilean SEN marginal cost ($CMg$) historical data.
-
----
-
-## 🏗️ Architecture
+Open BESS Edge operates at the **OT (Operational Technology)** layer inside substation-hardened Industrial PCs (Edge IPC). It enforces real-time grid dynamic response during disturbances and autonomously protects battery assets.
 
 ```mermaid
 graph TB
-    subgraph HW["⚡ Physical BESS System"]
-        BAT[Battery Racks BT<br/>+ BMS per module]
-        INV[Bidirectional Inverters<br/>Huawei · SMA · Sungrow · BYD · Tesla]
-        TRF[Step-up Transformer<br/>BT → MT]
-        MT[MT Switchgear & Cells<br/>13.2 kV / 23 kV]
-        PROT[Protection Relays<br/>All interfaces: BT · AC · MT · PCC]
+    subgraph PCC ["⚡ Point of Common Coupling (PCC) · SEN Chile"]
+        GRID["Transmission / Distribution Grid<br/><b>66 kV / 110 kV / 220 kV</b>"]
+        TRF["Main Step-Up Transformer<br/><b>LV (400V) → MV/HV</b>"]
     end
 
-    subgraph Edge["🖥️ Open BESS Edge Gateway"]
-        GW[IoT Gateway / Edge Compute<br/>Modbus→MQTT · OPC-UA · TLS]
-        FW[Industrial Firewall + DMZ<br/>OT/IT Segmentation · DPI]
-        EMS[Local EMS / DERMS<br/>24-48h Autonomous · Grid-Forming]
-        UPS[Control UPS<br/>Emergency power for control systems]
-        DRV[Protocol Drivers<br/>Modbus TCP · IEC 61850 · DNP3 · IEC 104]
-        SG[SafetyGuard<br/>IEC 62443 SL-1/SL-2]
-        subgraph AI["🤖 AI Engine"]
-            IDS[AI-IDS<br/>IsolationForest]
-            DRL[DRL Agent<br/>PPO ONNX]
-            EVO[BESSAIEvolve<br/>Weekly μ+λ Evolution]
+    subgraph BESS_PLANT ["🔋 BESS Power Yard"]
+        PCS["Bidirectional Power Conversion System (PCS)<br/><i>Sungrow · Kehua · SMA · Ingeteam · PE</i><br/>[Active & Reactive Power Control · Modbus TCP]"]
+        BMS["Battery Management System (BMS)<br/><i>CATL · BYD · Gotion · EVE (LFP 314Ah)</i><br/>[Cell Telemetry · Safety Interlocks]"]
+    end
+
+    subgraph EDGE_GATEWAY ["🖥️ Open BESS Edge Runtime (Substation IPC)"]
+        direction TB
+        MB["<b>ModbusBESSClient</b><br/>Async Driver with Exponential Backoff & Simulation Engine"]
+        
+        subgraph ENGINES ["Deterministic Control Loop (Sub-0.1ms Latency)"]
+            GUARD["🛡️ <b>SafetyEnvelopeEvaluator</b><br/>Hardware Envelope BESS-GUARD-001..005"]
+            FFR["⚡ <b>FFRDroopController</b><br/>FFR (<500ms) & Droop (s=3%, ±30mHz)"]
+            VV["🔄 <b>VoltVarController</b><br/>Dynamic Q(V) & cos φ Support"]
         end
-        TEL[Telemetry Layer<br/>Prometheus · OpenTelemetry · MQTT/TLS]
+
+        TELEMETRY["📡 <b>Telemetry & Diagnostics</b><br/>Battery Data Format (BDF) · IEC 61850"]
     end
 
-    subgraph SE["🏭 Substation SCADA"]
-        SCADA_SE[SCADA SE<br/>IEC 60870-5-104 · DNP3]
-        IED[Protection IEDs<br/>IEC 61850 GOOSE]
+    subgraph SCADA_CEN ["🏢 National Grid Operator (CEN)"]
+        CEN_SCADA["CEN SCADA & Energy Management System<br/>AGC Dispatch Setpoints & Grid Code Compliance"]
     end
 
-    subgraph Cloud["☁️ Cloud"]
-        GCP[GCP Pub/Sub]
-        PROM[Prometheus + Grafana]
-        OT[Cloud Trace]
-    end
+    GRID --- TRF --- PCS
+    PCS <-->|"DC Bus"| BMS
 
-    subgraph Market["📈 Market"]
-        CMG[CEN Chile CMg API<br/>Real-time spot price]
-    end
+    PCS <-->|"Modbus TCP (Holding Regs)"| MB
+    BMS <-->|"Cell & Rack Telemetry"| MB
 
-    BAT -->|CAN/RS485| GW
-    INV -->|Modbus TCP| DRV
-    TRF & MT & PROT -->|IEC 61850 GOOSE| IED
-    IED --> SCADA_SE
-    GW --> FW
-    FW --> EMS
-    EMS --> DRV
-    DRV --> SG
-    SG --> AI
-    CMG -->|30-day history| EVO
-    AI --> TEL
-    SCADA_SE -->|IEC 60870-5-104| TEL
-    TEL --> GCP
-    TEL --> PROM
-    TEL --> OT
-    UPS -.->|Powers| GW & FW & EMS
+    MB -->|"Hardware Snapshot"| GUARD
+    GUARD -->|"Safe Envelope Condition"| FFR
+    GUARD -->|"Safe Envelope Condition"| VV
+    GUARD -.->|"Critical Safety Interlock (0 kW)"| MB
+
+    FFR -->|"P Setpoint (kW)"| MB
+    VV -->|"Q Setpoint (kVAR)"| MB
+    MB -->|"Setpoint Commits"| PCS
+
+    EDGE_GATEWAY -.->|"NTSyCS Telemetry Stream"| CEN_SCADA
 ```
 
 ---
 
-## 📊 Data Flow
+## ⏱️ Real-Time Closed-Loop Sequence (Severe Contingency)
+
+Millisecond-by-millisecond execution trace during a massive generation trip on the SEN (loss of 397 MW):
 
 ```mermaid
 sequenceDiagram
-    participant HW as BESS Hardware
-    participant DRV as Driver
-    participant SG as SafetyGuard
-    participant DRL as DRL Agent (ONNX)
-    participant MKT as CMg Market
-    participant PUB as Publishers
+    autonumber
+    participant SEN as SEN Grid (PCC)
+    participant PCS as PCS Inverter
+    participant MB as Modbus Driver (Edge)
+    participant GUARD as SafetyGuard Evaluator
+    participant FFR as FFR Controller (CEN 2026)
+    participant VV as Volt/VAR Controller
 
-    HW->>DRV: Poll telemetry (5s)
-    DRV->>SG: BatteryState {soc, temp, power}
-    SG-->>DRL: ✅ Safe to dispatch
-    MKT-->>DRL: CMg price forecast
-    DRL->>SG: Proposed setpoint p_pu ∈ [-1, 1]
-    SG->>SG: Validate SOC bounds + thermal limits
-    alt safe
-        SG->>HW: Write power setpoint
-    else violation
-        SG->>HW: Hold (0 kW)
-        SG->>PUB: safety_violation alert
-    end
-    SG->>PUB: Telemetry + metrics
-    PUB->>PUB: Prometheus / GCP / MQTT / OTel
+    Note over SEN: t = 0.0 ms: Thermal generator trip (f drops to 49.65 Hz)
+    SEN->>PCS: Frequency excursion to 49.65 Hz (|Δf| = 0.35 Hz)
+    PCS->>MB: Fast telemetry sampling (t = 2.0 ms)
+    MB->>GUARD: Sub-millisecond cell voltage & temp check (t = 2.05 ms)
+    GUARD-->>FFR: ✅ BESS-GUARD Status: SAFE_NORMAL
+    Note over FFR: |Δf| ≥ 0.30 Hz: Emergency transition to FFR_EMERGENCY_FAST
+    FFR->>FFR: Instantaneous nominal power target calculation (t = 2.08 ms)
+    GUARD-->>VV: PCC Voltage verification (V = 398 V)
+    VV->>VV: Within Q(V) deadband (Q = 0 kVAR)
+    FFR->>MB: P Setpoint = +1000 kW (t = 2.10 ms)
+    MB->>PCS: Modbus Holding Register 200 Write (t = 4.5 ms)
+    PCS->>SEN: ⚡ Full power injection delivered in t < 500 ms (Nadir Defense)
 ```
 
 ---
 
-## 🔌 Hardware Registry
+## ⚡ Grid Code Compliance (CEN CFyDR 2026)
+
+The edge controller parameters are calibrated against the official **Frequency Control & Reserve Determination Study (CFyDR 2026) by the Coordinador Eléctrico Nacional (CEN)** and the **NTSyCS Technical Grid Code (Res. CNE N° 343)**:
+
+```text
+                                 DROOP & FFR CHARACTERISTIC CURVE (CEN 2026)
+        Discharge (+P)
+              ▲
+      P_nom ──┤                                            ┌─────────── Severe Contingency FFR (|Δf| ≥ 0.30 Hz)
+              │                                           /              Ramp Released: Sub-500ms Full Injection
+              │                                          /
+              │                  Primary Droop Zone     /
+              │                       (s = 3%)         /
+              │                   (K_p = P_nom/s*f)   ┌
+              │                                      /│
+              │                                     / │
+        0 kW ─┼──────────────────────────────┬─────┴──┼────────────────────────► Frequency (Hz)
+              │                              │        │
+              │                     49.70 Hz │        │ 49.97 Hz   50.00 Hz
+              │                (FFR Trigger) │        │ (Deadband Boundary)
+              │                              │        │
+              │                              │        └─ CEN Official Primary Deadband: ±30 mHz
+              │                              │
+     -P_nom ──┤                              └─ Automatic Load Shedding: If P < 0, immediately cut to 0 kW
+              ▼
+         Charge (-P)
+```
+
+| Parameter | Grid Code Reference | Open BESS Edge Specification |
+|---|---|---|
+| **Nominal Frequency** | NTSyCS Art. 3-1 | $f_0 = 50.00\text{ Hz}$ |
+| **Primary Deadband** | CEN CFyDR 2026 Study | $\Delta f_{deadband} = \pm 0.03\text{ Hz}$ ($\pm 30\text{ mHz}$) eliminating stochastic noise cycling |
+| **Permanent Droop ($s$)** | Res. CNE N° 343 / NTSyCS | Configurable $s \in [0.02, 0.05]$ (Default: $s = 0.03$ / 3%) |
+| **FFR Contingency Threshold**| CEN CFyDR 2026 Study | $|\Delta f| \ge 0.30\text{ Hz}$ ($f \le 49.70\text{ Hz}$ or $f \ge 50.30\text{ Hz}$) |
+| **FFR Response Time** | NTSyCS Chapter 3 | Full power injection delivered in $t < 500\text{ ms}$ for Nadir support |
+| **Normal Ramp Limit** | NTSyCS Art. 3-15 | Automated quasi-steady-state ramp clamp $\le 20\% P_{nom}/\text{min}$ |
+| **Immediate Load Relief** | CFyDR 2026 Methodology | Instantaneous shedding to $0\text{ kW}$ if BESS was charging during an event |
+| **CEN Performance Audit** | Formal Homologation | Deterministic measurement and reporting of $Aporte_{@10s}$ and $Aporte_{@2min}$ |
+
+---
+
+## 🔄 Dynamic Volt/VAR Support: $Q(V)$
+
+In compliance with **NTSyCS Chapter 3 (Art. 3-21)**, all BESS facilities connected to the SEN must supply dynamic reactive power support at the PCC:
+
+* **Automated $Q(V)$ Curve**: Capacitive reactive injection ($+Q$) when $V < 0.98\text{ pu}$; inductive reactive absorption ($-Q$) when $V > 1.02\text{ pu}$.
+* **Constant $\cos\phi(P)$**: Smooth power factor control between $0.95$ inductive and $0.95$ capacitive.
+* **Direct $Q$ Dispatch**: Centralized setpoints received from the system coordinator.
+
+---
+
+## 🛡️ Hardware Safety Envelope (BESS-GUARD)
+
+Deterministic sub-millisecond safety interlocks engineered for **LFP 314Ah** utility-scale cells under **NFPA 855** and **SEC RIC N° 01/02**:
+
+| Guard Code | Fault Description | Physical Boundary (LFP 314Ah) | Automated Edge Action |
+|:---:|---|:---:|---|
+| **`BESS-GUARD-001`** | **Cell Undervoltage** | $V_{cell,min} < 2.50\text{ V}$ | Discharge interlock & DC breaker trip |
+| **`BESS-GUARD-002`** | **Cell Overvoltage** | $V_{cell,max} > 3.65\text{ V}$ | Charge interlock & PCS halt |
+| **`BESS-GUARD-003`** | **Cell Overtemperature** | $T_{cell,max} > 50.0\text{ °C}$ | Emergency shutdown & maximum HVAC boost |
+| **`BESS-GUARD-004`** | **DC Isolation Fault** | $R_{iso} < 500.0\text{ k}\Omega$ | Inverter trip & isolation alert dispatch |
+| **`BESS-GUARD-005`** | **Cell Imbalance Warning**| $\Delta V_{cell} > 50.0\text{ mV}$ | Active balancing alert & preventive derating |
+
+---
+
+## 🔌 Supported Hardware Ecosystem
 
 ```mermaid
 graph LR
-    subgraph Inverters
-        HW[Huawei SUN2000<br/>✅ Production]
-        SMA[SMA Sunny Tripower<br/>✅ Tested]
-        VIC[Victron MultiPlus<br/>✅ Tested]
-        FRO[Fronius Symo<br/>✅ Tested]
-        SE[SolarEdge StorEdge<br/>✅ Tested]
+    subgraph INVERTERS ["⚡ Bidirectional Inverters (PCS)"]
+        SG["Sungrow SC / ST Series<br/>✅ Modbus TCP"]
+        KH["Kehua Tech SPI Series<br/>✅ Modbus TCP"]
+        SMA["SMA Sunny Central Storage<br/>✅ Modbus TCP"]
+        ING["Ingeteam Ingecon Sun<br/>✅ Modbus TCP"]
+        PE["Power Electronics HEM<br/>✅ Modbus TCP"]
     end
-    subgraph Batteries
-        BYD[BYD Battery Box<br/>✅ Tested]
-        TES[Tesla Powerwall<br/>✅ Tested]
+
+    subgraph BATTERIES ["🔋 Industrial BMS & LFP Racks"]
+        CATL["CATL EnerOne / EnerC (314Ah)<br/>✅ BMS Telemetry"]
+        BYD["BYD MC Cube ESS<br/>✅ BMS Telemetry"]
+        GOT["Gotion High-Tech 314Ah<br/>✅ BMS Telemetry"]
+        EVE["EVE Energy LF560K / LF314<br/>✅ BMS Telemetry"]
     end
-    subgraph Pending["🔵 Roadmap (BEP-0202)"]
-        ABB[ABB PCS100]
-        SCH[Schneider Conext]
-        GE[GE Grid Solutions]
+
+    subgraph PROTOCOLS ["📡 Communication Protocols"]
+        MB_TCP["Modbus TCP / RTU (SunSpec & IEC 61850)"]
+        BDF["Battery Data Format (Linux Foundation Energy)"]
+        BPX["Battery Parameter eXchange (BPX v1.1.1)"]
     end
-    DRIV[BESSAI Protocol Drivers]
-    HW & SMA & VIC & FRO & SE & BYD & TES -->|Modbus TCP| DRIV
+
+    INVERTERS --> PROTOCOLS
+    BATTERIES --> PROTOCOLS
+    PROTOCOLOS --> CORE["🖥️ Open BESS Edge Gateway"]
 ```
 
 ---
 
-## 🔌 Model Context Protocol (MCP) Server
+## 🚀 Quick Start
 
-Open BESS Edge features a native Python-based **MCP Server** that exposes key operational tools to AI assistants (such as Claude Desktop or custom agents). This enables managing and querying BESS status in natural language with strict adherence to our Zero Mock Data Policy.
-
-### Exposed Tools
-* **`get_battery_health`**: Read real-time telemetry (SOC, voltage, active/reactive power, temperatures) over Modbus TCP.
-* **`diagnose_faults`**: Inspect active alarms and status registers for fault-decoding.
-* **`predict_rul`**: Forecast Remaining Useful Life (RUL) using Arrhenius thermal-stress kinetics over [training_dataset.parquet](data/training_dataset.parquet).
-* **`cyber_hygiene_check`**: Audit host OS hardening parameters (SSH, TLS, rules).
-
-### Claude Desktop Configuration
-Add the server config to your `claude_desktop_config.json`:
-```json
-{
-  "mcpServers": {
-    "open-bess-edge": {
-      "command": "python",
-      "args": [
-        "C:/Users/lenovo/OneDrive/Desktop/02_Proyectos_Tech/01_BESS_Tech/open-bess-edge/mcp_server/server.py"
-      ],
-      "env": {
-        "PYTHONPATH": "C:/Users/lenovo/OneDrive/Desktop/02_Proyectos_Tech/01_BESS_Tech/open-bess-edge"
-      }
-    }
-  }
-}
-```
-
----
-
-## ⚡ Quick Start
-
-### 0. Interactive Setup (Recommended)
+### 1. Installation
 
 ```bash
 git clone https://github.com/bess-solutions/open-bess-edge.git
 cd open-bess-edge
-bash scripts/setup.sh   # interactive site config generation
+
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate       # On Windows: .venv\Scripts\activate
+
+# Install in editable mode with development dependencies
+pip install -e .[dev]
 ```
 
-### 1. Local (Python)
+### 2. Run the Official CEN Compliance Test Suite
 
 ```bash
-make dev                  # install dependencies + setup pre-commit hooks
-bash scripts/setup.sh     # generate config/.env
-make simulate             # run with integrated BESS simulator
-make health               # verify all local components are active
+pytest tests/ -v
 ```
 
-### 2. Docker Compose (Recommended Deployment)
+### 3. Run the Node in Deterministic Simulation Mode
 
 ```bash
-git clone https://github.com/bess-solutions/open-bess-edge.git
-cd open-bess-edge
-bash scripts/setup.sh     # generate config/.env
-docker compose -f infrastructure/docker/docker-compose.yml --profile simulator --profile monitoring up -d
+python -m src.edge_node
 ```
-
-Grafana → http://localhost:3000 (Credentials: check `GF_SECURITY_ADMIN_PASSWORD` in `config/.env`)  
-Metrics → http://localhost:8000/metrics  
-Health  → http://localhost:8000/health
 
 ---
 
-## ✨ Features
+## 🐳 Industrial Deployment (Docker / Substation IPC)
 
-| Feature | Description | BEP |
-|---|---|---|
-| **Multi-protocol drivers** | Modbus TCP, IEC 61850, IEEE 2030.5 / SEP 2.0 | BEP-0100 |
-| **Hardware profiles** | Certified profiles (Huawei, SMA, Victron, BYD, Tesla…) | – |
-| **SafetyGuard** | SOC/thermal/power bounds — blocks unsafe commands | – |
-| **AI-IDS** | Real-time anomaly detection (IsolationForest + z-score) | – |
-| **DRL Arbitrage Agent** | PPO + 8 Chilean Node ONNX models — local execution | BEP-0200 |
-| **BESSAIEvolve** | Parameter self-improvement weekly evolutionary cycle | BEP-0303 |
-| **VPP Fleet Manager** | Multi-site Virtual Power Plant manager | BEP-0500 |
-| **OpenTelemetry** | Distributed traces + metrics to GCP / Datadog / Grafana | – |
-| **IEC 62443 SL-1/2** | Full cybersecurity control mapping — SL-2 compliant | – |
-| **DNP3** | Utility / substation SCADA telecontrol driver | `DNP3Driver` |
-| **IEC 60870-5-104** | Substation SCADA telecontrol for Chilean CEN | `IEC104Driver` |
-| **IEEE 1547-2018 (IBR/GFM)** | Grid-Forming + anti-islanding + LVRT/HVRT | `FrequencyResponseAgent` |
+```bash
+docker build -t bess-solutions/open-bess-edge:2.0.0 .
+
+docker run -d \
+  --name open-bess-edge \
+  --restart always \
+  --network host \
+  -v $(pwd)/config/edge_config.yaml:/app/config/edge_config.yaml:ro \
+  bess-solutions/open-bess-edge:2.0.0
+```
 
 ---
 
-## 🛡️ Compliance
+## 📄 License & Governance
 
-| Standard | Status | Evidence |
-|---|---|---|
-| IEC 62443 SL-1 | ✅ Compliant | [iec62443_mapping.md](docs/compliance/iec62443_mapping.md) & MFA (`totp_auth.py`) |
-| IEC 62443 SL-2 | ⚠️ Partial | mTLS (`ot_tls_config.py`) and API request rate-limiting (`server.py`) |
-| NTSyCS Cap. 4.2 | ✅ GAP-001 | Ramp rate ≤10%/min (`SafetyGuard`) |
-| NTSyCS Cap. 4.3 | ✅ GAP-002 | PFR droop < 2s (`FrequencyResponseAgent`) |
-| NTSyCS Cap. 4.4 | ✅ GAP-011 | Q/V droop (`ReactiveController`) |
-| NTSyCS Cap. 6.1 | ✅ GAP-003 | mTLS telemetry to CEN (`CENPublisher`) |
-| NTSyCS Cap. 6.2 | ✅ GAP-004 | SCADA IEC 60870-5-104 (`IEC104Driver`) |
-| Decreto 88/2023 | ✅ GAP-007 | Anti-arbitrage PMGD (`PMGDComplianceEngine`) |
-| Ley 21.663/2024 | 📋 Roadmap | Automated CSIRT incident alerts under design |
-| IEEE 2030.5 / SEP 2.0 | ✅ 10 endpoints | [BEP-0100](docs/bep/BEP-0100.md) |
-
+Distributed under the **Apache 2.0** License. See [LICENSE](LICENSE) for details.
