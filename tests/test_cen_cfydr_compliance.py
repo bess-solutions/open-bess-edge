@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 open-bess-edge/tests/test_cen_cfydr_compliance.py
 ==============================================================================
@@ -16,16 +15,17 @@ Valida de forma determinística:
 ==============================================================================
 """
 
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 EDGE_DIR = Path(__file__).resolve().parent.parent
 if str(EDGE_DIR) not in sys.path:
     sys.path.insert(0, str(EDGE_DIR))
 
 from src.controllers.ffr_droop_controller import FFRDroopController
-from src.controllers.volt_var_controller import VoltVarController, ReactiveControlMode
+from src.controllers.volt_var_controller import ReactiveControlMode, VoltVarController
 from src.edge_node import BESSEdgeNode
 
 
@@ -142,6 +142,25 @@ def test_cen_volt_var_qv_curve():
     assert meta_buck["status"] == "OVERVOLTAGE_ABSORBING_Q"
 
 
+def test_cen_cos_phi_p_curve():
+    """Verifica el control de factor de potencia dinámico en función de la potencia activa P."""
+    vv = VoltVarController(
+        q_max_kvar=500.0,
+        mode=ReactiveControlMode.POWER_FACTOR,
+    )
+    # Sin inyección activa -> Q = 0
+    q_zero, meta_zero = vv.compute_reactive_power(400.0, p_actual_kw=0.0)
+    assert q_zero == 0.0
+    assert meta_zero["status"] == "COS_PHI_REGULATION"
+
+    # Con inyección nominal (1000 kW) y cos(phi) = 0.95 -> Q != 0
+    q_act, meta_act = vv.compute_reactive_power(
+        400.0, p_actual_kw=1000.0, target_cos_phi=0.95
+    )
+    assert q_act > 0.0
+    assert meta_act["status"] == "COS_PHI_REGULATION"
+
+
 @pytest.mark.asyncio
 async def test_full_edge_node_closed_loop():
     """
@@ -165,5 +184,11 @@ async def test_full_edge_node_closed_loop():
     assert res_contingency["p_setpoint_kw"] > 0.0
     assert res_contingency["is_ffr_emergency"] is True
     assert res_contingency["commit_ok"] is True
+
+    # 3. Inyección de evento crítico de celda para verificar interlock de seguridad
+    node.driver._sim_t_max_c = 58.0  # Sobretemperatura crítica
+    res_interlock = await node.step()
+    assert res_interlock["status"] == "SAFETY_TRIP_INTERLOCK"
+    assert len(res_interlock["faults"]) > 0
 
     await node.stop()

@@ -68,13 +68,10 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - "📍 Para Adopters":
-    - Adopter Hub (empieza aquí): ADOPTER_HUB.md
-    - Onboarding Día 0 → 7: ONBOARDING_7DAYS.md
-    - FAQ Técnica: FAQ.md
-    - Contribuir (primer PR): CONTRIBUTING_ADOPTERS.md
-    - Programa Early Adopters: early_adopters.md
+  - "⚡ Operación & Despliegue":
     - Pilot Guide (Chile/CEN): PILOT_GUIDE.md
+    - Guía de Operaciones: OPERATIONS_GUIDE.md
+    - FAQ Técnica: FAQ.md
   - Getting Started:
     - Quick Start (5 min): tutorials/quickstart_5min.md
     - Local Development: local_development.md
@@ -86,10 +83,7 @@ nav:
   - Architecture:
     - Overview: architecture.md
     - Sim-First Strategy: simulation_registry.md
-    - Roadmap v2.7–3.0: ROADMAP.md
-    - 🚀 AI Roadmap 20/10: ai_roadmap_20_10.md
-    - 🔍 AI Audit Report: ai_audit_report.md
-    - 🧬 BESSAIEvolve — AlphaEvolve: BESSAI_EVOLVE.md
+    - Roadmap Industrial: ROADMAP.md
     - Decision Records (ADRs):
       - Overview: adr/README.md
       - ADR-001 Pydantic Settings: adr/0001-pydantic-settings-config.md
@@ -107,12 +101,7 @@ nav:
   - Enhancement Proposals (BEPs):
     - BEP-0001 — BEP Process: bep/BEP-0001.md
     - BEP-0100 — IEEE 2030.5 Adapter: bep/BEP-0100.md
-    - BEP-0200 — DRL Arbitrage Agent: bep/BEP-0200.md
     - BEP-0202 — Protocol Registry: bep/BEP-0202.md
-    - BEP-0300 — DRL Autonomous Control: bep/BEP-0300.md
-    - BEP-0301 — XAI — Explainable AI: bep/BEP-0301.md
-    - BEP-0302 — Market Integration CMg Live: bep/BEP-0302.md
-    - BEP-0303 — BESSAIEvolve (Self-Improvement): bep/BEP-0303.md
   - API Reference:
     - External Interface (API): API.md
     - API Reference (Legacy): api_reference.md
@@ -135,7 +124,6 @@ nav:
     - OpenFMB Adapter Guide: interoperability/openFMB_adapter.md
     - Battery Data Format (BDF): interoperability/BDF_alignment.md
   - Community:
-    - Adopters: adopters.md
     - Good First Issues: GOOD_FIRST_ISSUES.md
     - Academic Collaboration: academic_collaboration.md
     - Research Topics: research_topics.md
@@ -143,13 +131,11 @@ nav:
     - BENCHMARK-001 Latency: benchmarks/BENCHMARK-001-latency.md
     - BENCHMARK-002 Scale: benchmarks/BENCHMARK-002-scale.md
     - BENCHMARK-003 Security: benchmarks/BENCHMARK-003-security.md
-    - BENCHMARK-004 DRL Arbitrage: benchmarks/BENCHMARK-004-drl-arbitrage.md
     - BENCHMARK-005 Edge Devices: benchmarks/BENCHMARK-005-edge-devices.md
   - Development:
     - Release Process: release_process.md
     - Security Guide (Maintainer): security_guide_maintainer.md
     - Hardware Profile Tutorial: tutorials/hardware_profile_contribution.md
-    - DRL Training Custom: tutorials/training_custom_drl.md
 
 extra:
   social:

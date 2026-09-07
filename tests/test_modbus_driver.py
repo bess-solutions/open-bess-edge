@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 open-bess-edge/tests/test_modbus_driver.py
 ==============================================================================
@@ -7,17 +6,17 @@ Pruebas unitarias para el driver Modbus TCP/RTU industrial de BESS
 ==============================================================================
 """
 
-import pytest
-import asyncio
 import sys
 from pathlib import Path
+
+import pytest
 
 EDGE_DIR = Path(__file__).resolve().parent.parent
 if str(EDGE_DIR) not in sys.path:
     sys.path.insert(0, str(EDGE_DIR))
 
-from src.drivers.modbus_client import ModbusBESSClient, BESSReadings
 from src.config import ModbusConfig
+from src.drivers.modbus_client import BESSReadings, ModbusBESSClient
 
 
 @pytest.mark.asyncio
@@ -64,4 +63,21 @@ async def test_modbus_injected_event():
     assert readings.f_measured_hz == 49.75
     assert readings.v_grid_v == 395.0
 
+    # Test reconexión en simulación
+    reconnected = await client.reconnect_with_backoff()
+    assert reconnected is True
+
     await client.disconnect()
+
+
+def test_modbus_numeric_conversions():
+    """Verifica conversiones 16-bit signed/unsigned."""
+    # Positivo
+    u_pos = ModbusBESSClient._to_unsigned16(500)
+    assert u_pos == 500
+    assert ModbusBESSClient._signed16(u_pos) == 500
+
+    # Negativo (complemento a 2 en 16 bits)
+    u_neg = ModbusBESSClient._to_unsigned16(-500)
+    assert u_neg == 65536 - 500
+    assert ModbusBESSClient._signed16(u_neg) == -500

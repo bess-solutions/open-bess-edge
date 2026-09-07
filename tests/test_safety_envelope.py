@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 open-bess-edge/tests/test_safety_envelope.py
 ==============================================================================
@@ -62,7 +61,7 @@ def test_bess_guard_002_overvoltage():
 def test_bess_guard_003_overtemperature():
     evaluator = SafetyEnvelopeEvaluator()
     # Temperatura por encima de 50.0°C (ej. 53.5°C)
-    safe, faults, meta = evaluator.evaluate_cell_telemetry(
+    safe, faults, _meta = evaluator.evaluate_cell_telemetry(
         v_min_v=3.20,
         v_max_v=3.25,
         t_max_c=53.5,
@@ -75,7 +74,7 @@ def test_bess_guard_003_overtemperature():
 def test_bess_guard_004_isolation_fault():
     evaluator = SafetyEnvelopeEvaluator()
     # Aislamiento por debajo de 500 kOhm (ej. 320 kOhm)
-    safe, faults, meta = evaluator.evaluate_cell_telemetry(
+    safe, faults, _meta = evaluator.evaluate_cell_telemetry(
         v_min_v=3.20,
         v_max_v=3.25,
         t_max_c=25.0,
@@ -88,7 +87,7 @@ def test_bess_guard_004_isolation_fault():
 def test_bess_guard_005_imbalance_warning():
     evaluator = SafetyEnvelopeEvaluator()
     # Desbalance mayor a 50 mV (ej. v_min=3.20V, v_max=3.28V -> Delta = 80 mV)
-    safe, faults, meta = evaluator.evaluate_cell_telemetry(
+    _safe, faults, meta = evaluator.evaluate_cell_telemetry(
         v_min_v=3.20,
         v_max_v=3.28,
         t_max_c=25.0,
@@ -96,6 +95,7 @@ def test_bess_guard_005_imbalance_warning():
     )
     assert any("BESS-GUARD-005" in f for f in faults)
     import pytest
+
     assert pytest.approx(meta["delta_v_mv"], abs=0.1) == 80.0
 
 

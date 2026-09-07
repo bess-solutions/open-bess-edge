@@ -1,0 +1,5 @@
+# Core runtime dependencies for Open BESS Edge Gateway
+pymodbus>=3.8.0
+pydantic>=2.7.0
+pyyaml>=6.0.0
+structlog>=24.0.0

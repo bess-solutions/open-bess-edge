@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 open-bess-edge/src/edge_node.py
 ==============================================================================
@@ -13,9 +12,10 @@ Orquesta el lazo cerrado de control en tiempo real:
 from __future__ import annotations
 
 import asyncio
-import time
 import sys
+import time
 from pathlib import Path
+from typing import Any
 
 EDGE_DIR = Path(__file__).resolve().parent.parent
 if str(EDGE_DIR) not in sys.path:
@@ -23,10 +23,10 @@ if str(EDGE_DIR) not in sys.path:
 
 import structlog
 
-from src.config import edge_settings, EdgeConfig
-from src.drivers.modbus_client import ModbusBESSClient, BESSReadings
+from src.config import EdgeConfig, edge_settings
 from src.controllers.ffr_droop_controller import FFRDroopController
 from src.controllers.volt_var_controller import VoltVarController
+from src.drivers.modbus_client import BESSReadings, ModbusBESSClient
 from src.safety.safety_envelope_evaluator import SafetyEnvelopeEvaluator
 
 logger = structlog.get_logger(__name__)
@@ -38,7 +38,7 @@ class BESSEdgeNode:
     Ejecuta el lazo determinístico de control de frecuencia y tensión.
     """
 
-    def __init__(self, config: Optional[EdgeConfig] = None):
+    def __init__(self, config: EdgeConfig | None = None):
         self.cfg = config or edge_settings
 
         self.driver = ModbusBESSClient(self.cfg.modbus)
@@ -63,9 +63,9 @@ class BESSEdgeNode:
         )
 
         self._running = False
-        self._loop_task: Optional[asyncio.Task] = None
+        self._loop_task: asyncio.Task | None = None
         self.cycle_count: int = 0
-        self.last_telemetry: Optional[Dict[str, Any]] = None
+        self.last_telemetry: dict[str, Any] | None = None
 
     async def start(self) -> bool:
         """Inicia el enlace de comunicaciones y el lazo de control en tiempo real."""
@@ -91,7 +91,7 @@ class BESSEdgeNode:
         await self.driver.disconnect()
         logger.info("edge_node_stopped_safely")
 
-    async def step(self) -> Dict[str, Any]:
+    async def step(self) -> dict[str, Any]:
         """
         Ejecuta un ciclo discreto de control (Paso determinístico).
         Retorna la telemetría consolidada del ciclo.
@@ -131,14 +131,14 @@ class BESSEdgeNode:
         )
 
         # 4. Lazo de Control de Tensión (Volt/VAR Q(V) NTSyCS)
-        q_target_kvar, vv_meta = self.volt_var_controller.compute_reactive_power(
+        q_target_kvar, _vv_meta = self.volt_var_controller.compute_reactive_power(
             v_measured_v=readings.v_grid_v,
             p_actual_kw=p_target_kw,
         )
 
         # 5. Validación de Envolvente de Consigna Inversor (C-Rate y Aislamiento)
         capacity_kwh = self.cfg.bess.e_nominal_mwh * 1000.0
-        approved, p_approved_kw, reason = self.safety.evaluate_inverter_setpoint(
+        _approved, p_approved_kw, _reason = self.safety.evaluate_inverter_setpoint(
             p_target_kw=p_target_kw,
             q_target_kvar=q_target_kvar,
             e_nominal_kwh=capacity_kwh,
@@ -146,7 +146,9 @@ class BESSEdgeNode:
         )
 
         # 6. Despacho de Consignas al PCS vía Modbus
-        commit_ok, commit_msg = await self.driver.write_setpoints(p_approved_kw, q_target_kvar)
+        commit_ok, _commit_msg = await self.driver.write_setpoints(
+            p_approved_kw, q_target_kvar
+        )
 
         dt_total_ms = (time.monotonic() - t0) * 1000.0
 
@@ -171,17 +173,22 @@ class BESSEdgeNode:
 
 
 if __name__ == "__main__":
+
     async def demo():
         node = BESSEdgeNode()
         await node.start()
         print("--- Ciclo Normal (50.00 Hz) ---")
         res1 = await node.step()
-        print(f"P Setpoint: {res1['p_setpoint_kw']} kW | Latencia: {res1['latency_ms']:.2f} ms")
+        print(
+            f"P Setpoint: {res1['p_setpoint_kw']} kW | Latencia: {res1['latency_ms']:.2f} ms"
+        )
 
         print("\n--- Contingencia Severa SEN (49.65 Hz) ---")
         node.driver.inject_simulated_grid_event(49.65)
         res2 = await node.step()
-        print(f"P Setpoint: {res2['p_setpoint_kw']} kW | Modo: {res2['ffr_mode']} | Latencia: {res2['latency_ms']:.2f} ms")
+        print(
+            f"P Setpoint: {res2['p_setpoint_kw']} kW | Modo: {res2['ffr_mode']} | Latencia: {res2['latency_ms']:.2f} ms"
+        )
         await node.stop()
 
     asyncio.run(demo())
