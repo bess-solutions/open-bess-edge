@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 open-bess-edge/src/controllers/ffr_droop_controller.py
 ==============================================================================
@@ -35,18 +34,14 @@ class FFRDroopController:
         max_soc_pct: float = 95.0,
     ):
         if not (0.01 <= droop_r <= 0.10):
-            raise ValueError(
-                f"Droop {droop_r} fuera de límites técnicos admisibles (0.01 a 0.10)"
-            )
+            raise ValueError(f"Droop {droop_r} fuera de límites técnicos admisibles (0.01 a 0.10)")
 
         self.p_nominal_kw = p_nominal_kw
         self.f_nominal_hz = f_nominal_hz
         self.droop_r = droop_r
         self.deadband_hz = deadband_hz
         self.ffr_threshold_hz = ffr_contingency_threshold_hz
-        self.normal_ramp_rate_kw_per_sec = (
-            normal_ramp_limit_pct_min / 100.0 * p_nominal_kw
-        ) / 60.0
+        self.normal_ramp_rate_kw_per_sec = (normal_ramp_limit_pct_min / 100.0 * p_nominal_kw) / 60.0
         self.min_soc = min_soc_pct
         self.max_soc = max_soc_pct
 

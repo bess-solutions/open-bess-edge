@@ -14,11 +14,16 @@ build/
 .installed.cfg
 *.pyd
 
-# Virtual Environments
-.venv/
-venv/
+# Virtual Environments & Clean test envs
+.venv*/
+venv*/
 ENV/
 env/
+*_clean/
+test_*_env/
+*.log
+mypy_output.txt
+pytest_run.log
 
 # Testing & Coverage
 .pytest_cache/

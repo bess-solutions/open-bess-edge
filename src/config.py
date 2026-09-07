@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 open-bess-edge/src/config.py
 ==============================================================================
@@ -22,13 +21,9 @@ class BESSHardwareConfig(BaseModel):
     device_id: str = Field(default="bess-node-linares-01")
     site_name: str = Field(default="S/E Linares 66/15 kV")
     chemistry: str = Field(default="LFP_314Ah")
-    p_nominal_mw: float = Field(
-        default=1.0, description="Potencia nominal activa en MW"
-    )
+    p_nominal_mw: float = Field(default=1.0, description="Potencia nominal activa en MW")
     e_nominal_mwh: float = Field(default=2.0, description="Capacidad nominal en MWh")
-    v_nominal_ac_v: float = Field(
-        default=400.0, description="Tensión nominal AC inversor (V)"
-    )
+    v_nominal_ac_v: float = Field(default=400.0, description="Tensión nominal AC inversor (V)")
     max_charge_c_rate: float = Field(default=0.5)
     max_discharge_c_rate: float = Field(default=1.0)
 
@@ -37,12 +32,8 @@ class GridCodeCENConfig(BaseModel):
     """Parámetros de cumplimiento de Código de Red (NTSyCS Cap. 3 & CEN CFyDR 2026)."""
 
     f_nominal_hz: float = Field(default=50.0, description="Frecuencia nominal del SEN")
-    deadband_hz: float = Field(
-        default=0.03, description="Banda muerta primaria (+/- 30 mHz)"
-    )
-    droop_r: float = Field(
-        default=0.03, description="Estatismo permanente (s = 3%, rango 2%-5%)"
-    )
+    deadband_hz: float = Field(default=0.03, description="Banda muerta primaria (+/- 30 mHz)")
+    droop_r: float = Field(default=0.03, description="Estatismo permanente (s = 3%, rango 2%-5%)")
     ffr_contingency_threshold_hz: float = Field(
         default=0.30, description="Umbral de contingencia severa FFR (300 mHz)"
     )
@@ -52,12 +43,8 @@ class GridCodeCENConfig(BaseModel):
     normal_ramp_limit_pct_min: float = Field(
         default=20.0, description="Rampa máxima de operación normal (% Pn/min)"
     )
-    volt_var_deadband_pct: float = Field(
-        default=2.0, description="Banda muerta Q(V) (+/- 2% Vnom)"
-    )
-    q_max_mvar: float = Field(
-        default=0.6, description="Capacidad máxima reactiva (+/- 0.6 MVAR)"
-    )
+    volt_var_deadband_pct: float = Field(default=2.0, description="Banda muerta Q(V) (+/- 2% Vnom)")
+    q_max_mvar: float = Field(default=0.6, description="Capacidad máxima reactiva (+/- 0.6 MVAR)")
 
 
 class ModbusConfig(BaseModel):
@@ -90,9 +77,7 @@ class ModbusConfig(BaseModel):
     reg_soh_pct_x10: int = Field(default=105, description="SOH x10 (ej. 982 = 98.2%)")
     reg_cell_v_min_mv: int = Field(default=106, description="Voltaje celda mínima (mV)")
     reg_cell_v_max_mv: int = Field(default=107, description="Voltaje celda máxima (mV)")
-    reg_cell_t_max_c_x10: int = Field(
-        default=108, description="Temperatura máxima celda x10 (°C)"
-    )
+    reg_cell_t_max_c_x10: int = Field(default=108, description="Temperatura máxima celda x10 (°C)")
     reg_dc_isolation_kohm: int = Field(default=109, description="Aislamiento DC (kOhm)")
     reg_p_setpoint_kw: int = Field(
         default=200, description="Registro de consigna de potencia activa (kW)"

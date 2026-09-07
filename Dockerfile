@@ -17,22 +17,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copiar manifiesto de dependencias e instalar
-COPY pyproject.toml .
-RUN pip install --no-cache-dir .
+# Copiar manifiesto y código fuente para instalación
+COPY pyproject.toml README.md ./
+COPY src/ ./src/
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir .
 
-# Copiar código fuente y configuración
+# Copiar configuración y datos
 COPY config/ ./config/
 COPY data/ ./data/
-COPY src/ ./src/
 
 # Usuario sin privilegios por seguridad en subestación
 RUN useradd -u 1001 -m bessedge && chown -R bessedge:bessedge /app
 USER bessedge
 
-EXPOSE 502/tcp 8080/tcp
+EXPOSE 502/tcp
 
-HEALTHCHECK --interval=10s --timeout=3s --retries=3 \
-    CMD python -c "from src.drivers.modbus_client import ModbusBESSClient; print('OK')" || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD python -c "from src.config import load_config; load_config()" || exit 1
 
 ENTRYPOINT ["python", "-m", "src.edge_node"]

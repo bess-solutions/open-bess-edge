@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 open-bess-edge/src/drivers/modbus_client.py
 ==============================================================================
@@ -79,9 +78,7 @@ class ModbusBESSClient:
         """Establece la conexión con el PCS/BMS. En modo simulación retorna True de inmediato."""
         if self.cfg.simulation_mode:
             self._connected = True
-            logger.info(
-                "modbus_simulation_active", host=self.cfg.host, port=self.cfg.port
-            )
+            logger.info("modbus_simulation_active", host=self.cfg.host, port=self.cfg.port)
             return True
 
         try:
@@ -94,9 +91,7 @@ class ModbusBESSClient:
             self._connected = self._client.connected
             if self._connected:
                 self._reconnect_delay = self.cfg.reconnect_delay_s
-                logger.info(
-                    "modbus_connected_ok", host=self.cfg.host, port=self.cfg.port
-                )
+                logger.info("modbus_connected_ok", host=self.cfg.host, port=self.cfg.port)
             return self._connected
         except Exception as exc:  # noqa: BLE001
             logger.error("modbus_connect_failed", error=str(exc))
@@ -119,9 +114,7 @@ class ModbusBESSClient:
         sleep_time = min(self._reconnect_delay * jitter, self.cfg.max_reconnect_delay_s)
         logger.warning("modbus_reconnecting", delay_s=sleep_time)
         await asyncio.sleep(sleep_time)
-        self._reconnect_delay = min(
-            self._reconnect_delay * 2.0, self.cfg.max_reconnect_delay_s
-        )
+        self._reconnect_delay = min(self._reconnect_delay * 2.0, self.cfg.max_reconnect_delay_s)
         return await self.connect()
 
     async def read_telemetry(self) -> BESSReadings:
@@ -249,9 +242,7 @@ class ModbusBESSClient:
             self._connected = False
             return False, f"Modbus exception: {exc}"
 
-    def inject_simulated_grid_event(
-        self, f_hz: float, v_v: float | None = None
-    ) -> None:
+    def inject_simulated_grid_event(self, f_hz: float, v_v: float | None = None) -> None:
         """Método para pruebas dinámicas de hardware-in-the-loop / simulación."""
         self._sim_f_hz = f_hz
         if v_v is not None:

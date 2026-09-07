@@ -1,0 +1,68 @@
+# ==============================================================================
+# Open BESS Edge — Docker Ignore Manifest
+# Standard Tier-1: Exclude local artifacts, caches, virtual environments & docs
+# ==============================================================================
+
+# Version Control
+.git
+.gitignore
+.githooks
+.mailmap
+
+# Virtual Environments & Package Managers
+.venv*
+venv*
+env*
+.uv
+dist/
+build/
+*.egg-info/
+
+# Python Caches & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Testing & Coverage
+.coverage*
+coverage.xml
+htmlcov/
+tests/
+benchmarks/
+experimental/
+research/
+
+# IDEs & Editor configs
+.vscode/
+.idea/
+.agent/
+.agents/
+.devcontainer/
+.clusterfuzzlite/
+
+# Documentation & Reports
+docs/
+reports/
+reportes/
+*.md
+!README.md
+!SECURITY.md
+!NOTICE
+!LICENSE
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Scratch & Temporary
+scratch*
+*.log
+mypy_output.txt
+pytest_run.log
+dwg_*.html

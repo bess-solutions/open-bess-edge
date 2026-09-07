@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 open-bess-edge/src/safety/safety_envelope_evaluator.py
 ==============================================================================
@@ -75,15 +74,11 @@ class SafetyEnvelopeEvaluator:
 
         # BESS-GUARD-001: Subtensión de celda
         if v_min_v < v_min_limit:
-            faults.append(
-                f"BESS-GUARD-001: CELL_UNDERVOLTAGE ({v_min_v:.3f}V < {v_min_limit}V)"
-            )
+            faults.append(f"BESS-GUARD-001: CELL_UNDERVOLTAGE ({v_min_v:.3f}V < {v_min_limit}V)")
 
         # BESS-GUARD-002: Sobretensión de celda
         if v_max_v > v_max_limit:
-            faults.append(
-                f"BESS-GUARD-002: CELL_OVERVOLTAGE ({v_max_v:.3f}V > {v_max_limit}V)"
-            )
+            faults.append(f"BESS-GUARD-002: CELL_OVERVOLTAGE ({v_max_v:.3f}V > {v_max_limit}V)")
 
         # BESS-GUARD-003: Sobretemperatura de celda
         if t_max_c > t_max_limit:
@@ -115,9 +110,7 @@ class SafetyEnvelopeEvaluator:
             "t_max_c": t_max_c,
             "isolation_kohm": isolation_kohm,
             "faults_count": len(faults),
-            "status": "SAFE_NORMAL"
-            if not faults
-            else ("WARNING" if is_safe else "CRITICAL_TRIP"),
+            "status": "SAFE_NORMAL" if not faults else ("WARNING" if is_safe else "CRITICAL_TRIP"),
         }
 
         return is_safe, faults, meta

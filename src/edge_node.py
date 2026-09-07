@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 open-bess-edge/src/edge_node.py
 ==============================================================================
@@ -146,9 +145,7 @@ class BESSEdgeNode:
         )
 
         # 6. Despacho de Consignas al PCS vía Modbus
-        commit_ok, _commit_msg = await self.driver.write_setpoints(
-            p_approved_kw, q_target_kvar
-        )
+        commit_ok, _commit_msg = await self.driver.write_setpoints(p_approved_kw, q_target_kvar)
 
         dt_total_ms = (time.monotonic() - t0) * 1000.0
 
@@ -179,9 +176,7 @@ if __name__ == "__main__":
         await node.start()
         print("--- Ciclo Normal (50.00 Hz) ---")
         res1 = await node.step()
-        print(
-            f"P Setpoint: {res1['p_setpoint_kw']} kW | Latencia: {res1['latency_ms']:.2f} ms"
-        )
+        print(f"P Setpoint: {res1['p_setpoint_kw']} kW | Latencia: {res1['latency_ms']:.2f} ms")
 
         print("\n--- Contingencia Severa SEN (49.65 Hz) ---")
         node.driver.inject_simulated_grid_event(49.65)

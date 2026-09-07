@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 open-bess-edge/tests/test_safety_envelope.py
 ==============================================================================

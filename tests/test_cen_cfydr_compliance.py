@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 open-bess-edge/tests/test_cen_cfydr_compliance.py
 ==============================================================================
@@ -154,9 +153,7 @@ def test_cen_cos_phi_p_curve():
     assert meta_zero["status"] == "COS_PHI_REGULATION"
 
     # Con inyección nominal (1000 kW) y cos(phi) = 0.95 -> Q != 0
-    q_act, meta_act = vv.compute_reactive_power(
-        400.0, p_actual_kw=1000.0, target_cos_phi=0.95
-    )
+    q_act, meta_act = vv.compute_reactive_power(400.0, p_actual_kw=1000.0, target_cos_phi=0.95)
     assert q_act > 0.0
     assert meta_act["status"] == "COS_PHI_REGULATION"
 
