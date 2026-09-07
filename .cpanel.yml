@@ -1,4 +1,0 @@
----
-deployment:
-  - destination: /home/besssolu/public_html
-    source: website
