@@ -15,6 +15,35 @@ We celebrate and acknowledge all individuals, organizations, and automated intel
 
 ## 🤖 AI Architectural Assistance & Infrastructure Hardening
 
+<table>
+  <tr>
+    <td align="center" width="220">
+      <a href="https://docs.docker.com/ai/docker-agent/">
+        <img src="https://raw.githubusercontent.com/docker/compose/main/logo.png" width="80" alt="Gordon - Docker AI Assistant" /><br />
+        <b>Gordon</b>
+      </a><br />
+      <sub>Docker AI Assistant</sub><br />
+      <code>gordon@docker.ai</code>
+    </td>
+    <td align="center" width="220">
+      <a href="https://deepmind.google/">
+        <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" width="80" alt="Antigravity - Advanced Agentic Engineering" /><br />
+        <b>Antigravity</b>
+      </a><br />
+      <sub>Google DeepMind</sub><br />
+      <code>Agentic Engineering</code>
+    </td>
+    <td align="center" width="220">
+      <a href="https://bess-solutions.cl">
+        <img src="https://avatars.githubusercontent.com/u/262487238?v=4" width="80" alt="Rodrigo Díaz - BESS Solutions" /><br />
+        <b>Rodrigo Díaz</b>
+      </a><br />
+      <sub>Project Lead & Arch.</sub><br />
+      <code>rdiaz@bess-solutions.cl</code>
+    </td>
+  </tr>
+</table>
+
 * **Gordon — Docker AI Assistant** (`gordon@docker.ai`)
   * Container infrastructure review, multi-stage build optimization, container security hardening (IEC 62443 SL-2 alignment with non-root execution and dropped Linux capabilities), and DevContainer configuration for reproducible edge development.
 * **Antigravity — Advanced Agentic Engineering** (`Google DeepMind`)
