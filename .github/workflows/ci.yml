@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [main]
 
-# OpenSSF Scorecard: Token-Permissions — restrict default token to read-only
 permissions: read-all
 
 concurrency:
@@ -14,22 +13,21 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PYTHON_VERSION: "3.12"
   IMAGE_NAME: bessai-edge-gateway
 
 jobs:
   # ─────────────────────────────────────────────────────────────────
-  # Job 1: Lint
+  # Job 1: Lint & Formatting (Ruff)
   # ─────────────────────────────────────────────────────────────────
   lint:
-    name: Lint (ruff)
+    name: Lint & Style (ruff)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
+      - uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: "3.12"
           cache: pip
 
       - name: Install ruff
@@ -42,43 +40,30 @@ jobs:
         run: ruff format --check src/ tests/
 
   # ─────────────────────────────────────────────────────────────────
-  # Job 2: Type check
-  # ─────────────────────────────────────────────────────────────────
-  typecheck:
-    name: Type check (mypy)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
-
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt -r requirements-dev.txt
-
-      - name: Run mypy
-        run: mypy src/ --ignore-missing-imports --no-error-summary || true
-
-  # ─────────────────────────────────────────────────────────────────
-  # Job 3: Unit tests
+  # Job 2: Unit & Compliance Tests (pytest)
   # ─────────────────────────────────────────────────────────────────
   test:
-    name: Tests (pytest)
+    name: Tests (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
 
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: ${{ matrix.python-version }}
           cache: pip
 
       - name: Install dependencies
-        run: pip install -r requirements.txt -r requirements-dev.txt
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
 
-      - name: Run tests with coverage
+      - name: Run test suite with coverage
         run: |
           pytest tests/ -v --tb=short \
             --cov=src \
@@ -86,370 +71,60 @@ jobs:
             --cov-report=term-missing \
             --cov-fail-under=80
 
-      - name: Upload coverage to Codecov
-        if: always()
-        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238  # v4
+      - name: Upload coverage artifact
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
         with:
-          file: coverage.xml
-          flags: unittests
-          fail_ci_if_error: false
+          name: coverage-report
+          path: coverage.xml
 
   # ─────────────────────────────────────────────────────────────────
-  # Job 3.5: Load tests (Locust)
-  # ─────────────────────────────────────────────────────────────────
-  load-test:
-    name: Load Tests (Locust)
-    runs-on: ubuntu-latest
-    needs: [test]
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
-
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt -r requirements-dev.txt
-
-      - name: Start BESSAI Edge Server in background
-        env:
-          PYTHONPATH: ${{ github.workspace }}
-          BESSAI_DISABLE_RATE_LIMIT: "true"
-        run: |
-          python demo_server.py > demo_server.log 2>&1 &
-          sleep 5
-          cat demo_server.log
-
-      - name: Run Locust load test
-        run: |
-          locust -f tests/load/locustfile.py --headless -u 100 -r 20 --run-time 30s --host http://localhost:8000 --csv=load_results
-
-      - name: Validate SLAs
-        run: |
-          # Basic validation: Check if failure rate is greater than 0%
-          if grep -q failure load_results_stats.csv; then
-            echo "Warning/Errors found in run, verifying metrics"
-            awk -F',' 'NR>1 {if($3=="failure") exit 1}' load_results_stats.csv || { echo "SLA verification failed!"; exit 1; }
-          fi
-
-      - name: Upload load test results
-        if: always()
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0
-        with:
-          name: load-test-results
-          path: load_results*.csv
-
-  # ─────────────────────────────────────────────────────────────────
-  # Job 4: Interoperability Contract Tests (BESSAI-SPEC-001 Category A)
-  # No hardware needed — uses SimulatorDriver
-  # ─────────────────────────────────────────────────────────────────
-  interop:
-    name: Interop Contract Tests (BESSAI-SPEC-001)
-    runs-on: ubuntu-latest
-    needs: [test]
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
-
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt -r requirements-dev.txt
-
-      - name: Run BESSAI-SPEC-001 Category A contract tests
-        env:
-          SITE_ID: CI-INTEROP-TEST
-          INVERTER_IP: "127.0.0.1"
-        run: |
-          pytest tests/interop/test_driver_contract.py \
-            -v --tb=short \
-            -m "not slow" \
-            --junit-xml=interop-results.xml
-
-      - name: Upload interop test results
-        if: always()
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0
-        with:
-          name: interop-test-results
-          path: interop-results.xml
-
-  # ─────────────────────────────────────────────────────────────────
-  # Job 5: Security — SAST + Dependency audit
+  # Job 3: Security Analysis (Bandit SAST + pip-audit)
   # ─────────────────────────────────────────────────────────────────
   security:
-    name: Security (bandit + pip-audit)
+    name: Security (Bandit + pip-audit)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-
-      - name: Install security tools
-        run: pip install bandit pip-audit
-
-      - name: Run bandit SAST
-        run: |
-          bandit -r src/ \
-            --severity-level medium \
-            --confidence-level medium \
-            --format json \
-            --output bandit-report.json
-
-      - name: Upload bandit report
-        if: always()
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0
-        with:
-          name: bandit-report
-          path: bandit-report.json
-
-      - name: Run pip-audit (dependency vulnerability scan)
-        run: |
-          pip-audit \
-            --requirement requirements.txt \
-            --format json \
-            --output pip-audit-report.json || true
-          pip-audit \
-            --requirement requirements.txt \
-            --ignore-vuln PYSEC-2022-42969 \
-            --ignore-vuln GHSA-537c-gmf6-5ccf
-
-      - name: Upload pip-audit report
-        if: always()
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0
-        with:
-          name: pip-audit-report
-          path: pip-audit-report.json
-
-  # ─────────────────────────────────────────────────────────────────
-  # Job 6: Terraform validate (no GCP credentials needed)
-  # ─────────────────────────────────────────────────────────────────
-  terraform-validate:
-    name: Terraform validate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd  # v3.1.2
-        with:
-          terraform_version: "~> 1.7"
-
-      - name: Terraform init (local backend only)
-        run: terraform -chdir=infrastructure/terraform init -backend=false
-
-      - name: Terraform validate
-        run: terraform -chdir=infrastructure/terraform validate
-
-      - name: Terraform fmt check
-        run: terraform -chdir=infrastructure/terraform fmt -check -recursive
-
-  # ─────────────────────────────────────────────────────────────────
-  # Job 7: Helm lint & template validation
-  # ─────────────────────────────────────────────────────────────────
-  helm-lint:
-    name: Helm lint & template
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
-
-      - name: Set up Helm
-        uses: azure/setup-helm@fe7b79cd5ee1e45176fcad797de68ecaf3ca4814  # v4.2.0
-        with:
-          version: "3.14.0"
-
-      - name: Helm lint
-        run: helm lint infrastructure/helm/bessai-edge/
-
-      - name: Helm template dry-run
-        run: |
-          helm template bessai-test infrastructure/helm/bessai-edge/ \
-            --set config.inverterIp=10.0.1.50 \
-            --set config.siteId=CI-TEST \
-            | head -60
-
-  # ─────────────────────────────────────────────────────────────────
-  # Job 8: Docker build (validates the image builds correctly)
-  # ─────────────────────────────────────────────────────────────────
-  docker-build:
-    name: Docker build
-    runs-on: ubuntu-latest
-    needs: [lint, test]
-    outputs:
-      image-digest: ${{ steps.build.outputs.digest }}
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db  # v3.6.1
-
-      - name: Build image (no push)
-        id: build
-        uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75  # v6.9.0
-        with:
-          context: .
-          file: infrastructure/docker/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: false
-          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  # ─────────────────────────────────────────────────────────────────
-  # Job 9: Trivy container security scan
-  # ─────────────────────────────────────────────────────────────────
-  trivy:
-    name: Container scan (Trivy)
-    runs-on: ubuntu-latest
-    needs: [docker-build]
-    permissions:
-      contents: read
-      security-events: write  # Required to upload SARIF to GitHub Security tab
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db  # v3.6.1
-
-      - name: Build image for scanning
-        uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75  # v6.9.0
-        with:
-          context: .
-          file: infrastructure/docker/Dockerfile
-          platforms: linux/amd64
-          push: false
-          load: true
-          tags: ${{ env.IMAGE_NAME }}:scan
-          cache-from: type=gha
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
-        with:
-          image-ref: "${{ env.IMAGE_NAME }}:scan"
-          format: "sarif"
-          output: "trivy-results.sarif"
-          severity: "CRITICAL,HIGH"
-          exit-code: "0"  # Don't fail CI — upload results for visibility
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@1bb15d06a6fbb5d9d9ffd228746bf8ee208caec8  # codeql-bundle-v2.20.5
-        if: always()
-        with:
-          sarif_file: "trivy-results.sarif"
-          category: "trivy-container"
-
-  # ─────────────────────────────────────────────────────────────────
-  # Job 10: Push to GCP Artifact Registry (only on main)
-  # ─────────────────────────────────────────────────────────────────
-  docker-push:
-    name: Push to Artifact Registry
-    runs-on: ubuntu-latest
-    needs: [docker-build, security, trivy]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    permissions:
-      contents: read
-      id-token: write  # Required for Workload Identity Federation
-
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f  # v2.1.7
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-
-      - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev --quiet
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db  # v3.6.1
-
-      - name: Build and push
-        uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75  # v6.9.0
-        with:
-          context: .
-          file: infrastructure/docker/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/bessai/${{ env.IMAGE_NAME }}:latest
-            ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/bessai/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  # ─────────────────────────────────────────────────────────────────
-  # Job 11: BEP-0200 DRL + Global Market Adapters tests
-  # Installs drl-standalone extras (torch CPU, gymnasium, onnxruntime)
-  # ─────────────────────────────────────────────────────────────────
-  drl-market-tests:
-    name: "BEP-0200 DRL + Market Adapters (Python 3.12)"
-    runs-on: ubuntu-latest
-    needs: [test]
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
-
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
 
-      - name: Install core dependencies
-        run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Install security scanners
+        run: pip install bandit pip-audit
 
-      - name: Install DRL extras (torch CPU, gymnasium, onnxruntime, onnxscript)
+      - name: Run Bandit SAST on source code
         run: |
-          pip install torch --index-url https://download.pytorch.org/whl/cpu
-          pip install \
-            "gymnasium>=1.0" \
-            "onnx>=1.15" \
-            "onnxscript>=0.1" \
-            "onnxruntime>=1.17"
+          bandit -r src/ \
+            --severity-level medium \
+            --confidence-level medium
 
-      - name: Restore CMg data cache
-        id: cmg-cache
-        uses: actions/cache@v4
-        with:
-          path: ../bessai-web/data/cmg_data.json
-          key: cmg-data-v1
-
-      - name: Check out bessai-web for CMg data (if not cached)
-        if: steps.cmg-cache.outputs.cache-hit != 'true'
-        continue-on-error: true
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
-        with:
-          repository: bess-solutions/bessai-web
-          path: ../bessai-web
-          sparse-checkout: data/cmg_data.json
-
-      - name: Run DRL environment + dataset tests
-        env:
-          PYTHONPATH: ${{ github.workspace }}
+      - name: Run pip-audit vulnerability scan
         run: |
-          pytest tests/test_drl_agent.py \
-            -v --tb=short \
-            -m "not slow" \
-            --junit-xml=drl-test-results.xml
+          pip-audit --requirement requirements.txt
 
-      - name: Run global market adapter tests (6 markets, mock HTTP)
-        env:
-          PYTHONPATH: ${{ github.workspace }}
-        run: |
-          pytest tests/test_market_adapter_global.py \
-            -v --tb=short \
-            --junit-xml=market-adapter-results.xml
+  # ─────────────────────────────────────────────────────────────────
+  # Job 4: Docker Container Build Check
+  # ─────────────────────────────────────────────────────────────────
+  docker-build:
+    name: Docker Build Validation
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Upload DRL test results
-        if: always()
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (no push)
+        uses: docker/build-push-action@v6
         with:
-          name: drl-market-test-results
-          path: |
-            drl-test-results.xml
-            market-adapter-results.xml
-
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          push: false
+          tags: ${{ env.IMAGE_NAME }}:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

@@ -125,7 +125,6 @@ nav:
     - Battery Data Format (BDF): interoperability/BDF_alignment.md
   - Community:
     - Good First Issues: GOOD_FIRST_ISSUES.md
-    - Academic Collaboration: academic_collaboration.md
     - Research Topics: research_topics.md
   - Benchmarks:
     - BENCHMARK-001 Latency: benchmarks/BENCHMARK-001-latency.md
