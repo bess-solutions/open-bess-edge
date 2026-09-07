@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 open-bess-edge/src/controllers/volt_var_controller.py
 ==============================================================================
@@ -13,8 +12,8 @@ soporte de tensión en el punto de conexión (PCC) según el Código de Red SEN.
 from __future__ import annotations
 
 import time
-from typing import Dict, Any, Tuple
 from enum import Enum
+from typing import Any
 
 
 class ReactiveControlMode(str, Enum):
@@ -33,8 +32,8 @@ class VoltVarController:
         self,
         q_max_kvar: float = 600.0,
         v_nominal_v: float = 400.0,
-        deadband_pct: float = 2.0,       # +/- 2% de banda muerta en tensión
-        slope_k_q: float = 10.0,         # Pendiente de estatismo reactivo (% Qmax / % V)
+        deadband_pct: float = 2.0,  # +/- 2% de banda muerta en tensión
+        slope_k_q: float = 10.0,  # Pendiente de estatismo reactivo (% Qmax / % V)
         mode: ReactiveControlMode = ReactiveControlMode.VOLT_VAR_Q_V,
     ):
         self.q_max_kvar = q_max_kvar
@@ -52,7 +51,7 @@ class VoltVarController:
         p_actual_kw: float = 0.0,
         target_cos_phi: float = 1.0,
         fixed_q_setpoint_kvar: float = 0.0,
-    ) -> Tuple[float, Dict[str, Any]]:
+    ) -> tuple[float, dict[str, Any]]:
         """
         Calcula la consigna de potencia reactiva según el modo operativo.
         Convención de signos:
@@ -82,7 +81,7 @@ class VoltVarController:
                 status = "VOLT_VAR_DEADBAND_IDLE"
 
             # Curva Q(V): Q = - K_q * Q_max * active_dv_pu
-            q_target_kvar = - (self.slope_k_q * self.q_max_kvar * active_dv_pu)
+            q_target_kvar = -(self.slope_k_q * self.q_max_kvar * active_dv_pu)
 
         elif self.mode == ReactiveControlMode.FIXED_Q:
             q_target_kvar = fixed_q_setpoint_kvar
@@ -92,6 +91,7 @@ class VoltVarController:
             # Q = P * tan(acos(cos_phi))
             cos_phi = max(0.8, min(1.0, abs(target_cos_phi)))
             import math
+
             tan_phi = math.tan(math.acos(cos_phi))
             # Si target_cos_phi negativo, modo inductivo
             sign = 1.0 if target_cos_phi >= 0 else -1.0

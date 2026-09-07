@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 open-bess-edge/src/drivers/modbus_client.py
 ==============================================================================
@@ -13,11 +12,10 @@ Soporta reconexión por backoff exponencial y modo simulación determinístico.
 from __future__ import annotations
 
 import asyncio
-import time
 import random
-from dataclasses import dataclass, field
-from typing import Optional, Tuple
 import sys
+import time
+from dataclasses import dataclass
 from pathlib import Path
 
 EDGE_DIR = Path(__file__).resolve().parent.parent
@@ -28,7 +26,7 @@ import structlog
 from pymodbus.client import AsyncModbusTcpClient
 from pymodbus.exceptions import ModbusException
 
-from src.config import edge_settings, ModbusConfig
+from src.config import ModbusConfig, edge_settings
 
 logger = structlog.get_logger(__name__)
 
@@ -36,18 +34,19 @@ logger = structlog.get_logger(__name__)
 @dataclass
 class BESSReadings:
     """Snapshot completo de mediciones físicas del PCS y BMS en un instante."""
+
     timestamp_utc: float
     device_id: str
-    f_measured_hz: float          # Frecuencia de red instantánea (Hz)
-    v_grid_v: float               # Tensión de red RMS (V)
-    p_actual_kw: float            # Potencia activa instantánea (+ = carga, - = descarga)
-    q_actual_kvar: float          # Potencia reactiva (+ = inductivo, - = capacitivo)
-    soc_pct: float                # State of Charge (0.0 a 100.0 %)
-    soh_pct: float                # State of Health (0.0 a 100.0 %)
-    cell_v_min_mv: float          # Voltaje mínimo de celda (mV)
-    cell_v_max_mv: float          # Voltaje máximo de celda (mV)
-    cell_t_max_c: float           # Temperatura máxima de celda (°C)
-    dc_isolation_kohm: float      # Resistencia de aislamiento DC (kOhm)
+    f_measured_hz: float  # Frecuencia de red instantánea (Hz)
+    v_grid_v: float  # Tensión de red RMS (V)
+    p_actual_kw: float  # Potencia activa instantánea (+ = carga, - = descarga)
+    q_actual_kvar: float  # Potencia reactiva (+ = inductivo, - = capacitivo)
+    soc_pct: float  # State of Charge (0.0 a 100.0 %)
+    soh_pct: float  # State of Health (0.0 a 100.0 %)
+    cell_v_min_mv: float  # Voltaje mínimo de celda (mV)
+    cell_v_max_mv: float  # Voltaje máximo de celda (mV)
+    cell_t_max_c: float  # Temperatura máxima de celda (°C)
+    dc_isolation_kohm: float  # Resistencia de aislamiento DC (kOhm)
     read_ok: bool = True
     error_msg: str = ""
 
@@ -58,9 +57,9 @@ class ModbusBESSClient:
     Maneja lectura de telemetría y escritura de consignas de P y Q.
     """
 
-    def __init__(self, config: Optional[ModbusConfig] = None):
+    def __init__(self, config: ModbusConfig | None = None):
         self.cfg = config or edge_settings.modbus
-        self._client: Optional[AsyncModbusTcpClient] = None
+        self._client: AsyncModbusTcpClient | None = None
         self._connected = False
         self._reconnect_delay = self.cfg.reconnect_delay_s
 
@@ -80,7 +79,9 @@ class ModbusBESSClient:
         """Establece la conexión con el PCS/BMS. En modo simulación retorna True de inmediato."""
         if self.cfg.simulation_mode:
             self._connected = True
-            logger.info("modbus_simulation_active", host=self.cfg.host, port=self.cfg.port)
+            logger.info(
+                "modbus_simulation_active", host=self.cfg.host, port=self.cfg.port
+            )
             return True
 
         try:
@@ -93,9 +94,11 @@ class ModbusBESSClient:
             self._connected = self._client.connected
             if self._connected:
                 self._reconnect_delay = self.cfg.reconnect_delay_s
-                logger.info("modbus_connected_ok", host=self.cfg.host, port=self.cfg.port)
+                logger.info(
+                    "modbus_connected_ok", host=self.cfg.host, port=self.cfg.port
+                )
             return self._connected
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("modbus_connect_failed", error=str(exc))
             self._connected = False
             return False
@@ -116,7 +119,9 @@ class ModbusBESSClient:
         sleep_time = min(self._reconnect_delay * jitter, self.cfg.max_reconnect_delay_s)
         logger.warning("modbus_reconnecting", delay_s=sleep_time)
         await asyncio.sleep(sleep_time)
-        self._reconnect_delay = min(self._reconnect_delay * 2.0, self.cfg.max_reconnect_delay_s)
+        self._reconnect_delay = min(
+            self._reconnect_delay * 2.0, self.cfg.max_reconnect_delay_s
+        )
         return await self.connect()
 
     async def read_telemetry(self) -> BESSReadings:
@@ -148,10 +153,18 @@ class ModbusBESSClient:
                 return BESSReadings(
                     timestamp_utc=now,
                     device_id=device_id,
-                    f_measured_hz=50.0, v_grid_v=0.0, p_actual_kw=0.0, q_actual_kvar=0.0,
-                    soc_pct=0.0, soh_pct=0.0, cell_v_min_mv=0.0, cell_v_max_mv=0.0,
-                    cell_t_max_c=0.0, dc_isolation_kohm=0.0,
-                    read_ok=False, error_msg="Modbus link offline",
+                    f_measured_hz=50.0,
+                    v_grid_v=0.0,
+                    p_actual_kw=0.0,
+                    q_actual_kvar=0.0,
+                    soc_pct=0.0,
+                    soh_pct=0.0,
+                    cell_v_min_mv=0.0,
+                    cell_v_max_mv=0.0,
+                    cell_t_max_c=0.0,
+                    dc_isolation_kohm=0.0,
+                    read_ok=False,
+                    error_msg="Modbus link offline",
                 )
 
         try:
@@ -180,19 +193,27 @@ class ModbusBESSClient:
                 dc_isolation_kohm=float(regs[9]),
                 read_ok=True,
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("modbus_read_failure", error=str(exc))
             self._connected = False
             return BESSReadings(
                 timestamp_utc=now,
                 device_id=device_id,
-                f_measured_hz=50.0, v_grid_v=0.0, p_actual_kw=0.0, q_actual_kvar=0.0,
-                soc_pct=0.0, soh_pct=0.0, cell_v_min_mv=0.0, cell_v_max_mv=0.0,
-                cell_t_max_c=0.0, dc_isolation_kohm=0.0,
-                read_ok=False, error_msg=str(exc),
+                f_measured_hz=50.0,
+                v_grid_v=0.0,
+                p_actual_kw=0.0,
+                q_actual_kvar=0.0,
+                soc_pct=0.0,
+                soh_pct=0.0,
+                cell_v_min_mv=0.0,
+                cell_v_max_mv=0.0,
+                cell_t_max_c=0.0,
+                dc_isolation_kohm=0.0,
+                read_ok=False,
+                error_msg=str(exc),
             )
 
-    async def write_setpoints(self, p_kw: float, q_kvar: float) -> Tuple[bool, str]:
+    async def write_setpoints(self, p_kw: float, q_kvar: float) -> tuple[bool, str]:
         """Escribe las consignas de potencia activa y reactiva calculadas por los controladores."""
         if self.cfg.simulation_mode:
             self._sim_p_kw = p_kw
@@ -206,8 +227,8 @@ class ModbusBESSClient:
 
         try:
             # Conversión a enteros con signo de 16-bit
-            val_p = self._to_unsigned16(int(round(p_kw)))
-            val_q = self._to_unsigned16(int(round(q_kvar)))
+            val_p = self._to_unsigned16(round(p_kw))
+            val_q = self._to_unsigned16(round(q_kvar))
 
             res_p = await self._client.write_register(
                 address=self.cfg.reg_p_setpoint_kw,
@@ -224,11 +245,13 @@ class ModbusBESSClient:
                 return False, f"Modbus write error: P={res_p}, Q={res_q}"
 
             return True, "SETPOINTS_COMMITTED"
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             self._connected = False
             return False, f"Modbus exception: {exc}"
 
-    def inject_simulated_grid_event(self, f_hz: float, v_v: Optional[float] = None) -> None:
+    def inject_simulated_grid_event(
+        self, f_hz: float, v_v: float | None = None
+    ) -> None:
         """Método para pruebas dinámicas de hardware-in-the-loop / simulación."""
         self._sim_f_hz = f_hz
         if v_v is not None:

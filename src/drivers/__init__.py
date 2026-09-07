@@ -1,4 +1,4 @@
 # open-bess-edge/src/drivers/__init__.py
-from .modbus_client import ModbusBESSClient, BESSReadings
+from .modbus_client import BESSReadings, ModbusBESSClient
 
-__all__ = ["ModbusBESSClient", "BESSReadings"]
+__all__ = ["BESSReadings", "ModbusBESSClient"]

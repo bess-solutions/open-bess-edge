@@ -24,12 +24,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /build
 
 # Copy dependency manifest first to leverage Docker layer cache
-COPY requirements.txt .
+COPY pyproject.toml .
+COPY config/ config/
+COPY src/ src/
 
-# Create isolated virtual environment and install deps
+# Create isolated virtual environment and install package
 RUN python -m venv /opt/venv && \
     /opt/venv/bin/pip install --upgrade pip && \
-    /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
+    /opt/venv/bin/pip install --no-cache-dir .
 
 
 # ── Stage 2: Runtime ─────────────────────────────────────────────────────────

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 open-bess-edge/src/controllers/ffr_droop_controller.py
 ==============================================================================
@@ -14,8 +13,8 @@ según los estándares del Coordinador Eléctrico Nacional (SEN de Chile).
 from __future__ import annotations
 
 import time
-from typing import Dict, Any, Tuple, Optional
 from collections import deque
+from typing import Any
 
 
 class FFRDroopController:
@@ -28,22 +27,26 @@ class FFRDroopController:
         self,
         p_nominal_kw: float = 1000.0,
         f_nominal_hz: float = 50.0,
-        droop_r: float = 0.03,                           # Estatismo s = 3% (rango 0.02 - 0.05)
-        deadband_hz: float = 0.03,                        # Banda muerta oficial CEN: +/- 30 mHz
-        ffr_contingency_threshold_hz: float = 0.30,      # Umbral FFR de emergencia: +/- 300 mHz
-        normal_ramp_limit_pct_min: float = 20.0,         # Rampa normal en cuasiestacionario: <= 20% Pn/min
+        droop_r: float = 0.03,  # Estatismo s = 3% (rango 0.02 - 0.05)
+        deadband_hz: float = 0.03,  # Banda muerta oficial CEN: +/- 30 mHz
+        ffr_contingency_threshold_hz: float = 0.30,  # Umbral FFR de emergencia: +/- 300 mHz
+        normal_ramp_limit_pct_min: float = 20.0,  # Rampa normal en cuasiestacionario: <= 20% Pn/min
         min_soc_pct: float = 5.0,
         max_soc_pct: float = 95.0,
     ):
         if not (0.01 <= droop_r <= 0.10):
-            raise ValueError(f"Droop {droop_r} fuera de límites técnicos admisibles (0.01 a 0.10)")
+            raise ValueError(
+                f"Droop {droop_r} fuera de límites técnicos admisibles (0.01 a 0.10)"
+            )
 
         self.p_nominal_kw = p_nominal_kw
         self.f_nominal_hz = f_nominal_hz
         self.droop_r = droop_r
         self.deadband_hz = deadband_hz
         self.ffr_threshold_hz = ffr_contingency_threshold_hz
-        self.normal_ramp_rate_kw_per_sec = (normal_ramp_limit_pct_min / 100.0 * p_nominal_kw) / 60.0
+        self.normal_ramp_rate_kw_per_sec = (
+            normal_ramp_limit_pct_min / 100.0 * p_nominal_kw
+        ) / 60.0
         self.min_soc = min_soc_pct
         self.max_soc = max_soc_pct
 
@@ -52,20 +55,20 @@ class FFRDroopController:
 
         # Registro de contingencia para auditar Aporte @10s y @2min
         self.contingency_active: bool = False
-        self.contingency_start_time: Optional[float] = None
+        self.contingency_start_time: float | None = None
         self.event_history: deque = deque(maxlen=3600)  # búfer de 1 hora a 1 Hz
-        self.aporte_10s_kw: Optional[float] = None
-        self.aporte_2min_kw: Optional[float] = None
+        self.aporte_10s_kw: float | None = None
+        self.aporte_2min_kw: float | None = None
 
     def compute_response(
         self,
         f_measured_hz: float,
         p_base_kw: float = 0.0,
         soc_pct: float = 50.0,
-    ) -> Tuple[float, Dict[str, Any]]:
+    ) -> tuple[float, dict[str, Any]]:
         """
         Calcula la consigna de potencia activa de acuerdo a la desviación de frecuencia.
-        
+
         Retorna:
             (p_target_kw, telemetry_dict)
         """
@@ -110,10 +113,12 @@ class FFRDroopController:
 
         # 5. Envolvente por Estado de Carga (SoC Protection)
         # Si subfrecuencia y SoC crítico, no se puede descargar
-        if raw_target_p > 0 and soc_pct <= self.min_soc:
-            raw_target_p = 0.0
-        # Si sobrefrecuencia y batería llena, no se puede cargar
-        elif raw_target_p < 0 and soc_pct >= self.max_soc:
+        if (
+            raw_target_p > 0
+            and soc_pct <= self.min_soc
+            or raw_target_p < 0
+            and soc_pct >= self.max_soc
+        ):
             raw_target_p = 0.0
 
         # Saturación a límites nominales de placa del inversor [-P_nom, +P_nom]
