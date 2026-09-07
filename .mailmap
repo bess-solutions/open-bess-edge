@@ -1,7 +1,9 @@
 # Git Mailmap for BESSAI Edge Gateway
 # Canonical author mappings for clean git log and contributor metrics
+# Maps AI assistant identities to verified Docker accounts for GitHub UI attribution
+
+docker-agent <279097899+docker-agent@users.noreply.github.com> Gordon - Docker AI Assistant <gordon@docker.ai>
+docker-agent <279097899+docker-agent@users.noreply.github.com> Gordon <gordon@docker.com>
 
 BESS Solutions Engineering Team <contact@bess-solutions.cl> <bess.solutions.cl@gmail.com>
 Rodrigo Díaz <rdiaz@bess-solutions.cl>
-Gordon - Docker AI Assistant <279097899+docker-agent@users.noreply.github.com> <gordon@docker.ai>
-Gordon - Docker AI Assistant <279097899+docker-agent@users.noreply.github.com> <gordon@docker.com>
