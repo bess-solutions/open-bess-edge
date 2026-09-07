@@ -1,0 +1,47 @@
+{
+  "schema_version": "BDF-1.0-LFE",
+  "device_id": "OPEN_BESS_EDGE_LINARES_01",
+  "records_count": 5,
+  "data": [
+    {
+      "timestamp": 1788750071.3070302,
+      "pack_voltage_v": 716.8,
+      "pack_current_a": -150.0,
+      "temperature_c": 24.5,
+      "state_of_charge": 65.0,
+      "state_of_health": 99.8
+    },
+    {
+      "timestamp": 1788750071.3070335,
+      "pack_voltage_v": 716.8,
+      "pack_current_a": -150.0,
+      "temperature_c": 24.5,
+      "state_of_charge": 65.0,
+      "state_of_health": 99.8
+    },
+    {
+      "timestamp": 1788750071.3070354,
+      "pack_voltage_v": 716.8,
+      "pack_current_a": -150.0,
+      "temperature_c": 24.5,
+      "state_of_charge": 65.0,
+      "state_of_health": 99.8
+    },
+    {
+      "timestamp": 1788750071.3070362,
+      "pack_voltage_v": 716.8,
+      "pack_current_a": -150.0,
+      "temperature_c": 24.5,
+      "state_of_charge": 65.0,
+      "state_of_health": 99.8
+    },
+    {
+      "timestamp": 1788750071.3070366,
+      "pack_voltage_v": 716.8,
+      "pack_current_a": -150.0,
+      "temperature_c": 24.5,
+      "state_of_charge": 65.0,
+      "state_of_health": 99.8
+    }
+  ]
+}

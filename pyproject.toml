@@ -1,225 +1,54 @@
-# pyproject.toml — BESSAI Edge Gateway
-# PEP 517/518 compliant: package metadata + tool configuration
-
-# ---------------------------------------------------------------------------
-# Build system
-# ---------------------------------------------------------------------------
 [build-system]
-requires      = ["hatchling>=1.21"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-# ---------------------------------------------------------------------------
-# Package metadata (PEP 621)
-# ---------------------------------------------------------------------------
 [project]
-name            = "bessai-edge"
-version         = "2.17.1"
-description     = "Open-source industrial BESS gateway: Modbus, IEEE 2030.5, IEC 62443, MQTT, OpenTelemetry, Prometheus"
-readme          = "README.md"
-license         = { file = "LICENSE" }
+name = "open-bess-edge"
+version = "2.0.0"
+description = "Mission-Critical Industrial Edge Gateway & Frequency Response Controller for Battery Energy Storage Systems (BESS)"
+readme = "README.md"
 requires-python = ">=3.10"
-authors         = [{ name = "BESS Solutions", email = "ingenieria@bess-solutions.cl" }]
-keywords        = [
-    "BESS", "battery-energy-storage", "Modbus", "IIoT",
-    "anomaly-detection", "edge-AI", "ONNX", "industrial-control",
-    "NTSyCS", "IEC62443", "GCP", "DRL", "PPO", "arbitrage",
-    "CAISO", "ERCOT", "ENTSOE", "SEN", "market-adapter",
+license = "Apache-2.0"
+authors = [
+    { name = "BESS Solutions Engineering Team", email = "contacto@bess-solutions.cl" }
+]
+keywords = [
+    "bess", "battery-energy-storage", "grid-code", "ffr", "droop-control",
+    "cen-chile", "ntsycs", "modbus", "edge-computing", "linux-foundation-energy"
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Developers",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Manufacturing",
     "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
     "License :: OSI Approved :: Apache Software License",
-    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.14",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    "Topic :: System :: Hardware",
-    "Topic :: Utilities",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-    "pydantic-settings>=2.2",
-    "pymodbus>=3.6",
-    "scikit-learn>=1.4",
-    "onnxruntime>=1.17",
-    "google-cloud-pubsub>=2.20",
-    "opentelemetry-sdk>=1.23",
-    "opentelemetry-exporter-otlp>=1.23",
-    "prometheus-client>=0.20",
-    "structlog>=24.1",
-    "aiohttp>=3.9",
-    "numpy>=1.26",
+    "pymodbus>=3.8.0",
+    "pydantic>=2.7.0",
+    "pyyaml>=6.0.0",
+    "structlog>=24.0.0",
 ]
 
 [project.optional-dependencies]
+research = [
+    "pybamm>=24.1",
+    "pandas>=2.0.0",
+    "pyarrow>=14.0.0",
+]
 dev = [
-    "pytest>=8.0", "pytest-asyncio>=0.23", "pytest-cov>=4.1",
-    "ruff>=0.3", "mypy>=1.9", "bandit>=1.7", "pip-audit>=2.7",
-]
-docs = [
-    "mkdocs-material>=9.5", "mkdocs-minify-plugin>=0.8",
-]
-# BEP-0200: DRL Arbitrage Agent — only needed for training, not runtime
-drl = [
-    "gymnasium>=0.29",
-    "ray[rllib]>=2.9",
-    "torch>=2.2",
-    "onnx>=1.15",
-]
-# Simulation / RL environment only (without full Ray RLlib)
-sim = [
-    "gymnasium>=0.29",
-]
-# BEP-0215: MILP day-ahead optimizer
-milp = [
-    "pulp>=2.8",
-    "highspy>=1.7",
-]
-# BEP-0220: Multi-agent MARL / VPP fleet
-marl = [
-    "gymnasium>=0.29",
-    "pettingzoo>=1.24",
-]
-# BEP-0200 Phase 3: DRL without Ray (torch-only, compatible with Py 3.12+)
-drl-standalone = [
-    "gymnasium>=1.0",
-    "torch>=2.5",
-    "onnx>=1.15",
-    "onnxscript>=0.1",
-    "onnxruntime>=1.17",
-]
-# Full DRL stack (all optional deps)
-full = [
-    "gymnasium>=0.29",
-    "ray[rllib]>=2.9",
-    "torch>=2.2",
-    "onnx>=1.15",
-    "pulp>=2.8",
-    "highspy>=1.7",
-    "pettingzoo>=1.24",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
 ]
 
 [project.scripts]
-bessai-edge = "bessai_edge.cli:main"
-
-[project.urls]
-Homepage      = "https://bess-solutions.github.io/open-bess-edge/"
-Repository    = "https://github.com/bess-solutions/open-bess-edge"
-Documentation = "https://bess-solutions.github.io/open-bess-edge/"
-"Bug Tracker" = "https://github.com/bess-solutions/open-bess-edge/issues"
-Changelog     = "https://github.com/bess-solutions/open-bess-edge/blob/main/CHANGELOG.md"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src"]
+open-bess-edge = "src.edge_node:main"
 
 [tool.pytest.ini_options]
-testpaths       = ["tests"]
-asyncio_mode    = "auto"
-log_cli         = true
-log_cli_level   = "WARNING"
-addopts         = "-v --tb=short"
-markers = [
-    "integration: marks tests as integration tests (require real device)",
-    "unit: marks tests as pure unit tests (mocked)",
-    "slow: marks tests as slow (excluded from CI fast path with -m 'not slow')",
-    "asyncio: marks tests as async (used by pytest-asyncio)",
-]
-
-# ---------------------------------------------------------------------------
-# Ruff — linter + formatter (reemplaza flake8 + black + isort)
-# ---------------------------------------------------------------------------
-[tool.ruff]
-line-length    = 99
-target-version = "py310"
-src            = ["src", "tests"]
-
-[tool.ruff.lint]
-select = [
-    "E", "W",   # pycodestyle
-    "F",        # pyflakes
-    "I",        # isort
-    "B",        # bugbear
-    "UP",       # pyupgrade
-    "C90",      # mccabe complexity
-]
-ignore = [
-    "E501",     # line-length (handled by formatter)
-]
-
-[tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S101", "ARG"]   # allow assert + unused args in tests
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-
-# ---------------------------------------------------------------------------
-# Mypy — strict-ish type checking
-# ---------------------------------------------------------------------------
-[tool.mypy]
-python_version         = "3.12"
-warn_return_any        = true
-warn_unused_configs    = true
-ignore_missing_imports = true
-no_error_summary       = true
-exclude                = ["^tests/integration/"]
-
-[[tool.mypy.overrides]]
-module = ["pymodbus.*", "gcloud.*", "opentelemetry.*", "prometheus_client.*"]
-ignore_missing_imports = true
-
-# ---------------------------------------------------------------------------
-# Coverage
-# ---------------------------------------------------------------------------
-[tool.coverage.run]
-source   = ["src"]
-omit     = [
-    "src/**/__init__.py",
-    # Infrastructure modules requiring GCP credentials / OTel collector
-    "src/interfaces/otel_setup.py",
-    "src/interfaces/pubsub_publisher.py",
-    "src/core/main.py",
-    # Partial stubs (production path only — tested via integration)
-    "src/interfaces/sun2000_monitor.py",
-]
-
-[tool.coverage.report]
-fail_under  = 80
-show_missing = true
-
-# ---------------------------------------------------------------------------
-# Bandit — Python SAST (Security Static Analysis)
-# ---------------------------------------------------------------------------
-[tool.bandit]
-skips = [
-    "B101",   # assert_used — acceptable in tests (excluded via exclude)
-    "B311",   # random — we use random only for simulation, not crypto
-    "B603",   # subprocess_without_shell_equals_true — not applicable
-    "B404",   # import_subprocess — used only in scripts/
-]
-exclude_dirs = ["tests", ".venv", ".git"]
-
-# ---------------------------------------------------------------------------
-# Codecov — coverage reporting
-# ---------------------------------------------------------------------------
-[tool.codecov]
-# Settings are mostly in codecov.yml, but minimum thresholds here:
-patch_coverage_threshold = 70
-
-# ---------------------------------------------------------------------------
-# CHANGELOG excerpt v2.15.2 (2026-03-12)
-# ---------------------------------------------------------------------------
-# BEP-0200 Phase 3:
-#   + bess_rl_env_cen.py: Gymnasium env using real CEN/SEN CMg V4 data (15-min All Nodes)
-#   + train_cen_standalone.py: PPO trainer (torch-only, no Ray) → ONNX
-#   + 8× _drl_cen_v1.onnx models (p95 latency < 0.1ms, best_reward=374 USD)
-# Sprint C — Global Market Adapters:
-#   + CAISOAdapter, ERCOTAdapter, ENTSOEAdapter (9 EU zones)
-#   + test_market_adapter_global.py: 62 tests, 7 markets, mock HTTP
-# CI/tooling:
-#   + drl-standalone optional dep group
-#   + codecov config
-#   + Python 3.14 classifier
+asyncio_mode = "auto"
+testpaths = ["tests"]

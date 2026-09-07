@@ -1,0 +1,35 @@
+{
+  "chemistry": "LFP_314Ah",
+  "cell_limits": {
+    "voltage_min_v": 2.50,
+    "voltage_max_v": 3.65,
+    "voltage_nominal_v": 3.20,
+    "temp_min_c": -10.0,
+    "temp_max_c": 50.0,
+    "temp_opt_min_c": 15.0,
+    "temp_opt_max_c": 35.0,
+    "max_cell_imbalance_mv": 50.0
+  },
+  "rack_limits": {
+    "string_voltage_min_v": 1040.0,
+    "string_voltage_max_v": 1518.4,
+    "max_charge_c_rate": 0.50,
+    "max_discharge_c_rate": 1.00,
+    "max_ambient_temp_c": 45.0,
+    "dc_isolation_min_kohm": 500.0
+  },
+  "guard_codes": {
+    "BESS-GUARD-001": "CELL_UNDERVOLTAGE_TRIP",
+    "BESS-GUARD-002": "CELL_OVERVOLTAGE_TRIP",
+    "BESS-GUARD-003": "CELL_OVERTEMPERATURE_TRIP",
+    "BESS-GUARD-004": "DC_ISOLATION_FAULT",
+    "BESS-GUARD-005": "CELL_IMBALANCE_WARNING"
+  },
+  "safety_actions": {
+    "voltage_violation": "TRIP_DC_BREAKER",
+    "thermal_warning": "DERATE_50_PERCENT",
+    "thermal_critical": "EMERGENCY_SHUTDOWN_AND_HVAC_BOOST",
+    "isolation_fault": "ISOLATE_RACK_AND_ALARM_CEN"
+  },
+  "standard_ref": "SEC RIC N° 01/02 & NFPA 855"
+}

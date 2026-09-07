@@ -1,0 +1,47 @@
+# ==============================================================================
+# Open BESS Edge — Configuración Canónica de Nodo de Borde Industrial
+# Alineado con NTSyCS Capítulo 3 y Estudio CFyDR 2026 del CEN
+# ==============================================================================
+
+bess:
+  device_id: "bess-node-linares-01"
+  site_name: "S/E Linares 66/15 kV"
+  chemistry: "LFP_314Ah"
+  p_nominal_mw: 1.0
+  e_nominal_mwh: 2.0
+  v_nominal_ac_v: 400.0
+  max_charge_c_rate: 0.5
+  max_discharge_c_rate: 1.0
+
+grid:
+  f_nominal_hz: 50.0
+  deadband_hz: 0.03          # +/- 30 mHz (Estudio CFyDR 2026 CEN)
+  droop_r: 0.03              # Estatismo s = 3% (rango admisible 2% a 5%)
+  ffr_contingency_threshold_hz: 0.30  # Disparo FFR de emergencia si |delta_f| > 300 mHz
+  ffr_max_response_time_ms: 500.0     # Respuesta completa en t < 500 ms
+  normal_ramp_limit_pct_min: 20.0     # Limitador de rampa normal <= 20% Pn/min
+  volt_var_deadband_pct: 2.0          # Banda muerta Q(V) +/- 2%
+  q_max_mvar: 0.6                     # Potencia reactiva máxima +/- 0.6 MVAR (cos phi 0.85)
+
+modbus:
+  host: "127.0.0.1"
+  port: 502
+  unit_id: 1
+  timeout_s: 3.0
+  reconnect_delay_s: 2.0
+  max_reconnect_delay_s: 30.0
+  simulation_mode: true      # Fallback a simulación determinística si no hay hardware
+
+  # Registros Holding
+  reg_f_measured_x100: 100
+  reg_v_grid_v: 101
+  reg_p_actual_kw: 102
+  reg_q_actual_kvar: 103
+  reg_soc_pct_x10: 104
+  reg_soh_pct_x10: 105
+  reg_cell_v_min_mv: 106
+  reg_cell_v_max_mv: 107
+  reg_cell_t_max_c_x10: 108
+  reg_dc_isolation_kohm: 109
+  reg_p_setpoint_kw: 200
+  reg_q_setpoint_kvar: 201
