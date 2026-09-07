@@ -8,8 +8,11 @@ Parámetros de red del Coordinador Eléctrico Nacional (CEN) y hardware BESS.
 
 from pathlib import Path
 
+import structlog
 import yaml
 from pydantic import BaseModel, Field
+
+logger = structlog.get_logger(__name__)
 
 EDGE_ROOT = Path(__file__).resolve().parent.parent
 CONFIG_YAML_PATH = EDGE_ROOT / "config" / "edge_config.yaml"
@@ -103,9 +106,26 @@ class EdgeConfig(BaseModel):
                     raw_data = yaml.safe_load(fh)
                     if isinstance(raw_data, dict):
                         return cls.model_validate(raw_data)
-            except (OSError, yaml.YAMLError, ValueError):
-                pass
+                    logger.warning(
+                        "config_yaml_not_dict",
+                        path=str(cfg_path),
+                        type=type(raw_data).__name__,
+                    )
+            except (OSError, yaml.YAMLError, ValueError) as exc:
+                logger.error(
+                    "config_yaml_parse_error",
+                    path=str(cfg_path),
+                    error=str(exc),
+                    fallback="defaults",
+                )
+        else:
+            logger.info("config_yaml_not_found_using_defaults", path=str(cfg_path))
         return cls()
+
+
+def load_config(path: Path | None = None) -> EdgeConfig:
+    """Carga y valida la configuración del edge gateway."""
+    return EdgeConfig.load_from_yaml(path)
 
 
 # Instancia global por defecto

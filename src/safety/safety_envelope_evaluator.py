@@ -14,6 +14,10 @@ import json
 from pathlib import Path
 from typing import Any
 
+import structlog
+
+logger = structlog.get_logger(__name__)
+
 EDGE_ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_BASELINE = EDGE_ROOT / "data" / "bess_safety_baseline.json"
 
@@ -31,9 +35,26 @@ class SafetyEnvelopeEvaluator:
     def _load_baseline(self) -> dict[str, Any]:
         if self.baseline_path.exists():
             try:
-                return json.loads(self.baseline_path.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError):
-                pass
+                raw = json.loads(self.baseline_path.read_text(encoding="utf-8"))
+                if isinstance(raw, dict):
+                    return raw
+                logger.warning(
+                    "safety_baseline_not_dict",
+                    path=str(self.baseline_path),
+                    type=type(raw).__name__,
+                )
+            except (OSError, json.JSONDecodeError) as exc:
+                logger.error(
+                    "safety_baseline_load_failed",
+                    path=str(self.baseline_path),
+                    error=str(exc),
+                    fallback="hardcoded_defaults",
+                )
+        else:
+            logger.info(
+                "safety_baseline_not_found_using_defaults",
+                path=str(self.baseline_path),
+            )
         return {
             "cell_limits": {
                 "voltage_min_v": 2.50,

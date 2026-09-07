@@ -121,3 +121,19 @@ def test_inverter_setpoint_clipping_c_rate():
     assert ok is True
     assert p_clipped_ch == -1000.0
     assert "CLIPPED_MAX_CHARGE" in reason_ch
+
+
+def test_safety_envelope_corrupted_baseline(tmp_path: Path):
+    corrupted_file = tmp_path / "corrupted_baseline.json"
+    corrupted_file.write_text("{ INVALID JSON CORRUPTED DATA !!!", encoding="utf-8")
+
+    evaluator = SafetyEnvelopeEvaluator(baseline_path=corrupted_file)
+    assert evaluator.baseline["cell_limits"]["voltage_min_v"] == 2.50
+    assert evaluator.baseline["cell_limits"]["voltage_max_v"] == 3.65
+
+
+def test_safety_envelope_missing_baseline(tmp_path: Path):
+    missing_file = tmp_path / "non_existent_baseline.json"
+
+    evaluator = SafetyEnvelopeEvaluator(baseline_path=missing_file)
+    assert evaluator.baseline["rack_limits"]["dc_isolation_min_kohm"] == 500.0
