@@ -311,6 +311,20 @@ docker run -d \
 
 ---
 
+## 🤖 Infraestructura y Asistencia de IA
+
+<div align="center">
+
+[![Docker AI](https://img.shields.io/badge/Asistencia%20IA-Docker%20AI%20(Gordon)-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/ai/docker-agent/)
+[![Dev Container](https://img.shields.io/badge/Dev%20Container-VS%20Code%20%7C%20Codespaces-blue?logo=visualstudiocode&logoColor=white)](.devcontainer/devcontainer.json)
+[![IEC 62443 Hardened](https://img.shields.io/badge/Security-Hardened%20(IEC%2062443)-green?logo=docker&logoColor=white)](Dockerfile.hardened)
+
+</div>
+
+Este proyecto incorpora optimizaciones de infraestructura, DevContainers reproducibles y perfiles de contenedor endurecidos bajo IEC 62443 con asistencia de **Docker AI Assistant (Gordon)**, complementado con la ingeniería de control y calibración de red de **Antigravity (Google DeepMind)**. Consulte [CONTRIBUTORS.md](CONTRIBUTORS.md) para detalles de atribución.
+
+---
+
 ## 📄 Licencia y Gobernanza
 
 Este software es de código abierto y está distribuido bajo la licencia **Apache 2.0**.  

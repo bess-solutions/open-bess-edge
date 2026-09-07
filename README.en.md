@@ -250,6 +250,20 @@ docker run -d \
 
 ---
 
+## 🤖 Infrastructure & AI Architectural Assistance
+
+<div align="center">
+
+[![Docker AI](https://img.shields.io/badge/AI%20Assistance-Docker%20AI%20(Gordon)-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/ai/docker-agent/)
+[![Dev Container](https://img.shields.io/badge/Dev%20Container-VS%20Code%20%7C%20Codespaces-blue?logo=visualstudiocode&logoColor=white)](.devcontainer/devcontainer.json)
+[![IEC 62443 Hardened](https://img.shields.io/badge/Security-Hardened%20(IEC%2062443)-green?logo=docker&logoColor=white)](Dockerfile.hardened)
+
+</div>
+
+This project incorporates container infrastructure hardening, reproducible DevContainers, and unprivileged IEC 62443 security profiles developed with assistance from **Docker AI Assistant (Gordon)**, complemented by grid control engineering and SEN Chile market calibration by **Antigravity (Google DeepMind)**. See [CONTRIBUTORS.md](CONTRIBUTORS.md) for full attribution.
+
+---
+
 ## 📄 License & Governance
 
 Distributed under the **Apache 2.0** License. See [LICENSE](LICENSE) for details.
