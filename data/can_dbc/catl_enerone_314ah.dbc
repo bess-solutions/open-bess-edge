@@ -1,0 +1,64 @@
+VERSION ""
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_: BMU_Master CMU_Module1 Inverter_PCS
+
+BO_ 402777588 CATL_CellVoltages_Mod1: 8 CMU_Module1
+ SG_ ModuleID : 0|8@1+ (1,0) [0|255] "" BMU_Master
+ SG_ CellCount : 8|8@1+ (1,0) [1|16] "" BMU_Master
+ SG_ Cell1_Voltage : 16|16@1+ (0.001,0) [0|5] "V" BMU_Master
+ SG_ Cell2_Voltage : 32|16@1+ (0.001,0) [0|5] "V" BMU_Master
+ SG_ Cell3_Voltage : 48|16@1+ (0.001,0) [0|5] "V" BMU_Master
+
+BO_ 402843124 CATL_CellTemps_Mod1: 8 CMU_Module1
+ SG_ ModuleID : 0|8@1+ (1,0) [0|255] "" BMU_Master
+ SG_ TempSensorCount : 8|8@1+ (1,0) [1|8] "" BMU_Master
+ SG_ Temp1_C : 16|8@1+ (1,-40) [-40|120] "degC" BMU_Master
+ SG_ Temp2_C : 24|8@1+ (1,-40) [-40|120] "degC" BMU_Master
+ SG_ Temp3_C : 32|8@1+ (1,-40) [-40|120] "degC" BMU_Master
+ SG_ Temp4_C : 40|8@1+ (1,-40) [-40|120] "degC" BMU_Master
+
+BO_ 402908660 CATL_Pack_MasterStatus: 8 BMU_Master
+ SG_ Pack_Voltage : 0|16@1+ (0.1,0) [0|1500] "V" Inverter_PCS
+ SG_ Pack_Current : 16|16@1+ (0.1,-500) [-500|500] "A" Inverter_PCS
+ SG_ Pack_SOC : 32|16@1+ (0.1,0) [0|100] "%" Inverter_PCS
+ SG_ Pack_SOH : 48|8@1+ (1,0) [0|100] "%" Inverter_PCS
+ SG_ Contactor_Status : 56|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ Thermal_Runaway_Warning : 57|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ Cell_Imbalance_Alarm : 58|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ Insulation_Fault : 59|1@1+ (1,0) [0|1] "" Inverter_PCS
+
+CM_ BO_ 402777588 "Trama de medicion de voltajes celda a celda CATL EnerOne 314Ah";
+CM_ BO_ 402843124 "Arreglo de sensores NTC termicos de celda y busbar";
+CM_ BO_ 402908660 "Estado general de potencia, corriente y banderas de seguridad de rack";

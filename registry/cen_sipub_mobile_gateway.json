@@ -1,0 +1,64 @@
+{
+  "$schema": "https://bessai.io/schemas/device-profile/v2.json",
+  "profile_version": "2.0.0",
+  "device": {
+    "manufacturer": "Coordinador Eléctrico Nacional (CEN Chile)",
+    "model": "SIPUB Mobile Gateway API",
+    "description": "Gateway telemétrico oficial del Coordinador Eléctrico Nacional para Costo Marginal y Demanda SEN. Extraído de cen.app.coordinador.",
+    "firmware_reference": "SIPUB v3 / v4 REST Architecture",
+    "protocol": "REST_HTTPS",
+    "auth_type": "user_key_query_param"
+  },
+  "connection": {
+    "base_urls": [
+      "https://sipub.api.coordinador.cl",
+      "https://sipubv1.api.coordinador.cl"
+    ],
+    "timeout_seconds": 5,
+    "retries": 3
+  },
+  "endpoints": {
+    "costo_marginal_online": {
+      "url": "https://sipub.api.coordinador.cl/costos-marginales-online-8b/v4/findAll",
+      "method": "GET",
+      "user_key": "028f23746cc6a4dd0648a6feae8a32ad",
+      "frequency": "Tiempo real (cada 1 hora / online)",
+      "description": "Costos Marginales online para barras principales del SEN (Atacama, Cardones, Charrúa, Crucero, Quillota, etc.)"
+    },
+    "costo_marginal_programado": {
+      "url": "https://sipub.api.coordinador.cl/mobile/cmg-programados/v4/findAll",
+      "method": "GET",
+      "user_key": "028f23746cc6a4dd0648a6feae8a32ad",
+      "frequency": "Diario / Horario",
+      "description": "Costos marginales programados ex-ante por bloque horario para optimización de despacho MILP."
+    },
+    "demanda_sistema_real": {
+      "url": "https://sipubv1.api.coordinador.cl/api/v1/recursos/demandasistemareal",
+      "method": "GET",
+      "user_key": "f3cdad2758436a0a2c2c1fec92853de7",
+      "frequency": "Horario continuo",
+      "description": "Demanda bruta instantánea del SEN (MW) para seguimiento de curva de carga y detección de bloque de punta."
+    },
+    "generacion_centrales_tecnologia": {
+      "url": "https://sipubv1.api.coordinador.cl/api/v1/recursos/generacion_centrales_tecnologia_horario",
+      "method": "GET",
+      "user_key": "f3cdad2758436a0a2c2c1fec92853de7",
+      "frequency": "Horario",
+      "description": "Desglose de inyección horaria por tecnología (Solar FV, Eólica, BESS, Hidro, Térmica) y detección de vertimiento ERNC."
+    },
+    "generacion_programada_tecnologia": {
+      "url": "https://sipubv1.api.coordinador.cl/api/v1/recursos/generacion_programada_tecnologia_horario",
+      "method": "GET",
+      "user_key": "f3cdad2758436a0a2c2c1fec92853de7",
+      "frequency": "Diario",
+      "description": "Programa oficial de despacho del CEN para planificación de carga BESS en horas solares."
+    },
+    "embalse_real_ultimo": {
+      "url": "https://sipub.api.coordinador.cl/embalse-real/v3/findLast",
+      "method": "GET",
+      "user_key": "028f23746cc6a4dd0648a6feae8a32ad",
+      "frequency": "Diario",
+      "description": "Estado y cota de embalses principales del SEN para modelación del valor del agua."
+    }
+  }
+}

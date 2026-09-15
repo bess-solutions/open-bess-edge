@@ -39,6 +39,9 @@ jobs:
       - name: Run ruff format check
         run: ruff format --check src/ tests/
 
+      - name: Verify Documentation & Hardware Claims Guardrail
+        run: python scripts/verify_claims.py
+
   # ─────────────────────────────────────────────────────────────────
   # Job 2: Unit & Compliance Tests (pytest)
   # ─────────────────────────────────────────────────────────────────

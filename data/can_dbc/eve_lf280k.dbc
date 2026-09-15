@@ -1,0 +1,86 @@
+VERSION ""
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_: EVE_BCU EVE_BMU_String Inverter_PCS
+
+BO_ 419364864 EVE_CellVoltages_GroupA: 8 EVE_BMU_String
+ SG_ StringID : 0|8@1+ (1,0) [0|32] "" EVE_BCU
+ SG_ CellIndexStart : 8|8@1+ (1,0) [1|240] "" EVE_BCU
+ SG_ CellA_mV : 16|16@1+ (1,0) [2000|4500] "mV" EVE_BCU
+ SG_ CellB_mV : 32|16@1+ (1,0) [2000|4500] "mV" EVE_BCU
+ SG_ CellC_mV : 48|16@1+ (1,0) [2000|4500] "mV" EVE_BCU
+
+BO_ 419365120 EVE_CellVoltages_GroupB: 8 EVE_BMU_String
+ SG_ StringID : 0|8@1+ (1,0) [0|32] "" EVE_BCU
+ SG_ CellIndexStart : 8|8@1+ (1,0) [1|240] "" EVE_BCU
+ SG_ CellD_mV : 16|16@1+ (1,0) [2000|4500] "mV" EVE_BCU
+ SG_ CellE_mV : 32|16@1+ (1,0) [2000|4500] "mV" EVE_BCU
+ SG_ CellF_mV : 48|16@1+ (1,0) [2000|4500] "mV" EVE_BCU
+
+BO_ 419365376 EVE_String_ThermalSensors: 8 EVE_BMU_String
+ SG_ StringID : 0|8@1+ (1,0) [0|32] "" EVE_BCU
+ SG_ MaxCellTemp_C : 8|8@1+ (1,-40) [-40|120] "degC" EVE_BCU
+ SG_ MinCellTemp_C : 16|8@1+ (1,-40) [-40|120] "degC" EVE_BCU
+ SG_ AvgCellTemp_C : 24|8@1+ (1,-40) [-40|120] "degC" EVE_BCU
+ SG_ PositiveTerminalTemp_C : 32|8@1+ (1,-40) [-40|120] "degC" EVE_BCU
+ SG_ NegativeTerminalTemp_C : 40|8@1+ (1,-40) [-40|120] "degC" EVE_BCU
+ SG_ CoolantInletTemp_C : 48|8@1+ (1,-40) [-40|120] "degC" EVE_BCU
+ SG_ CoolantOutletTemp_C : 56|8@1+ (1,-40) [-40|120] "degC" EVE_BCU
+
+BO_ 419365632 EVE_BCU_MasterTelemetry: 8 EVE_BCU
+ SG_ TotalVoltage_V : 0|16@1+ (0.1,0) [0|1500] "V" Inverter_PCS
+ SG_ TotalCurrent_A : 16|16@1+ (0.1,-1000) [-1000|1000] "A" Inverter_PCS
+ SG_ String_SOC : 32|16@1+ (0.1,0) [0|100] "%" Inverter_PCS
+ SG_ String_SOH : 48|8@1+ (1,0) [0|100] "%" Inverter_PCS
+ SG_ MaxChargeCurrentLimit_A : 56|8@1+ (2,0) [0|500] "A" Inverter_PCS
+
+BO_ 419365888 EVE_BCU_SafetyAlarms: 8 EVE_BCU
+ SG_ Level1_Warning : 0|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ Level2_Alarm : 1|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ Level3_EmergencyStop : 2|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ OverVoltage_Protection : 3|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ UnderVoltage_Protection : 4|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ OverCurrent_Discharge : 5|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ OverCurrent_Charge : 6|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ ThermalRunaway_Imminent : 7|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ PositiveInsulation_kOhm : 8|16@1+ (1,0) [0|65535] "kOhm" Inverter_PCS
+ SG_ NegativeInsulation_kOhm : 24|16@1+ (1,0) [0|65535] "kOhm" Inverter_PCS
+ SG_ BalancingActiveMask : 40|16@1+ (1,0) [0|65535] "" Inverter_PCS
+ SG_ HeartbeatCounter : 56|8@1+ (1,0) [0|255] "" Inverter_PCS
+
+CM_ BO_ 419364864 "Telemetria celda-a-celda grupo primario EVE LF280K C&I";
+CM_ BO_ 419365120 "Telemetria celda-a-celda grupo secundario EVE LF280K C&I";
+CM_ BO_ 419365376 "Matriz termica multicanal NTC y lazo hidraulico de refrigeracion";
+CM_ BO_ 419365632 "Parametros de potencia DC, limites de corriente y estado de carga BCU";
+CM_ BO_ 419365888 "Banderas de seguridad, proteccion NFPA 855 y aislamiento galvanico";

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 open-bess-edge/src/safety/safety_envelope_evaluator.py
 ==============================================================================
@@ -13,10 +14,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Any
-
-import structlog
-
-logger = structlog.get_logger(__name__)
 
 EDGE_ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_BASELINE = EDGE_ROOT / "data" / "bess_safety_baseline.json"
@@ -35,26 +32,9 @@ class SafetyEnvelopeEvaluator:
     def _load_baseline(self) -> dict[str, Any]:
         if self.baseline_path.exists():
             try:
-                raw = json.loads(self.baseline_path.read_text(encoding="utf-8"))
-                if isinstance(raw, dict):
-                    return raw
-                logger.warning(
-                    "safety_baseline_not_dict",
-                    path=str(self.baseline_path),
-                    type=type(raw).__name__,
-                )
-            except (OSError, json.JSONDecodeError) as exc:
-                logger.error(
-                    "safety_baseline_load_failed",
-                    path=str(self.baseline_path),
-                    error=str(exc),
-                    fallback="hardcoded_defaults",
-                )
-        else:
-            logger.info(
-                "safety_baseline_not_found_using_defaults",
-                path=str(self.baseline_path),
-            )
+                return json.loads(self.baseline_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                pass
         return {
             "cell_limits": {
                 "voltage_min_v": 2.50,
@@ -103,26 +83,18 @@ class SafetyEnvelopeEvaluator:
 
         # BESS-GUARD-003: Sobretemperatura de celda
         if t_max_c > t_max_limit:
-            faults.append(
-                f"BESS-GUARD-003: CELL_OVERTEMPERATURE ({t_max_c:.1f}°C > {t_max_limit}°C)"
-            )
+            faults.append(f"BESS-GUARD-003: CELL_OVERTEMPERATURE ({t_max_c:.1f}°C > {t_max_limit}°C)")
 
         # BESS-GUARD-004: Falla de aislamiento DC
         if isolation_kohm < iso_min_limit:
-            faults.append(
-                f"BESS-GUARD-004: DC_ISOLATION_FAULT ({isolation_kohm:.1f}kOhm < {iso_min_limit}kOhm)"
-            )
+            faults.append(f"BESS-GUARD-004: DC_ISOLATION_FAULT ({isolation_kohm:.1f}kOhm < {iso_min_limit}kOhm)")
 
         # BESS-GUARD-005: Desbalance excesivo entre celdas (Delta V)
         delta_v_mv = (v_max_v - v_min_v) * 1000.0
         if delta_v_mv > imbalance_limit_mv:
-            faults.append(
-                f"BESS-GUARD-005: CELL_IMBALANCE_WARNING (Delta {delta_v_mv:.1f}mV > {imbalance_limit_mv}mV)"
-            )
+            faults.append(f"BESS-GUARD-005: CELL_IMBALANCE_WARNING (Delta {delta_v_mv:.1f}mV > {imbalance_limit_mv}mV)")
 
-        is_safe = (
-            len([f for f in faults if "BESS-GUARD-005" not in f]) == 0
-        )  # Imbalance es warning inicial
+        is_safe = len([f for f in faults if "BESS-GUARD-005" not in f]) == 0  # Imbalance es warning inicial
 
         meta = {
             "v_min_v": v_min_v,

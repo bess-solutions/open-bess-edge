@@ -28,17 +28,18 @@ Provee adquisición de telemetría de alta fidelidad vía **Modbus TCP**, evalua
 
 ## 🧪 Matriz de Validación y Cobertura
 
-* **Pruebas Unitarias y de Cumplimiento:** **18 / 18 aprobadas** (100% pass rate) en 0.81s.
-* **Cobertura de Código (`pytest-cov`):** **82%** medido sobre `src/`.
-* **Seguridad Estática (SAST - Bandit):** **0 vulnerabilidades**.
+* **Pruebas Unitarias y de Cumplimiento:** **33 / 33 aprobadas** (100% pass rate).
+* **Cobertura de Código (`pytest-cov`):** **82.36%** medido sobre `src/` (supera umbral CI `--cov-fail-under=80`).
+* **Seguridad Estática (SAST - Bandit):** **0 vulnerabilidades (0 Medium, 0 High)**.
 * **Auditoría de Dependencias (pip-audit):** **0 CVEs detectados**.
 * **Estilo y Calidad de Código (Ruff):** **0 errores, 0 advertencias**.
+* **Guardrail de Verificación Documental:** **100% claims respaldados en código (`scripts/verify_claims.py`)**.
 
 ---
 
 ## ⚙️ Workflows Canónicos de Integración Continua (`.github/workflows/`)
 
-1. **`ci.yml`**: Matriz de pruebas automatizadas en Python 3.10, 3.11 y 3.12, linting con Ruff, escaneo de seguridad con Bandit y pip-audit, y validación de compilación de imagen Docker.
+1. **`ci.yml`**: Matriz de pruebas automatizadas en Python 3.10, 3.11 y 3.12, linting con Ruff, guardrail de claims documental, escaneo de seguridad con Bandit y pip-audit, y validación de compilación de imagen Docker.
 2. **`codeql.yml`**: Análisis estático de código oficial de GitHub (CodeQL) para Python.
 3. **`docs.yml`**: Compilación estricta y despliegue automatizado de la documentación en GitHub Pages vía MkDocs Material.
 4. **`docker-multiarch.yml`**: Compilación y publicación de imágenes OCI multi-arquitectura (`linux/amd64`, `linux/arm64`) en GitHub Container Registry (ghcr.io).
@@ -56,3 +57,6 @@ Perfiles Modbus validados para inversores y controladores de almacenamiento:
 * BYD Battery-Box (`registry/byd_battery_box.json`)
 * Tesla Powerwall 3 (`registry/tesla_powerwall3.json`)
 * Victron MultiPlus-II (`registry/victron_multiplus2.json`)
+* Deye / Sunsynk Hybrid (`registry/deye_sunsynk_hybrid.json`)
+* GoodWe Lynx Home (`registry/goodwe_lynx_home.json`)
+* CEN SIPUB Mobile Gateway (`registry/cen_sipub_mobile_gateway.json`)

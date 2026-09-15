@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 open-bess-edge/src/drivers/modbus_client.py
 ==============================================================================
@@ -18,16 +19,27 @@ from dataclasses import dataclass
 from pathlib import Path
 
 EDGE_DIR = Path(__file__).resolve().parent.parent
-if str(EDGE_DIR) not in sys.path:
-    sys.path.insert(0, str(EDGE_DIR))
+EDGE_ROOT = EDGE_DIR.parent
+for p in [str(EDGE_DIR), str(EDGE_ROOT)]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
-import structlog
+try:
+    import structlog
+
+    logger = structlog.get_logger(__name__)
+except ImportError:
+    import logging
+
+    logger = logging.getLogger(__name__)
+
 from pymodbus.client import AsyncModbusTcpClient
 from pymodbus.exceptions import ModbusException
 
-from src.config import ModbusConfig, edge_settings
-
-logger = structlog.get_logger(__name__)
+try:
+    from src.config import ModbusConfig, edge_settings
+except ImportError:
+    from config import ModbusConfig, edge_settings
 
 
 @dataclass

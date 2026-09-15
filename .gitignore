@@ -73,3 +73,14 @@ launch_api.ps1
 .env
 .env.*
 !.env.example
+
+# Local Data Dumps & Untracked Temporary Artifacts
+data/raw/
+data/*.parquet
+bessai-web/
+dashboard/
+models/
+uv.lock
+CONSOLIDATION.md
+docs/dwg_obe_2026.html
+
