@@ -1,0 +1,74 @@
+VERSION ""
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_: BYD_Cube_Master BYD_Blade_BMS Inverter_PCS
+
+BO_ 436207616 BYD_Blade_Extremes: 8 BYD_Blade_BMS
+ SG_ MaxCellVolt_mV : 0|16@1+ (1,0) [2000|4200] "mV" BYD_Cube_Master
+ SG_ MaxCellVolt_Index : 16|8@1+ (1,1) [1|255] "" BYD_Cube_Master
+ SG_ MinCellVolt_mV : 24|16@1+ (1,0) [2000|4200] "mV" BYD_Cube_Master
+ SG_ MinCellVolt_Index : 40|8@1+ (1,1) [1|255] "" BYD_Cube_Master
+ SG_ CellDelta_mV : 48|16@1+ (1,0) [0|1000] "mV" BYD_Cube_Master
+
+BO_ 436207872 BYD_Blade_ThermalExtremes: 8 BYD_Blade_BMS
+ SG_ MaxTemp_C : 0|8@1+ (1,-40) [-40|120] "degC" BYD_Cube_Master
+ SG_ MaxTemp_Index : 8|8@1+ (1,1) [1|64] "" BYD_Cube_Master
+ SG_ MinTemp_C : 16|8@1+ (1,-40) [-40|120] "degC" BYD_Cube_Master
+ SG_ MinTemp_Index : 24|8@1+ (1,1) [1|64] "" BYD_Cube_Master
+ SG_ ThermalGradient_C : 32|8@1+ (0.5,0) [0|50] "degC" BYD_Cube_Master
+ SG_ ChillWaterFlow_Lpm : 40|16@1+ (0.1,0) [0|500] "L/min" BYD_Cube_Master
+ SG_ ChillPumpSpeed_RPM : 56|8@1+ (50,0) [0|5000] "RPM" BYD_Cube_Master
+
+BO_ 436208128 BYD_Cube_DC_Bus: 8 BYD_Cube_Master
+ SG_ DC_Link_Voltage_V : 0|16@1+ (0.1,0) [0|1500] "V" Inverter_PCS
+ SG_ DC_Link_Current_A : 16|16@1+ (0.1,-1500) [-1500|1500] "A" Inverter_PCS
+ SG_ Cumulative_Charge_kWh : 32|32@1+ (0.1,0) [0|429496729.5] "kWh" Inverter_PCS
+
+BO_ 436208384 BYD_Cube_Safety_Interlocks: 8 BYD_Cube_Master
+ SG_ ContactorMainPos_Closed : 0|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ ContactorMainNeg_Closed : 1|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ Precharge_Complete : 2|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ PyroFuse_Blown : 3|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ Aerosol_Fire_Discharged : 4|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ CombustibleGas_LEL_PPM : 5|11@1+ (1,0) [0|2047] "ppm" Inverter_PCS
+ SG_ EmergencyStop_Activated : 16|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ HighVoltage_Interlock_HVIL : 17|1@1+ (1,0) [0|1] "" Inverter_PCS
+ SG_ InsulationPositive_kOhm : 24|16@1+ (1,0) [0|65535] "kOhm" Inverter_PCS
+ SG_ InsulationNegative_kOhm : 40|16@1+ (1,0) [0|65535] "kOhm" Inverter_PCS
+ SG_ HeartbeatCounter : 56|8@1+ (1,0) [0|255] "" Inverter_PCS
+
+CM_ BO_ 436207616 "Mediciones extremas Vmax/Vmin celda Blade para balanceo activo";
+CM_ BO_ 436207872 "Sensores de gradiente termico y control de bomba de circuito frio";
+CM_ BO_ 436208128 "Potencia y energia acumulada de barraje principal 1500V DC";
+CM_ BO_ 436208384 "Interlocks criticos de seguridad NFPA 855 y deteccion de gas combustible LEL";

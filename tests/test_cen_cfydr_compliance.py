@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 open-bess-edge/tests/test_cen_cfydr_compliance.py
 ==============================================================================
@@ -189,3 +190,41 @@ async def test_full_edge_node_closed_loop():
     assert len(res_interlock["faults"]) > 0
 
     await node.stop()
+
+
+@pytest.mark.asyncio
+async def test_edge_node_degraded_telemetry():
+    from unittest.mock import AsyncMock, MagicMock
+
+    node = BESSEdgeNode()
+    await node.start()
+
+    mock_readings = MagicMock()
+    mock_readings.read_ok = False
+    mock_readings.error_msg = "Link lost"
+    node.driver.read_telemetry = AsyncMock(return_value=mock_readings)
+
+    res = await node.step()
+    assert res["status"] == "TELEMETRY_COMM_ERROR"
+
+    node.driver.connect = AsyncMock(return_value=False)
+    ok = await node.start()
+    assert ok is False
+    await node.stop()
+
+
+def test_droop_normal_ramp_limiting():
+    ctrl = FFRDroopController(
+        p_nominal_kw=1000.0,
+        normal_ramp_limit_pct_min=1.0,  # Slow ramp
+    )
+    # Start at 0 kW
+    p1, meta1 = ctrl.compute_response(f_measured_hz=49.90)
+    # Immediate next step requesting jump beyond ramp rate
+    p2, meta2 = ctrl.compute_response(f_measured_hz=49.80)
+    assert meta2["ramp_mode"] in ("NORMAL_RAMP_LIMITED", "NORMAL_FOLLOW")
+
+
+def test_droop_invalid_r():
+    with pytest.raises(ValueError, match="fuera de límites"):
+        FFRDroopController(droop_r=0.50)

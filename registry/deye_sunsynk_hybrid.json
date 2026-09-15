@@ -1,0 +1,722 @@
+{
+  "$schema": "https://bessai.io/schemas/device-profile/v2.json",
+  "profile_version": "2.0.0",
+  "device": {
+    "manufacturer": "Deye / Sunsynk Technology",
+    "model": "SUN-(8K-12K)-SG04LP3 / C&I 50K",
+    "description": "Perfil de integración Modbus RTU/TCP para inversores híbridos Deye / Sunsynk trifásicos con almacenamiento BESS.",
+    "firmware_reference": "Deye Modbus Register Specification v5411",
+    "protocol": "ModbusTCP",
+    "slave_id_default": 1,
+    "rs485_baud": 9600,
+    "rs485_parity": "N",
+    "rs485_stopbits": 1
+  },
+  "connection": {
+    "byte_order": "BIG",
+    "word_order": "BIG",
+    "timeout_seconds": 3,
+    "retries": 3
+  },
+  "registers": {
+    "batt_type": {
+      "address": 111,
+      "address_hex": "0x006F",
+      "count": 1,
+      "type": "ENUM16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "enum",
+      "description": "Batt Type (Grupo: Battery Setting)",
+      "options": {
+        "0": "Batt-V Mode",
+        "1": "Batt-% Mode",
+        "2": "BMS Lithium Batt",
+        "3": "No battery"
+      }
+    },
+    "battery_capacity": {
+      "address": 102,
+      "address_hex": "0x0066",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "Ah",
+      "description": "Battery Capacity (Grupo: Battery Setting)",
+      "options": null
+    },
+    "max_a_charge": {
+      "address": 108,
+      "address_hex": "0x006C",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "A",
+      "description": "Max A Charge (Grupo: Battery Setting)",
+      "options": null
+    },
+    "max_a_discharge": {
+      "address": 109,
+      "address_hex": "0x006D",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "A",
+      "description": "Max A Discharge (Grupo: Battery Setting)",
+      "options": null
+    },
+    "batt_shutdown": {
+      "address": 115,
+      "address_hex": "0x0073",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "%",
+      "description": "Batt Shutdown % (Grupo: Battery Setting)",
+      "options": null
+    },
+    "batt_restart": {
+      "address": 116,
+      "address_hex": "0x0074",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "%",
+      "description": "Batt Restart % (Grupo: Battery Setting)",
+      "options": null
+    },
+    "batt_low": {
+      "address": 117,
+      "address_hex": "0x0075",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "%",
+      "description": "Batt Low % (Grupo: Battery Setting)",
+      "options": null
+    },
+    "batt_shutdown_v": {
+      "address": 118,
+      "address_hex": "0x0076",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Batt Shutdown V (Grupo: Battery Setting)",
+      "options": null
+    },
+    "batt_restart_v": {
+      "address": 119,
+      "address_hex": "0x0077",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Batt Restart V (Grupo: Battery Setting)",
+      "options": null
+    },
+    "batt_low_v": {
+      "address": 120,
+      "address_hex": "0x0078",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Batt Low V (Grupo: Battery Setting)",
+      "options": null
+    },
+    "activate_battery": {
+      "address": 112,
+      "address_hex": "0x0070",
+      "count": 1,
+      "type": "ENUM16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "enum",
+      "description": "Activate Battery (Grupo: Battery Setting)",
+      "options": {
+        "0": "Disable",
+        "1": "Enable"
+      }
+    },
+    "lithium_mode": {
+      "address": 223,
+      "address_hex": "0x00DF",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "",
+      "description": "Lithium Mode (Grupo: Battery Setting)",
+      "options": null
+    },
+    "float_v": {
+      "address": 101,
+      "address_hex": "0x0065",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Float V (Grupo: Battery Setting)",
+      "options": null
+    },
+    "absorption_v": {
+      "address": 100,
+      "address_hex": "0x0064",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Absorption V (Grupo: Battery Setting)",
+      "options": null
+    },
+    "equalization_v": {
+      "address": 99,
+      "address_hex": "0x0063",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Equalization V (Grupo: Battery Setting)",
+      "options": null
+    },
+    "equalization_cycle": {
+      "address": 105,
+      "address_hex": "0x0069",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "Day",
+      "description": "Equalization Cycle (Grupo: Battery Setting)",
+      "options": null
+    },
+    "equalization_operating_time": {
+      "address": 106,
+      "address_hex": "0x006A",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.5,
+      "unit": "Hour",
+      "description": "Equalization Operating Time (Grupo: Battery Setting)",
+      "options": null
+    },
+    "grid_charge": {
+      "address": 130,
+      "address_hex": "0x0082",
+      "count": 1,
+      "type": "ENUM16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "enum",
+      "description": "Grid Charge (Grupo: Battery Setting)",
+      "options": {
+        "0": "Disable",
+        "1": "Enable"
+      }
+    },
+    "gen_charge": {
+      "address": 129,
+      "address_hex": "0x0081",
+      "count": 1,
+      "type": "ENUM16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "enum",
+      "description": "Gen Charge (Grupo: Battery Setting)",
+      "options": {
+        "0": "Disable",
+        "1": "Enable"
+      }
+    },
+    "grid_signal": {
+      "address": 140,
+      "address_hex": "0x008C",
+      "count": 1,
+      "type": "ENUM16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "enum",
+      "description": "Grid Signal (Grupo: Battery Setting)",
+      "options": {
+        "0": "Disable",
+        "1": "Enable"
+      }
+    },
+    "gen_signal": {
+      "address": 139,
+      "address_hex": "0x008B",
+      "count": 1,
+      "type": "ENUM16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "enum",
+      "description": "Gen Signal (Grupo: Battery Setting)",
+      "options": {
+        "0": "Disable",
+        "1": "Enable"
+      }
+    },
+    "grid_start_v": {
+      "address": 126,
+      "address_hex": "0x007E",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Grid Start V (Grupo: Battery Setting)",
+      "options": null
+    },
+    "grid_start": {
+      "address": 127,
+      "address_hex": "0x007F",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "%",
+      "description": "Grid Start % (Grupo: Battery Setting)",
+      "options": null
+    },
+    "grid_start_a": {
+      "address": 128,
+      "address_hex": "0x0080",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "A",
+      "description": "Grid Start A (Grupo: Battery Setting)",
+      "options": null
+    },
+    "gen_start_v": {
+      "address": 123,
+      "address_hex": "0x007B",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Gen Start V (Grupo: Battery Setting)",
+      "options": null
+    },
+    "gen_start": {
+      "address": 124,
+      "address_hex": "0x007C",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "%",
+      "description": "Gen Start % (Grupo: Battery Setting)",
+      "options": null
+    },
+    "gen_start_a": {
+      "address": 125,
+      "address_hex": "0x007D",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "A",
+      "description": "Gen Start A (Grupo: Battery Setting)",
+      "options": null
+    },
+    "gen_max_run_time": {
+      "address": 121,
+      "address_hex": "0x0079",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.1,
+      "unit": "h",
+      "description": "Gen Max Run Time (Grupo: Battery Setting)",
+      "options": null
+    },
+    "gen_down_time": {
+      "address": 122,
+      "address_hex": "0x007A",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.1,
+      "unit": "h",
+      "description": "Gen Down Time (Grupo: Battery Setting)",
+      "options": null
+    },
+    "batt_charge_efficiency": {
+      "address": 114,
+      "address_hex": "0x0072",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.1,
+      "unit": "%",
+      "description": "Batt Charge Efficiency (Grupo: Battery Setting)",
+      "options": null
+    },
+    "batt_resistance": {
+      "address": 113,
+      "address_hex": "0x0071",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "mΩ",
+      "description": "Batt Resistance (Grupo: Battery Setting)",
+      "options": null
+    },
+    "batt_empty_v": {
+      "address": 103,
+      "address_hex": "0x0067",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Batt Empty V (Grupo: Battery Setting)",
+      "options": null
+    },
+    "tempco": {
+      "address": 107,
+      "address_hex": "0x006B",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "-mV/℃",
+      "description": "TEMPCO (Grupo: Battery Setting)",
+      "options": null
+    },
+    "system_working_mode": {
+      "address": 142,
+      "address_hex": "0x008E",
+      "count": 1,
+      "type": "ENUM16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "enum",
+      "description": "System Working Mode (Grupo: System Work Mode)",
+      "options": {
+        "0": "Selling Frist",
+        "1": "Zero Export To Load",
+        "2": "Zero Export To CT"
+      }
+    },
+    "solar_sell": {
+      "address": 145,
+      "address_hex": "0x0091",
+      "count": 1,
+      "type": "ENUM16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "enum",
+      "description": "Solar Sell (Grupo: System Work Mode)",
+      "options": {
+        "0": "Disable",
+        "1": "Enable"
+      }
+    },
+    "time_of_use": {
+      "address": 146,
+      "address_hex": "0x0092",
+      "count": 1,
+      "type": "ENUM16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "enum",
+      "description": "Time of use (Grupo: System Work Mode)",
+      "options": {
+        "0": "Disable",
+        "1": "Enable"
+      }
+    },
+    "max_solar_power": {
+      "address": 340,
+      "address_hex": "0x0154",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "W",
+      "description": "Max Solar Power (Grupo: System Work Mode)",
+      "options": null
+    },
+    "max_sell_power": {
+      "address": 143,
+      "address_hex": "0x008F",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "W",
+      "description": "Max Sell Power (Grupo: System Work Mode)",
+      "options": null
+    },
+    "energy_pattern": {
+      "address": 141,
+      "address_hex": "0x008D",
+      "count": 1,
+      "type": "ENUM16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "enum",
+      "description": "Energy Pattern (Grupo: System Work Mode)",
+      "options": {
+        "0": "Batt First",
+        "1": "Load First"
+      }
+    },
+    "zero_export_power": {
+      "address": 104,
+      "address_hex": "0x0068",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "W",
+      "description": "Zero export power (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_1": {
+      "address": 166,
+      "address_hex": "0x00A6",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "%",
+      "description": "Selling Mode Time 1 % (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_2": {
+      "address": 167,
+      "address_hex": "0x00A7",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "%",
+      "description": "Selling Mode Time 2 % (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_3": {
+      "address": 168,
+      "address_hex": "0x00A8",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "%",
+      "description": "Selling Mode Time 3 % (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_4": {
+      "address": 169,
+      "address_hex": "0x00A9",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "%",
+      "description": "Selling Mode Time 4 % (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_5": {
+      "address": 170,
+      "address_hex": "0x00AA",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "%",
+      "description": "Selling Mode Time 5 % (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_6": {
+      "address": 171,
+      "address_hex": "0x00AB",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "%",
+      "description": "Selling Mode Time 6 % (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_1_power": {
+      "address": 154,
+      "address_hex": "0x009A",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "W",
+      "description": "Selling Mode Time 1 Power (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_2_power": {
+      "address": 155,
+      "address_hex": "0x009B",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "W",
+      "description": "Selling Mode Time 2 Power (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_3_power": {
+      "address": 156,
+      "address_hex": "0x009C",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "W",
+      "description": "Selling Mode Time 3 Power (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_4_power": {
+      "address": 157,
+      "address_hex": "0x009D",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "W",
+      "description": "Selling Mode Time 4 Power (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_5_power": {
+      "address": 158,
+      "address_hex": "0x009E",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "W",
+      "description": "Selling Mode Time 5 Power (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_6_power": {
+      "address": 159,
+      "address_hex": "0x009F",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "W",
+      "description": "Selling Mode Time 6 Power (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_1_v": {
+      "address": 160,
+      "address_hex": "0x00A0",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Selling Mode Time 1 V (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_2_v": {
+      "address": 161,
+      "address_hex": "0x00A1",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Selling Mode Time 2 V (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_3_v": {
+      "address": 162,
+      "address_hex": "0x00A2",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Selling Mode Time 3 V (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_4_v": {
+      "address": 163,
+      "address_hex": "0x00A3",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Selling Mode Time 4 V (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_5_v": {
+      "address": 164,
+      "address_hex": "0x00A4",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Selling Mode Time 5 V (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time_6_v": {
+      "address": 165,
+      "address_hex": "0x00A5",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "V",
+      "description": "Selling Mode Time 6 V (Grupo: System Work Mode)",
+      "options": null
+    },
+    "selling_mode_time1_grid_charge": {
+      "address": 172,
+      "address_hex": "0x00AC",
+      "count": 1,
+      "type": "ENUM16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "enum",
+      "description": "Selling Mode Time1  grid charge (Grupo: System Work Mode)",
+      "options": {
+        "0": "Disable",
+        "1": "Enable"
+      }
+    },
+    "selling_mode_time2_grid_charge": {
+      "address": 173,
+      "address_hex": "0x00AD",
+      "count": 1,
+      "type": "ENUM16",
+      "access": "RW",
+      "scale": 1,
+      "unit": "enum",
+      "description": "Selling Mode Time2  grid charge (Grupo: System Work Mode)",
+      "options": {
+        "0": "Disable",
+        "1": "Enable"
+      }
+    }
+  }
+}

@@ -9,7 +9,7 @@
 [![Latency](https://img.shields.io/badge/Loop%20Latency-sub--0.1ms-purple?logo=speedtest&logoColor=white)](#-rendimiento-y-latencia-de-lazo-cerrado)
 [![Architecture](https://img.shields.io/badge/Platform-IPC%20x86__64%20%7C%20ARM64-orange?logo=docker&logoColor=white)](#-despliegue-industrial)
 [![Safety Standard](https://img.shields.io/badge/Safety-NFPA%20855%20%7C%20SEC%20RIC-red?logo=shield&logoColor=white)](#-envolvente-de-seguridad-de-hardware-bess-guard)
-[![Tests](https://img.shields.io/badge/Tests-16%2F16%20Passing%20(100%25)-brightgreen?logo=pytest&logoColor=white)](#-suite-de-pruebas-y-homologaci%C3%B3n-cen)
+[![Tests](https://img.shields.io/badge/Tests-33%2F33%20Passing%20(100%25)-brightgreen?logo=pytest&logoColor=white)](#-suite-de-pruebas-y-homologaci%C3%B3n-cen)
 
 **Mission-Critical Industrial Edge Gateway & Frequency Response Controller for Battery Energy Storage Systems (BESS)**  
 *Controlador de borde determinístico de subestación eléctrica para cumplimiento estricto del Código de Red del Sistema Eléctrico Nacional (SEN) de Chile.*
@@ -37,8 +37,8 @@ graph TB
     end
 
     subgraph BESS_PLANT ["🔋 Planta de Almacenamiento BESS (Patio de Potencia)"]
-        PCS["Inversor Bidireccional de Potencia (PCS)<br/><i>Sungrow · Kehua · SMA · Ingeteam · PE</i><br/>[Control P/Q · Modbus TCP]"]
-        BMS["Sistema de Gestión de Baterías (BMS)<br/><i>CATL · BYD · Gotion · EVE (LFP 314Ah)</i><br/>[Telemetría de Celdas · Alarmas]"]
+        PCS["Inversor Bidireccional de Potencia (PCS)<br/><i>Huawei · SMA · Fronius · Deye · Victron · SolarEdge</i><br/>[Control P/Q · Modbus TCP]"]
+        BMS["Sistema de Gestión de Baterías (BMS)<br/><i>BYD · Tesla · GoodWe (Racks LFP)</i><br/>[Telemetría de Celdas · Alarmas]"]
     end
 
     subgraph EDGE_GATEWAY ["🖥️ Open BESS Edge Runtime (IPC Subestación)"]
@@ -191,34 +191,46 @@ El módulo `SafetyEnvelopeEvaluator` valida la telemetría cada ciclo en **tiemp
 ---
 
 ## 🔌 Ecosistema de Hardware Soportado
+### Perfiles Modbus Validados en Producción (`registry/`)
+
+Los siguientes fabricantes cuentan con perfiles de mapeo de registros Modbus, decodificación de datos y pruebas de conformidad implementadas en el directorio [`registry/`](registry/):
 
 ```mermaid
 graph LR
-    subgraph INVERSORES ["⚡ Inversores Bidireccionales (PCS)"]
-        SG["Sungrow SC / ST Series<br/>✅ Modbus TCP"]
-        KH["Kehua Tech SPI Series<br/>✅ Modbus TCP"]
-        SMA["SMA Sunny Central Storage<br/>✅ Modbus TCP"]
-        ING["Ingeteam Ingecon Sun<br/>✅ Modbus TCP"]
-        PE["Power Electronics HEM<br/>✅ Modbus TCP"]
+    subgraph INVERSORES ["⚡ Inversores Bidireccionales (PCS) Validados"]
+        HW["Huawei SUN2000 Series<br/>✅ registry/huawei_sun2000.json"]
+        SMA["SMA Sunny Tripower Storage<br/>✅ registry/sma_sunny_tripower.json"]
+        FRON["Fronius Symo GEN24 Plus<br/>✅ registry/fronius_gen24_byd.json"]
+        SE["SolarEdge StorEdge<br/>✅ registry/solaredge_storedge.json"]
+        VIC["Victron MultiPlus-II<br/>✅ registry/victron_multiplus2.json"]
+        DEYE["Deye / Sunsynk Hybrid<br/>✅ registry/deye_sunsynk_hybrid.json"]
+        GW["GoodWe Lynx Home<br/>✅ registry/goodwe_lynx_home.json"]
     end
 
-    subgraph BATERIAS ["🔋 Baterías y BMS Industrial (Racks LFP)"]
-        CATL["CATL EnerOne / EnerC (314Ah)<br/>✅ BMS Telemetry"]
-        BYD["BYD MC Cube ESS<br/>✅ BMS Telemetry"]
-        GOT["Gotion High-Tech 314Ah<br/>✅ BMS Telemetry"]
-        EVE["EVE Energy LF560K / LF314<br/>✅ BMS Telemetry"]
+    subgraph BATERIAS ["🔋 Baterías y BMS Validados"]
+        BYD["BYD Battery-Box Premium<br/>✅ registry/byd_battery_box.json"]
+        TSLA["Tesla Powerwall 3<br/>✅ registry/tesla_powerwall3.json"]
     end
 
-    subgraph PROTOCOLOS ["📡 Protocolos de Interconexión"]
-        MB_TCP["Modbus TCP / RTU (SunSpec & IEC 61850)"]
-        BDF["Battery Data Format (Linux Foundation Energy)"]
-        BPX["Battery Parameter eXchange (BPX v1.1.1)"]
+    subgraph PROTOCOLOS ["📡 Protocolos de Interconexión Activos"]
+        MB_TCP["Modbus TCP / RTU (SunSpec & IEEE 754)"]
+        SITR_104["IEC 60870-5-104 (SCADA Coordinador CEN)"]
+        GOOSE["IEC 61850 GOOSE Fast-Trip (Sub-4ms)"]
+        CAN_BMS["CANopen / J1939 DBC Engine"]
     end
 
     INVERSORES --> PROTOCOLOS
     BATERIAS --> PROTOCOLOS
     PROTOCOLOS --> CORE["🖥️ Open BESS Edge Gateway"]
 ```
+
+### 🎯 Roadmap de Integración de Hardware (Q4-2026 / 2027)
+
+> [!NOTE]
+> En estricto apego al principio de **Zero Mock Data** y transparencia técnica, los siguientes equipos industriales forman parte de la hoja de ruta de homologación de planta utility-scale. Sus perfiles están en fase de calibración y pruebas de laboratorio antes de su incorporación a `registry/`:
+>
+> - **Inversores Utility-Scale (PCS)**: Sungrow (SC/ST Series), Kehua Tech (SPI Series), Ingeteam (Ingecon Sun Storage), Power Electronics (HEM Series).
+> - **Racks de Celdas y BMS Utility-Scale**: CATL (EnerOne / EnerC 314Ah), Gotion High-Tech (314Ah), EVE Energy (LF560K / LF314Ah).
 
 ---
 

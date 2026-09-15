@@ -1,0 +1,89 @@
+{
+  "$schema": "https://bessai.io/schemas/device-profile/v2.json",
+  "profile_version": "2.0.0",
+  "device": {
+    "manufacturer": "GoodWe Power Supply",
+    "model": "GoodWe ET/EH Series & Lynx Home High Voltage BESS",
+    "description": "Inversor híbrido trifásico con gestión de batería de alto voltaje LFP. Recuperado de SafetyParam.json.",
+    "firmware_reference": "GoodWe Modbus Protocol Definition v1.0",
+    "protocol": "ModbusTCP",
+    "slave_id_default": 247,
+    "rs485_baud": 9600,
+    "rs485_parity": "N",
+    "rs485_stopbits": 1
+  },
+  "connection": {
+    "byte_order": "BIG",
+    "word_order": "BIG",
+    "timeout_seconds": 3,
+    "retries": 3
+  },
+  "registers": {
+    "safety_reg_40489": {
+      "address": 40489,
+      "address_hex": "0x9E29",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "Hz/V",
+      "range": "[47.5,49.5]",
+      "description": "GoodWe Safety Parameter: 市电频率下限"
+    },
+    "safety_reg_40490": {
+      "address": 40490,
+      "address_hex": "0x9E2A",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "Hz/V",
+      "range": "[50.5,51.5]",
+      "description": "GoodWe Safety Parameter: 市电频率上限"
+    },
+    "safety_reg_42744": {
+      "address": 42744,
+      "address_hex": "0xA6F8",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "Hz/V",
+      "range": "[47.5,49.5]",
+      "description": "GoodWe Safety Parameter: 市电频率下限"
+    },
+    "safety_reg_42747": {
+      "address": 42747,
+      "address_hex": "0xA6FB",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.01,
+      "unit": "Hz/V",
+      "range": "[50.5,51.5]",
+      "description": "GoodWe Safety Parameter: 市电频率上限"
+    },
+    "safety_reg_40551": {
+      "address": 40551,
+      "address_hex": "0x9E67",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.1,
+      "unit": "Hz/V",
+      "range": "[352.0,396.0]",
+      "description": "GoodWe Safety Parameter: 市电电压下限"
+    },
+    "safety_reg_40552": {
+      "address": 40552,
+      "address_hex": "0x9E68",
+      "count": 1,
+      "type": "UINT16",
+      "access": "RW",
+      "scale": 0.1,
+      "unit": "Hz/V",
+      "range": "[484.0,528.0]",
+      "description": "GoodWe Safety Parameter: 市电电压上限"
+    }
+  }
+}

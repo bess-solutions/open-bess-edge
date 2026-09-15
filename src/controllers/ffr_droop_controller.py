@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 open-bess-edge/src/controllers/ffr_droop_controller.py
 ==============================================================================
@@ -108,12 +109,7 @@ class FFRDroopController:
 
         # 5. Envolvente por Estado de Carga (SoC Protection)
         # Si subfrecuencia y SoC crítico, no se puede descargar
-        if (
-            raw_target_p > 0
-            and soc_pct <= self.min_soc
-            or raw_target_p < 0
-            and soc_pct >= self.max_soc
-        ):
+        if raw_target_p > 0 and soc_pct <= self.min_soc or raw_target_p < 0 and soc_pct >= self.max_soc:
             raw_target_p = 0.0
 
         # Saturación a límites nominales de placa del inversor [-P_nom, +P_nom]

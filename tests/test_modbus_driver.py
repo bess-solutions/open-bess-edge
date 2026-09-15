@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 open-bess-edge/tests/test_modbus_driver.py
 ==============================================================================
@@ -80,3 +81,69 @@ def test_modbus_numeric_conversions():
     u_neg = ModbusBESSClient._to_unsigned16(-500)
     assert u_neg == 65536 - 500
     assert ModbusBESSClient._signed16(u_neg) == -500
+
+
+@pytest.mark.asyncio
+async def test_modbus_real_client_read_and_write():
+    from unittest.mock import AsyncMock, MagicMock
+
+    cfg = ModbusConfig(simulation_mode=False)
+    client = ModbusBESSClient(cfg)
+    client._connected = True
+
+    mock_client = AsyncMock()
+    mock_client.close = MagicMock()
+    mock_res = MagicMock()
+    mock_res.isError.return_value = False
+    mock_res.registers = [5000, 400, 100, 50, 800, 950, 3200, 3250, 250, 1000]
+    mock_client.read_holding_registers.return_value = mock_res
+
+    mock_write_res = MagicMock()
+    mock_write_res.isError.return_value = False
+    mock_client.write_register.return_value = mock_write_res
+
+    client._client = mock_client
+
+    readings = await client.read_telemetry()
+    assert readings.read_ok is True
+    assert readings.f_measured_hz == 50.0
+    assert readings.v_grid_v == 400.0
+    assert readings.p_actual_kw == 100.0
+    assert readings.soc_pct == 80.0
+
+    # Write setpoints
+    ok, msg = await client.write_setpoints(p_kw=100.0, q_kvar=50.0)
+    assert ok is True
+    assert msg == "SETPOINTS_COMMITTED"
+
+    # Write error
+    mock_write_err = MagicMock()
+    mock_write_err.isError.return_value = True
+    mock_client.write_register.return_value = mock_write_err
+    ok_err, _ = await client.write_setpoints(p_kw=100.0, q_kvar=50.0)
+    assert ok_err is False
+
+    # Read error
+    mock_read_err = MagicMock()
+    mock_read_err.isError.return_value = True
+    mock_client.read_holding_registers.return_value = mock_read_err
+    readings_err = await client.read_telemetry()
+    assert readings_err.read_ok is False
+
+    await client.disconnect()
+    assert client._connected is False
+
+
+@pytest.mark.asyncio
+async def test_modbus_connect_failure():
+    from unittest.mock import patch
+
+    cfg = ModbusConfig(simulation_mode=False)
+    client = ModbusBESSClient(cfg)
+
+    with patch("src.drivers.modbus_client.AsyncModbusTcpClient") as mock_cls:
+        instance = mock_cls.return_value
+        instance.connect.side_effect = ConnectionRefusedError("Offline")
+        ok = await client.connect()
+        assert ok is False
+        assert client._connected is False
