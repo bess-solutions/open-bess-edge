@@ -1,79 +1,24 @@
-# =============================================================================
-# BESSAI Edge Gateway — Multi-stage Dockerfile
-# =============================================================================
-# Stage 1: builder  — installs dependencies into an isolated venv
-# Stage 2: runtime  — minimal image with only the venv copied in
-#
-# Design decisions:
-#   * python:3.11-slim for a balance of size and compatibility.
-#   * Non-root user (bess) for security.
-#   * PYTHONDONTWRITEBYTECODE + PYTHONUNBUFFERED for clean container logs.
-#   * Health-check via a lightweight Python import probe.
-# =============================================================================
+# Open BESS Edge v3 — imagen mínima, usuario no-root.
+# Nota: esta imagen NO fue construida en el entorno de desarrollo (sin daemon Docker); el CI la construye.
+FROM python:3.12-slim AS build
+WORKDIR /src
+COPY pyproject.toml README.md LICENSE ./
+COPY src ./src
+COPY registry ./registry
+COPY data ./data
+RUN pip install --no-cache-dir build && python -m build --wheel --outdir /dist
 
-# ── Stage 1: Builder ─────────────────────────────────────────────────────────
-FROM python:3.11-slim AS builder
-
-# Install build tools needed for native extensions (pymodbus, cryptography …)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    libffi-dev \
-    libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /build
-
-# Copy dependency manifest first to leverage Docker layer cache
-COPY pyproject.toml .
-COPY config/ config/
-COPY src/ src/
-
-# Create isolated virtual environment and install package
-RUN python -m venv /opt/venv && \
-    /opt/venv/bin/pip install --upgrade pip && \
-    /opt/venv/bin/pip install --no-cache-dir .
-
-
-# ── Stage 2: Runtime ─────────────────────────────────────────────────────────
-FROM python:3.11-slim AS runtime
-
-LABEL maintainer="ingenieria@bess-solutions.cl" \
-    org.opencontainers.image.title="BESSAI Edge Gateway" \
-    org.opencontainers.image.description="Industrial BESS gateway — NTSyCS compliant" \
-    org.opencontainers.image.version="2.4.0" \
-    org.opencontainers.image.licenses="Apache-2.0"
-
-# Runtime-only system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libssl3 \
-    && rm -rf /var/lib/apt/lists/*
-
-# Security: run as non-root
-RUN groupadd --gid 1001 bess && \
-    useradd  --uid 1001 --gid bess --shell /bin/sh --create-home bess
-
-# Copy venv from builder (not the whole /build folder)
-COPY --from=builder /opt/venv /opt/venv
-
+FROM python:3.12-slim
+RUN useradd --system --uid 10001 --home /app obe && mkdir -p /app/config /app/data /var/lib/open-bess-edge \
+    && chown -R obe /var/lib/open-bess-edge
+COPY --from=build /dist/*.whl /tmp/
+RUN pip install --no-cache-dir /tmp/*.whl && rm /tmp/*.whl
+COPY --chown=obe config/edge_config.yaml /app/config/edge_config.yaml
+COPY --chown=obe data/bess_safety_baseline.json /app/data/bess_safety_baseline.json
+USER obe
 WORKDIR /app
-
-# Copy application source
-COPY --chown=bess:bess src/       ./src/
-COPY --chown=bess:bess registry/  ./registry/
-COPY --chown=bess:bess config/    ./config/
-
-USER bess
-
-# Activate venv
-ENV PATH="/opt/venv/bin:$PATH" \
-    PYTHONPATH="/app" \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
-
-EXPOSE 8000
-
-# Lightweight liveness probe: verify the package is importable
-HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-    CMD python -c "from src.core.config import settings; print('OK')" || exit 1
-
-ENTRYPOINT ["python", "-m", "src.core.main"]
+ENV PYTHONUNBUFFERED=1
+HEALTHCHECK --interval=15s --timeout=3s --start-period=10s --retries=3 \
+  CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=2).status==200 else 1)"
+ENTRYPOINT ["open-bess-edge"]
+CMD ["run", "--config", "/app/config/edge_config.yaml"]

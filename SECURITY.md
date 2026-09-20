@@ -1,3 +1,6 @@
+> **Aviso:** este documento describe la v2 (`src.*`); en v3 el paquete es `open_bess_edge` y la referencia vigente es `README.md` y `docs/spec/CONTROL.md`.
+
+<!-- DOCUMENTO DE v2 -->
 # Security Policy — BESSAI Edge Gateway
 
 ## Supported Versions
