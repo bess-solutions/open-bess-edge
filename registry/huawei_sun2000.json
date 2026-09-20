@@ -84,7 +84,7 @@
     },
     "ac_current": {
       "address": 32072,
-      "count": 1,
+      "count": 2,
       "type": "INT32",
       "access": "RO",
       "scale": 0.001,
@@ -322,5 +322,30 @@
   "soc": {
     "address": 37760,
     "register_alias": "luna_soc"
-  }
+  },
+    "canonical": {
+        "frequency_hz": {
+            "register": "frequency"
+        },
+        "v_grid_v": {
+            "register": "ac_voltage"
+        },
+        "p_kw": {
+            "register": "luna_power",
+            "sign": -1
+        },
+        "q_kvar": {
+            "register": "reactive_power"
+        },
+        "soc_pct": {
+            "register": "luna_soc"
+        },
+        "soh_pct": {
+            "register": "luna_soh"
+        }
+    },
+    "verification": {
+        "level": "unverified",
+        "notes": "Bindings de telemetría derivados de las descripciones del propio perfil; NO verificados contra el dispositivo real. Sin bindings de consigna P/Q ni de señales de celda/aislamiento: el perfil sólo admite modo monitor. Convención del fabricante: batería + = carga (se invierte a la convención interna)."
+    }
 }

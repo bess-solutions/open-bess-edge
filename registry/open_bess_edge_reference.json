@@ -1,0 +1,46 @@
+{
+  "$schema": "https://bessai.io/schemas/device-profile/v2.json",
+  "profile_version": "3.0.0",
+  "device": {
+    "manufacturer": "Open BESS Edge",
+    "model": "Reference register map v1",
+    "description": "Mapa de registros de referencia del proyecto (PCS/BMS agregados). Convención de potencia: + = descarga, - = carga; Q: + = capacitivo.",
+    "protocol": "ModbusTCP",
+    "slave_id_default": 1
+  },
+  "connection": { "byte_order": "BIG", "word_order": "BIG", "timeout_seconds": 1, "retries": 0 },
+  "registers": {
+    "f_measured":      { "address": 100, "count": 1, "type": "UINT16", "access": "RO", "scale": 0.01, "unit": "Hz",   "description": "Frecuencia de red" },
+    "v_grid":          { "address": 101, "count": 1, "type": "UINT16", "access": "RO", "scale": 1,    "unit": "V",    "description": "Tensión de red RMS" },
+    "p_actual":        { "address": 102, "count": 1, "type": "INT16",  "access": "RO", "scale": 1,    "unit": "kW",   "description": "Potencia activa (+ descarga / - carga)" },
+    "q_actual":        { "address": 103, "count": 1, "type": "INT16",  "access": "RO", "scale": 1,    "unit": "kvar", "description": "Potencia reactiva (+ capacitivo / - inductivo)" },
+    "soc":             { "address": 104, "count": 1, "type": "UINT16", "access": "RO", "scale": 0.1,  "unit": "%",    "description": "Estado de carga" },
+    "soh":             { "address": 105, "count": 1, "type": "UINT16", "access": "RO", "scale": 0.1,  "unit": "%",    "description": "Estado de salud" },
+    "cell_v_min":      { "address": 106, "count": 1, "type": "UINT16", "access": "RO", "scale": 1,    "unit": "mV",   "description": "Tensión mínima de celda" },
+    "cell_v_max":      { "address": 107, "count": 1, "type": "UINT16", "access": "RO", "scale": 1,    "unit": "mV",   "description": "Tensión máxima de celda" },
+    "cell_t_max":      { "address": 108, "count": 1, "type": "INT16",  "access": "RO", "scale": 0.1,  "unit": "C",    "description": "Temperatura máxima de celda" },
+    "isolation":       { "address": 109, "count": 1, "type": "UINT16", "access": "RO", "scale": 1,    "unit": "kOhm", "description": "Resistencia de aislamiento DC" },
+    "p_setpoint":      { "address": 200, "count": 1, "type": "INT16",  "access": "RW", "scale": 1,    "unit": "kW",   "description": "Consigna P (+ descarga / - carga)" },
+    "q_setpoint":      { "address": 201, "count": 1, "type": "INT16",  "access": "RW", "scale": 1,    "unit": "kvar", "description": "Consigna Q (+ capacitivo / - inductivo)" },
+    "watchdog_heartbeat": { "address": 202, "count": 1, "type": "UINT16", "access": "RW", "scale": 1, "unit": "count", "description": "Contador de latido; el PCS debe pasar a estado seguro si deja de incrementarse" }
+  },
+  "canonical": {
+    "frequency_hz":  { "register": "f_measured" },
+    "v_grid_v":      { "register": "v_grid" },
+    "p_kw":          { "register": "p_actual" },
+    "q_kvar":        { "register": "q_actual" },
+    "soc_pct":       { "register": "soc" },
+    "soh_pct":       { "register": "soh" },
+    "cell_v_min_v":  { "register": "cell_v_min", "factor": 0.001 },
+    "cell_v_max_v":  { "register": "cell_v_max", "factor": 0.001 },
+    "cell_t_max_c":  { "register": "cell_t_max" },
+    "isolation_kohm": { "register": "isolation" },
+    "p_setpoint_kw":  { "register": "p_setpoint" },
+    "q_setpoint_kvar": { "register": "q_setpoint" },
+    "heartbeat":      { "register": "watchdog_heartbeat" }
+  },
+  "verification": {
+    "level": "reference",
+    "notes": "Mapa definido por el proyecto. No corresponde a ningún fabricante."
+  }
+}

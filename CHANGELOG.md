@@ -1,3 +1,13 @@
+# Changelog
+
+## 3.0.0
+- Reescritura del núcleo como paquete `open_bess_edge` (rompe imports `src.*`); pymodbus >=3.9.2.
+- Corrige: integrador en el droop, driver roto con pymodbus >=3.10, wrap-around de consignas, fallos silenciosos de
+  configuración/baseline, NaN tratado como seguro, ausencia de fail-safe ante pérdida de enlace, empaquetado hatch,
+  punto de entrada inexistente, DBC con IDs extendidos inválidos, perfil Huawei con `count` erróneo.
+- Elimina `sitr_gateway` (segunda lógica de FFR con potencia fija que eludía la envolvente de seguridad).
+- CAN/IEC 104/GOOSE pasan a `experimental`.
+
 # CHANGELOG — BESSAI Edge Gateway (`open-bess-edge`)
 
 All notable changes to this project will be documented in this file.

@@ -202,5 +202,28 @@
     "test_environment": "SolarEdge StorEdge SE7K + SolarEdge Home Battery 10kWh (LG Chem RESU10H)",
     "contributor": "BESSAI Engineering Team",
     "registry_profile_version": "2.0.0"
-  }
+  },
+    "canonical": {
+        "frequency_hz": {
+            "register": "ac_frequency"
+        },
+        "v_grid_v": {
+            "register": "ac_voltage_ab"
+        },
+        "p_kw": {
+            "register": "storage_power",
+            "sign": -1,
+            "factor": 0.001
+        },
+        "soc_pct": {
+            "register": "storage_soc"
+        },
+        "soh_pct": {
+            "register": "storage_soh"
+        }
+    },
+    "verification": {
+        "level": "unverified",
+        "notes": "Bindings de telemetría derivados de las descripciones del propio perfil; NO verificados contra el dispositivo real. Sin bindings de consigna P/Q ni de señales de celda/aislamiento: el perfil sólo admite modo monitor. Convención del fabricante: batería + = carga (se invierte a la convención interna)."
+    }
 }

@@ -252,5 +252,25 @@
     "soc": {
         "address": 40361,
         "register_alias": "battery_soc"
+    },
+    "canonical": {
+        "frequency_hz": {
+            "register": "ac_frequency"
+        },
+        "v_grid_v": {
+            "register": "ac_voltage_l1"
+        },
+        "p_kw": {
+            "register": "battery_power",
+            "sign": -1,
+            "factor": 0.001
+        },
+        "soc_pct": {
+            "register": "battery_soc"
+        }
+    },
+    "verification": {
+        "level": "unverified",
+        "notes": "Bindings de telemetría derivados de las descripciones del propio perfil; NO verificados contra el dispositivo real. Sin bindings de consigna P/Q ni de señales de celda/aislamiento: el perfil sólo admite modo monitor. Convención del fabricante: batería + = carga (se invierte a la convención interna)."
     }
 }

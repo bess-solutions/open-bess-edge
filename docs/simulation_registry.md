@@ -1,3 +1,6 @@
+> **Aviso:** este documento describe la v2 (`src.*`); en v3 el paquete es `open_bess_edge` y la referencia vigente es `README.md` y `docs/spec/CONTROL.md`.
+
+<!-- DOCUMENTO DE v2 -->
 # 🧪 BESSAI — Registro de Simulaciones
 
 > **Última actualización:** 2026-03-02 · **Versión:** v2.14.0  

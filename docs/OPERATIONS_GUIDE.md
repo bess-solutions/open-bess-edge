@@ -1,3 +1,6 @@
+> **Aviso:** este documento describe la v2 (`src.*`); en v3 el paquete es `open_bess_edge` y la referencia vigente es `README.md` y `docs/spec/CONTROL.md`.
+
+<!-- DOCUMENTO DE v2 -->
 # Guía de Operaciones Industriales — BESSAI Edge Gateway
 
 Esta guía describe los procedimientos operativos para desplegar, supervisar y mantener el BESSAI Edge Gateway en hardware de borde (Industrial PC, Raspberry Pi 4/5, o servidores locales de subestación) en conexión directa con inversores y sistemas BESS.

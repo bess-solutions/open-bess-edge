@@ -1,39 +1,24 @@
-# ==============================================================================
-# Open BESS Edge — Production Industrial Edge Gateway Container
-# Multi-arch support for x86_64 and ARM64 (IPC Advantech / Siemens / Raspberry Pi CM4)
-# ==============================================================================
+# Open BESS Edge v3 — imagen mínima, usuario no-root.
+# Nota: esta imagen NO fue construida en el entorno de desarrollo (sin daemon Docker); el CI la construye.
+FROM python:3.12-slim AS build
+WORKDIR /src
+COPY pyproject.toml README.md LICENSE ./
+COPY src ./src
+COPY registry ./registry
+COPY data ./data
+RUN pip install --no-cache-dir build && python -m build --wheel --outdir /dist
 
-FROM python:3.12-slim-bookworm AS base
-
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1 \
-    EDGE_CONFIG_PATH=/app/config/edge_config.yaml
-
+FROM python:3.12-slim
+RUN useradd --system --uid 10001 --home /app obe && mkdir -p /app/config /app/data /var/lib/open-bess-edge \
+    && chown -R obe /var/lib/open-bess-edge
+COPY --from=build /dist/*.whl /tmp/
+RUN pip install --no-cache-dir /tmp/*.whl && rm /tmp/*.whl
+COPY --chown=obe config/edge_config.yaml /app/config/edge_config.yaml
+COPY --chown=obe data/bess_safety_baseline.json /app/data/bess_safety_baseline.json
+USER obe
 WORKDIR /app
-
-# Instalar dependencias esenciales de sistema
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copiar manifiesto y código fuente para instalación
-COPY pyproject.toml README.md ./
-COPY src/ ./src/
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir .
-
-# Copiar configuración y datos
-COPY config/ ./config/
-COPY data/ ./data/
-
-# Usuario sin privilegios por seguridad en subestación
-RUN useradd -u 1001 -m bessedge && chown -R bessedge:bessedge /app
-USER bessedge
-
-EXPOSE 502/tcp
-
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD python -c "from src.config import load_config; load_config()" || exit 1
-
-ENTRYPOINT ["python", "-m", "src.edge_node"]
+ENV PYTHONUNBUFFERED=1
+HEALTHCHECK --interval=15s --timeout=3s --start-period=10s --retries=3 \
+  CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=2).status==200 else 1)"
+ENTRYPOINT ["open-bess-edge"]
+CMD ["run", "--config", "/app/config/edge_config.yaml"]

@@ -1,348 +1,74 @@
-# ⚡ Open BESS Edge
+# Open BESS Edge v3
 
-<div align="center">
+Gateway de borde para sistemas de almacenamiento (BESS): lee telemetría por Modbus TCP, evalúa una envolvente de
+seguridad *fail-closed*, calcula la respuesta en frecuencia (droop/FFR) y el control de reactivos (Volt/VAR) y escribe
+consignas P/Q verificadas al PCS. Español: este README; parámetros y convenciones en `docs/spec/CONTROL.md`.
 
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue?logo=python&logoColor=white)](https://www.python.org/)
-[![Grid Code](https://img.shields.io/badge/Grid%20Code-NTSyCS%20Cap.%203%20(Chile)-2ea44f?logo=lightning&logoColor=white)](https://www.cne.cl/)
-[![CEN Standard](https://img.shields.io/badge/CEN%20SEN-CFyDR%202026%20Compliant-009688?logo=buffer&logoColor=white)](https://www.coordinador.cl/)
-[![Latency](https://img.shields.io/badge/Loop%20Latency-sub--0.1ms-purple?logo=speedtest&logoColor=white)](#-rendimiento-y-latencia-de-lazo-cerrado)
-[![Architecture](https://img.shields.io/badge/Platform-IPC%20x86__64%20%7C%20ARM64-orange?logo=docker&logoColor=white)](#-despliegue-industrial)
-[![Safety Standard](https://img.shields.io/badge/Safety-NFPA%20855%20%7C%20SEC%20RIC-red?logo=shield&logoColor=white)](#-envolvente-de-seguridad-de-hardware-bess-guard)
-[![Tests](https://img.shields.io/badge/Tests-33%2F33%20Passing%20(100%25)-brightgreen?logo=pytest&logoColor=white)](#-suite-de-pruebas-y-homologaci%C3%B3n-cen)
+> **Estado honesto.** Probado contra emuladores y un servidor Modbus independiente, **no contra hardware real** y sin
+> validación regulatoria. Los parámetros de red provienen de la documentación del proyecto y deben ser confirmados por el
+> titular contra la NTSyCS vigente antes de operar en el SEN. Ver `PROJECT_STATUS.md`.
 
-**Mission-Critical Industrial Edge Gateway & Frequency Response Controller for Battery Energy Storage Systems (BESS)**  
-*Controlador de borde determinístico de subestación eléctrica para cumplimiento estricto del Código de Red del Sistema Eléctrico Nacional (SEN) de Chile.*
+## Inicio rápido
 
-[Arquitectura](#-arquitectura-de-subestaci%C3%B3n) •
-[Código de Red CEN](#-cumplimiento-normativo-y-c%C3%B3digo-de-red-sen) •
-[Seguridad BESS-GUARD](#-envolvente-de-seguridad-de-hardware-bess-guard) •
-[Volt/VAR Q(V)](#-soporte-din%C3%A1mico-de-tensi%C3%B3n-voltvar-qv) •
-[Hardware Compatible](#-ecosistema-de-hardware-soportado) •
-[Puesta en Marcha](#-puesta-en-marcha-r%C3%A1pida)
-
-</div>
-
----
-
-## 🏗️ Arquitectura de Subestación
-
-Open BESS Edge opera en el nivel **OT (Operational Technology)** dentro de computadores industriales de borde (*Edge IPC*) instalados en la caseta de control de la subestación. Su función es garantizar la respuesta dinámica ante contingencias de red y proteger la vida útil de las baterías de forma autónoma.
-
-```mermaid
-graph TB
-    subgraph PCC ["⚡ Punto de Conexión Común (PCC) · SEN Chile"]
-        GRID["Red de Transmisión / Distribución<br/><b>66 kV / 110 kV / 220 kV</b>"]
-        TRF["Transformador Elevador Principal<br/><b>BT (400V) → MT/AT</b>"]
-    end
-
-    subgraph BESS_PLANT ["🔋 Planta de Almacenamiento BESS (Patio de Potencia)"]
-        PCS["Inversor Bidireccional de Potencia (PCS)<br/><i>Huawei · SMA · Fronius · Deye · Victron · SolarEdge</i><br/>[Control P/Q · Modbus TCP]"]
-        BMS["Sistema de Gestión de Baterías (BMS)<br/><i>BYD · Tesla · GoodWe (Racks LFP)</i><br/>[Telemetría de Celdas · Alarmas]"]
-    end
-
-    subgraph EDGE_GATEWAY ["🖥️ Open BESS Edge Runtime (IPC Subestación)"]
-        direction TB
-        MB["<b>ModbusBESSClient</b><br/>Driver Asíncrono con Backoff & Fallback Simulación"]
-        
-        subgraph ENGINES ["Lazo de Control Determinístico (Latencia sub-0.1ms)"]
-            GUARD["🛡️ <b>SafetyEnvelopeEvaluator</b><br/>Envolvente BESS-GUARD-001..005"]
-            FFR["⚡ <b>FFRDroopController</b><br/>FFR (<500ms) & Estatismo (s=3%, ±30mHz)"]
-            VV["🔄 <b>VoltVarController</b><br/>Regulación Dinámica Q(V) & cos φ"]
-        end
-
-        TELEMETRY["📡 <b>Telemetry & Diagnostics</b><br/>Battery Data Format (BDF) · IEC 61850"]
-    end
-
-    subgraph SCADA_CEN ["🏢 Despacho y Telecontrol Central"]
-        CEN_SCADA["SCADA Coordinador Eléctrico Nacional<br/>Consignas AGC & Monitoreo NTSyCS"]
-    end
-
-    GRID --- TRF --- PCS
-    PCS <-->|"Potencia DC"| BMS
-
-    PCS <-->|"Modbus TCP (Holding Regs)"| MB
-    BMS <-->|"Telemetría DC / Celdas"| MB
-
-    MB -->|"Snapshot Físico"| GUARD
-    GUARD -->|"Condición Segura"| FFR
-    GUARD -->|"Condición Segura"| VV
-    GUARD -.->|"Interlock Disparo Crítico (0 kW)"| MB
-
-    FFR -->|"Consigna P (kW)"| MB
-    VV -->|"Consigna Q (kVAR)"| MB
-    MB -->|"Escritura Setpoints"| PCS
-
-    EDGE_GATEWAY -.->|"Telemetría NTSyCS"| CEN_SCADA
+```bash
+pip install .                       # o: pip install -e ".[dev]"
+open-bess-edge simulate             # planta simulada + Modbus TCP + nodo (contingencia 49,65 Hz)
+open-bess-edge check-config config/edge_config.yaml
+open-bess-edge run --config config/edge_config.yaml
+open-bess-edge profile-info open_bess_edge_reference
+open-bess-edge verify-audit /var/lib/open-bess-edge/audit.jsonl
 ```
 
----
+## Convención física (única en todo el código)
+P + = descarga/inyección, − = carga. Q + = capacitivo (sube tensión). La conversión desde la convención de cada
+fabricante se hace sólo en el perfil (`sign`, `factor`).
 
-## ⏱️ Flujo de Lazo Cerrado en Tiempo Real (Secuencia de Contingencia)
+## Ciclo de control
+`lectura → envolvente de seguridad → FFR/droop → Volt/VAR → limitador → escritura (+verificación) → latido → auditoría`
 
-La siguiente secuencia describe la respuesta milisegundo a milisegundo ante una contingencia de desconexión de generación masiva en el SEN (pérdida de 397 MW):
+Garantías, cada una con test (`tests/test_node.py`, `tests/test_fuzz_invariants.py`):
+- Arranque en 0 kW y validación de `startup_valid_cycles` ciclos antes de operar.
+- Pérdida de telemetría: retiene la consigna `comm_loss_hold_s` (2 s) y luego fuerza 0, reintentando el 0 hasta confirmarlo.
+  Un PCS sin watchdog conserva la última consigna mientras el enlace esté caído: usar el registro de latido.
+- Dato requerido ausente, NaN, infinito o físicamente imposible ⇒ salida 0 (nunca un valor "razonable").
+- Disparos de seguridad enclavados; se liberan sólo con reset explícito y condición despejada con histéresis.
+- Consigna con truncado hacia cero; desborde de registro ⇒ error, nunca *wrap-around*.
+- Errores internos no matan el lazo: estado `SAFE_STATE` y auditoría.
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant SEN as Red SEN (PCC)
-    participant PCS as Inversor PCS
-    participant MB as Modbus Driver (Edge)
-    participant GUARD as SafetyGuard Evaluator
-    participant FFR as FFR Controller (CEN 2026)
-    participant VV as Volt/VAR Controller
+## Guardas de seguridad
+| Código | Efecto |
+|---|---|
+| BESS-GUARD-001 / 002 | Sub/sobretensión de celda: disparo enclavado |
+| BESS-GUARD-003 | Sobretemperatura de celda: disparo enclavado |
+| BESS-GUARD-004 | Aislamiento DC: disparo enclavado |
+| BESS-GUARD-005 | Desbalance de celdas: advertencia |
+| BESS-GUARD-006 / 009 | Temperatura de celda / ambiente altas: recorte 50 % |
+| BESS-GUARD-007 | Temperatura baja: inhibe carga |
+| BESS-GUARD-008 | Tensión de string fuera de ventana: disparo enclavado |
+| BESS-GUARD-010 | SOC en límite: inhibe descarga o carga |
+| BESS-GUARD-020 / 021 | Alarma de frecuencia / tensión de red (sólo si se configuran umbrales) |
+| BESS-GUARD-090 | Dato requerido inválido: salida 0, se recupera tras N ciclos válidos |
 
-    Note over SEN: t = 0.0 ms: Desconexión de unidad térmica (49.65 Hz)
-    SEN->>PCS: Frecuencia cae a 49.65 Hz (|Δf| = 0.35 Hz)
-    PCS->>MB: Lectura de frecuencia y voltajes instantáneos (t = 2.0 ms)
-    MB->>GUARD: Evaluación de envolvente térmica y de aislamiento (t = 2.05 ms)
-    GUARD-->>FFR: ✅ BESS-GUARD Normal (Sin disparos térmicos)
-    Note over FFR: |Δf| ≥ 0.30 Hz detectado: Conmutación a modo FFR_EMERGENCY_FAST
-    FFR->>FFR: Cálculo de inyección a plena potencia nominal (t = 2.08 ms)
-    GUARD-->>VV: Evaluación de tensión PCC (V = 398 V)
-    VV->>VV: Curva Q(V) dentro de banda muerta (Q = 0 kVAR)
-    FFR->>MB: Setpoint P = +1000 kW (t = 2.10 ms)
-    MB->>PCS: Escritura Modbus Register 200 (t = 4.5 ms)
-    PCS->>SEN: ⚡ Inyección plena a la red en t < 500 ms (Defensa del Nadir)
-```
+## Perfiles de dispositivo (`registry/`)
+Un perfil sólo permite **control** si declara consigna de P y las señales de seguridad requeridas. Ningún perfil de
+fabricante lo hace hoy: son de **monitor** y su nivel es `unverified` (bindings derivados de las descripciones del perfil,
+sin prueba contra el equipo real).
 
----
-
-## ⚡ Cumplimiento Normativo y Código de Red SEN
-
-El controlador incorpora la parametrización oficial del **Estudio de Control de Frecuencia y Determinación de Reservas (CFyDR) 2026 del Coordinador Eléctrico Nacional (CEN)** y la **Norma Técnica de Seguridad y Calidad de Servicio (NTSyCS)**:
-
-```text
-                                 CURVA DE ESTATISMO Y FFR (CEN CFyDR 2026)
-        Inyección (+P)
-              ▲
-      P_nom ──┤                                            ┌─────────── FFR Contingencia Severa (|Δf| ≥ 0.30 Hz)
-              │                                           /              Rampa liberada: Inyección en sub-500ms
-              │                                          /
-              │                  Zona de Estatismo      /
-              │                   Primario (s = 3%)    /
-              │                      (K_p = P_nom/s*f)┌
-              │                                      /│
-              │                                     / │
-        0 kW ─┼──────────────────────────────┬─────┴──┼────────────────────────► Frecuencia (Hz)
-              │                              │        │
-              │                     49.70 Hz │        │ 49.97 Hz   50.00 Hz
-              │                 (Umbral FFR) │        │ (Límite Banda Muerta)
-              │                              │        │
-              │                              │        └─ Banda Muerta Primaria Oficial CEN: ±30 mHz
-              │                              │
-     -P_nom ──┤                              └─ Supresión Automática de Carga: Si P < 0, se apaga a 0 kW
-              ▼
-        Carga (-P)
-```
-
-| Parámetro Operativo | Norma / Referencia CEN | Implementación en Open BESS Edge |
+| Perfil | Modo | Nivel |
 |---|---|---|
-| **Frecuencia Nominal** | NTSyCS Art. 3-1 | $f_0 = 50.00\text{ Hz}$ |
-| **Banda Muerta Primaria** | Estudio CFyDR 2026 CEN | $\Delta f_{deadband} = \pm 0.03\text{ Hz}$ ($\pm 30\text{ mHz}$) insensible a ruido estocástico |
-| **Estatismo Permanente ($s$)** | Res. CNE N° 343 / NTSyCS | Configurable $s \in [0.02, 0.05]$ (Default: $s = 0.03$ / 3%) |
-| **Umbral de Contingencia FFR** | Estudio CFyDR 2026 CEN | $|\Delta f| \ge 0.30\text{ Hz}$ ($f \le 49.70\text{ Hz}$ o $f \ge 50.30\text{ Hz}$) |
-| **Tiempo de Respuesta FFR** | NTSyCS Cap. 3 | Inyección a plena potencia en $t < 500\text{ ms}$ sostenida para defensa del Nadir |
-| **Rampa de Operación Normal** | NTSyCS Art. 3-15 | Limitador automático $\le 20\% P_{nom}/\text{min}$ en cuasiestacionario |
-| **Alivio Instantáneo en Carga** | Metodología CFyDR 2026 | Supresión instantánea a $0\text{ kW}$ de consumo si la batería estaba cargando |
-| **Auditoría de Desempeño CEN** | Procedimientos de Homologación | Registro y cálculo determinístico de $Aporte_{@10s}$ y $Aporte_{@2min}$ |
+| `open_bess_edge_reference` | control | reference (mapa definido por el proyecto) |
+| `huawei_sun2000` | monitor | unverified |
+| `sma_sunny_tripower` | monitor | unverified |
+| `fronius_gen24_byd` | monitor | unverified |
+| `solaredge_storedge` | monitor | unverified |
+| `victron_multiplus2` | monitor | unverified |
 
----
+## Verificación
+`make check` ejecuta lint, mypy estricto, pruebas, verificador de afirmaciones y seguridad. Cubre pruebas unitarias y de
+propiedades, extremo a extremo por TCP real con inyección de fallas, fuzz de invariantes y latencia en tiempo real
+(loopback, sin PCS). Compatible con pymodbus ≥ 3.9.2 (3.9.2 a 3.15.0 probadas; 3.8.x acepta respuestas con transaction
+ID incorrecto y se excluye).
 
-## 🔄 Soporte Dinámico de Tensión Volt/VAR: $Q(V)$
-
-Bajo el **Capítulo 3 de la NTSyCS (Art. 3-21)**, todo sistema BESS conectado al SEN debe aportar regulación dinámica de potencia reactiva para soporte de tensión en el PCC:
-
-```text
-      Potencia Reactiva Q
-      (+ Q: Capacitivo / Eleva Tensión)
-              ▲
-     +Q_max ──┤\
-              │ \  Pendiente K_q (% Qmax / % V)
-              │  \
-              │   \   Banda Muerta (±2% Vnom)
-        0 kVAR┼────┴──────┬──────────┬──────┴────► Tensión PCC (V)
-              │         0.98 pu    1.02 pu
-              │                       \
-              │                        \
-     -Q_max ──┤                         \
-              ▼
-      (- Q: Inductivo / Reduce Tensión)
-```
-
-* **Modo $Q(V)$ Automático**: Inyección de reactivos capacitivos ($+Q$) si $V < 0.98\text{ pu}$; absorción de reactivos inductivos ($-Q$) si $V > 1.02\text{ pu}$.
-* **Modo $\cos\phi(P)$**: Regulación continua de factor de potencia entre $0.95$ inductivo y $0.95$ capacitivo.
-* **Modo $Q$ Fijo**: Consigna despachada por el Coordinador Eléctrico Nacional.
-
----
-
-## 🛡️ Envolvente de Seguridad de Hardware (BESS-GUARD)
-
-El módulo `SafetyEnvelopeEvaluator` valida la telemetría cada ciclo en **tiempo sub-milisegundo** contra los límites de diseño electroquímico de celdas **LFP 314Ah** bajo **NFPA 855** y **SEC RIC N° 01/02**:
-
-| Código de Guarda | Condición de Disparo | Límite Físico (LFP 314Ah) | Acción Automática de Borde |
-|:---:|---|:---:|---|
-| **`BESS-GUARD-001`** | **Cell Undervoltage** | $V_{cell,min} < 2.50\text{ V}$ | Interlock de descarga y desconexión DC |
-| **`BESS-GUARD-002`** | **Cell Overvoltage** | $V_{cell,max} > 3.65\text{ V}$ | Interlock de carga y apertura de interruptor |
-| **`BESS-GUARD-003`** | **Cell Overtemperature** | $T_{cell,max} > 50.0\text{ °C}$ | Parada de emergencia y máxima ventilación HVAC |
-| **`BESS-GUARD-004`** | **DC Isolation Fault** | $R_{iso} < 500.0\text{ k}\Omega$ | Bloqueo de inversor y alarma de aislamiento |
-| **`BESS-GUARD-005`** | **Cell Imbalance Warning** | $\Delta V_{cell} > 50.0\text{ mV}$ | Alarma preventiva y balanceo activo |
-
----
-
-## 🔌 Ecosistema de Hardware Soportado
-### Perfiles Modbus Validados en Producción (`registry/`)
-
-Los siguientes fabricantes cuentan con perfiles de mapeo de registros Modbus, decodificación de datos y pruebas de conformidad implementadas en el directorio [`registry/`](registry/):
-
-```mermaid
-graph LR
-    subgraph INVERSORES ["⚡ Inversores Bidireccionales (PCS) Validados"]
-        HW["Huawei SUN2000 Series<br/>✅ registry/huawei_sun2000.json"]
-        SMA["SMA Sunny Tripower Storage<br/>✅ registry/sma_sunny_tripower.json"]
-        FRON["Fronius Symo GEN24 Plus<br/>✅ registry/fronius_gen24_byd.json"]
-        SE["SolarEdge StorEdge<br/>✅ registry/solaredge_storedge.json"]
-        VIC["Victron MultiPlus-II<br/>✅ registry/victron_multiplus2.json"]
-        DEYE["Deye / Sunsynk Hybrid<br/>✅ registry/deye_sunsynk_hybrid.json"]
-        GW["GoodWe Lynx Home<br/>✅ registry/goodwe_lynx_home.json"]
-    end
-
-    subgraph BATERIAS ["🔋 Baterías y BMS Validados"]
-        BYD["BYD Battery-Box Premium<br/>✅ registry/byd_battery_box.json"]
-        TSLA["Tesla Powerwall 3<br/>✅ registry/tesla_powerwall3.json"]
-    end
-
-    subgraph PROTOCOLOS ["📡 Protocolos de Interconexión Activos"]
-        MB_TCP["Modbus TCP / RTU (SunSpec & IEEE 754)"]
-        SITR_104["IEC 60870-5-104 (SCADA Coordinador CEN)"]
-        GOOSE["IEC 61850 GOOSE Fast-Trip (Sub-4ms)"]
-        CAN_BMS["CANopen / J1939 DBC Engine"]
-    end
-
-    INVERSORES --> PROTOCOLOS
-    BATERIAS --> PROTOCOLOS
-    PROTOCOLOS --> CORE["🖥️ Open BESS Edge Gateway"]
-```
-
-### 🎯 Roadmap de Integración de Hardware (Q4-2026 / 2027)
-
-> [!NOTE]
-> En estricto apego al principio de **Zero Mock Data** y transparencia técnica, los siguientes equipos industriales forman parte de la hoja de ruta de homologación de planta utility-scale. Sus perfiles están en fase de calibración y pruebas de laboratorio antes de su incorporación a `registry/`:
->
-> - **Inversores Utility-Scale (PCS)**: Sungrow (SC/ST Series), Kehua Tech (SPI Series), Ingeteam (Ingecon Sun Storage), Power Electronics (HEM Series).
-> - **Racks de Celdas y BMS Utility-Scale**: CATL (EnerOne / EnerC 314Ah), Gotion High-Tech (314Ah), EVE Energy (LF560K / LF314Ah).
-
----
-
-## 🔬 Módulo de Investigación Científica (`research/`)
-
-Open BESS Edge integra estándares internacionales abiertos de investigación avanzada:
-* **BPX v1.1.1 ([`research/bpx_parameter_store.py`](research/bpx_parameter_store.py))**: Formato de modelado electroquímico impulsado por **The Faraday Institution** y **BMW**.
-* **Physics-Informed Digital Twin ([`research/physics_informed_twin.py`](research/physics_informed_twin.py))**: Estimador en tiempo real de resistencia interna ($R_{int}$), riesgo de *Lithium Plating* y degradación de salud ($SoH$).
-* **Battery Data Format ([`research/bdf_telemetry_streamer.py`](research/bdf_telemetry_streamer.py))**: Esquema de telemetría de alta resolución interoperable con **Linux Foundation Energy (LF Energy)**.
-
----
-
-## 🚀 Puesta en Marcha Rápida
-
-### 1. Clonar e Instalar Entorno
-
-```bash
-git clone https://github.com/bess-solutions/open-bess-edge.git
-cd open-bess-edge
-
-# Crear y activar entorno virtual
-python -m venv .venv
-source .venv/bin/activate       # En Windows: .venv\Scripts\activate
-
-# Instalar paquete en modo editable con dependencias de desarrollo
-pip install -e .[dev]
-```
-
-### 2. Ejecutar la Suite de Pruebas de Homologación CEN
-
-```bash
-pytest tests/ -v
-```
-
-Salida esperada:
-```text
-tests/test_cen_cfydr_compliance.py::test_cen_deadband_insensitivity_30mhz PASSED [  6%]
-tests/test_cen_cfydr_compliance.py::test_cen_droop_primary_regulation_accuracy PASSED [ 12%]
-tests/test_cen_cfydr_compliance.py::test_cen_ffr_severe_contingency_trip PASSED [ 18%]
-tests/test_cen_cfydr_compliance.py::test_cen_charging_mode_instantaneous_relief PASSED [ 25%]
-tests/test_cen_cfydr_compliance.py::test_cen_volt_var_qv_curve PASSED [ 31%]
-tests/test_cen_cfydr_compliance.py::test_full_edge_node_closed_loop PASSED [ 37%]
-tests/test_modbus_driver.py::test_modbus_simulation_connection PASSED [ 43%]
-tests/test_modbus_driver.py::test_modbus_write_setpoints_simulation PASSED [ 50%]
-tests/test_modbus_driver.py::test_modbus_injected_event PASSED [ 56%]
-tests/test_safety_envelope.py::test_safety_envelope_normal_operation PASSED [ 62%]
-tests/test_safety_envelope.py::test_bess_guard_001_undervoltage PASSED [ 68%]
-tests/test_safety_envelope.py::test_bess_guard_002_overvoltage PASSED [ 75%]
-tests/test_safety_envelope.py::test_bess_guard_003_overtemperature PASSED [ 81%]
-tests/test_safety_envelope.py::test_bess_guard_004_isolation_fault PASSED [ 87%]
-tests/test_safety_envelope.py::test_bess_guard_005_imbalance_warning PASSED [ 93%]
-tests/test_safety_envelope.py::test_inverter_setpoint_clipping_c_rate PASSED [100%]
-============================== 16 passed in 0.58s ==============================
-```
-
-### 3. Ejecución del Nodo en Modo Simulación Determinística
-
-```bash
-python -m src.edge_node
-```
-
-```text
-2026-09-07 00:35:10 [info] edge_node_starting       device_id=bess-node-linares-01 p_nominal_mw=1.0 site='S/E Linares 66/15 kV'
-2026-09-07 00:35:10 [info] modbus_simulation_active host=127.0.0.1 port=502
---- Ciclo Normal (50.00 Hz) ---
-P Setpoint: 0.0 kW | Q Setpoint: 0.0 kVAR | Latencia: 0.07 ms
-
---- Inyección de Contingencia Severa SEN (49.65 Hz) ---
-P Setpoint: 213.3 kW | Modo: FFR_EMERGENCY_FAST | Latencia: 0.04 ms
-```
-
----
-
-## 🐳 Despliegue Industrial (Docker / IPC Subestación)
-
-Para compilar y ejecutar en hardware industrial embebido (Advantech UNO, Siemens Microbox IPC o Raspberry Pi Compute Module 4):
-
-```bash
-# Compilar imagen de producción multi-arquitectura
-docker build -t bess-solutions/open-bess-edge:2.0.0 .
-
-# Ejecutar contenedor con reinicio automático y enlace de red local
-docker run -d \
-  --name open-bess-edge \
-  --restart always \
-  --network host \
-  -v $(pwd)/config/edge_config.yaml:/app/config/edge_config.yaml:ro \
-  bess-solutions/open-bess-edge:2.0.0
-```
-
----
-
-## 🤖 Infraestructura y Asistencia de IA
-
-<div align="center">
-
-[![Docker AI](https://img.shields.io/badge/Asistencia%20IA-Docker%20AI%20(Gordon)-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/ai/docker-agent/)
-[![Dev Container](https://img.shields.io/badge/Dev%20Container-VS%20Code%20%7C%20Codespaces-blue?logo=visualstudiocode&logoColor=white)](.devcontainer/devcontainer.json)
-[![IEC 62443 Hardened](https://img.shields.io/badge/Security-Hardened%20(IEC%2062443)-green?logo=docker&logoColor=white)](Dockerfile.hardened)
-
-</div>
-
-Este proyecto incorpora optimizaciones de infraestructura, DevContainers reproducibles y perfiles de contenedor endurecidos bajo IEC 62443 con asistencia de **Docker AI Assistant (Gordon)**, complementado con la ingeniería de control y calibración de red de **Antigravity (Google DeepMind)**. Consulte [CONTRIBUTORS.md](CONTRIBUTORS.md) para detalles de atribución.
-
----
-
-## 📄 Licencia y Gobernanza
-
-Este software es de código abierto y está distribuido bajo la licencia **Apache 2.0**.  
-Consulte el archivo [LICENSE](LICENSE) para más detalles.
-
-Para guías de contribución técnica y código de conducta:
-* [CONTRIBUTING.md](CONTRIBUTING.md) — Directrices de pull requests y estándares de código de red.
-* [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — Estándar de conducta comunitaria.
-* [SECURITY.md](SECURITY.md) — Política de reporte de vulnerabilidades NERC-CIP e IEC 62443.
+## Módulos experimentales (`open_bess_edge.experimental`, fuera de la ruta de control)
+CAN/DBC (validado contra `cantools`), IEC 60870-5-104 (interopera en STARTDT e interrogación con `c104`; sin
+temporizadores t1/t2/t3) y un códec tipo GOOSE sobre UDP de loopback (no es GOOSE de capa 2). No se afirma latencia.
