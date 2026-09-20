@@ -15,10 +15,10 @@ abstract: >-
   learning client/server, carbon LCA engine, and P2P energy trading stubs.
   Compliant with NTSyCS CEN Chile and IEC 62443 SL-2 (readiness ~98%).
 authors:
-  - family-names: "Briones"
+  - family-names: "Díaz T."
     given-names: "Rodrigo"
     affiliation: "BESS Solutions"
-    email: "ingenieria@bess-solutions.cl"
+    email: "contacto@bess-solutions.cl"
     orcid: ""
 repository-code: "https://github.com/bess-solutions/open-bess-edge"
 url: "https://bess-solutions.cl"
