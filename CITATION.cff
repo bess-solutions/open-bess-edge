@@ -1,49 +1,30 @@
 cff-version: 1.2.0
 message: >-
-  If you use BESSAI Edge Gateway in your research or industrial deployment,
+  If you use Open BESS Edge in your research or industrial deployment,
   please cite it using the metadata from this file.
 type: software
-title: "BESSAI Edge Gateway"
+title: "Open BESS Edge"
 abstract: >-
-  Open-source industrial IoT gateway for Battery Energy Storage Systems (BESS).
-  Acquires real-time telemetry via Modbus TCP from industrial inverters
-  (Huawei SUN2000, SMA, Victron, Fronius, SolarEdge, BYD, Tesla), validates
-  safety constraints, publishes telemetry to GCP Pub/Sub and MQTT brokers,
-  and applies edge AI (Isolation Forest anomaly detection, ONNX/DRL dispatch,
-  MILP optimizer, MARL multi-agent fleet, WatchdogManager self-healing) for
-  optimal battery operation. Includes IEEE 2030.5 SEP 2.0 adapter, federated
-  learning client/server, carbon LCA engine, and P2P energy trading stubs.
-  Compliant with NTSyCS CEN Chile and IEC 62443 SL-2 (readiness ~98%).
+  Production-grade edge gateway and real-time controller for Battery Energy
+  Storage Systems (BESS). Communicates via Modbus TCP with PCS/inverters and BMS,
+  enforces an in-memory fail-closed physical safety envelope, executes droop
+  frequency response (FFR/PFR) and reactive power voltage support (Volt/VAR),
+  and logs verifiable audit telemetry via a tamper-evident append-only hash chain.
 authors:
   - family-names: "Díaz T."
     given-names: "Rodrigo"
     affiliation: "BESS Solutions"
     email: "contacto@bess-solutions.cl"
-    orcid: ""
 repository-code: "https://github.com/bess-solutions/open-bess-edge"
 url: "https://bess-solutions.cl"
 license: Apache-2.0
 version: "3.0.0"
-date-released: "2026-02-25"
+date-released: "2026-09-20"
 keywords:
   - "BESS"
   - "battery energy storage"
-  - "Modbus TCP"
-  - "edge computing"
-  - "IIoT"
-  - "renewable energy"
-  - "anomaly detection"
-  - "ONNX"
-  - "Chile"
-  - "NTSyCS"
-  - "IEC 62443"
-  - "open-source"
-references:
-  - type: standard
-    title: "IEC 62443 — Industrial Automation and Control Systems Security (SL-2)"
-    authors:
-      - name: "International Electrotechnical Commission"
-  - type: standard
-    title: "Norma Técnica de Seguridad y Calidad de Servicio (NTSyCS)"
-    authors:
-      - name: "Coordinador Eléctrico Nacional de Chile (CEN)"
+  - "modbus"
+  - "edge-computing"
+  - "grid-forming"
+  - "frequency-response"
+  - "volt-var"
