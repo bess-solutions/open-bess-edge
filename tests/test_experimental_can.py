@@ -3,10 +3,11 @@ import math
 import random
 from pathlib import Path
 
-import cantools
 import pytest
 
 from open_bess_edge.experimental.can_bms import DBCParser, IndustrialCANBMSDriver
+
+cantools = pytest.importorskip("cantools")
 
 DBC_DIR = Path(__file__).resolve().parents[1] / "data" / "can_dbc"
 DBCS = sorted(DBC_DIR.glob("*.dbc"))

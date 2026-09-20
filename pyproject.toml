@@ -45,7 +45,7 @@ include = ["src", "registry", "data", "config", "tests", "docs", "README.md", "L
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = ["src", "."]
 addopts = "-ra --strict-markers"
 markers = ["e2e: pruebas de extremo a extremo por TCP real", "slow: pruebas lentas"]
 

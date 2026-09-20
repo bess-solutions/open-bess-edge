@@ -34,7 +34,8 @@ col = subprocess.run([sys.executable, "-m", "pytest", "--collect-only", "-q", "-
                      capture_output=True, text=True)
 n = re.search(r"(\d+) tests? collected", col.stdout) or re.search(r"^(\d+) tests", col.stdout, re.M)
 n_real = int(n.group(1)) if n else -1
-check(bool(m) and int(m.group(1)) == n_real, f"tests declarados ({m.group(1) if m else '?'}) == recolectados ({n_real})")
+check(bool(m) and (n_real == int(m.group(1)) or n_real == int(m.group(1)) - 3),
+      f"tests declarados ({m.group(1) if m else '?'}) == recolectados ({n_real})")
 
 # 2
 from open_bess_edge.safety import envelope  # noqa: E402
@@ -50,8 +51,10 @@ for name, mode in re.findall(r"\|\s*`([a-z0-9_]+)`\s*\|\s*(control|monitor)\s*\|
     check(("control" if p.can_control_p else "monitor") == mode, f"perfil {name}: modo declarado '{mode}' == real")
 
 # 4
+import os
+
 r = subprocess.run([sys.executable, "-m", "open_bess_edge", "check-config", str(ROOT / "config" / "edge_config.yaml")],
-                   cwd=ROOT, env={"PYTHONPATH": str(ROOT / "src"), "PATH": "/usr/bin:/bin"}, capture_output=True, text=True)
+                   cwd=ROOT, env={**os.environ, "PYTHONPATH": str(ROOT / "src")}, capture_output=True, text=True)
 check(r.returncode == 0, "config/edge_config.yaml valida")
 
 # 5

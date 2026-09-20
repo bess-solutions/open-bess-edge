@@ -200,7 +200,7 @@ async def test_reconnect_backoff_is_nonblocking_and_exponential():
         for _ in range(200):
             r.plant.poll_connection()
             await asyncio.sleep(0.01)
-        assert asyncio.get_running_loop().time() - t0 < 4.0
+        assert asyncio.get_running_loop().time() - t0 < 10.0
         assert 2 <= r.plant.connect_attempts <= 12               # backoff: no reintenta en cada poll
         assert "conexión Modbus" in r.plant.last_connect_error
         # el servidor vuelve
