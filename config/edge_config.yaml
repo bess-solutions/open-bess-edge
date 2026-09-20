@@ -1,47 +1,68 @@
 # ==============================================================================
-# Open BESS Edge — Configuración Canónica de Nodo de Borde Industrial
-# Alineado con NTSyCS Capítulo 3 y Estudio CFyDR 2026 del CEN
+# Open BESS Edge v3 — configuración de referencia
+# Todos los parámetros de seguridad y de red son explícitos y validados
+# (claves desconocidas o valores fuera de rango => error al arranque).
+# Los valores de red (banda muerta, estatismo, umbral FFR, rampa) provienen de la
+# documentación del proyecto (Estudio CFyDR 2026 / NTSyCS); DEBEN ser confirmados
+# por el titular contra la versión vigente de la norma antes de operar en el SEN.
 # ==============================================================================
+node:
+  device_id: "obe-node-01"
+  site_name: null            # nombre libre del sitio (opcional)
 
-bess:
-  device_id: "bess-node-linares-01"
-  site_name: "S/E Linares 66/15 kV"
-  chemistry: "LFP_314Ah"
-  p_nominal_mw: 1.0
-  e_nominal_mwh: 2.0
-  v_nominal_ac_v: 400.0
+plant:
+  p_nominal_kw: 1000.0
+  e_nominal_kwh: 2000.0
+  v_nominal_v: 400.0
   max_charge_c_rate: 0.5
   max_discharge_c_rate: 1.0
 
 grid:
   f_nominal_hz: 50.0
-  deadband_hz: 0.03          # +/- 30 mHz (Estudio CFyDR 2026 CEN)
-  droop_r: 0.03              # Estatismo s = 3% (rango admisible 2% a 5%)
-  ffr_contingency_threshold_hz: 0.30  # Disparo FFR de emergencia si |delta_f| > 300 mHz
-  ffr_max_response_time_ms: 500.0     # Respuesta completa en t < 500 ms
-  normal_ramp_limit_pct_min: 20.0     # Limitador de rampa normal <= 20% Pn/min
-  volt_var_deadband_pct: 2.0          # Banda muerta Q(V) +/- 2%
-  q_max_mvar: 0.6                     # Potencia reactiva máxima +/- 0.6 MVAR (cos phi 0.85)
+
+ffr:
+  enabled: true
+  deadband_hz: 0.03                 # ±30 mHz
+  droop_r: 0.03                     # estatismo 3 % (admisible 2–5 %)
+  contingency_threshold_hz: 0.30    # |Δf| >= 300 mHz => contingencia
+  ramp_pct_per_min: 20.0            # rampa de la consigna base (cuasiestacionario)
+  freq_invalid_hold_s: 1.0
+
+volt_var:
+  mode: VOLT_VAR_Q_V
+  q_max_kvar: 600.0
+  deadband_pct: 2.0
+  slope_k_q: 10.0                   # % Qmax por % de V
+
+dispatch:
+  p_base_kw: 0.0
+  external_timeout_s: 30.0
+
+safety:
+  baseline_path: ../data/bess_safety_baseline.json   # estricto: si falta o es inválido, el nodo no arranca
 
 modbus:
   host: "127.0.0.1"
   port: 502
-  unit_id: 1
-  timeout_s: 3.0
-  reconnect_delay_s: 2.0
-  max_reconnect_delay_s: 30.0
-  simulation_mode: true      # Fallback a simulación determinística si no hay hardware
+  unit_id: null                     # null => valor por defecto del perfil
+  profile: open_bess_edge_reference # nombre en registry/ o ruta a un .json
+  timeout_s: 0.5
+  verify_writes: true
+  verify_every_n_cycles: 10
 
-  # Registros Holding
-  reg_f_measured_x100: 100
-  reg_v_grid_v: 101
-  reg_p_actual_kw: 102
-  reg_q_actual_kvar: 103
-  reg_soc_pct_x10: 104
-  reg_soh_pct_x10: 105
-  reg_cell_v_min_mv: 106
-  reg_cell_v_max_mv: 107
-  reg_cell_t_max_c_x10: 108
-  reg_dc_isolation_kohm: 109
-  reg_p_setpoint_kw: 200
-  reg_q_setpoint_kvar: 201
+runtime:
+  cycle_ms: 100
+  comm_loss_hold_s: 2.0             # retención de la última consigna ante pérdida de datos
+  startup_valid_cycles: 3
+  ffr_latency_budget_ms: 500.0
+  write_fail_safe_after: 3
+  monitor_only: false
+
+audit:
+  path: /var/lib/open-bess-edge/audit.jsonl
+
+health:
+  enabled: true
+  host: "127.0.0.1"
+  port: 8080
+  reset_token: null

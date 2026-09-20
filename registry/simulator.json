@@ -83,5 +83,24 @@
             "unit": "counter",
             "description": "Heartbeat for physical LED toggle"
         }
+    },
+    "canonical": {
+        "frequency_hz": {
+            "register": "frequency"
+        },
+        "v_grid_v": {
+            "register": "ac_voltage"
+        },
+        "soc_pct": {
+            "register": "soc"
+        },
+        "p_kw": {
+            "register": "active_power",
+            "factor": 0.001
+        }
+    },
+    "verification": {
+        "level": "unverified",
+        "notes": "Emulador Arduino del proyecto (valores enteros, sin escala). Sólo monitor."
     }
 }
