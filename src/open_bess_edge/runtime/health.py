@@ -17,7 +17,7 @@ import hmac
 import ipaddress
 import json
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 from ..models import NodeState
 from .node import EdgeNode
@@ -59,7 +59,7 @@ class HealthServer:
         limit = max(5 * n.cfg.runtime.cycle_ms / 1000.0, 2.0)
         return (n.clock.mono() - n.last_cycle_mono) <= limit
 
-    def status(self) -> dict:
+    def status(self) -> dict[str, Any]:
         n, r = self.node, self.node.last_result
         return {
             "device_id": n.cfg.node.device_id, "state": n.state.value, "alive": self.alive(),

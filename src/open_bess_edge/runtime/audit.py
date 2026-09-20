@@ -28,7 +28,7 @@ class AuditLog:
     def __init__(self, path: Optional[Path], max_bytes: int = 50_000_000, backups: int = 5, ring: int = 1000) -> None:
         self.path = Path(path) if path else None
         self.max_bytes, self.backups = max_bytes, backups
-        self.ring: Deque[dict] = deque(maxlen=ring)
+        self.ring: Deque[dict[str, Any]] = deque(maxlen=ring)
         self._seq = 0
         self._prev = GENESIS
         self._fh = None
@@ -50,7 +50,7 @@ class AuditLog:
             rec = json.loads(last)
             self._seq, self._prev = int(rec["seq"]), rec["hash"]
 
-    def event(self, kind: str, wall: float, **data: Any) -> dict:
+    def event(self, kind: str, wall: float, **data: Any) -> dict[str, Any]:
         self._seq += 1
         body = {"seq": self._seq, "t": round(wall, 6), "kind": kind, "data": data}
         h = _digest(body, self._prev)

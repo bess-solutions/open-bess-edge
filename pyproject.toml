@@ -52,6 +52,7 @@ markers = ["e2e: pruebas de extremo a extremo por TCP real", "slow: pruebas lent
 [tool.coverage.run]
 source = ["src/open_bess_edge"]
 branch = true
+omit = ["src/open_bess_edge/experimental/*"]
 
 [tool.coverage.report]
 fail_under = 90

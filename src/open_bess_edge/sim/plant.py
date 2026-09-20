@@ -52,7 +52,7 @@ class PlantModel:
     f_profile: Optional[Callable[[float], float]] = None
     v_profile: Optional[Callable[[float], float]] = None
     # Sobrescrituras de medición (inyección de fallas): nombre -> valor físico.
-    overrides: dict = field(default_factory=dict)
+    overrides: dict[str, float] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         p = self.params

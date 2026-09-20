@@ -24,7 +24,7 @@ import math
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Any, Iterable, Optional
 
 from ..errors import ProfileError
 from .codec import Order, RegType
@@ -98,7 +98,7 @@ class DeviceProfile:
     verification_level: str
     notes: str = ""
     source: Optional[Path] = None
-    _plan_cache: dict = field(default_factory=dict, compare=False, repr=False)
+    _plan_cache: dict[Any, Any] = field(default_factory=dict, compare=False, repr=False)
 
     # -- capacidades -----------------------------------------------------
     @property
@@ -126,7 +126,7 @@ class DeviceProfile:
         key = (tuple(sorted(set(signals))), max_gap)
         cached = self._plan_cache.get(key)
         if cached is not None:
-            return cached
+            return tuple(cached)
         needed: dict[str, RegisterSpec] = {}
         for s in key[0]:
             b = self.bindings.get(s)
@@ -262,7 +262,7 @@ def parse_profile(raw: object, name: str, source: Optional[Path] = None) -> Devi
             sf = registers[ref]
         else:
             try:
-                sf = by_addr.get((registers[rname].function, int(ref)))  # type: ignore[arg-type]
+                sf = by_addr.get((registers[rname].function, int(str(ref))))
             except (TypeError, ValueError):
                 sf = None
         if sf is None or sf.rtype not in (RegType.INT16, RegType.UINT16):
@@ -316,7 +316,7 @@ def parse_profile(raw: object, name: str, source: Optional[Path] = None) -> Devi
     )
 
 
-def _asdict(r: RegisterSpec) -> dict:
+def _asdict(r: RegisterSpec) -> dict[str, Any]:
     return {
         "name": r.name, "address": r.address, "rtype": r.rtype, "access": r.access,
         "scale": r.scale, "offset": r.offset, "unit": r.unit, "function": r.function,

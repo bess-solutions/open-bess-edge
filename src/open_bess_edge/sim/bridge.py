@@ -12,7 +12,7 @@ import math
 from typing import Optional
 
 from ..modbus.codec import decode, encode
-from ..modbus.profile import DeviceProfile, apply_scale, unapply_scale
+from ..modbus.profile import DeviceProfile, RegisterSpec, apply_scale, unapply_scale
 from .modbus_server import RegisterBank
 from .plant import PlantModel
 
@@ -39,7 +39,7 @@ class SimBridge:
         # Los setpoints y latido son holding aunque el perfil no lo diga.
         self.sync_out()
 
-    def _write_raw(self, spec, raw_value: float) -> None:
+    def _write_raw(self, spec: RegisterSpec, raw_value: float) -> None:
         if isinstance(raw_value, float) and not math.isfinite(raw_value) and spec.rtype.is_float:
             # Inyección de NaN/inf: el códec de producción los rechaza al *codificar*, el emulador debe poder emitirlos.
             import struct  # noqa: PLC0415
@@ -102,7 +102,7 @@ class SimBridge:
                 self.plant.q_setpoint_kvar = 0.0
 
 
-def _bounds(spec) -> tuple[float, float]:
+def _bounds(spec: RegisterSpec) -> tuple[float, float]:
     from ..modbus.codec import _INT_RANGE  # noqa: PLC0415
 
     lo, hi = _INT_RANGE[spec.rtype]

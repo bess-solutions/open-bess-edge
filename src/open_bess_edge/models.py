@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
 
 def finite(x: Optional[float]) -> bool:
@@ -117,4 +117,4 @@ class WriteResult:
     detail: str = ""
     verified: Optional[bool] = None   # None = no se intentó verificar
     latency_ms: float = 0.0
-    extra: dict = field(default_factory=dict)
+    extra: dict[str, Any] = field(default_factory=dict)

@@ -24,7 +24,7 @@ import contextlib
 import logging
 import math
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Any, Optional
 
 from ..config import EdgeConfig, ReactiveMode
 from ..control.ffr_droop import FFRDroopController
@@ -73,7 +73,7 @@ class Metrics:
     ffr_budget_exceeded: int = 0
     latency_ms_max: float = 0.0
     latency_ms_last: float = 0.0
-    latencies: list = field(default_factory=list)   # ventana de las últimas muestras (ms)
+    latencies: list[float] = field(default_factory=list)   # ventana de las últimas muestras (ms)
 
     def record_latency(self, ms: float) -> None:
         self.latency_ms_last = ms
@@ -86,11 +86,11 @@ class Metrics:
         if not self.latencies:
             return 0.0
         s = sorted(self.latencies)
-        return s[min(len(s) - 1, int(q * len(s)))]
+        return float(s[min(len(s) - 1, int(q * len(s)))])
 
 
 class EdgeNode:
-    def __init__(self, cfg: EdgeConfig, plant: ModbusPlant, *, clock=None, audit: Optional[AuditLog] = None) -> None:
+    def __init__(self, cfg: EdgeConfig, plant: ModbusPlant, *, clock: Any = None, audit: Optional[AuditLog] = None) -> None:
         self.cfg = cfg
         self.plant = plant
         self.clock = clock or SystemClock()

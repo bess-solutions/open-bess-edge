@@ -28,7 +28,7 @@ from __future__ import annotations
 import math
 from collections import deque
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 
 EPS = 1e-9
 MAX_PLAUSIBLE_DF_HZ = 5.0
@@ -61,7 +61,7 @@ class ContingencyRecord:
     end_mono: Optional[float] = None
     reported: bool = False
 
-    def as_dict(self) -> dict:
+    def as_dict(self) -> dict[str, Any]:
         return {
             "start_wall": self.start_wall,
             "direction": self.direction,

@@ -57,7 +57,7 @@ class Faults:
     truncate_next: int = 0                  # responde a medias y cierra
     garbage_next: int = 0                   # responde bytes aleatorios
     wrong_tid_next: int = 0                 # responde con transaction id equivocado
-    exception_next: list = field(default_factory=list)   # códigos a devolver en las próximas peticiones
+    exception_next: list[int] = field(default_factory=list)   # códigos a devolver en las próximas peticiones
     write_exception: Optional[int] = None   # excepción permanente en escrituras
     ignore_writes: bool = False             # confirma la escritura pero no la aplica
     ignore_unknown_unit: bool = True

@@ -106,7 +106,8 @@ def decode(
         if not isinstance(r, int) or isinstance(r, bool) or not 0 <= r <= 0xFFFF:
             raise CodecError(f"registro fuera de rango 0..65535: {r!r}")
     raw = _to_bytes(regs, byte_order, word_order)
-    return struct.unpack(_STRUCT[rtype], raw)[0]
+    value: int | float = struct.unpack(_STRUCT[rtype], raw)[0]
+    return value
 
 
 def encode(

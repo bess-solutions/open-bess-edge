@@ -1,3 +1,5 @@
+> **DESACTUALIZADO:** describe la v2. La documentación vigente es `README.md` (v3).
+
 # ⚡ Open BESS Edge
 
 <div align="center">

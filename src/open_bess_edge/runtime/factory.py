@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from ..config import EdgeConfig
 from ..modbus.driver import ModbusPlant
@@ -13,7 +13,7 @@ from .node import EdgeNode
 
 
 def build_node(cfg: EdgeConfig, *, base_dir: Optional[Path] = None, transport: Optional[ModbusTransport] = None,
-               clock=None, host: Optional[str] = None, port: Optional[int] = None) -> EdgeNode:
+               clock: Any = None, host: Optional[str] = None, port: Optional[int] = None) -> EdgeNode:
     profile = load_profile(cfg.modbus.profile, base_dir)
     unit = cfg.modbus.unit_id if cfg.modbus.unit_id is not None else (profile.default_unit_id or 1)
     tr = transport or PyModbusTransport(host or cfg.modbus.host, port or cfg.modbus.port, cfg.modbus.timeout_s)

@@ -61,7 +61,7 @@ class ModbusPlant:
         self._min, self._max = reconnect_min_s, reconnect_max_s
         self._delay = reconnect_min_s
         self._next_attempt = 0.0
-        self._connect_task: Optional[asyncio.Task] = None
+        self._connect_task: Optional[asyncio.Task[None]] = None
         self.last_connect_error: str = ""
         self.connect_attempts = 0
         self._hb = 0
@@ -160,7 +160,7 @@ class ModbusPlant:
             if val is None:
                 invalid.append(sig)
             values[sig] = val
-        return Telemetry(t_mono=t0_mono, t_wall=t0_wall, invalid=tuple(invalid), **values)  # type: ignore[arg-type]
+        return Telemetry(t_mono=t0_mono, t_wall=t0_wall, invalid=tuple(invalid), **values)
 
     def _to_canonical(self, b: Binding, raw_by_reg: dict[str, float]) -> Optional[float]:
         spec = self.profile.registers[b.register]

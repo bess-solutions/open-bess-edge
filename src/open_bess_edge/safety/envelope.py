@@ -88,11 +88,11 @@ class SafetyEnvelope:
         tlo, thi = c.plausible_temp_c
         for sig in ("cell_v_min_v", "cell_v_max_v"):
             v = getattr(tel, sig)
-            if finite(v) and not vlo <= v <= vhi:  # type: ignore[operator]
+            if finite(v) and not vlo <= v <= vhi:
                 bad.append(f"{sig}={v}")
         for sig in ("cell_t_max_c", "cell_t_min_c"):
             v = getattr(tel, sig)
-            if finite(v) and not tlo <= v <= thi:  # type: ignore[operator]
+            if finite(v) and not tlo <= v <= thi:
                 bad.append(f"{sig}={v}")
         if finite(tel.soc_pct) and not 0.0 <= tel.soc_pct <= 100.0:  # type: ignore[operator]
             bad.append(f"soc_pct={tel.soc_pct}")

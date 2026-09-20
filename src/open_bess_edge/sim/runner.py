@@ -29,7 +29,7 @@ class SimEnvironment:
         self.bridge = SimBridge(self.profile, self.plant, self.bank, pcs_watchdog_s=pcs_watchdog_s)
         self.server = SimModbusServer(self.bank, unit_ids=(unit_id,))
         self.tick_s = tick_s
-        self._task: Optional[asyncio.Task] = None
+        self._task: Optional[asyncio.Task[None]] = None
         self._last: Optional[float] = None
         self._now = 0.0
 
