@@ -1,11 +1,13 @@
 name: CI
+
 on: [push, pull_request]
 
 permissions:
   contents: read
 
 jobs:
-  test:
+  test-linux:
+    name: Linux Tests (pymodbus matrix)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -13,8 +15,8 @@ jobs:
         python: ["3.10", "3.11", "3.12"]
         pymodbus: ["3.9.2", "3.11.4", "latest"]
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with: { python-version: "${{ matrix.python }}" }
       - run: pip install -e ".[dev]" c104 cantools
       - run: pip install "pymodbus==${{ matrix.pymodbus }}"
@@ -23,18 +25,33 @@ jobs:
       - run: mypy
       - run: pytest -q --cov=open_bess_edge --cov-report=term-missing
       - run: python scripts/verify_claims.py
+
+  test-windows:
+    name: Windows Tests (Win32 runtime)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e ".[dev]" cantools
+      - run: pytest -q --tb=short
+      - run: python scripts/verify_claims.py
+
   security:
+    name: Security & Vulnerability Scans
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install -e ".[dev]"
       - run: bandit -q -r src/open_bess_edge -x src/open_bess_edge/experimental
       - run: pip-audit
+
   package:
+    name: Build & Package Validation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/checkout@v4
       - run: pip install build && python -m build
       - run: docker build -t open-bess-edge:ci .
