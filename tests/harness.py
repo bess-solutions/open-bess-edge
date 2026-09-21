@@ -28,7 +28,8 @@ class Harness:
 
     async def start(self, start_node: bool = True):
         port = await self.env.start(realtime=False)
-        self.node = build_node(self.cfg, host="127.0.0.1", port=port, clock=self.clock)
+        self.node = build_node(self.cfg, host="127.0.0.1", port=port, clock=self.clock,
+                               meter_port=self.env.meter_port if self.env.meter_server is not None else None)
         # el nodo resuelve el unit_id del perfil salvo configuración explícita
         if start_node:
             assert await self.node.start(timeout_s=2.0)

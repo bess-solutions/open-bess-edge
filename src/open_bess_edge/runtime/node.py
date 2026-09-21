@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import dataclasses
 import logging
 import math
 from dataclasses import dataclass, field
@@ -29,10 +30,11 @@ from typing import Any, Optional
 from ..config import EdgeConfig, ReactiveMode
 from ..control.ffr_droop import FFRDroopController
 from ..control.limiter import apply_limits
+from ..control.peak_shaving import site_window
 from ..control.volt_var import VoltVarController
 from ..errors import ConfigError, PlantCommError, PlantDataError
 from ..modbus.driver import ModbusPlant
-from ..models import Command, NodeState, SafetyVerdict, Severity, Telemetry
+from ..models import Command, NodeState, SafetyVerdict, Severity, Telemetry, finite
 from ..safety.envelope import SafetyEnvelope
 from .audit import AuditLog
 from .clock import SystemClock
@@ -56,6 +58,7 @@ class CycleResult:
     faults: tuple[str, ...] = ()
     commit_ok: Optional[bool] = None
     verified: Optional[bool] = None
+    p_grid_kw: Optional[float] = None
     latency_ms: float = 0.0            # edad de la muestra de frecuencia al terminar la escritura
     cycle_ms: float = 0.0
 
@@ -90,19 +93,32 @@ class Metrics:
 
 
 class EdgeNode:
-    def __init__(self, cfg: EdgeConfig, plant: ModbusPlant, *, clock: Any = None, audit: Optional[AuditLog] = None) -> None:
+    def __init__(self, cfg: EdgeConfig, plant: ModbusPlant, *, clock: Any = None, audit: Optional[AuditLog] = None,
+                 meter: Optional[ModbusPlant] = None) -> None:
         self.cfg = cfg
         self.plant = plant
         self.clock = clock or SystemClock()
         self.audit = audit or AuditLog(cfg.audit.path, cfg.audit.max_bytes, cfg.audit.backups)
         self.metrics = Metrics()
         self.state = NodeState.INIT
-        self.safety = SafetyEnvelope(cfg.safety.limits, cfg.plant, cfg.grid.f_nominal_hz)
+        self.meter = meter
+        cons = cfg.installation.constraints
+        self._needs_meter = cons.needs_grid_meter
+        self._site = cons if (cons.needs_grid_meter or cons.soc_reserve_pct is not None) else None
+        limits = cfg.safety.limits
+        if self._site is not None:      # la carga del sitio L = p_grid + P_bess exige P_bess medida
+            limits = limits.model_copy(update={"required_signals": tuple(dict.fromkeys((*limits.required_signals, "p_kw")))})
+        self.safety = SafetyEnvelope(limits, cfg.plant, cfg.grid.f_nominal_hz)
+        self.safety.grid_meter_required = self._needs_meter
+        self._meter_val: Optional[float] = None
+        self._meter_t = -1e18
+        self._dispatch_ttl: Optional[float] = None
+        self._saturated = False
         f = cfg.ffr
         self.ffr = FFRDroopController(
             p_nominal_kw=cfg.plant.p_nominal_kw, f_nominal_hz=cfg.grid.f_nominal_hz, droop_r=f.droop_r,
             deadband_hz=f.deadband_hz, contingency_threshold_hz=f.contingency_threshold_hz,
-            ramp_pct_per_min=f.ramp_pct_per_min, freq_invalid_hold_s=f.freq_invalid_hold_s, enabled=f.enabled,
+            ramp_pct_per_min=f.ramp_pct_per_min, freq_invalid_hold_s=f.freq_invalid_hold_s, enabled=cfg.ffr_enabled,
         )
         v = cfg.volt_var
         self.vv = VoltVarController(
@@ -140,6 +156,11 @@ class EdgeNode:
         req = self.safety.limits.required_signals
         missing = prof.missing_signals(req)
         monitor = cfg.runtime.monitor_only
+        if self._needs_meter:
+            if self.meter is None:
+                raise ConfigError("las restricciones de instalación requieren el medidor de red (grid_meter)")
+            if "p_grid_kw" not in self.meter.profile.bindings:
+                raise ConfigError(f"el perfil de medidor '{self.meter.profile.name}' no define el binding p_grid_kw")
         if not monitor:
             if not prof.can_control_p:
                 raise ConfigError(
@@ -149,7 +170,7 @@ class EdgeNode:
                 raise ConfigError(
                     f"el perfil '{prof.name}' no provee señales de seguridad requeridas: {missing}. "
                     "El control sin envolvente de seguridad completa está prohibido.")
-            if cfg.ffr.enabled and "frequency_hz" not in prof.bindings:
+            if cfg.ffr_enabled and "frequency_hz" not in prof.bindings:
                 raise ConfigError("ffr.enabled requiere el binding frequency_hz en el perfil")
             v = cfg.volt_var
             if v.mode is not ReactiveMode.DISABLED:
@@ -165,7 +186,16 @@ class EdgeNode:
         self._validate_capabilities()
         self.audit.event("NODE_START", self.clock.wall(), device_id=self.cfg.node.device_id,
                          profile=self.plant.profile.name, verification=self.plant.profile.verification_level,
-                         control=self.control_enabled)
+                         control=self.control_enabled, role=self.cfg.installation.role)
+        meta = self.cfg.installation.metadata
+        if meta is not None:
+            self.audit.event("RULE_SET", self.clock.wall(), rule_set_id=meta.rule_set_id, status=meta.status,
+                             policy_compiler=meta.policy_compiler)
+            if self.cfg.unverified_regulatory_rules:
+                self.audit.event("UNVERIFIED_RULE_SET_ACCEPTED", self.clock.wall(), rule_set_id=meta.rule_set_id,
+                                 status=meta.status)
+        if self.meter is not None:
+            await self.meter.connect_now(min(timeout_s, 2.0))
         ok = await self.plant.connect_now(timeout_s)
         if not ok:
             self._set_state(NodeState.SAFE_STATE, "NO_CONNECTION_AT_START")
@@ -189,6 +219,8 @@ class EdgeNode:
                 self.audit.event("SHUTDOWN_ZERO", self.clock.wall(), ok=res.ok, detail=res.detail)
             except (asyncio.TimeoutError, PlantCommError) as exc:
                 self.audit.event("SHUTDOWN_ZERO", self.clock.wall(), ok=False, detail=str(exc))
+        if self.meter is not None:
+            await self.meter.close()
         await self.plant.close()
         self._set_state(NodeState.STOPPED, "STOPPED")
         self.audit.close()
@@ -196,16 +228,20 @@ class EdgeNode:
     # ------------------------------------------------------------------
     # Operación
     # ------------------------------------------------------------------
-    def set_dispatch(self, p_kw: float) -> None:
+    def set_dispatch(self, p_kw: float, ttl_s: Optional[float] = None) -> float:
         """Consigna base externa (p. ej. AGC/SCADA). Expira a 0 tras ``dispatch.external_timeout_s``."""
         if not math.isfinite(p_kw):
             raise ValueError("consigna de despacho no finita")
         cap_d, cap_c = self.cfg.plant.p_discharge_cap_kw, self.cfg.plant.p_charge_cap_kw
+        if ttl_s is not None and not (math.isfinite(ttl_s) and ttl_s > 0):
+            raise ValueError("ttl_s inválido")
         self._dispatch_p = max(-cap_c, min(cap_d, p_kw))
         self._dispatch_t = self.clock.mono()
+        self._dispatch_ttl = ttl_s
+        return self._dispatch_p
 
     def _dispatch_now(self, now: float) -> float:
-        if self._dispatch_t is not None and now - self._dispatch_t > self.cfg.dispatch.external_timeout_s:
+        if self._dispatch_t is not None and now - self._dispatch_t > (self._dispatch_ttl or self.cfg.dispatch.external_timeout_s):
             self._dispatch_p, self._dispatch_t = 0.0, None
             self.audit.event("DISPATCH_EXPIRED", self.clock.wall())
         return self._dispatch_p
@@ -243,6 +279,21 @@ class EdgeNode:
             if any(f.severity is Severity.TRIP and f.latched and f"{f.code}:{f.name}" in raised for f in verdict.faults):
                 self.metrics.trips += 1
             self._fault_codes = codes
+
+    async def _with_grid(self, tel: Telemetry, now: float) -> Telemetry:
+        m = self.meter
+        assert m is not None  # noqa: S101 - invariante interna
+        m.poll_connection()
+        if m.connected:
+            try:
+                mt = await m.read_telemetry(["p_grid_kw"])
+                if finite(mt.p_grid_kw):
+                    self._meter_val, self._meter_t = mt.p_grid_kw, now
+            except PlantCommError:
+                pass
+        limit = self.cfg.installation.constraints.p_grid_timeout_s
+        fresh = self._meter_val is not None and (now - self._meter_t) <= limit
+        return dataclasses.replace(tel, p_grid_kw=self._meter_val if fresh else None)
 
     async def step(self) -> CycleResult:
         m = self.metrics
@@ -290,6 +341,9 @@ class EdgeNode:
                                   faults=verdict.codes)
             return self._finish(res, t_cycle0)
 
+        if self.meter is not None:
+            tel = await self._with_grid(tel, now)
+
         # ---- seguridad ---------------------------------------------------
         verdict = self.safety.evaluate(tel, now, max_age_s=max_age)
         self._log_faults(verdict)
@@ -332,8 +386,21 @@ class EdgeNode:
         wall = self.clock.wall()
         p_base = self._dispatch_now(now)
         ffr = self.ffr.update(now, tel.frequency_hz, p_base, wall=wall)
-        vv = self.vv.update(now, tel.v_grid_v, ffr.p_kw)
-        cmd = apply_limits(ffr.p_kw, vv.q_kvar, verdict, s_max_kva=self.cfg.s_max_kva,
+        p_pre, verdict_eff = ffr.p_kw, verdict
+        if self._site is not None:
+            win = site_window(self._site, p_grid_kw=tel.p_grid_kw, p_bess_kw=tel.p_kw or 0.0, soc_pct=tel.soc_pct or 0.0,
+                              dis_cap_kw=verdict.p_discharge_max_kw, chg_cap_kw=verdict.p_charge_max_kw)
+            if win.p_shave_kw > 0:
+                p_pre = max(win.p_shave_kw, ffr.p_kw)
+            if win.shave_saturated != self._saturated:
+                self._saturated = win.shave_saturated
+                self.audit.event("SHAVE_SATURATED" if win.shave_saturated else "SHAVE_RECOVERED", wall,
+                                 load_kw=round(win.load_kw, 2), needed_kw=round(win.p_shave_kw, 2),
+                                 available_kw=round(win.dis_max_kw, 2))
+            verdict_eff = dataclasses.replace(verdict, p_discharge_max_kw=min(verdict.p_discharge_max_kw, win.dis_max_kw),
+                                              p_charge_max_kw=min(verdict.p_charge_max_kw, win.chg_max_kw))
+        vv = self.vv.update(now, tel.v_grid_v, p_pre)
+        cmd = apply_limits(p_pre, vv.q_kvar, verdict_eff, s_max_kva=self.cfg.s_max_kva,
                            q_max_kvar=self.cfg.volt_var.q_max_kvar if self.plant.profile.can_control_q else 0.0)
         if not self.plant.profile.can_control_q and abs(cmd.q_kvar) > 0:
             cmd = Command(cmd.p_kw, 0.0, cmd.p_clipped, True, cmd.reason)
@@ -383,7 +450,7 @@ class EdgeNode:
             f_hz=tel.frequency_hz, v_v=tel.v_grid_v, p_measured_kw=tel.p_kw,
             p_setpoint_kw=cmd.p_kw, q_setpoint_kvar=cmd.q_kvar, ffr_status=ffr.status,
             is_ffr_emergency=ffr.contingency, safety_status=verdict.status, faults=verdict.codes,
-            commit_ok=wr.ok, verified=wr.verified, latency_ms=latency_ms,
+            p_grid_kw=tel.p_grid_kw, commit_ok=wr.ok, verified=wr.verified, latency_ms=latency_ms,
         )
         return self._finish(res, t_cycle0)
 

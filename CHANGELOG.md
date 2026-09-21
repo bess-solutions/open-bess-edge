@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.1.0 (sin publicar)
+- Contexto de instalación: `installation` (restricciones genéricas), `grid_meter` (segundo dispositivo Modbus en el PCC), peak shaving BTM sin integrador,
+  BESS-GUARD-091, estado del conjunto de reglas auditado/expuesto, API HTTP de despacho con token (loopback) y programa base con TTL.
+- `ffr.enabled` pasa a derivarse del rol cuando no se declara; FFR no permitido con `role: btm_peak_shaving`.
+
 ## 3.0.0
 - Reescritura del núcleo como paquete `open_bess_edge` (rompe imports `src.*`); pymodbus >=3.9.2.
 - Corrige: integrador en el droop, driver roto con pymodbus >=3.10, wrap-around de consignas, fallos silenciosos de

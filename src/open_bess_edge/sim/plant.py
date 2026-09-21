@@ -48,6 +48,7 @@ class PlantModel:
     cell_t_c: float = 0.0
     f_hz: float = 0.0
     v_v: float = 0.0
+    site_load_kw: float = 0.0        # carga del sitio (alimenta el medidor de red simulado)
     # Función opcional f(t) para perfiles de frecuencia/tensión.
     f_profile: Optional[Callable[[float], float]] = None
     v_profile: Optional[Callable[[float], float]] = None
@@ -109,6 +110,7 @@ class PlantModel:
             "isolation_kohm": p.isolation_kohm,
             "string_v_v": 1300.0,
             "ambient_c": p.ambient_c,
+            "p_grid_kw": self.site_load_kw - self.p_kw,     # + importación
         }
         m.update(self.overrides)
         return m

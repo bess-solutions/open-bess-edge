@@ -1,6 +1,6 @@
 # Estado del proyecto — Open BESS Edge v3.0.0
 
-<!-- tests:230 -->
+<!-- tests:285 -->
 Pruebas: ver marcador (verificado por `scripts/verify_claims.py`).
 
 | Componente | Madurez | Evidencia |

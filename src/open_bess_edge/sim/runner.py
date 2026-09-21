@@ -28,6 +28,14 @@ class SimEnvironment:
         self.bank = RegisterBank()
         self.bridge = SimBridge(self.profile, self.plant, self.bank, pcs_watchdog_s=pcs_watchdog_s)
         self.server = SimModbusServer(self.bank, unit_ids=(unit_id,))
+        self.meter_server: Optional[SimModbusServer] = None
+        self.meter_bridge: Optional[SimBridge] = None
+        if cfg.grid_meter is not None:
+            mprof = load_profile(cfg.grid_meter.profile)
+            mbank = RegisterBank()
+            self.meter_bridge = SimBridge(mprof, self.plant, mbank)
+            self.meter_server = SimModbusServer(
+                mbank, unit_ids=(cfg.grid_meter.unit_id if cfg.grid_meter.unit_id is not None else (mprof.default_unit_id or 1),))
         self.tick_s = tick_s
         self._task: Optional[asyncio.Task[None]] = None
         self._last: Optional[float] = None
@@ -43,9 +51,18 @@ class SimEnvironment:
         self.bridge.sync_in(self._now)
         self.plant.tick(dt)
         self.bridge.sync_out()
+        if self.meter_bridge is not None:
+            self.meter_bridge.sync_out()
+
+    @property
+    def meter_port(self) -> int:
+        assert self.meter_server is not None  # noqa: S101
+        return self.meter_server.port
 
     async def start(self, realtime: bool = True) -> int:
         port = await self.server.start()
+        if self.meter_server is not None:
+            await self.meter_server.start()
         if realtime:
             self._task = asyncio.ensure_future(self._loop())
         return port
@@ -66,4 +83,6 @@ class SimEnvironment:
                 await self._task
             except asyncio.CancelledError:
                 pass
+        if self.meter_server is not None:
+            await self.meter_server.stop()
         await self.server.stop()

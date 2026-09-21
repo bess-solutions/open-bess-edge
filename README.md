@@ -48,6 +48,7 @@ Garantías, cada una con test (`tests/test_node.py`, `tests/test_fuzz_invariants
 | BESS-GUARD-010 | SOC en límite: inhibe descarga o carga |
 | BESS-GUARD-020 / 021 | Alarma de frecuencia / tensión de red (sólo si se configuran umbrales) |
 | BESS-GUARD-090 | Dato requerido inválido: salida 0, se recupera tras N ciclos válidos |
+| BESS-GUARD-091 | Medidor de red (PCC) sin datos vigentes: salida 0, se recupera tras N ciclos válidos |
 
 ## Perfiles de dispositivo (`registry/`)
 Un perfil sólo permite **control** si declara consigna de P y las señales de seguridad requeridas. Ningún perfil de
@@ -62,6 +63,14 @@ sin prueba contra el equipo real).
 | `fronius_gen24_byd` | monitor | unverified |
 | `solaredge_storedge` | monitor | unverified |
 | `victron_multiplus2` | monitor | unverified |
+| `open_bess_edge_meter_reference` | monitor | reference (medidor de red del PCC; mapa del proyecto) |
+
+## Contexto de instalación (BTM peak shaving)
+`installation` declara restricciones genéricas (`max_grid_import_kw`, `max_grid_export_kw`, `soc_reserve_pct`) que el edge
+hace cumplir con la medición de un medidor en el PCC (`grid_meter`); si el medidor falla, la salida queda en 0 (BESS-GUARD-091).
+El estado del conjunto de reglas (`VIGENTE`/`EN_EVALUACION`/`SUPUESTO`) se audita y se expone en `/status`; si no es `VIGENTE`
+el nodo exige `accept_unverified_rule_set: true`. Un EMS local envía un programa base con expiración por HTTP autenticado
+(sólo loopback, sin TLS). Ejemplo: `config/installation_btm_peak_shaving.yaml`; decisiones y límites: `docs/spec/INSTALLATION.md`.
 
 ## Verificación
 `make check` ejecuta lint, mypy estricto, pruebas, verificador de afirmaciones y seguridad. Cubre pruebas unitarias y de

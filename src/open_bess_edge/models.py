@@ -37,6 +37,7 @@ class Telemetry:
     isolation_kohm: Optional[float] = None
     string_v_v: Optional[float] = None
     ambient_c: Optional[float] = None
+    p_grid_kw: Optional[float] = None   # potencia neta en el PCC: + importación, - exportación
     invalid: tuple[str, ...] = ()
 
     def age_s(self, now_mono: float) -> float:

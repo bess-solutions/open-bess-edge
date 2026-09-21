@@ -65,7 +65,13 @@ class HealthServer:
             "device_id": n.cfg.node.device_id, "state": n.state.value, "alive": self.alive(),
             "control_enabled": n.control_enabled, "profile": n.plant.profile.name,
             "profile_verification": n.plant.profile.verification_level,
-            "connected": n.plant.connected, "latched_trips": list(n.safety.latched_codes),
+            "connected": n.plant.connected,
+            "installation": {
+                "role": n.cfg.installation.role,
+                "constraints": n.cfg.installation.constraints.model_dump(),
+                "rule_set": None if n.cfg.installation.metadata is None else n.cfg.installation.metadata.model_dump(),
+                "grid_meter_connected": None if n.meter is None else n.meter.connected},
+            "unverified_regulatory_rules": n.cfg.unverified_regulatory_rules, "latched_trips": list(n.safety.latched_codes),
             "last": None if r is None else {
                 "status": r.status, "f_hz": r.f_hz, "v_v": r.v_v, "p_measured_kw": r.p_measured_kw,
                 "p_setpoint_kw": r.p_setpoint_kw, "q_setpoint_kvar": r.q_setpoint_kvar,

@@ -32,7 +32,7 @@ from .codec import Order, RegType
 TELEMETRY_SIGNALS = (
     "frequency_hz", "v_grid_v", "p_kw", "q_kvar", "soc_pct", "soh_pct",
     "cell_v_min_v", "cell_v_max_v", "cell_t_max_c", "cell_t_min_c",
-    "isolation_kohm", "string_v_v", "ambient_c",
+    "isolation_kohm", "string_v_v", "ambient_c", "p_grid_kw",
 )
 CONTROL_SIGNALS = ("p_setpoint_kw", "q_setpoint_kvar", "heartbeat")
 ALL_SIGNALS = TELEMETRY_SIGNALS + CONTROL_SIGNALS

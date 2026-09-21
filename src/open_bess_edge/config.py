@@ -13,7 +13,7 @@ from __future__ import annotations
 import math
 from enum import Enum
 from pathlib import Path
-from typing import Optional
+from typing import Literal, Optional
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
@@ -54,7 +54,7 @@ class GridConfig(_Strict):
 
 
 class FFRConfig(_Strict):
-    enabled: bool = True
+    enabled: Optional[bool] = None       # None => lo decide el rol de la instalación (ver EdgeConfig.ffr_enabled)
     deadband_hz: float = Field(0.03, ge=0, le=0.5)
     droop_r: float = Field(0.03, ge=0.02, le=0.05)
     contingency_threshold_hz: float = Field(0.30, gt=0, le=3.0)
@@ -156,6 +156,62 @@ class HealthConfig(_Strict):
     reset_token: Optional[str] = Field(None, min_length=8)
 
 
+class InstallationConstraints(_Strict):
+    """Restricciones operativas *genéricas* (agnósticas de jurisdicción) que el edge hace cumplir.
+
+    Convención en el punto de conexión (PCC): p_grid + = importación, − = exportación.
+    Carga del sitio L = p_grid + P_bess (P_bess + = descarga).
+    """
+
+    max_grid_import_kw: Optional[float] = Field(None, gt=0)
+    max_grid_export_kw: Optional[float] = Field(None, ge=0)
+    soc_reserve_pct: Optional[float] = Field(None, ge=0, le=100)
+    p_grid_timeout_s: float = Field(2.0, gt=0, le=60)
+
+    @property
+    def needs_grid_meter(self) -> bool:
+        return self.max_grid_import_kw is not None or self.max_grid_export_kw is not None
+
+
+class DispatchSource(_Strict):
+    type: Literal["http_bearer"] = "http_bearer"
+    authorized_roles: tuple[str, ...] = ("local_ems",)
+
+
+class RuleSetMeta(_Strict):
+    """Procedencia del conjunto de reglas (informativa y auditada; no altera la física)."""
+
+    policy_compiler: Optional[str] = Field(None, max_length=128)
+    rule_set_id: str = Field(pattern=r"^[A-Za-z0-9._-]{1,64}$")
+    status: Literal["VIGENTE", "EN_EVALUACION", "SUPUESTO"]
+
+
+class InstallationConfig(_Strict):
+    role: str = Field("unspecified", pattern=r"^[a-z0-9_]{1,48}$")
+    constraints: InstallationConstraints = Field(default_factory=InstallationConstraints)
+    dispatch_sources: tuple[DispatchSource, ...] = ()
+    metadata: Optional[RuleSetMeta] = None
+    accept_unverified_rule_set: bool = False
+
+
+class GridMeterConfig(_Strict):
+    host: str = Field("127.0.0.1", min_length=1, max_length=253)
+    port: int = Field(502, ge=1, le=65535)
+    unit_id: Optional[int] = Field(None, ge=0, le=255)
+    profile: str = "open_bess_edge_meter_reference"
+    timeout_s: float = Field(0.5, gt=0, le=60)
+
+
+class DispatchApiConfig(_Strict):
+    enabled: bool = False
+    host: str = "127.0.0.1"
+    port: int = Field(8081, ge=1, le=65535)
+    token_env: str = "OBE_API_TOKEN"  # noqa: S105 - nombre de la variable de entorno, no un secreto
+    token_file: Optional[Path] = None
+    max_body_bytes: int = Field(4096, ge=64, le=65536)
+    rate_limit_per_s: float = Field(20.0, gt=0, le=1000)
+
+
 class SafetyConfig(_Strict):
     baseline_path: Optional[Path] = None
     limits: SafetyLimits = Field(default_factory=SafetyLimits)
@@ -173,6 +229,9 @@ class EdgeConfig(_Strict):
     runtime: RuntimeConfig = Field(default_factory=RuntimeConfig)
     audit: AuditConfig = Field(default_factory=AuditConfig)
     health: HealthConfig = Field(default_factory=HealthConfig)
+    installation: InstallationConfig = Field(default_factory=InstallationConfig)
+    grid_meter: Optional[GridMeterConfig] = None
+    dispatch_api: DispatchApiConfig = Field(default_factory=DispatchApiConfig)
 
     @model_validator(mode="after")
     def _cross(self) -> EdgeConfig:
@@ -193,7 +252,32 @@ class EdgeConfig(_Strict):
         if mode is ReactiveMode.VOLT_VAR_Q_V and self.volt_var.q_max_kvar == 0.0:
             # Q(V) con Qmax=0 no puede regular nada: se exige explicitar DISABLED.
             raise ValueError("volt_var: mode=VOLT_VAR_Q_V con q_max_kvar=0; use mode=DISABLED o defina q_max_kvar")
+        inst = self.installation
+        if inst.role == "btm_peak_shaving":
+            if inst.constraints.max_grid_import_kw is None:
+                raise ValueError("installation.role=btm_peak_shaving requiere constraints.max_grid_import_kw")
+            if self.ffr.enabled is True:
+                raise ValueError("ffr.enabled=true no está permitido con role=btm_peak_shaving (FFR sólo en utility_sscc/unspecified)")
+        if inst.constraints.needs_grid_meter and self.grid_meter is None:
+            raise ValueError("las restricciones de importación/exportación requieren la sección grid_meter (medidor en el PCC)")
+        if inst.metadata is not None and inst.metadata.status != "VIGENTE" and not inst.accept_unverified_rule_set:
+            raise ValueError(
+                f"el conjunto de reglas '{inst.metadata.rule_set_id}' tiene estado {inst.metadata.status}; "
+                "el nodo no arranca salvo installation.accept_unverified_rule_set: true (queda en la auditoría)")
+        if self.dispatch_api.enabled and not inst.dispatch_sources:
+            raise ValueError("dispatch_api.enabled requiere al menos una installation.dispatch_sources")
         return self
+
+    @property
+    def ffr_enabled(self) -> bool:
+        if self.ffr.enabled is not None:
+            return self.ffr.enabled
+        return self.installation.role != "btm_peak_shaving"
+
+    @property
+    def unverified_regulatory_rules(self) -> bool:
+        m = self.installation.metadata
+        return m is not None and m.status != "VIGENTE"
 
     @property
     def s_max_kva(self) -> float:

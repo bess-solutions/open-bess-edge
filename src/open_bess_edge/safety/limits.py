@@ -114,7 +114,7 @@ class GridAlarms(_Strict):
 _KNOWN_SIGNALS = frozenset({
     "frequency_hz", "v_grid_v", "p_kw", "q_kvar", "soc_pct", "soh_pct",
     "cell_v_min_v", "cell_v_max_v", "cell_t_max_c", "cell_t_min_c",
-    "isolation_kohm", "string_v_v", "ambient_c",
+    "isolation_kohm", "string_v_v", "ambient_c", "p_grid_kw",
 })
 
 

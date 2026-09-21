@@ -15,6 +15,7 @@ from .config import EdgeConfig, load_config, reference_config
 from .errors import OpenBessEdgeError
 from .modbus.profile import list_profiles, load_profile
 from .runtime.audit import verify_chain
+from .runtime.dispatch_api import DispatchApi, load_api_token
 from .runtime.factory import build_node
 from .runtime.health import HealthServer
 
@@ -31,6 +32,12 @@ async def _run(cfg: EdgeConfig, base_dir: Path | None) -> int:
     if cfg.health.enabled:
         health = HealthServer(node, cfg.health.host, cfg.health.port, cfg.health.reset_token)
         await health.start()
+    api = None
+    if cfg.dispatch_api.enabled:
+        da = cfg.dispatch_api
+        api = DispatchApi(node, da.host, da.port, load_api_token(da), max_body_bytes=da.max_body_bytes,
+                          rate_limit_per_s=da.rate_limit_per_s)
+        await api.start()
     loop = asyncio.get_running_loop()
     for sig in (signal.SIGINT, signal.SIGTERM):
         try:
@@ -45,6 +52,8 @@ async def _run(cfg: EdgeConfig, base_dir: Path | None) -> int:
     finally:
         if health:
             await health.stop()
+        if api:
+            await api.stop()
         await node.stop()
     return 0
 

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://bessai.io/schemas/device-profile/v2.json",
+  "profile_version": "3.1.0",
+  "device": {
+    "manufacturer": "Open BESS Edge",
+    "model": "Reference grid-meter register map v1",
+    "description": "Mapa de referencia del proyecto para un analizador de red en el PCC. Potencia activa neta: + = importación, - = exportación.",
+    "protocol": "ModbusTCP",
+    "slave_id_default": 1
+  },
+  "connection": { "byte_order": "BIG", "word_order": "BIG" },
+  "registers": {
+    "p_grid_w": { "address": 0, "count": 2, "type": "INT32", "access": "RO", "scale": 1, "unit": "W", "description": "Potencia activa trifásica neta en el PCC (+ importación)" }
+  },
+  "canonical": {
+    "p_grid_kw": { "register": "p_grid_w", "factor": 0.001 }
+  },
+  "verification": { "level": "reference", "notes": "Mapa definido por el proyecto; no corresponde a ningún fabricante de medidores." }
+}

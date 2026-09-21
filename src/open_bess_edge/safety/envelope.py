@@ -17,6 +17,7 @@ BESS-GUARD-009          DERATE     Temperatura ambiente alta (recorte 50 %)
 BESS-GUARD-010          DERATE     SOC en límite: inhibe descarga (≤ min) o carga (≥ max)
 BESS-GUARD-020/021      WARNING    Frecuencia / tensión de red fuera de umbral de alarma
 BESS-GUARD-090          DATA       Señal requerida ausente, no finita o implausible
+BESS-GUARD-091          DATA       Medidor de red (PCC) sin datos vigentes: salida 0 (no enclavada)
 ======================  =========  ================================================
 
 Reglas:
@@ -41,6 +42,7 @@ from .limits import SafetyLimits
 G001, G002, G003, G004, G005 = (f"BESS-GUARD-00{i}" for i in range(1, 6))
 G006, G007, G008, G009 = "BESS-GUARD-006", "BESS-GUARD-007", "BESS-GUARD-008", "BESS-GUARD-009"
 G010, G020, G021, G090 = "BESS-GUARD-010", "BESS-GUARD-020", "BESS-GUARD-021", "BESS-GUARD-090"
+G091 = "BESS-GUARD-091"
 
 _TRIP_NAMES = {
     G001: "CELL_UNDERVOLTAGE_TRIP",
@@ -75,6 +77,9 @@ class SafetyEnvelope:
         self._ambient_derate = False
         self._lowtemp = False
         self._data_fault = False
+        self.grid_meter_required = False       # lo activa el nodo si hay restricciones de instalación
+        self._grid_fault = False
+        self._grid_ok_streak = 0
         self._ok_streak = 0
         self._last_tel: Optional[Telemetry] = None
 
@@ -172,6 +177,21 @@ class SafetyEnvelope:
                 f"recuperando ({self._ok_streak}/{t.recovery_valid_cycles} ciclos válidos)")
             faults.append(Fault(G090, "REQUIRED_SIGNAL_INVALID", Severity.DATA, detail))
 
+        # ---- 1b. Medidor de red (BESS-GUARD-091): sólo si hay restricciones que dependen de p_grid
+        if self.grid_meter_required:
+            if tel is not None and finite(tel.p_grid_kw):
+                if self._grid_fault:
+                    self._grid_ok_streak += 1
+                    if self._grid_ok_streak >= t.recovery_valid_cycles:
+                        self._grid_fault = False
+            else:
+                self._grid_fault, self._grid_ok_streak = True, 0
+            if self._grid_fault:
+                detail = ("p_grid_kw ausente, obsoleta o no finita" if self._grid_ok_streak == 0 else
+                          f"recuperando ({self._grid_ok_streak}/{t.recovery_valid_cycles} ciclos válidos)")
+                faults.append(Fault(G091, "GRID_METER_COMM_LOSS", Severity.DATA, detail))
+        grid_fault_active = self.grid_meter_required and self._grid_fault
+
         # ---- 2. Disparos enclavados -------------------------------------
         if tel is not None:
             state = self._trip_state(tel)
@@ -268,7 +288,7 @@ class SafetyEnvelope:
                     faults.append(Fault(G021, "GRID_VOLTAGE_ALARM", Severity.WARNING, f"V={pu:.3f} pu"))
 
         # ---- 4. Límites de salida ----------------------------------------
-        allow = not tripped and not data_active
+        allow = not tripped and not data_active and not grid_fault_active
         if allow:
             p_dis = self.plant.p_discharge_cap_kw * derate * soc_dis
             p_chg = self.plant.p_charge_cap_kw * derate * soc_chg * (0.0 if charge_inhibit_temp else 1.0)

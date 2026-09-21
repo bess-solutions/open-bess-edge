@@ -1,0 +1,28 @@
+# Open BESS Edge — ejemplo: BTM peak shaving con inyección cero (medidor en el PCC)
+# Convención en el PCC: p_grid + = importación, − = exportación. Carga del sitio L = p_grid + P_bess.
+# Las restricciones son GENÉRICAS (agnósticas de jurisdicción). 'metadata' documenta de dónde salen y su estado.
+node: { device_id: "obe-btm-01" }
+plant: { p_nominal_kw: 1000.0, e_nominal_kwh: 2000.0, v_nominal_v: 400.0 }
+volt_var: { mode: DISABLED }
+ffr: { enabled: false }                # con role=btm_peak_shaving el FFR no está permitido
+installation:
+  role: btm_peak_shaving
+  constraints:
+    max_grid_import_kw: 1200.0         # umbral de peak shaving
+    max_grid_export_kw: 0.0            # inyección cero
+    soc_reserve_pct: 20.0              # sin descarga bajo esta reserva
+    p_grid_timeout_s: 2.0              # retención del último valor del medidor antes de BESS-GUARD-091
+  dispatch_sources:
+    - { type: http_bearer, authorized_roles: [local_ems] }
+  metadata:
+    policy_compiler: open-bess-sandbox
+    rule_set_id: CL-PEAK-TARIFF-2026
+    status: SUPUESTO                   # != VIGENTE exige la aceptación explícita de abajo (queda en la auditoría)
+  accept_unverified_rule_set: true
+grid_meter: { host: "127.0.0.1", port: 1502, profile: open_bess_edge_meter_reference }
+dispatch_api:
+  enabled: true                        # token en OBE_API_TOKEN o token_file (>= 32 caracteres); sólo loopback
+  port: 8081
+safety: { baseline_path: ../data/bess_safety_baseline.json }
+modbus: { host: "127.0.0.1", port: 502, profile: open_bess_edge_reference }
+audit: { path: /var/lib/open-bess-edge/audit.jsonl }
