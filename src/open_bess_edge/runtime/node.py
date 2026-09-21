@@ -282,7 +282,7 @@ class EdgeNode:
 
     async def _with_grid(self, tel: Telemetry, now: float) -> Telemetry:
         m = self.meter
-        assert m is not None  # noqa: S101 - invariante interna
+        assert m is not None  # noqa: S101 # nosec B101 - invariante interna
         m.poll_connection()
         if m.connected:
             try:

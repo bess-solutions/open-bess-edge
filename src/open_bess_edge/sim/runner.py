@@ -56,7 +56,7 @@ class SimEnvironment:
 
     @property
     def meter_port(self) -> int:
-        assert self.meter_server is not None  # noqa: S101
+        assert self.meter_server is not None  # noqa: S101 # nosec B101
         return self.meter_server.port
 
     async def start(self, realtime: bool = True) -> int:
