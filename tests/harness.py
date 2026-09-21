@@ -4,13 +4,12 @@ from __future__ import annotations
 import asyncio
 from typing import Optional
 
-from tests.conftest import make_cfg
-
 from open_bess_edge.config import EdgeConfig
 from open_bess_edge.runtime.clock import ManualClock
 from open_bess_edge.runtime.factory import build_node
 from open_bess_edge.sim.plant import PlantParams
 from open_bess_edge.sim.runner import SimEnvironment
+from tests.conftest import make_cfg
 
 
 def s16(v: int) -> int:

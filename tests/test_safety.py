@@ -3,7 +3,6 @@ import math
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
-from tests.conftest import make_cfg, tel
 
 from open_bess_edge.models import Severity, Telemetry
 from open_bess_edge.safety.envelope import (
@@ -23,6 +22,7 @@ from open_bess_edge.safety.envelope import (
     SafetyEnvelope,
 )
 from open_bess_edge.safety.limits import load_limits
+from tests.conftest import make_cfg, tel
 
 
 def env(**limits):

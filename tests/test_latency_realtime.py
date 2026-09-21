@@ -3,10 +3,10 @@ import asyncio
 import time
 
 import pytest
-from tests.conftest import make_cfg
 
 from open_bess_edge.runtime.factory import build_node
 from open_bess_edge.sim.runner import SimEnvironment
+from tests.conftest import make_cfg
 
 pytestmark = [pytest.mark.e2e, pytest.mark.slow]
 

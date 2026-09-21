@@ -4,8 +4,6 @@ import math
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
-from tests.conftest import make_cfg
-from tests.harness import Harness
 
 from open_bess_edge.config import InstallationConstraints, parse_config
 from open_bess_edge.control.peak_shaving import site_window
@@ -13,6 +11,8 @@ from open_bess_edge.errors import ConfigError
 from open_bess_edge.modbus.profile import load_profile
 from open_bess_edge.models import NodeState
 from open_bess_edge.runtime.health import HealthServer
+from tests.conftest import make_cfg
+from tests.harness import Harness
 
 PLANT = {"p_nominal_kw": 1000.0, "e_nominal_kwh": 2000.0, "v_nominal_v": 400.0}
 

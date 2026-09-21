@@ -2,9 +2,9 @@
 import random
 
 import pytest
-from tests.harness import Harness
 
 from open_bess_edge.models import NodeState
+from tests.harness import Harness
 
 pytestmark = [pytest.mark.e2e, pytest.mark.slow]
 

@@ -1,8 +1,8 @@
 import pytest
-from tests.conftest import make_cfg
 
 from open_bess_edge.config import ReactiveMode, load_config, parse_config, reference_config
 from open_bess_edge.errors import ConfigError
+from tests.conftest import make_cfg
 
 BASE = {"plant": {"p_nominal_kw": 1000, "e_nominal_kwh": 2000, "v_nominal_v": 400}, "volt_var": {"mode": "DISABLED"}}
 

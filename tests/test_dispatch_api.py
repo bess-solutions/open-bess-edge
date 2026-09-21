@@ -3,12 +3,12 @@ import asyncio
 import json
 
 import pytest
-from tests.harness import Harness
-from tests.test_installation import btm_cfg
 
 from open_bess_edge.config import DispatchApiConfig
 from open_bess_edge.errors import ConfigError
 from open_bess_edge.runtime.dispatch_api import DispatchApi, load_api_token
+from tests.harness import Harness
+from tests.test_installation import btm_cfg
 
 TOKEN = "t" * 40
 pytestmark = pytest.mark.e2e

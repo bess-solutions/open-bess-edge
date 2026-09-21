@@ -6,11 +6,11 @@ import sys
 from pathlib import Path
 
 import pytest
-from tests.harness import Harness
 
 from open_bess_edge.cli import main
 from open_bess_edge.runtime.audit import AuditLog, verify_chain
 from open_bess_edge.runtime.health import HealthServer
+from tests.harness import Harness
 
 ROOT = Path(__file__).resolve().parents[1]
 

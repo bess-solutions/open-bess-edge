@@ -1,11 +1,11 @@
 
 import pytest
-from tests.conftest import make_cfg
-from tests.harness import Harness
 
 from open_bess_edge.errors import ConfigError
 from open_bess_edge.modbus.profile import load_profile
 from open_bess_edge.models import NodeState
+from tests.conftest import make_cfg
+from tests.harness import Harness
 
 pytestmark = [pytest.mark.e2e]
 
