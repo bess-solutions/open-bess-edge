@@ -40,9 +40,9 @@ UNIT_KWARG = _unit_kwarg()
 def _client_kwargs(timeout_s: float) -> dict[str, Any]:
     params = inspect.signature(AsyncModbusTcpClient.__init__).parameters
     kw: dict[str, Any] = {"timeout": timeout_s}
-    if "retries" in params:
+    if "retries" in params or "kwargs" in params:
         kw["retries"] = 0
-    if "reconnect_delay" in params:
+    if "reconnect_delay" in params or "kwargs" in params:
         kw["reconnect_delay"] = 0          # la reconexión la gobierna el driver
     return kw
 
@@ -98,7 +98,7 @@ class PyModbusTransport:
             except asyncio.TimeoutError as exc:
                 await self.close()
                 raise PlantCommError(f"timeout Modbus en {fn_name} (>{self.timeout_s}s)") from exc
-            except (OSError, ModbusException) as exc:
+            except (OSError, ModbusException, AttributeError) as exc:
                 await self.close()
                 raise PlantCommError(f"error Modbus en {fn_name}: {exc!r}") from exc
         if res is None:

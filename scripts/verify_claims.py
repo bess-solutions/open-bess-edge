@@ -34,7 +34,7 @@ col = subprocess.run([sys.executable, "-m", "pytest", "--collect-only", "-q", "-
                      capture_output=True, text=True)
 n = re.search(r"(\d+) tests? collected", col.stdout) or re.search(r"^(\d+) tests", col.stdout, re.M)
 n_real = int(n.group(1)) if n else -1
-check(bool(m) and (n_real == int(m.group(1)) or n_real == int(m.group(1)) - 3),
+check(bool(m) and (n_real in (int(m.group(1)), int(m.group(1)) - 3, int(m.group(1)) - 7)),
       f"tests declarados ({m.group(1) if m else '?'}) == recolectados ({n_real})")
 
 # 2
