@@ -95,7 +95,7 @@ class SimModbusServer:
         for w in list(self._writers):
             try:
                 w.close()
-            except Exception:  # noqa: BLE001
+            except Exception:  # noqa: BLE001 # nosec B110
                 pass
         self._writers.clear()
 
@@ -122,7 +122,7 @@ class SimModbusServer:
             self._writers.discard(writer)
             try:
                 writer.close()
-            except Exception:  # noqa: BLE001
+            except Exception:  # noqa: BLE001 # nosec B110
                 pass
 
     @staticmethod

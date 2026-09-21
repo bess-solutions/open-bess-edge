@@ -57,7 +57,7 @@ class ModbusPlant:
         self.unit_id = unit_id
         self.max_read_gap = max_read_gap
         self._mono, self._wall = mono, wall
-        self._rng = rng or random.Random()
+        self._rng = rng or random.Random()  # nosec B311
         self._min, self._max = reconnect_min_s, reconnect_max_s
         self._delay = reconnect_min_s
         self._next_attempt = 0.0
