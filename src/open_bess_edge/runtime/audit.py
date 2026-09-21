@@ -65,7 +65,7 @@ class AuditLog:
         return rec
 
     def _rotate(self) -> None:
-        assert self.path is not None  # nosec B101 and self._fh is not None
+        assert self.path is not None and self._fh is not None  # nosec B101
         self._fh.close()
         if self.backups > 0:
             for i in range(self.backups - 1, 0, -1):

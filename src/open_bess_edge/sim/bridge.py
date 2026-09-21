@@ -74,7 +74,7 @@ class SimBridge:
                     raw = max(lo, min(hi, raw))
             try:
                 self._write_raw(spec, raw)
-            except Exception:  # noqa: BLE001 # nosec B110 # nosec B110
+            except Exception:  # noqa: BLE001 # nosec B110
                 pass
 
     def sync_in(self, now: float) -> None:
