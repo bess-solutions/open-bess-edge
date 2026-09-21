@@ -18,8 +18,8 @@ authors:
 repository-code: "https://github.com/bess-solutions/open-bess-edge"
 url: "https://bess-solutions.cl"
 license: Apache-2.0
-version: "3.0.0"
-date-released: "2026-09-20"
+version: "3.1.0"
+date-released: "2026-09-21"
 keywords:
   - "BESS"
   - "battery energy storage"

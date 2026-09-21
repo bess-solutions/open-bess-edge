@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "open-bess-edge"
-version = "3.0.0"
+version = "3.1.0"
 description = "Gateway industrial de borde para BESS: Modbus TCP, envolvente de seguridad, FFR/droop y Volt/VAR (SEN Chile)"
 readme = "README.md"
 license = { text = "Apache-2.0" }

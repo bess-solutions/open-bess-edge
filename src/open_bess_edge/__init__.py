@@ -11,6 +11,6 @@ Toda conversión desde/hacia la convención de un dispositivo se hace en el
 borde del driver (perfil), nunca dentro de controladores ni de la envolvente.
 """
 
-__version__ = "3.0.0"
+__version__ = "3.1.0"
 
 __all__ = ["__version__"]
