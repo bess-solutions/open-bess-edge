@@ -1,15 +1,12 @@
-> **Aviso:** este documento describe la v2 (`src.*`); en v3 el paquete es `open_bess_edge` y la referencia vigente es `README.md` y `docs/spec/CONTROL.md`.
-
-<!-- DOCUMENTO DE v2 -->
-# Security Policy — BESSAI Edge Gateway
+# Security Policy — Open BESS Edge
 
 ## Supported Versions
 
 | Version | Support Status |
 |---|---|
-| v2.12.x (main) | ✅ Active support |
-| v2.11.x | ⚠️ Security fixes only |
-| < v2.11 | ❌ No longer supported |
+| v3.1.x (main) | ✅ Active support |
+| v3.0.x | ⚠️ Security fixes only |
+| < v3.0 | ❌ No longer supported (v2 EOL) |
 
 ## Reporting a Vulnerability
 
@@ -30,11 +27,13 @@ Report security issues via:
 
 ## Scope
 
-This security policy covers **BESSAI Edge Gateway** (`open-bess-edge`):
+This security policy covers **Open BESS Edge** (`open_bess_edge`):
 
-- `src/core/` — compliance and control logic
-- `src/drivers/` — hardware drivers (Modbus, IEC 60870-5-104)
-- `src/interfaces/` — publishers, health server, metrics
+- `src/open_bess_edge/safety/` — envolvente física de seguridad fail-closed
+- `src/open_bess_edge/runtime/` — ciclo de control, auditoría criptográfica, servidor de salud
+- `src/open_bess_edge/modbus/` — transporte TCP y parseo de perfiles
+- `src/open_bess_edge/control/` — lazos de FFR/droop, Volt/VAR y Peak Shaving BTM
+- `src/open_bess_edge/dispatch/` — API HTTP de despacho local autenticada (loopback)
 
 ## Out of Scope
 

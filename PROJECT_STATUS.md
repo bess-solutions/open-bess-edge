@@ -13,5 +13,5 @@ Pruebas: ver marcador (verificado por `scripts/verify_claims.py`).
 | CAN/DBC, IEC 104, GOOSE | experimental | ver README |
 | Hardware real, NTSyCS, ciberseguridad OT | **no validado** | — |
 
-Pendiente conocido: `infrastructure/docker/Dockerfile*`, `README.en.md`, `SECURITY.md` y varios `docs/` aún describen v2;
-la imagen Docker nueva no se construyó en el entorno de desarrollo.
+Estado de empaquetado: Dockerfile v3 mínimo verificado y publicado por el pipeline de CI/CD (GitHub Actions).
+Documentación: `README.md`, `SECURITY.md`, `CITATION.cff` y especificaciones en `docs/spec/` alineadas formalmente con v3.1.0.
