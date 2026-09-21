@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from open_bess_edge import __version__
 from open_bess_edge.cli import main
 from open_bess_edge.runtime.audit import AuditLog, verify_chain
 from open_bess_edge.runtime.health import HealthServer
@@ -148,7 +149,7 @@ async def test_health_survives_garbage_requests():
 
 # ---------------------------------------------------------------- CLI
 def test_cli_version_profile_info_check_config_and_errors(capsys, tmp_path):
-    assert main(["version"]) == 0 and "3.0.0" in capsys.readouterr().out
+    assert main(["version"]) == 0 and __version__ in capsys.readouterr().out
     assert main(["profile-info"]) == 0 and "open_bess_edge_reference" in capsys.readouterr().out
     assert main(["profile-info", "huawei_sun2000"]) == 0
     info = json.loads(capsys.readouterr().out)
