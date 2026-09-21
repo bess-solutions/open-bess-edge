@@ -91,16 +91,23 @@ class PyModbusTransport:
         c = self._client
         if c is None or not c.connected:
             raise PlantCommError("sin conexión Modbus")
+        fn = getattr(c, fn_name)
         async with self._lock:
             try:
-                fn = getattr(c, fn_name)
                 res = await asyncio.wait_for(fn(*args, **{UNIT_KWARG: unit}, **kw), timeout=self._outer_s)
             except asyncio.TimeoutError as exc:
                 await self.close()
                 raise PlantCommError(f"timeout Modbus en {fn_name} (>{self.timeout_s}s)") from exc
-            except (OSError, ModbusException, AttributeError) as exc:
+            except (OSError, ModbusException) as exc:
                 await self.close()
                 raise PlantCommError(f"error Modbus en {fn_name}: {exc!r}") from exc
+            except AttributeError as exc:
+                # En pymodbus < 3.8 o ante desconexión asíncrona concurrente, pymodbus puede
+                # desasociar el socket en transport_send y disparar: 'NoneType' object has no attribute 'write'.
+                if "NoneType" in str(exc) and "write" in str(exc):
+                    await self.close()
+                    raise PlantCommError(f"error de transporte Modbus en {fn_name} (socket desconectado): {exc!r}") from exc
+                raise
         if res is None:
             await self.close()
             raise PlantCommError(f"respuesta vacía en {fn_name}")

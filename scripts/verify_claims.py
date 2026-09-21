@@ -29,13 +29,30 @@ readme = (ROOT / "README.md").read_text(encoding="utf-8")
 status = (ROOT / "PROJECT_STATUS.md").read_text(encoding="utf-8")
 
 # 1
+try:
+    import c104  # type: ignore[import-not-found]
+    has_c104 = True
+except ImportError:
+    has_c104 = False
+
+try:
+    import cantools  # type: ignore[import-not-found]
+    has_cantools = True
+except ImportError:
+    has_cantools = False
+
 m = re.search(r"<!-- tests:(\d+) -->", status)
 col = subprocess.run([sys.executable, "-m", "pytest", "--collect-only", "-q", "-p", "no:cacheprovider"], cwd=ROOT,
                      capture_output=True, text=True)
 n = re.search(r"(\d+) tests? collected", col.stdout) or re.search(r"^(\d+) tests", col.stdout, re.M)
 n_real = int(n.group(1)) if n else -1
-check(bool(m) and (n_real in (int(m.group(1)), int(m.group(1)) - 3, int(m.group(1)) - 7)),
-      f"tests declarados ({m.group(1) if m else '?'}) == recolectados ({n_real})")
+
+if has_c104 and has_cantools:
+    check(bool(m) and n_real == int(m.group(1)),
+          f"tests declarados ({m.group(1) if m else '?'}) == recolectados ({n_real})")
+else:
+    print(f"OMITIDO tests declarados ({m.group(1) if m else '?'}) vs recolectados ({n_real}): "
+          f"requiere c104 y cantools (c104={has_c104}, cantools={has_cantools})")
 
 # 2
 from open_bess_edge.safety import envelope  # noqa: E402
