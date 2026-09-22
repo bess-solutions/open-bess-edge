@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="blueprint">
+<html lang="es" data-theme="obsidian">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,68 +27,72 @@
     --radius-lg: 14px;
   }
 
-  /* THEME 01 — DRAFT BLUEPRINT (Original Technical CAD Paper) */
+  /* THEME 01 — OBSIDIAN SCADA (Default: Cyber Vektor Command Center) */
+  [data-theme="obsidian"] {
+    --canvas: #06080d;
+    --canvas-sub: #0d111a;
+    --surface: #10141f;
+    --surface-hover: #171d2c;
+    --surface-card: rgba(16, 20, 31, 0.92);
+    --border: rgba(0, 242, 254, 0.22);
+    --border-strong: #00f2fe;
+    --border-accent: rgba(0, 242, 254, 0.6);
+    --ink: #f0f4fc;
+    --ink-muted: #94a3b8;
+    --ink-dim: #64748b;
+    --ink-faint: #334155;
+    --accent: #00f2fe;
+    --accent-sub: rgba(0, 242, 254, 0.14);
+    --accent-glow: 0 0 24px rgba(0, 242, 254, 0.45);
+    --cyan: #38bdf8;
+    --cyan-sub: rgba(56, 189, 248, 0.16);
+    --line-grid: rgba(0, 242, 254, 0.07);
+    --badge-bg: rgba(0, 242, 254, 0.15);
+    --badge-text: #00f2fe;
+    --scanline-opacity: 0.18;
+    --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.65);
+    --node-header-bg: rgba(0, 242, 254, 0.12);
+    --node-body-bg: #0d111b;
+  }
+
+  /* THEME 02 — DRAFT BLUEPRINT (Original Technical CAD Paper) */
   [data-theme="blueprint"] {
     --canvas: #fbfbf9;
     --canvas-sub: #f3f3f0;
     --surface: #ffffff;
     --surface-hover: #eceae5;
-    --surface-card: rgba(255, 255, 255, 0.85);
-    --border: rgba(18, 18, 18, 0.16);
+    --surface-card: rgba(255, 255, 255, 0.90);
+    --border: rgba(18, 18, 18, 0.18);
     --border-strong: #121212;
-    --border-accent: rgba(197, 64, 31, 0.4);
+    --border-accent: rgba(197, 64, 31, 0.5);
     --ink: #121212;
-    --ink-muted: rgba(18, 18, 18, 0.72);
-    --ink-dim: rgba(18, 18, 18, 0.46);
+    --ink-muted: rgba(18, 18, 18, 0.75);
+    --ink-dim: rgba(18, 18, 18, 0.48);
     --ink-faint: rgba(18, 18, 18, 0.22);
     --accent: #c5401f;
     --accent-sub: rgba(197, 64, 31, 0.10);
-    --accent-glow: 0 0 16px rgba(197, 64, 31, 0.3);
+    --accent-glow: 0 0 16px rgba(197, 64, 31, 0.35);
     --cyan: #0284c7;
     --cyan-sub: rgba(2, 132, 199, 0.12);
     --line-grid: rgba(18, 18, 18, 0.10);
     --badge-bg: rgba(197, 64, 31, 0.08);
     --badge-text: #c5401f;
     --scanline-opacity: 0;
-    --shadow-elevated: 0 4px 20px rgba(0,0,0,0.06);
+    --shadow-elevated: 0 4px 20px rgba(0, 0, 0, 0.06);
+    --node-header-bg: rgba(18, 18, 18, 0.06);
+    --node-body-bg: #ffffff;
   }
 
-  /* THEME 02 — OBSIDIAN SCADA (Cyber Vektor Command Center) */
-  [data-theme="obsidian"] {
-    --canvas: #06080d;
-    --canvas-sub: #0d111a;
-    --surface: #121622;
-    --surface-hover: #1a2030;
-    --surface-card: rgba(18, 22, 34, 0.85);
-    --border: rgba(0, 242, 254, 0.18);
-    --border-strong: #00f2fe;
-    --border-accent: rgba(0, 242, 254, 0.5);
-    --ink: #f0f4fc;
-    --ink-muted: #94a3b8;
-    --ink-dim: #64748b;
-    --ink-faint: #334155;
-    --accent: #00f2fe;
-    --accent-sub: rgba(0, 242, 254, 0.12);
-    --accent-glow: 0 0 24px rgba(0, 242, 254, 0.4);
-    --cyan: #38bdf8;
-    --cyan-sub: rgba(56, 189, 248, 0.16);
-    --line-grid: rgba(0, 242, 254, 0.08);
-    --badge-bg: rgba(0, 242, 254, 0.15);
-    --badge-text: #00f2fe;
-    --scanline-opacity: 0.18;
-    --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.6);
-  }
-
-  /* THEME 03 — CYBER TERMINAL (Raycast / Matrix Green TUI) */
+  /* THEME 03 — CYBER TERMINAL (Matrix Green Phosphor TUI) */
   [data-theme="terminal"] {
     --canvas: #050a05;
     --canvas-sub: #0a140a;
     --surface: #0d1a0d;
     --surface-hover: #152915;
-    --surface-card: rgba(13, 26, 13, 0.9);
-    --border: rgba(34, 197, 94, 0.25);
+    --surface-card: rgba(13, 26, 13, 0.92);
+    --border: rgba(34, 197, 94, 0.28);
     --border-strong: #22c55e;
-    --border-accent: rgba(34, 197, 94, 0.6);
+    --border-accent: rgba(34, 197, 94, 0.65);
     --ink: #4ade80;
     --ink-muted: #22c55e;
     --ink-dim: #166534;
@@ -103,6 +107,8 @@
     --badge-text: #4ade80;
     --scanline-opacity: 0.28;
     --shadow-elevated: 0 4px 24px rgba(34, 197, 94, 0.15);
+    --node-header-bg: rgba(34, 197, 94, 0.14);
+    --node-body-bg: #091209;
   }
 
   /* ============================================================
@@ -167,6 +173,31 @@
   .crosshair-y { top: 0; bottom: 0; width: 1px; }
 
   /* ============================================================
+     SCADA LIVE TELEMETRY TICKER (Mined from Vektor Intelligence)
+     ============================================================ */
+  .scada-ticker {
+    background: var(--canvas-sub);
+    border-bottom: 1px solid var(--border);
+    padding: 6px 0;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    z-index: 12;
+  }
+  .scada-ticker-track {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    color: var(--ink-dim);
+    animation: tickerFlow 40s linear infinite;
+  }
+  .scada-ticker-track span { margin: 0 18px; }
+  .scada-ticker-track b { color: var(--accent); font-weight: 700; }
+  @keyframes tickerFlow { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+  /* ============================================================
      TOP RULE BAR & THEME SELECTOR HUD
      ============================================================ */
   .rule-bar {
@@ -179,7 +210,7 @@
     transition: background var(--dt) ease, border-color var(--dt) ease;
   }
   .rule-bar .brand-badge {
-    display: inline-flex; align-items: center; gap: 8px; font-weight: 700; color: var(--ink);
+    display: inline-flex; align-items: center; gap: 10px; font-weight: 700; color: var(--ink);
   }
   .live-dot {
     width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
@@ -187,7 +218,7 @@
   }
   @keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.85); } }
 
-  /* Interactive Theme Switcher Pills (Direct from Vektor Intelligence) */
+  /* Interactive Theme Switcher Pills */
   .theme-switch-group {
     display: flex; align-items: center; gap: 4px; background: var(--canvas-sub);
     padding: 3px; border-radius: 20px; border: 1px solid var(--border);
@@ -304,7 +335,6 @@
   .cad-anno .dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--ink); margin-right: 5px; vertical-align: middle; }
   .cad-anno .dot.accent { background: var(--accent); box-shadow: var(--accent-glow); }
 
-  /* 3D Model HUD & Controls (From Vektor Intelligence BIM Explorer) */
   .cad-controls {
     position: absolute; top: 12px; right: 12px; z-index: 5;
     display: flex; gap: 6px;
@@ -363,7 +393,7 @@
   .kicker-card .v { font-family: var(--font-mono); font-size: 16px; margin-top: 6px; color: var(--ink); font-weight: 700; }
 
   /* ============================================================
-     03 OBJETIVOS (Interactive Cards with 3D Tilt & Glow)
+     03 OBJETIVOS
      ============================================================ */
   .obj-grid {
     margin-left: 144px; display: grid; grid-template-columns: repeat(2, 1fr);
@@ -393,7 +423,7 @@
   .obj p { margin: 0; color: var(--ink-muted); font-size: 14.5px; line-height: 1.55; }
 
   /* ============================================================
-     04 ARQUITECTURA SVG DIAGRAM
+     04 ARQUITECTURA: REDISEÑO INDUSTRIAL HIGH-FIDELITY (ZERO OVERLAP)
      ============================================================ */
   .arch-wrap { margin-left: 144px; }
   @media(max-width: 640px) { .arch-wrap { margin-left: 0; } }
@@ -401,36 +431,79 @@
     overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-md);
     background: var(--surface);
     background-image: linear-gradient(var(--line-grid) 1px, transparent 1px), linear-gradient(90deg, var(--line-grid) 1px, transparent 1px);
-    background-size: 24px 24px; padding: 12px;
+    background-size: 32px 32px; padding: 18px;
     box-shadow: var(--shadow-elevated);
   }
-  .arch-scroll svg { display: block; min-width: 920px; width: 100%; height: auto; }
+  .arch-scroll svg { display: block; min-width: 1240px; width: 100%; height: auto; }
+  
   .arch-legend {
-    margin-top: 16px; display: flex; flex-wrap: wrap; gap: 24px;
-    font-family: var(--font-mono); font-size: 11px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: .05em;
+    margin-top: 20px; display: flex; flex-wrap: wrap; gap: 28px;
+    font-family: var(--font-mono); font-size: 11px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: .06em;
   }
   .arch-legend b { color: var(--ink); font-weight: 600; }
 
-  .diagram-path {
-    fill: none; stroke: var(--border-strong); stroke-width: 1.4;
-    stroke-dasharray: 1400; stroke-dashoffset: 1400;
-    transition: stroke-dashoffset 1.8s cubic-bezier(.2,.8,.2,1);
+  /* SVG Architectural Blueprint Classes */
+  .arch-node-box {
+    fill: var(--node-body-bg); stroke: var(--border); stroke-width: 1.5;
+    transition: stroke .2s ease, fill .2s ease;
   }
-  .diagram-box {
-    fill: var(--canvas); stroke: var(--border-strong); stroke-width: 1.3;
-    opacity: 0; transform: translateY(6px); transform-origin: center;
-    transition: opacity .6s ease, transform .6s ease, fill .2s ease;
+  .arch-node-box:hover { stroke: var(--border-strong); fill: var(--surface-hover); }
+  .arch-header-box {
+    fill: var(--node-header-bg); stroke: var(--border); stroke-width: 1;
   }
-  .diagram-box:hover { fill: var(--surface-hover); }
-  .diagram-label { font-family: var(--font-mono); fill: var(--ink); font-size: 11px; font-weight: 600; opacity: 0; transition: opacity .8s ease .3s; }
-  .diagram-sub { font-family: var(--font-mono); fill: var(--ink-dim); font-size: 9px; }
-  .arch-wrap.in-view .diagram-path { stroke-dashoffset: 0; }
-  .arch-wrap.in-view .diagram-box { opacity: 1; transform: translateY(0); }
-  .arch-wrap.in-view .diagram-label { opacity: 1; }
-  .accent-line { stroke: var(--accent) !important; }
-  .flow-dot { fill: var(--ink); }
-  .flow-dot.red { fill: var(--accent); }
-  .arch-wrap:not(.in-view) .flow-dot { opacity: 0; }
+  .arch-bus-line {
+    fill: none; stroke: var(--border-strong); stroke-width: 1.8;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .arch-bus-line.accent {
+    stroke: var(--accent);
+  }
+  .arch-bus-pill {
+    fill: var(--canvas); stroke: var(--border-strong); stroke-width: 1.2;
+  }
+  .arch-bus-pill.accent {
+    stroke: var(--accent); fill: var(--badge-bg);
+  }
+
+  /* Node Typography */
+  .node-title {
+    font-family: var(--font-mono); font-size: 11.5px; font-weight: 700;
+    fill: var(--ink); letter-spacing: .06em;
+  }
+  .node-badge {
+    font-family: var(--font-mono); font-size: 9.5px; font-weight: 600;
+    fill: var(--accent); letter-spacing: .04em;
+  }
+  .node-item {
+    font-family: var(--font-mono); font-size: 10.5px; font-weight: 500;
+    fill: var(--ink-muted);
+  }
+  .node-item.highlight {
+    fill: var(--ink); font-weight: 600;
+  }
+  .node-foot {
+    font-family: var(--font-mono); font-size: 9px; font-weight: 500;
+    fill: var(--ink-dim); letter-spacing: .04em;
+  }
+  .bus-label {
+    font-family: var(--font-mono); font-size: 9.5px; font-weight: 700;
+    fill: var(--accent); letter-spacing: .08em; text-anchor: middle;
+  }
+  .bus-label.dim {
+    fill: var(--ink);
+  }
+
+  /* Inspector Card below Architecture */
+  .arch-inspector {
+    margin-top: 16px; background: var(--surface-card); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 16px 20px; display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap; gap: 14px;
+    font-family: var(--font-mono); font-size: 11px;
+  }
+  .inspector-title { color: var(--accent); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .inspector-desc { color: var(--ink-muted); }
+  .inspector-specs { display: flex; gap: 16px; color: var(--ink-dim); }
+  .inspector-specs span b { color: var(--ink); font-weight: 600; }
 
   /* ============================================================
      05 HORIZONTE / TIMELINE
@@ -523,8 +596,6 @@
 
   @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
-    .diagram-path { stroke-dashoffset: 0; }
-    .diagram-box, .diagram-label { opacity: 1; transform: none; }
   }
 </style>
 </head>
@@ -541,6 +612,33 @@
   <div class="crosshair-x" id="chx"></div>
   <div class="crosshair-y" id="chy"></div>
 
+  <!-- Top SCADA Telemetry Ticker (Vektor High-Density Standard) -->
+  <div class="scada-ticker">
+    <div class="scada-ticker-track">
+      <span>● SEN FREQ: <b>50.000 Hz</b></span>
+      <span>● FFR DEAD-BAND: <b>±0.030 Hz</b></span>
+      <span>● DROOP SLOPE: <b>s = 3.0%</b></span>
+      <span>● CONTINGENCIA: <b>Δf ≥ 300 mHz</b></span>
+      <span>● RAMP LIMIT: <b>20% Pn/min</b></span>
+      <span>● BESS-GUARD: <b>ARMED &amp; INVIOLABLE</b></span>
+      <span>● FAIL-SAFE HOLD: <b>2.0s SAFE_STATE</b></span>
+      <span>● TESTS: <b>278 / 278 PASS (100%)</b></span>
+      <span>● COVERAGE: <b>82.0% FUZZING</b></span>
+      <span>● LICENCIA: <b>APACHE 2.0</b></span>
+      <!-- Repeated for infinite ticker loop -->
+      <span>● SEN FREQ: <b>50.000 Hz</b></span>
+      <span>● FFR DEAD-BAND: <b>±0.030 Hz</b></span>
+      <span>● DROOP SLOPE: <b>s = 3.0%</b></span>
+      <span>● CONTINGENCIA: <b>Δf ≥ 300 mHz</b></span>
+      <span>● RAMP LIMIT: <b>20% Pn/min</b></span>
+      <span>● BESS-GUARD: <b>ARMED &amp; INVIOLABLE</b></span>
+      <span>● FAIL-SAFE HOLD: <b>2.0s SAFE_STATE</b></span>
+      <span>● TESTS: <b>278 / 278 PASS (100%)</b></span>
+      <span>● COVERAGE: <b>82.0% FUZZING</b></span>
+      <span>● LICENCIA: <b>APACHE 2.0</b></span>
+    </div>
+  </div>
+
   <!-- Top Rule Bar & Interactive Theme Switcher -->
   <div class="rule-bar">
     <span class="brand-badge">
@@ -548,10 +646,10 @@
       OPEN BESS EDGE — BESSAI EDGE GATEWAY
     </span>
     
-    <!-- Theme Switcher Pill (Vektor Intelligence Multi-Skin Engine) -->
+    <!-- Theme Switcher Pill -->
     <div class="theme-switch-group">
-      <button class="theme-btn active" data-set-theme="blueprint" title="Plano Técnico CAD">Blueprint</button>
-      <button class="theme-btn" data-set-theme="obsidian" title="SCADA Obsidian Cyber">Obsidian</button>
+      <button class="theme-btn active" data-set-theme="obsidian" title="SCADA Obsidian Cyber">Obsidian</button>
+      <button class="theme-btn" data-set-theme="blueprint" title="Plano Técnico CAD">Blueprint</button>
       <button class="theme-btn" data-set-theme="terminal" title="Terminal Verde Matrix">Terminal</button>
     </div>
 
@@ -582,7 +680,7 @@
         <div class="cad-stage" id="cadStage">
           <!-- 3D Viewer Interactive Controls -->
           <div class="cad-controls">
-            <button class="cad-btn" id="btnRotate" title="Pausar / Reanudar Rotación">Rotar: ON</button>
+            <button class="cad-btn active" id="btnRotate" title="Pausar / Reanudar Rotación">Rotar: ON</button>
             <button class="cad-btn" id="btnWireframe" title="Alternar Vista Wireframe">Wireframe</button>
             <button class="cad-btn" id="btnResetView" title="Restablecer Cámara">Reset 1:1</button>
           </div>
@@ -663,91 +761,198 @@
     </div>
   </section>
 
-  <!-- ============ 04 ARQUITECTURA ============ -->
+  <!-- ============ 04 ARQUITECTURA: DIAGRAMA INDUSTRIAL IMPECABLE ============ -->
   <section id="arquitectura">
     <div class="sec-head" data-reveal>
       <div class="sec-index">04</div>
-      <div class="sec-title">Arquitectura<small>El plano del sistema</small></div>
+      <div class="sec-title">Arquitectura<small>El plano del sistema (Zero-Overlap Matrix)</small></div>
     </div>
     <div class="arch-wrap" id="archWrap">
       <div class="arch-scroll">
-        <svg viewBox="0 0 920 300" xmlns="http://www.w3.org/2000/svg" id="archSvg">
+        <!-- High-Precision Industrial Architecture Vector Matrix (1280 x 440) -->
+        <svg viewBox="0 0 1280 440" xmlns="http://www.w3.org/2000/svg" id="archSvg">
           <defs>
-            <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,1 L8,5 L0,9 z" fill="var(--border-strong)"/>
+            <!-- Drop Shadow for Architecture Cards -->
+            <filter id="nodeShadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+              <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.25"/>
+            </filter>
+            <!-- Marker for Data Flow Arrows -->
+            <marker id="busArrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="var(--border-strong)"/>
+            </marker>
+            <marker id="busArrowAccent" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="var(--accent)"/>
             </marker>
           </defs>
 
-          <path class="diagram-path" id="p1" d="M120,80 L230,80" style="transition-delay:.1s"/>
-          <path class="diagram-path" id="p2" d="M330,80 L430,80" style="transition-delay:.5s"/>
-          <path class="diagram-path" id="p3" d="M530,80 L630,80" style="transition-delay:.9s"/>
-          <path class="diagram-path" id="p4" d="M480,120 L480,190" style="transition-delay:1.1s"/>
-          <path class="diagram-path accent-line" id="p5" d="M85,190 L85,120 L480,120" style="transition-delay:1.3s"/>
+          <!-- ================= BUS CONDUITS & INTER-NODE WIRING ================= -->
+          <!-- Horizontal Bus Tier 1: Node 1 -> Node 2 -->
+          <path id="busH1" class="arch-bus-line" d="M 270,120 L 350,120" marker-end="url(#busArrow)"/>
+          <!-- Horizontal Bus Tier 1: Node 2 -> Node 3 -->
+          <path id="busH2" class="arch-bus-line accent" d="M 610,120 L 690,120" marker-end="url(#busArrowAccent)"/>
+          <!-- Horizontal Bus Tier 1: Node 3 -> Node 4 -->
+          <path id="busH3" class="arch-bus-line" d="M 960,120 L 1040,120" marker-end="url(#busArrow)"/>
 
-          <rect class="diagram-box" x="20" y="45" width="100" height="70" rx="4" style="transition-delay:0s"/>
-          <text class="diagram-label" x="70" y="35" text-anchor="middle" style="transition-delay:.15s">HARDWARE BESS</text>
-          <text class="diagram-sub" x="70" y="70" text-anchor="middle">Racks BT + BMS</text>
-          <text class="diagram-sub" x="70" y="84" text-anchor="middle">Inversor bidireccional</text>
-          <text class="diagram-sub" x="70" y="98" text-anchor="middle">Transformador MT</text>
-          <text class="diagram-label" x="175" y="72" text-anchor="middle" style="fill:var(--accent);transition-delay:.4s">MODBUS TCP / RS485</text>
+          <!-- Vertical Bus Tier 2: PCC Meter (Bottom 1) -> Open BESS Edge (Node 2) -->
+          <path id="busV1" class="arch-bus-line accent" d="M 480,270 L 480,210" marker-end="url(#busArrowAccent)"/>
+          <!-- Vertical Bus Tier 2: Dispatch API (Bottom 2) -> Safety Core (Node 3) -->
+          <path id="busV2" class="arch-bus-line" d="M 825,270 L 825,210" marker-end="url(#busArrow)"/>
 
-          <rect class="diagram-box" x="230" y="30" width="100" height="100" rx="4" style="transition-delay:.35s"/>
-          <text class="diagram-label" x="280" y="20" text-anchor="middle" style="transition-delay:.5s">OPEN BESS EDGE</text>
-          <text class="diagram-sub" x="280" y="55" text-anchor="middle">Runtime v3.1 (100 ms)</text>
-          <text class="diagram-sub" x="280" y="69" text-anchor="middle">Modbus TCP Driver</text>
-          <text class="diagram-sub" x="280" y="83" text-anchor="middle">Perfiles JSON SSOT</text>
-          <text class="diagram-sub" x="280" y="97" text-anchor="middle">Fail-Safe Hold 2s</text>
-          <text class="diagram-sub" x="280" y="111" text-anchor="middle">Meter PCC Loop</text>
+          <!-- Protocol Pill Conduits (Floating Safely in Inter-Node Channels) -->
+          <!-- Pill 1: MODBUS TCP / RS485 -->
+          <rect class="arch-bus-pill" x="282" y="106" width="56" height="26" rx="5"/>
+          <text class="bus-label dim" x="310" y="123">MODBUS</text>
 
-          <rect class="diagram-box" x="430" y="30" width="100" height="100" rx="4" style="transition-delay:.75s"/>
-          <text class="diagram-label" x="480" y="20" text-anchor="middle" style="transition-delay:.9s">CORE &amp; SAFETY</text>
-          <text class="diagram-sub" x="480" y="55" text-anchor="middle">BESS-GUARD (001-005)</text>
-          <text class="diagram-sub" x="480" y="69" text-anchor="middle">FFR Droop (s=3%)</text>
-          <text class="diagram-sub" x="480" y="83" text-anchor="middle">BTM Peak Shaving</text>
-          <text class="diagram-sub" x="480" y="97" text-anchor="middle">Hash Audit Ledger</text>
-          <text class="diagram-label" x="580" y="72" text-anchor="middle" style="transition-delay:.8s">TELEMETRÍA</text>
+          <!-- Pill 2: BESS-GUARD ENVELOPE -->
+          <rect class="arch-bus-pill accent" x="622" y="106" width="56" height="26" rx="5"/>
+          <text class="bus-label" x="650" y="123">GUARD</text>
 
-          <rect class="diagram-box" x="630" y="45" width="110" height="70" rx="4" style="transition-delay:1.15s"/>
-          <text class="diagram-label" x="685" y="35" text-anchor="middle" style="transition-delay:1.3s">OBSERVABILIDAD</text>
-          <text class="diagram-sub" x="685" y="70" text-anchor="middle">Prometheus Exporter</text>
-          <text class="diagram-sub" x="685" y="84" text-anchor="middle">Grafana Dashboard</text>
-          <text class="diagram-sub" x="685" y="98" text-anchor="middle">REST Health / Audit</text>
+          <!-- Pill 3: TELEMETRY PULL -->
+          <rect class="arch-bus-pill" x="970" y="106" width="60" height="26" rx="5"/>
+          <text class="bus-label dim" x="1000" y="123">METRICS</text>
 
-          <rect class="diagram-box" x="30" y="165" width="110" height="50" rx="4" style="transition-delay:1.2s"/>
-          <text class="diagram-label" x="85" y="240" text-anchor="middle" style="fill:var(--accent);transition-delay:1.45s">PUNTO DE CONEXIÓN (PCC)</text>
-          <text class="diagram-sub" x="85" y="195" text-anchor="middle">Medidor de Red</text>
+          <!-- Pill 4: PCC FEEDBACK LOOP -->
+          <rect class="arch-bus-pill accent" x="424" y="226" width="112" height="26" rx="5"/>
+          <text class="bus-label" x="480" y="243">LAZO PCC &lt; 50ms</text>
 
-          <rect class="diagram-box" x="430" y="165" width="100" height="50" rx="4" style="transition-delay:1.35s"/>
-          <text class="diagram-sub" x="480" y="195" text-anchor="middle">Local Dispatch API</text>
-          <text class="diagram-label" x="480" y="240" text-anchor="middle" style="transition-delay:1.5s">HTTP BEARER · AUDITADO</text>
+          <!-- Pill 5: DISPATCH BEARER -->
+          <rect class="arch-bus-pill" x="770" y="226" width="110" height="26" rx="5"/>
+          <text class="bus-label dim" x="825" y="243">HTTP BEARER TTL</text>
 
-          <!-- Flujo animado de paquetes de datos -->
-          <circle class="flow-dot" r="2.8">
-            <animateMotion dur="2.6s" begin="1.8s" repeatCount="indefinite">
-              <mpath href="#p1"/>
+          <!-- ================= TIER 1: CORE OPERATIONAL NODES ================= -->
+
+          <!-- NODE 01: HARDWARE BESS (Planta Física) -->
+          <g class="arch-node-group" data-node="hw">
+            <rect class="arch-node-box" x="20" y="30" width="250" height="180" rx="8" filter="url(#nodeShadow)"/>
+            <rect class="arch-header-box" x="20" y="30" width="250" height="34" rx="8"/>
+            <text class="node-title" x="36" y="52">01 // HARDWARE BESS</text>
+            <text class="node-badge" x="210" y="52">PLANTA</text>
+            <text class="node-item highlight" x="36" y="86">● Racks Batería LFP + BMS</text>
+            <text class="node-item" x="36" y="108">● Inversor PCS Bidireccional</text>
+            <text class="node-item" x="36" y="130">● Transformador MT &amp; Celdas</text>
+            <text class="node-item" x="36" y="152">● Pack 200 kWh / 100 kW</text>
+            <text class="node-foot" x="36" y="190">PUERTO: RS-485 / MODBUS TCP</text>
+          </g>
+
+          <!-- NODE 02: OPEN BESS EDGE (Gateway de Borde v3.1.0) -->
+          <g class="arch-node-group" data-node="edge">
+            <rect class="arch-node-box" x="350" y="30" width="260" height="180" rx="8" filter="url(#nodeShadow)" style="stroke:var(--border-strong)"/>
+            <rect class="arch-header-box" x="350" y="30" width="260" height="34" rx="8"/>
+            <text class="node-title" x="366" y="52">02 // OPEN BESS EDGE</text>
+            <text class="node-badge" x="550" y="52">v3.1.0</text>
+            <text class="node-item highlight" x="366" y="86">● Driver Modbus Asíncrono</text>
+            <text class="node-item" x="366" y="108">● Perfiles JSON Declarativos</text>
+            <text class="node-item" x="366" y="130">● Ciclo Control 100 ms Local</text>
+            <text class="node-item" x="366" y="152">● Fail-Safe Watchdog (2.0s)</text>
+            <text class="node-foot" x="366" y="190">NÚCLEO: PYTHON 3.10+ CANÓNICO</text>
+          </g>
+
+          <!-- NODE 03: CORE & SAFETY (Envolvente BESS-GUARD) -->
+          <g class="arch-node-group" data-node="safety">
+            <rect class="arch-node-box" x="690" y="30" width="270" height="180" rx="8" filter="url(#nodeShadow)" style="stroke:var(--border-accent)"/>
+            <rect class="arch-header-box" x="690" y="30" width="270" height="34" rx="8"/>
+            <text class="node-title" x="706" y="52">03 // CORE &amp; SAFETY</text>
+            <text class="node-badge" x="876" y="52">INVIOLABLE</text>
+            <text class="node-item highlight" x="706" y="86">● BESS-GUARD (Reglas 001-005)</text>
+            <text class="node-item" x="706" y="108">● FFR Droop s=3% (±30 mHz)</text>
+            <text class="node-item" x="706" y="130">● Rampa 20%/min &amp; Derating</text>
+            <text class="node-item" x="706" y="152">● Ledger Criptográfico SHA-256</text>
+            <text class="node-foot" x="706" y="190">ENVELOPE: HARD SAFETY LIMITS</text>
+          </g>
+
+          <!-- NODE 04: OBSERVABILIDAD & TELEMETRÍA -->
+          <g class="arch-node-group" data-node="obs">
+            <rect class="arch-node-box" x="1040" y="30" width="220" height="180" rx="8" filter="url(#nodeShadow)"/>
+            <rect class="arch-header-box" x="1040" y="30" width="220" height="34" rx="8"/>
+            <text class="node-title" x="1056" y="52">04 // OBSERVABILIDAD</text>
+            <text class="node-badge" x="1210" y="52">OT</text>
+            <text class="node-item highlight" x="1056" y="86">● Prometheus Exporter</text>
+            <text class="node-item" x="1056" y="108">● Grafana Dashboards</text>
+            <text class="node-item" x="1056" y="130">● Healthcheck &amp; REST Audit</text>
+            <text class="node-item" x="1056" y="152">● Trazabilidad Total</text>
+            <text class="node-foot" x="1056" y="190">ENDPOINT: /metrics · /health</text>
+          </g>
+
+          <!-- ================= TIER 2: BOUNDARY INTERFACES ================= -->
+
+          <!-- NODE 05 (Bottom 1): PUNTO DE CONEXIÓN (PCC) -->
+          <g class="arch-node-group" data-node="pcc">
+            <rect class="arch-node-box" x="350" y="270" width="260" height="140" rx="8" filter="url(#nodeShadow)" style="stroke:var(--border-accent)"/>
+            <rect class="arch-header-box" x="350" y="270" width="260" height="32" rx="8"/>
+            <text class="node-title" x="366" y="291">PUNTO DE CONEXIÓN (PCC)</text>
+            <text class="node-badge" x="546" y="291">METER</text>
+            <text class="node-item highlight" x="366" y="324">● Medidor de Red Multifunción</text>
+            <text class="node-item" x="366" y="346">● Lazo Cerrado Peak Shaving BTM</text>
+            <text class="node-item" x="366" y="368">● Lectura Rápida &lt; 50 ms PCC</text>
+            <text class="node-foot" x="366" y="396">JANITZA / SCHNEIDER / LOVATO</text>
+          </g>
+
+          <!-- NODE 06 (Bottom 2): DESPACHO LOCAL & EMS/AGC -->
+          <g class="arch-node-group" data-node="dispatch">
+            <rect class="arch-node-box" x="690" y="270" width="270" height="140" rx="8" filter="url(#nodeShadow)"/>
+            <rect class="arch-header-box" x="690" y="270" width="270" height="32" rx="8"/>
+            <text class="node-title" x="706" y="291">DESPACHO LOCAL (EMS / AGC)</text>
+            <text class="node-badge" x="888" y="291">REST API</text>
+            <text class="node-item highlight" x="706" y="324">● Dispatch API (HTTP Bearer)</text>
+            <text class="node-item" x="706" y="346">● Consignas P/Q con TTL Forzado</text>
+            <text class="node-item" x="706" y="368">● Supervisión previa BESS-GUARD</text>
+            <text class="node-foot" x="706" y="396">AUTH: LOCAL TOKEN · NO CLOUD</text>
+          </g>
+
+          <!-- ================= ANIMATED TELEMETRY FLOW PACKETS ================= -->
+          <!-- Packet 1: HW -> Edge Gateway -->
+          <circle class="flow-dot" r="3.2" fill="var(--accent)">
+            <animateMotion dur="2.4s" repeatCount="indefinite">
+              <mpath href="#busH1"/>
             </animateMotion>
           </circle>
-          <circle class="flow-dot" r="2.8">
-            <animateMotion dur="2.6s" begin="2.4s" repeatCount="indefinite">
-              <mpath href="#p2"/>
+          <!-- Packet 2: Edge Gateway -> Safety Envelope -->
+          <circle class="flow-dot" r="3.2" fill="var(--accent)">
+            <animateMotion dur="2.4s" begin="0.8s" repeatCount="indefinite">
+              <mpath href="#busH2"/>
             </animateMotion>
           </circle>
-          <circle class="flow-dot" r="2.8">
-            <animateMotion dur="2.6s" begin="3s" repeatCount="indefinite">
-              <mpath href="#p3"/>
+          <!-- Packet 3: Safety Core -> Observability -->
+          <circle class="flow-dot" r="3.2" fill="var(--accent)">
+            <animateMotion dur="2.4s" begin="1.6s" repeatCount="indefinite">
+              <mpath href="#busH3"/>
             </animateMotion>
           </circle>
-          <circle class="flow-dot red" r="2.8">
-            <animateMotion dur="3.4s" begin="3.2s" repeatCount="indefinite">
-              <mpath href="#p5"/>
+          <!-- Packet 4: PCC Meter -> Edge Gateway (Feedback Loop) -->
+          <circle class="flow-dot" r="3.2" fill="var(--accent)">
+            <animateMotion dur="2.8s" begin="0.5s" repeatCount="indefinite">
+              <mpath href="#busV1"/>
+            </animateMotion>
+          </circle>
+          <!-- Packet 5: Dispatch API -> Safety Core -->
+          <circle class="flow-dot" r="3.2" fill="var(--accent)">
+            <animateMotion dur="3.0s" begin="1.2s" repeatCount="indefinite">
+              <mpath href="#busV2"/>
             </animateMotion>
           </circle>
         </svg>
       </div>
+
+      <!-- Live Node Inspector HUD -->
+      <div class="arch-inspector" id="archInspector">
+        <div class="inspector-title">
+          <span class="live-dot"></span>
+          <span id="inspectNodeName">NODO ACTIVO: BESS-GUARD SAFETY ENVELOPE</span>
+        </div>
+        <div class="inspector-desc" id="inspectNodeDesc">
+          Envolvente física determinista local. Bloquea consignas que violen límites de celda (2.5-3.65V), temperatura (trip 50°C) o rampa (20%/min).
+        </div>
+        <div class="inspector-specs">
+          <span>LATENCIA: <b>&lt; 50 ms</b></span>
+          <span>ESTADO: <b>EN LAZO</b></span>
+          <span>NORMA: <b>NTSyCS / NFPA 855</b></span>
+        </div>
+      </div>
+
       <div class="arch-legend">
-        <span><b>—</b> Flujo de datos y control</span>
-        <span><b style="color:var(--accent)">—</b> Lazo cerrado medidor PCC</span>
-        <span><b>●</b> Paquete de telemetría en tránsito</span>
+        <span><b>—</b> Bus de datos principal (Modbus TCP &amp; Internal)</span>
+        <span><b style="color:var(--accent)">—</b> Lazo cerrado de frontera (PCC &amp; Safety Envelope)</span>
+        <span><b>●</b> Paquete de telemetría y consigna en tránsito</span>
       </div>
     </div>
   </section>
@@ -899,11 +1104,13 @@
     });
   });
 
-  // Restore saved theme or default to blueprint
+  // Restore saved theme or default to obsidian
   try {
     var savedTheme = localStorage.getItem('obe_theme');
-    if(savedTheme && ['blueprint', 'obsidian', 'terminal'].includes(savedTheme)) {
+    if(savedTheme && ['obsidian', 'blueprint', 'terminal'].includes(savedTheme)) {
       setTheme(savedTheme);
+    } else {
+      setTheme('obsidian');
     }
   } catch(e){}
 
@@ -921,16 +1128,6 @@
   } else {
     revealEls.forEach(function(el){ el.classList.add('in'); });
   }
-
-  var archWrap = document.getElementById('archWrap');
-  if('IntersectionObserver' in window && archWrap){
-    var io = new IntersectionObserver(function(entries){
-      entries.forEach(function(e){
-        if(e.isIntersecting){ archWrap.classList.add('in-view'); io.disconnect(); }
-      });
-    },{threshold:.25});
-    io.observe(archWrap);
-  } else if(archWrap){ archWrap.classList.add('in-view'); }
 
   /* ============================================================
      CROSSHAIR READOUT (Pointer Fine Devices)
@@ -971,6 +1168,57 @@
       card.addEventListener('mouseleave', function(){ card.style.transform = ''; });
     });
   }
+
+  /* ============================================================
+     INTERACTIVE ARCHITECTURE INSPECTOR
+     ============================================================ */
+  var nodeInfo = {
+    hw: {
+      title: "01 // HARDWARE BESS (PLANTA FÍSICA)",
+      desc: "Racks de baterías de fosfato de hierro y litio (LFP), BMS de potencia e inversor bidireccional PCS acoplado a transformador de media tensión.",
+      specs: "PROTOCOLO: Modbus RTU/TCP · VELOCIDAD: 100 ms · TOPOLOGÍA: BTM / Utility-Scale"
+    },
+    edge: {
+      title: "02 // OPEN BESS EDGE GATEWAY (v3.1.0)",
+      desc: "Runtime industrial canónico de borde en Python 3.10+. Ejecuta los lazos de control primario, perfiles declarativos JSON sin recompilación y fail-safe de 2.0s.",
+      specs: "CICLO: 100 ms Determinista · TESTS: 278/278 PASS · WATCHDOG: 2.0s Hold"
+    },
+    safety: {
+      title: "03 // CORE & SAFETY (BESS-GUARD ENVELOPE)",
+      desc: "Envolvente física inviolable determinista local. Bloquea de inmediato consignas que violen límites de celda (2.5-3.65V), temperatura (trip 50°C) o rampa (20%/min).",
+      specs: "BANDA: ±30 mHz · ESTATISMO: s=3% · CONTINGENCIA: 300 mHz · HASH: SHA-256"
+    },
+    obs: {
+      title: "04 // OBSERVABILIDAD & TELEMETRÍA OT",
+      desc: "Exportador de métricas Prometheus nativo en /metrics y paneles Grafana industriales. Exposición de estados de salud, alarmas BESS-GUARD y trazabilidad.",
+      specs: "LATENCIA: Scraping 1s · EXPORTER: Nativo v3 · ALERTAS: PromQL / Discord / PagerDuty"
+    },
+    pcc: {
+      title: "PUNTO DE CONEXIÓN A LA RED (PCC) // GRID METER",
+      desc: "Medidor de frontera en el punto de acoplamiento común. Mide potencia activa y reactiva de planta para ejecutar control Behind-the-Meter (BTM) Peak Shaving en tiempo real.",
+      specs: "MUESTREO: &lt; 50 ms · PROTOCOLO: Modbus TCP · MODELOS: Janitza / Schneider / Lovato"
+    },
+    dispatch: {
+      title: "DESPACHO LOCAL & EMS/AGC EXTERNO",
+      desc: "Interfaz HTTP Bearer para inyección de consignas P/Q desde el EMS local o AGC del operador. Toda consigna tiene TTL estricto y pasa por el filtro BESS-GUARD antes de tocar el hardware.",
+      specs: "SEGURIDAD: Bearer Token Local · TIMEOUT: TTL 5s · VALIDACIÓN: BESS-GUARD Obligatorio"
+    }
+  };
+
+  var inspectTitle = document.getElementById('inspectNodeName');
+  var inspectDesc = document.getElementById('inspectNodeDesc');
+
+  document.querySelectorAll('.arch-node-group').forEach(function(group){
+    group.style.cursor = 'pointer';
+    group.addEventListener('mouseenter', function(){
+      var key = group.getAttribute('data-node');
+      var info = nodeInfo[key];
+      if(info && inspectTitle && inspectDesc){
+        inspectTitle.textContent = "NODO SELECCIONADO: " + info.title;
+        inspectDesc.textContent = info.desc;
+      }
+    });
+  });
 
   /* ============================================================
      3D CAD BIM / DIGITAL TWIN STAGE (Three.js)
@@ -1021,7 +1269,7 @@
       inkMat.color.setHex(0x00f2fe);
       faintMat.color.setHex(0x1e3a5f);
       midMat.color.setHex(0x38bdf8);
-      accentMat.color.setHex(0x4facfe);
+      accentMat.color.setHex(0x00f2fe);
       packetMat.color.setHex(0x00f2fe);
       if(gridHelper) { gridHelper.material.color.setHex(0x00f2fe); }
     } else if(theme === 'terminal') {
@@ -1060,13 +1308,13 @@
     group.rotation.x = targetRotX;
     scene.add(group);
 
-    inkMat = new THREE.LineBasicMaterial({color:0x121212, transparent:true, opacity:.85});
-    faintMat = new THREE.LineBasicMaterial({color:0x121212, transparent:true, opacity:.20});
-    midMat = new THREE.LineBasicMaterial({color:0x121212, transparent:true, opacity:.45});
-    accentMat = new THREE.LineBasicMaterial({color:0xc5401f, transparent:true, opacity:.95});
-    packetMat = new THREE.MeshBasicMaterial({color:0xc5401f, transparent:true, opacity:.95});
+    inkMat = new THREE.LineBasicMaterial({color:0x00f2fe, transparent:true, opacity:.85});
+    faintMat = new THREE.LineBasicMaterial({color:0x1e3a5f, transparent:true, opacity:.30});
+    midMat = new THREE.LineBasicMaterial({color:0x38bdf8, transparent:true, opacity:.55});
+    accentMat = new THREE.LineBasicMaterial({color:0x00f2fe, transparent:true, opacity:.95});
+    packetMat = new THREE.MeshBasicMaterial({color:0x00f2fe, transparent:true, opacity:.95});
 
-    gridHelper = new THREE.GridHelper(150, 15, 0x121212, 0x121212);
+    gridHelper = new THREE.GridHelper(150, 15, 0x00f2fe, 0x00f2fe);
     gridHelper.material.transparent = true;
     gridHelper.material.opacity = .14;
     group.add(gridHelper);
@@ -1139,7 +1387,7 @@
     window.addEventListener('resize', onResize);
 
     // Initial theme sync
-    var currentTheme = rootHtml.getAttribute('data-theme') || 'blueprint';
+    var currentTheme = rootHtml.getAttribute('data-theme') || 'obsidian';
     update3DThemeColors(currentTheme);
 
     animate();
