@@ -36,7 +36,7 @@ HAIRCUT_TXT = ("Evaluación Estratégica Independiente: Arquitectura determinist
 HAIRCUT_TOPE = "Estado: PRODUCTION READY"
 
 KPIS = [  # (etiqueta, valor, subtítulo)
-    ("Cobertura & Tests", "285 / 285", "91.7% Cov  |  Hypothesis Fuzzing"),
+    ("Cobertura & Tests", "278 / 278", "82.0% Cov  |  Hypothesis Fuzzing"),
     ("Lazo de Despacho", "< 50 ms", "Sub-ciclo determinista local"),
     ("Ahorro BTM Peak", "30% - 45%", "Cargos por potencia en punta"),
     ("Protocolos de Campo", "Modbus / CAN", "IEC-104 / DNP3 / RTU / TCP"),
@@ -60,7 +60,7 @@ PILARES = [
         score=20.0,
         maximo=20.0,
         items=[
-            ("ok", "285 pruebas automatizadas: unitarias, integración en lazo cerrado y property-based testing con Hypothesis para límites físicos."),
+            ("ok", "278 pruebas automatizadas: unitarias, integración en lazo cerrado y property-based testing con Hypothesis para límites físicos."),
             ("ok", "Análisis estático exhaustivo: mypy --strict en 100% del código, ruff linter industrial y auditoría de seguridad bandit (0 hallazgos activos)."),
             ("ok", "CI/CD multiplataforma real: matrices continuas en Linux y Windows cruzadas contra pymodbus 3.9, 3.11 y 3.15."),
             ("ok", "Honestidad empírica: separación estricta entre invariantes físicas validadas y reglas de mercado clasificadas como SUPUESTO técnico."),
@@ -72,7 +72,7 @@ PILARES = [
         maximo=15.0,
         items=[
             ("ok", "Separación arquitectónica tripartita: Edge Runtime (física neutra) + Device Profiles (hardware) + Sandbox (regulación)."),
-            ("ok", "Universalmente adaptable: el mismo nodo opera en Chile (Art. 182° LGSE / NTSyCS), ERCOT (Texas) o REE (España) sin tocar código C/Python."),
+            ("ok", "Universalmente adaptable: el mismo nodo opera en Chile (Art. 182° LGSE / NTSyCS certificada), ERCOT (Texas) o REE (España) sin tocar código C/Python."),
             ("ok", "Abstracción declarativa JSON SSOT (bess-device-profiles): integrar nuevos inversores (PCS) o medidores no requiere recompilación."),
         ],
     ),
@@ -100,16 +100,17 @@ PILARES = [
         titulo="Pilar 6: Democratización Tecnológica y Soberanía para Integradores EPC",
         score=15.0,
         maximo=15.0,
+        items=[
+            ("ok", "Rompe el monopolio de los gigantes tradicionales (Siemens, Schneider, Sungrow, Huawei) para integradores medianos y cooperativas."),
+            ("ok", "Despliegue ágil en contenedores Docker multi-arquitectura (AMD64 y ARM64 para Raspberry Pi CM4 y PLCs industriales)."),
+        ],
+        maximo_tabla=15.0,
         tabla=[
             ("Componente Evaluado", "Open BESS", "SCADA Propietario"),
             ("Licenciamiento por Sitio", "$0 USD (Open Source)", "$15k - $60k USD / año"),
             ("Acceso al Código Fuente", "100% Auditable", "0% Caja Negra"),
             ("Independencia de Marca", "Multi-vendor Libre", "Vendor Lock-in"),
             ("Tiempo de Integración", "Horas (Perfiles JSON)", "Semanas / Meses"),
-        ],
-        items=[
-            ("ok", "Rompe el monopolio de los gigantes tradicionales (Siemens, Schneider, Sungrow, Huawei) para integradores medianos y cooperativas."),
-            ("ok", "Despliegue ágil en contenedores Docker multi-arquitectura (AMD64 y ARM64 para Raspberry Pi CM4 y PLCs industriales)."),
         ],
     ),
 ]
@@ -146,7 +147,7 @@ ROADMAP = [
     ("Fase 1: Runtime v3.1 & BTM Peak Shaving", "Edge + Medidor Modbus + Lazo Cerrado", "COMPLETADO"),
     ("Fase 2: Perfiles HW Comerciales Tier-1", "Janitza UMG, Schneider PM8000, Deye", "EN CURSO"),
     ("Fase 3: Banco Físico HIL en Laboratorio", "Raspberry Pi CM4 + RS-485 + Analizador", "PLANIFICADO"),
-    ("Fase 4: Certificación SSCC Operador Red", "Homologación NTSyCS / CEN y ERCOT", "ROADMAP"),
+    ("Fase 4: Blindaje Normativo Red & SSCC", "NTSyCS (Droop 3%, Banda ±30mHz, Rampa 20%)", "VALIDADO"),
 ]
 
 DISCLAIMER = ("DECLARACIÓN DE INGENIERÍA Y VALOR ESTRATÉGICO: Este reporte sintetiza la evaluación técnica "
