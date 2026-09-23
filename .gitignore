@@ -82,4 +82,6 @@ dashboard/
 models/
 uv.lock
 CONSOLIDATION.md
+portal_edge/
+
 
