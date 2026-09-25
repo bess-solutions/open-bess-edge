@@ -71,13 +71,13 @@ Each issue has a clear scope, the files involved, acceptance criteria, and estim
 
 ---
 
-### GFI-007 · Add Prometheus metric for `bess_evolve_champion_score`
+### GFI-007 · Add metric for Modbus transaction round-trip latency
 
-**Context:** BESSAIEvolve runs weekly and updates the champion policy, but there is no Prometheus gauge tracking the champion's fitness score over time.  
-**Task:** Add a `bess_evolve_champion_score` gauge to `src/monitoring/metrics.py` and emit it after each evolution run.  
-**Files:** `src/monitoring/metrics.py`, `src/agents/bessai_evolve.py` or equivalent.  
-**Acceptance:** `GET /metrics` returns `bess_evolve_champion_score` after `make evolve` runs. Unit test added.  
-**Labels:** `good first issue`, `observability`, `evolve`
+**Context:** The runtime node tracks cycle latency and loop overrun metrics, but exposing Modbus read/write round-trip latency (`modbus_rtt_ms`) provides granular visibility into physical serial/TCP gateway response times.  
+**Task:** Add a `modbus_rtt_ms` tracking field in runtime metrics and emit it in health status.  
+**Files:** `src/open_bess_edge/runtime/health.py`, `src/open_bess_edge/models.py`.  
+**Acceptance:** Health status includes `modbus_rtt_ms` and tests verify it records non-negative timings under simulator runs.  
+**Labels:** `good first issue`, `observability`, `metrics`
 
 ---
 

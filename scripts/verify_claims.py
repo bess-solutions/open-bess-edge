@@ -5,7 +5,8 @@
 2. Cada guarda BESS-GUARD del README existe en la envolvente.
 3. Cada perfil listado en el README carga y su modo (control/monitor) coincide con el declarado.
 4. La configuración de ejemplo valida (check-config).
-5. Ningún documento afirma latencias/plena potencia/homologación no demostradas.
+5. Auditoría integral de documentación (raíz y docs/ completo): Cero buzzwords, física imposible o afirmaciones no sustentadas.
+6. Gobernanza de autoría: commits de bots ficticios autónomos vetados en HEAD.
 """
 from __future__ import annotations
 
@@ -67,14 +68,70 @@ r = subprocess.run(  # noqa: S603
 )
 check(r.returncode == 0, "config/edge_config.yaml valida")
 
-# 5. Truth-in-Advertising: Cero buzzwords o afirmaciones no sustentadas en la documentación
+# 5. Truth-in-Advertising Integral: Raíz + todos los documentos en docs/
 forbidden_buzzwords = (
-    "sub-0.1ms", "sub-4ms", "homologad", "certificad", "zero mock data", "plena potencia", "hvdc", "500 mw", "bessaievolve"
+    "sub-0.1ms", "sub-4ms", "zero mock data", "plena potencia", "hvdc",
+    "500 mw", "800 mw", "100% listo para producción", "planetary energy os",
 )
-for doc, txt in (("README.md", readme), ("README.en.md", readme_en), ("PROJECT_STATUS.md", status)):
+
+docs_to_scan: list[tuple[str, str]] = [
+    ("README.md", readme),
+    ("README.en.md", readme_en),
+    ("PROJECT_STATUS.md", status),
+]
+
+if (ROOT / "GOVERNANCE.md").exists():
+    docs_to_scan.append(("GOVERNANCE.md", (ROOT / "GOVERNANCE.md").read_text(encoding="utf-8")))
+
+docs_dir = ROOT / "docs"
+if docs_dir.exists():
+    for md_file in sorted(docs_dir.rglob("*.md")):
+        rel = str(md_file.relative_to(ROOT))
+        docs_to_scan.append((rel, md_file.read_text(encoding="utf-8", errors="ignore")))
+
+for doc_path, txt in docs_to_scan:
+    clean_txt = txt.lower()
+    # Permitir homologación solo en contexto explícito de "pendiente de homologación", "no homologado", o reglas en GOVERNANCE
+    clean_homolog = (
+        clean_txt.replace("pendiente de homologación", "")
+        .replace("no homologad", "")
+        .replace('"homologado"', "")
+        .replace("'homologado'", "")
+        .replace("«homologado»", "")
+    )
+    check("homologad" not in clean_homolog, f"{doc_path} sin afirmación no demostrada 'homologad'")
+
+    # Bloquear afirmaciones falsas de certificación de producto/software, permitiendo certificados TLS/mTLS/X.509
+    for bad_cert in ("software certificad", "producto certificad", "algoritmo certificad", "100% certificad", "certificad contra ntsycs", "certificación sec"):
+        check(bad_cert not in clean_txt, f"{doc_path} sin afirmación no demostrada '{bad_cert}'")
+
+    # Bloquear buzzwords no sustentados
     for bad in forbidden_buzzwords:
-        clean_txt = txt.lower().replace("no certificad", "").replace("no homologad", "").replace("pendiente de homologación", "")
-        check(bad not in clean_txt, f"{doc} sin afirmación no demostrada '{bad}'")
+        check(bad not in clean_txt, f"{doc_path} sin afirmación no demostrada '{bad}'")
+
+    # Bloquear BESSAIEvolve salvo si el documento explícitamente lo declara retirado/withdrawn
+    if "bessaievolve" in clean_txt:
+        is_withdrawn = "withdrawn" in clean_txt or "retirad" in clean_txt or "obsolet" in clean_txt
+        check(is_withdrawn, f"{doc_path} menciona BESSAIEvolve solo como propuesta retirada/withdrawn")
+
+# 6. Gobernanza de autoría: Comprobar que HEAD no proviene de bots autónomos ficticios
+FORBIDDEN_AUTHORS = (
+    "docker-agent",
+    "gordon - docker ai assistant",
+    "bessai v bot",
+    "thermal optimization bot",
+    "cen resilience bot",
+    "ingeteam specialist bot",
+)
+try:
+    head_author = subprocess.run(
+        ["git", "log", "-n", "1", "--format=%an <%ae>"],
+        cwd=ROOT, capture_output=True, text=True, check=False
+    ).stdout.lower()
+    for bad_author in FORBIDDEN_AUTHORS:
+        check(bad_author not in head_author, f"HEAD commit no proviene de bot ficticio '{bad_author}'")
+except Exception as e:
+    print(f"WARN No se pudo verificar autoría git: {e}")
 
 print("\nRESULTADO:", "OK" if not FAIL else f"{len(FAIL)} FALLAS")
 sys.exit(1 if FAIL else 0)
