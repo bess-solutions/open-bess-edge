@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
 """
 open-bess-edge/research/bdf_telemetry_streamer.py
 Exportador y Streamer de Telemetría bajo el estándar Battery Data Format (BDF).
 Alineado con el proyecto Battery Data Alliance de Linux Foundation Energy (LF Energy).
 """
 
-import time
 import logging
+import time
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger("OpenBESSEdge.Research.BDF")
 
@@ -39,10 +38,10 @@ class BDFTelemetryStreamer:
     def flush_to_bdf_parquet(self) -> Path:
         if not self.buffer:
             return None
-        
+
         timestamp_str = int(time.time())
         filename = self.output_dir / f"bdf_edge_telemetry_{timestamp_str}.json"
-        
+
         # En producción se exporta a Parquet con batterydf / pyarrow
         import json
         with open(filename, "w", encoding="utf-8") as f:
@@ -52,14 +51,13 @@ class BDFTelemetryStreamer:
                 "records_count": len(self.buffer),
                 "data": self.buffer
             }, f, indent=2)
-            
+
         logger.info(f"[BDF Streamer] Lote de {len(self.buffer)} muestras exportado a: {filename}")
         self.buffer = []
         return filename
 
 if __name__ == "__main__":
-    from typing import Optional
     streamer = BDFTelemetryStreamer(batch_size=5)
-    for i in range(6):
+    for _ in range(6):
         streamer.record_sample(time.time(), 716.8, -150.0, 24.5, 65.0, 99.8)
     print("[OK] BDF Telemetry Streamer verificado.")

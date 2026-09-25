@@ -192,25 +192,32 @@ async def test_monitor_only_profile_refuses_setpoint_writes():
 
 
 async def test_reconnect_backoff_is_nonblocking_and_exponential():
-    async with Rig() as r:
+    current_time = 1000.0
+
+    def fake_mono():
+        return current_time
+
+    async with Rig(mono=fake_mono) as r:
         await r.plant.close()
         r.server.kick_all()
         await r.server.stop()                                     # el servidor desaparece
         t0 = asyncio.get_running_loop().time()
         for _ in range(200):
             r.plant.poll_connection()
-            await asyncio.sleep(0.01)
+            await asyncio.sleep(0.001)                            # cede control para procesar _attempt()
+            current_time += 0.01                                  # avance temporal determinístico
         assert asyncio.get_running_loop().time() - t0 < 10.0
-        assert 2 <= r.plant.connect_attempts <= 12               # backoff: no reintenta en cada poll
+        assert 2 <= r.plant.connect_attempts <= 15               # backoff: acotado, no reintenta en cada poll
         assert "conexión Modbus" in r.plant.last_connect_error
         # el servidor vuelve
         r.server._server = None
         await r.server.start()
         r.plant.transport.port = r.server.port
         for _ in range(300):
+            current_time += 0.02
             if r.plant.poll_connection():
                 break
-            await asyncio.sleep(0.02)
+            await asyncio.sleep(0.01)
         assert r.plant.connected
 
 

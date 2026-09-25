@@ -62,6 +62,10 @@ show_missing = true
 line-length = 135
 target-version = "py310"
 src = ["src", "tests"]
+extend-exclude = [
+    "hardware_simulator", "infrastructure", "arduino_cli_bin", "docs",
+    "bessai-web", "portal_edge", "ai", "mcp_server", "models", "sec-bess-ingestor", "dashboard"
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "S", "ASYNC"]

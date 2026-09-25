@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 open-bess-edge/research/bpx_parameter_store.py
 Módulo de Gestión de Parámetros Electroquímicos BPX v1.1.1 (Battery Parameter eXchange).
@@ -7,9 +6,9 @@ Estándar oficial de The Faraday Institution para celdas LFP/NMC.
 
 import json
 import logging
-from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Dict, Any, Optional
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger("OpenBESSEdge.Research.BPX")
 
@@ -64,12 +63,12 @@ class BPXParameterStore:
         self.cache[lfp_314ah.cell_id] = lfp_314ah
 
     def load_bpx_file(self, file_path: Path) -> CellBPXParameters:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             data = json.load(f)
-        
+
         header = data.get("Header", {})
         cell_id = header.get("Title", file_path.stem)
-        
+
         params = CellBPXParameters(
             cell_id=cell_id,
             chemistry=data.get("Chemistry", "LFP"),
@@ -92,4 +91,5 @@ class BPXParameterStore:
 if __name__ == "__main__":
     store = BPXParameterStore()
     p = store.get_profile("LFP_314Ah_Prismatic_C&I")
-    print(f"[OK] BPX Store inicializado. Perfil por defecto: {p.cell_id}, Química: {p.chemistry}, Capacidad: {p.nominal_capacity_ah} Ah")
+    if p:
+        print(f"[OK] BPX: {p.cell_id}, {p.chemistry}, {p.nominal_capacity_ah} Ah")

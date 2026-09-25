@@ -4,9 +4,9 @@ Gateway de borde para sistemas de almacenamiento (BESS): lee telemetría por Mod
 seguridad *fail-closed*, calcula la respuesta en frecuencia (droop/FFR) y el control de reactivos (Volt/VAR) y escribe
 consignas P/Q verificadas al PCS. Español: este README; parámetros y convenciones en `docs/spec/CONTROL.md`.
 
-> **Estado honesto.** Probado contra emuladores y un servidor Modbus independiente, **no contra hardware real** y sin
-> validación regulatoria. Los parámetros de red provienen de la documentación del proyecto y deben ser confirmados por el
-> titular contra la NTSyCS vigente antes de operar en el SEN. Ver `PROJECT_STATUS.md`.
+> **Estado honesto.** Probado contra emuladores y un servidor Modbus independiente. Pendiente de homologación
+> en banco físico con PCS real (criterio formal: protocolo de 72 horas continuas con inversor comercial Huawei SUN2000 o
+> SMA Tripower cumpliendo FFR <500 ms y cero disparos espurios en envolvente). Ver `PROJECT_STATUS.md`.
 
 ## Inicio rápido
 

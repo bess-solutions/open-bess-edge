@@ -1,20 +1,18 @@
-# -*- coding: utf-8 -*-
 """
 open-bess-edge/research/physics_informed_twin.py
 Gemelo Digital en Tiempo Real para Borde (Edge Physics-Informed Digital Twin).
 Combina el estándar BPX de Faraday con estimación rápida de resistencia interna y salud (SoH).
 """
 
-import time
-import math
 import logging
+import time
 from dataclasses import dataclass
-from typing import Dict, Any, Optional
+from typing import Optional
 
 try:
-    from .bpx_parameter_store import BPXParameterStore, CellBPXParameters
+    from .bpx_parameter_store import BPXParameterStore
 except ImportError:
-    from bpx_parameter_store import BPXParameterStore, CellBPXParameters
+    from bpx_parameter_store import BPXParameterStore
 
 logger = logging.getLogger("OpenBESSEdge.Research.PhysicsTwin")
 
@@ -68,7 +66,7 @@ class PhysicsInformedEdgeTwin:
             di = abs(snapshot.pack_current_a - self.last_snapshot.pack_current_a)
             dv = abs(snapshot.pack_voltage_v - self.last_snapshot.pack_voltage_v)
             dt = now - self.last_snapshot.timestamp_unix
-            
+
             # Si hubo un escalón de corriente significativo en < 2 segundos
             if di > 20.0 and dt < 2.0:
                 # Normalizar a nivel de celda (asumiendo 224 celdas en serie)
@@ -80,7 +78,7 @@ class PhysicsInformedEdgeTwin:
         # Ocurre cuando se carga a altas corrientes con baja temperatura (<10°C) o a alto SoC (>85%)
         is_charging = snapshot.pack_current_a < -10.0
         c_rate = abs(snapshot.pack_current_a) / self.cell_params.nominal_capacity_ah
-        
+
         plating_risk = "NORMAL"
         if is_charging:
             if snapshot.cell_avg_temp_c < 10.0 and c_rate > 0.2:
@@ -125,7 +123,11 @@ if __name__ == "__main__":
         cell_max_voltage_v=3.22,
         cell_avg_temp_c=24.5,
         cell_max_temp_c=25.2,
-        bms_soc_reported=65.0
+        bms_soc_reported=65.0,
     )
     diag = twin.evaluate_step(snap)
-    print(f"[OK] Physics Twin Step: SoH: {diag.estimated_soh_pct}% | R_int: {diag.estimated_internal_resistance_mohm} mOhm | Plating: {diag.lithium_plating_risk_level}")
+    print(
+        f"[OK] Physics Twin Step: SoH: {diag.estimated_soh_pct}% | "
+        f"R_int: {diag.estimated_internal_resistance_mohm} mOhm | "
+        f"Plating: {diag.lithium_plating_risk_level}"
+    )

@@ -77,11 +77,11 @@ launch_api.ps1
 # Local Data Dumps & Untracked Temporary Artifacts
 data/raw/
 data/*.parquet
+CONSOLIDATION.md
 bessai-web/
 dashboard/
 models/
-uv.lock
-CONSOLIDATION.md
 portal_edge/
+uv.lock
 
 

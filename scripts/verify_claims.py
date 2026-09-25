@@ -9,6 +9,8 @@
 """
 from __future__ import annotations
 
+import importlib.util
+import os
 import re
 import subprocess
 import sys
@@ -26,58 +28,53 @@ def check(ok: bool, msg: str) -> None:
 
 
 readme = (ROOT / "README.md").read_text(encoding="utf-8")
+readme_en = (ROOT / "README.en.md").read_text(encoding="utf-8") if (ROOT / "README.en.md").exists() else ""
 status = (ROOT / "PROJECT_STATUS.md").read_text(encoding="utf-8")
 
-# 1
-try:
-    import c104  # type: ignore[import-not-found]
-    has_c104 = True
-except ImportError:
-    has_c104 = False
-
-try:
-    import cantools  # type: ignore[import-not-found]
-    has_cantools = True
-except ImportError:
-    has_cantools = False
+# 1. Verificación de tests canónicos y opcionales
+has_c104 = importlib.util.find_spec("c104") is not None
+has_cantools = importlib.util.find_spec("cantools") is not None
 
 m = re.search(r"<!-- tests:(\d+) -->", status)
 col = subprocess.run([sys.executable, "-m", "pytest", "--collect-only", "-q", "-p", "no:cacheprovider"], cwd=ROOT,
-                     capture_output=True, text=True)
+                     capture_output=True, text=True)  # nosec S603
 n = re.search(r"(\d+) tests? collected", col.stdout) or re.search(r"^(\d+) tests", col.stdout, re.M)
 n_real = int(n.group(1)) if n else -1
 
 if has_c104 and has_cantools:
     check(bool(m) and n_real == int(m.group(1)),
-          f"tests declarados ({m.group(1) if m else '?'}) == recolectados ({n_real})")
+          f"tests declarados ({m.group(1) if m else '?'}) == recolectados ({n_real}) con módulos opcionales")
 else:
-    print(f"OMITIDO tests declarados ({m.group(1) if m else '?'}) vs recolectados ({n_real}): "
-          f"requiere c104 y cantools (c104={has_c104}, cantools={has_cantools})")
+    check(n_real == 278, f"tests recolectados ({n_real}) == 278 canónicos del núcleo (c104={has_c104}, cantools={has_cantools})")
 
-# 2
+# 2. Guardas de seguridad BESS-GUARD declaradas en README existen en el código
 from open_bess_edge.safety import envelope  # noqa: E402
 
 for code in sorted(set(re.findall(r"BESS-GUARD-\d{3}", readme))):
     check(code in Path(envelope.__file__).read_text(encoding="utf-8"), f"guarda {code} implementada")
 
-# 3
+# 3. Perfiles del registry cargan y modo declarado coincide
 from open_bess_edge.modbus.profile import load_profile  # noqa: E402
 
 for name, mode in re.findall(r"\|\s*`([a-z0-9_]+)`\s*\|\s*(control|monitor)\s*\|", readme):
     p = load_profile(name)
     check(("control" if p.can_control_p else "monitor") == mode, f"perfil {name}: modo declarado '{mode}' == real")
 
-# 4
-import os
-
-r = subprocess.run([sys.executable, "-m", "open_bess_edge", "check-config", str(ROOT / "config" / "edge_config.yaml")],
-                   cwd=ROOT, env={**os.environ, "PYTHONPATH": str(ROOT / "src")}, capture_output=True, text=True)
+# 4. Configuración de producción valida
+r = subprocess.run(  # noqa: S603
+    [sys.executable, "-m", "open_bess_edge", "check-config", str(ROOT / "config" / "edge_config.yaml")],
+    cwd=ROOT, env={**os.environ, "PYTHONPATH": str(ROOT / "src")}, capture_output=True, text=True,
+)
 check(r.returncode == 0, "config/edge_config.yaml valida")
 
-# 5
-for doc, txt in (("README.md", readme), ("PROJECT_STATUS.md", status)):
-    for bad in ("sub-0.1ms", "Sub-4ms", "sub-4ms", "Homologad", "certificad", "Zero Mock Data", "plena potencia"):
-        check(bad.lower() not in txt.lower().replace("no certificad", "").replace("no homologad", ""), f"{doc} sin afirmación '{bad}'")
+# 5. Truth-in-Advertising: Cero buzzwords o afirmaciones no sustentadas en la documentación
+forbidden_buzzwords = (
+    "sub-0.1ms", "sub-4ms", "homologad", "certificad", "zero mock data", "plena potencia", "hvdc", "500 mw", "bessaievolve"
+)
+for doc, txt in (("README.md", readme), ("README.en.md", readme_en), ("PROJECT_STATUS.md", status)):
+    for bad in forbidden_buzzwords:
+        clean_txt = txt.lower().replace("no certificad", "").replace("no homologad", "").replace("pendiente de homologación", "")
+        check(bad not in clean_txt, f"{doc} sin afirmación no demostrada '{bad}'")
 
 print("\nRESULTADO:", "OK" if not FAIL else f"{len(FAIL)} FALLAS")
 sys.exit(1 if FAIL else 0)
