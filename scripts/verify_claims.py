@@ -102,7 +102,11 @@ for doc_path, txt in docs_to_scan:
     check("homologad" not in clean_homolog, f"{doc_path} sin afirmación no demostrada 'homologad'")
 
     # Bloquear afirmaciones falsas de certificación de producto/software, permitiendo certificados TLS/mTLS/X.509
-    for bad_cert in ("software certificad", "producto certificad", "algoritmo certificad", "100% certificad", "certificad contra ntsycs", "certificación sec"):
+    bad_certs = (
+        "software certificad", "producto certificad", "algoritmo certificad",
+        "100% certificad", "certificad contra ntsycs", "certificación sec",
+    )
+    for bad_cert in bad_certs:
         check(bad_cert not in clean_txt, f"{doc_path} sin afirmación no demostrada '{bad_cert}'")
 
     # Bloquear buzzwords no sustentados
@@ -123,10 +127,13 @@ FORBIDDEN_AUTHORS = (
     "cen resilience bot",
     "ingeteam specialist bot",
 )
+import shutil  # noqa: E402
+
 try:
-    head_author = subprocess.run(
-        ["git", "log", "-n", "1", "--format=%an <%ae>"],
-        cwd=ROOT, capture_output=True, text=True, check=False
+    git_bin = shutil.which("git") or "git"
+    head_author = subprocess.run(  # noqa: S603
+        [git_bin, "log", "-n", "1", "--format=%an <%ae>"],
+        cwd=ROOT, capture_output=True, text=True, check=False,
     ).stdout.lower()
     for bad_author in FORBIDDEN_AUTHORS:
         check(bad_author not in head_author, f"HEAD commit no proviene de bot ficticio '{bad_author}'")
