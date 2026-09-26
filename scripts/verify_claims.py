@@ -68,11 +68,37 @@ r = subprocess.run(  # noqa: S603
 )
 check(r.returncode == 0, "config/edge_config.yaml valida")
 
+import unicodedata  # noqa: E402
+
+
+def normalize_text(text: str) -> str:
+    """Normaliza texto a minúsculas y elimina diacríticos/tildes para evitar evasiones."""
+    nfkd = unicodedata.normalize("NFKD", text.lower())
+    return "".join(c for c in nfkd if not unicodedata.combining(c))
+
+
 # 5. Truth-in-Advertising Integral: Raíz + todos los documentos en docs/
-forbidden_buzzwords = (
-    "sub-0.1ms", "sub-4ms", "zero mock data", "plena potencia", "hvdc",
-    "500 mw", "800 mw", "100% listo para producción", "planetary energy os",
-)
+forbidden_patterns: list[tuple[str, str]] = [
+    (r"\b800\s*mw\b", "800 MW"),
+    (r"\b500\s*mw\b", "500 MW"),
+    (r"\bhvdc\b", "HVDC"),
+    (r"\bzero\s+mock\s+data\b", "zero mock data"),
+    (r"\bplena\s+potencia\b", "plena potencia"),
+    (r"\b100\s*%\s*listo\s+para\s+produccion\b", "100% listo para produccion"),
+    (r"\blisto\s+para\s+produccion\b", "listo para produccion"),
+    (r"\bplanetary\s+energy\s+os\b", "planetary energy os"),
+    (r"\bsub-0\.1\s*ms\b", "sub-0.1ms"),
+    (r"\bsub-4\s*ms\b", "sub-4ms"),
+]
+
+forbidden_cert_patterns: list[tuple[str, str]] = [
+    (r"\bsoftware\s+certificad", "software certificado"),
+    (r"\bproducto\s+certificad", "producto certificado"),
+    (r"\balgoritmo\s+certificad", "algoritmo certificado"),
+    (r"\b100\s*%\s*certificad", "100% certificado"),
+    (r"\bcertificad[oa]s?\s+contra\s+ntsycs\b", "certificado contra NTSyCS"),
+    (r"\bcertificacion\s+sec\b", "certificación SEC"),
+]
 
 docs_to_scan: list[tuple[str, str]] = [
     ("README.md", readme),
@@ -90,10 +116,11 @@ if docs_dir.exists():
         docs_to_scan.append((rel, md_file.read_text(encoding="utf-8", errors="ignore")))
 
 for doc_path, txt in docs_to_scan:
-    clean_txt = txt.lower()
-    # Permitir homologación solo en contexto explícito de "pendiente de homologación", "no homologado", o reglas en GOVERNANCE
+    norm_txt = normalize_text(txt)
+
+    # Permitir homologación solo en contexto explícito de "pendiente de homologacion", "no homologado", o reglas en GOVERNANCE
     clean_homolog = (
-        clean_txt.replace("pendiente de homologación", "")
+        norm_txt.replace("pendiente de homologacion", "")
         .replace("no homologad", "")
         .replace('"homologado"', "")
         .replace("'homologado'", "")
@@ -102,20 +129,18 @@ for doc_path, txt in docs_to_scan:
     check("homologad" not in clean_homolog, f"{doc_path} sin afirmación no demostrada 'homologad'")
 
     # Bloquear afirmaciones falsas de certificación de producto/software, permitiendo certificados TLS/mTLS/X.509
-    bad_certs = (
-        "software certificad", "producto certificad", "algoritmo certificad",
-        "100% certificad", "certificad contra ntsycs", "certificación sec",
-    )
-    for bad_cert in bad_certs:
-        check(bad_cert not in clean_txt, f"{doc_path} sin afirmación no demostrada '{bad_cert}'")
+    for pattern, label in forbidden_cert_patterns:
+        match = re.search(pattern, norm_txt)
+        check(not match, f"{doc_path} sin afirmación no demostrada '{label}'")
 
     # Bloquear buzzwords no sustentados
-    for bad in forbidden_buzzwords:
-        check(bad not in clean_txt, f"{doc_path} sin afirmación no demostrada '{bad}'")
+    for pattern, label in forbidden_patterns:
+        match = re.search(pattern, norm_txt)
+        check(not match, f"{doc_path} sin afirmación no demostrada '{label}'")
 
     # Bloquear BESSAIEvolve salvo si el documento explícitamente lo declara retirado/withdrawn
-    if "bessaievolve" in clean_txt:
-        is_withdrawn = "withdrawn" in clean_txt or "retirad" in clean_txt or "obsolet" in clean_txt
+    if "bessaievolve" in norm_txt:
+        is_withdrawn = "withdrawn" in norm_txt or "retirad" in norm_txt or "obsolet" in norm_txt
         check(is_withdrawn, f"{doc_path} menciona BESSAIEvolve solo como propuesta retirada/withdrawn")
 
 # 6. Gobernanza de autoría: Comprobar que HEAD no proviene de bots autónomos ficticios
