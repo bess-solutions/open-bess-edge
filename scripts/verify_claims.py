@@ -44,7 +44,11 @@ n_real = int(n.group(1)) if n else -1
 
 if has_c104 and has_cantools:
     check(bool(m) and n_real == int(m.group(1)),
-          f"tests declarados ({m.group(1) if m else '?'}) == recolectados ({n_real}) con módulos opcionales")
+          f"tests declarados ({m.group(1) if m else '?'}) == recolectados ({n_real}) con módulos opcionales (c104 y cantools)")
+elif has_cantools and not has_c104:
+    check(n_real == 282, f"tests recolectados ({n_real}) == 282 con cantools activo (sin c104)")
+elif has_c104 and not has_cantools:
+    check(n_real == 281, f"tests recolectados ({n_real}) == 281 con c104 activo (sin cantools)")
 else:
     check(n_real == 278, f"tests recolectados ({n_real}) == 278 canónicos del núcleo (c104={has_c104}, cantools={has_cantools})")
 
