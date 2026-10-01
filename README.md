@@ -1,83 +1,79 @@
 # Open BESS Edge v3
 
-Gateway de borde para sistemas de almacenamiento (BESS): lee telemetría por Modbus TCP, evalúa una envolvente de
-seguridad *fail-closed*, calcula la respuesta en frecuencia (droop/FFR) y el control de reactivos (Volt/VAR) y escribe
-consignas P/Q verificadas al PCS. Español: este README; parámetros y convenciones en `docs/spec/CONTROL.md`.
+[![English](https://img.shields.io/badge/Language-English-blue)](#) [![Español](https://img.shields.io/badge/Idioma-Español-orange)](README.es.md)
 
-> **Estado honesto.** Probado contra emuladores y un servidor Modbus independiente. Pendiente de homologación
-> en banco físico con PCS real (criterio formal: protocolo de 72 horas continuas con inversor comercial Huawei SUN2000 o
-> SMA Tripower cumpliendo FFR <500 ms y cero disparos espurios en envolvente). Ver `PROJECT_STATUS.md`.
+Substation edge gateway for Battery Energy Storage Systems (BESS): acquires telemetry via Modbus TCP, evaluates a *fail-closed* safety envelope, calculates frequency response (droop/FFR and RoCoF synthetic inertia) and reactive power support (Volt/VAR with dynamic Q-priority during voltage sags), and writes verified P/Q setpoints to the PCS. Spanish version: [README.es.md](README.es.md); technical parameters and conventions: `docs/spec/CONTROL.md`.
 
-## Inicio rápido
+> **Honest Status.** Tested against emulators and an independent Modbus server. Pending physical bench homologation with real PCS hardware (formal criterion: 72-hour continuous test protocol with a commercial inverter such as Huawei SUN2000 or SMA Tripower, satisfying FFR <500 ms and zero spurious safety envelope trips). See `PROJECT_STATUS.md`.
+
+## Quick Start
 
 ```bash
-pip install .                       # o: pip install -e ".[dev]"
-open-bess-edge simulate             # planta simulada + Modbus TCP + nodo (contingencia 49,65 Hz)
+pip install .                       # or: pip install -e ".[dev]"
+open-bess-edge simulate             # simulated plant + Modbus TCP + edge node (49.65 Hz contingency)
 open-bess-edge check-config config/edge_config.yaml
 open-bess-edge run --config config/edge_config.yaml
 open-bess-edge profile-info open_bess_edge_reference
 open-bess-edge verify-audit /var/lib/open-bess-edge/audit.jsonl
 ```
 
-## Convención física (única en todo el código)
-P + = descarga/inyección, − = carga. Q + = capacitivo (sube tensión). La conversión desde la convención de cada
-fabricante se hace sólo en el perfil (`sign`, `factor`).
+## Physical Convention (Universal Across Codebase)
+P + = discharge / grid injection, − = charge. Q + = capacitive (raises voltage). Conversion from each manufacturer's convention occurs exclusively within the profile (`sign`, `factor`).
 
-## Ciclo de control
-`lectura → envolvente de seguridad → FFR/droop → Volt/VAR → limitador → escritura (+verificación) → latido → auditoría`
+## Control Loop
+`read → safety envelope → FFR/droop (+RoCoF) → Volt/VAR → limiter (P/Q priority) → write (+verification) → heartbeat → audit`
 
-Garantías, cada una con test (`tests/test_node.py`, `tests/test_fuzz_invariants.py`):
-- Arranque en 0 kW y validación de `startup_valid_cycles` ciclos antes de operar.
-- Pérdida de telemetría: retiene la consigna `comm_loss_hold_s` (2 s) y luego fuerza 0, reintentando el 0 hasta confirmarlo.
-  Un PCS sin watchdog conserva la última consigna mientras el enlace esté caído: usar el registro de latido.
-- Dato requerido ausente, NaN, infinito o físicamente imposible ⇒ salida 0 (nunca un valor "razonable").
-- Disparos de seguridad enclavados; se liberan sólo con reset explícito y condición despejada con histéresis.
-- Consigna con truncado hacia cero; desborde de registro ⇒ error, nunca *wrap-around*.
-- Errores internos no matan el lazo: estado `SAFE_STATE` y auditoría.
+Guarantees, each verified with automated tests (`tests/test_node.py`, `tests/test_fuzz_invariants.py`):
+- Start at 0 kW and validate `startup_valid_cycles` before operating.
+- Telemetry loss: retains setpoint for `comm_loss_hold_s` (2 s), then forces 0 kW, retrying until confirmed. A PCS lacking a watchdog holds the last setpoint while the link is down: use the heartbeat register.
+- Missing, NaN, infinite, or physically impossible required telemetry ⇒ output 0 (never a "plausible" value).
+- Latched safety trips; cleared only via explicit reset when the fault condition is cleared with hysteresis.
+- Setpoints truncate toward zero; register overflow triggers an error, never wrap-around.
+- Internal errors do not crash the control loop: enters `SAFE_STATE` and logs audit entry.
 
-## Guardas de seguridad
-| Código | Efecto |
+## Safety Guards
+| Code | Effect |
 |---|---|
-| BESS-GUARD-001 / 002 | Sub/sobretensión de celda: disparo enclavado |
-| BESS-GUARD-003 | Sobretemperatura de celda: disparo enclavado |
-| BESS-GUARD-004 | Aislamiento DC: disparo enclavado |
-| BESS-GUARD-005 | Desbalance de celdas: advertencia |
-| BESS-GUARD-006 / 009 | Temperatura de celda / ambiente altas: recorte 50 % |
-| BESS-GUARD-007 | Temperatura baja: inhibe carga |
-| BESS-GUARD-008 | Tensión de string fuera de ventana: disparo enclavado |
-| BESS-GUARD-010 | SOC en límite: inhibe descarga o carga |
-| BESS-GUARD-020 / 021 | Alarma de frecuencia / tensión de red (sólo si se configuran umbrales) |
-| BESS-GUARD-090 | Dato requerido inválido: salida 0, se recupera tras N ciclos válidos |
-| BESS-GUARD-091 | Medidor de red (PCC) sin datos vigentes: salida 0, se recupera tras N ciclos válidos |
+| BESS-GUARD-001 / 002 | Cell under/overvoltage: latched trip |
+| BESS-GUARD-003 | Cell overtemperature: latched trip |
+| BESS-GUARD-004 | DC isolation fault: latched trip |
+| BESS-GUARD-005 | Cell imbalance: warning |
+| BESS-GUARD-006 / 009 | High cell / ambient temperature: 50% derating |
+| BESS-GUARD-007 | Low temperature: inhibit charge |
+| BESS-GUARD-008 | String voltage out of range: latched trip |
+| BESS-GUARD-010 | SOC limit reached: inhibit discharge or charge |
+| BESS-GUARD-020 / 021 | Grid frequency / voltage alarm (only if thresholds configured) |
+| BESS-GUARD-090 | Required telemetry invalid: output 0, recovers after N valid cycles |
+| BESS-GUARD-091 | Grid meter (PCC) data stale/missing: output 0, recovers after N valid cycles |
 
-## Perfiles de dispositivo (`registry/`)
-Un perfil sólo permite **control** si declara consigna de P y las señales de seguridad requeridas. Ningún perfil de
-fabricante lo hace hoy: son de **monitor** y su nivel es `unverified` (bindings derivados de las descripciones del perfil,
-sin prueba contra el equipo real).
+## Device Profiles (`registry/`)
+A device profile permits **control** only if it declares an active power setpoint and required safety signals. Commercial and utility-scale inverter profiles (Power Electronics HEM, Ingeteam Sun B, Huawei, SMA, etc.) operate in **monitor** mode at `unverified` tier (derived from technical register specifications without physical bench testing on real hardware).
 
-| Perfil | Modo | Nivel |
+| Profile | Mode | Tier |
 |---|---|---|
-| `open_bess_edge_reference` | control | reference (mapa definido por el proyecto) |
+| `open_bess_edge_reference` | control | reference (project-defined register map) |
 | `huawei_sun2000` | monitor | unverified |
 | `sma_sunny_tripower` | monitor | unverified |
 | `fronius_gen24_byd` | monitor | unverified |
 | `solaredge_storedge` | monitor | unverified |
 | `victron_multiplus2` | monitor | unverified |
-| `open_bess_edge_meter_reference` | monitor | reference (medidor de red del PCC; mapa del proyecto) |
+| `power_electronics_hem` | monitor | unverified |
+| `ingeteam_ingecon_sun_b` | monitor | unverified |
+| `open_bess_edge_meter_reference` | monitor | reference (PCC grid meter; project map) |
 
-## Contexto de instalación (BTM peak shaving)
-`installation` declara restricciones genéricas (`max_grid_import_kw`, `max_grid_export_kw`, `soc_reserve_pct`) que el edge
-hace cumplir con la medición de un medidor en el PCC (`grid_meter`); si el medidor falla, la salida queda en 0 (BESS-GUARD-091).
-El estado del conjunto de reglas (`VIGENTE`/`EN_EVALUACION`/`SUPUESTO`) se audita y se expone en `/status`; si no es `VIGENTE`
-el nodo exige `accept_unverified_rule_set: true`. Un EMS local envía un programa base con expiración por HTTP autenticado
-(sólo loopback, sin TLS). Ejemplo: `config/installation_btm_peak_shaving.yaml`; decisiones y límites: `docs/spec/INSTALLATION.md`.
+## Installation Context (BTM Peak Shaving)
+`installation` declares generic constraints (`max_grid_import_kw`, `max_grid_export_kw`, `soc_reserve_pct`) enforced by the edge using measurements from a grid meter at the PCC (`grid_meter`). If the meter fails, output falls to 0 (BESS-GUARD-091).
+Rule set validity (`VIGENTE`/`EN_EVALUACION`/`SUPUESTO`) is audited and exposed at `/status`. If not `VIGENTE`, the node requires `accept_unverified_rule_set: true`. A local EMS can supply an expiring base schedule via authenticated HTTP (loopback only, plaintext). Example: `config/installation_btm_peak_shaving.yaml`; architectural decisions: `docs/spec/INSTALLATION.md`.
 
-## Verificación
-`make check` ejecuta lint, mypy estricto, pruebas, verificador de afirmaciones y seguridad. Cubre pruebas unitarias y de
-propiedades, extremo a extremo por TCP real con inyección de fallas, fuzz de invariantes y latencia en tiempo real
-(loopback, sin PCS). Compatible con pymodbus ≥ 3.9.2 (3.9.2 a 3.15.0 probadas; 3.8.x acepta respuestas con transaction
-ID incorrecto y se excluye).
+## Verification
+`make check` runs linting, strict mypy type checking, test suites, claims verifier, and security audit. It covers unit, property-based, end-to-end Modbus TCP with fault injection, fuzzing, and loopback latency tests. Compatible with pymodbus ≥ 3.9.2 (3.9.2 through 3.15.0 validated; 3.8.x is excluded due to acceptance of invalid transaction IDs).
 
-## Módulos experimentales (`open_bess_edge.experimental`, fuera de la ruta de control)
-CAN/DBC (validado contra `cantools`), IEC 60870-5-104 (interopera en STARTDT e interrogación con `c104`; sin
-temporizadores t1/t2/t3) y un códec tipo GOOSE sobre UDP de loopback (no es GOOSE de capa 2). No se afirma latencia.
+## Experimental Modules (`open_bess_edge.experimental`, Outside Control Loop)
+CAN/DBC (validated with `cantools`), IEC 60870-5-104 (interoperates on STARTDT and interrogation with `c104`; without t1/t2/t3 timers), and a GOOSE-like codec over UDP loopback (not Layer 2 GOOSE). No latency guarantees are claimed.
+
+## Contact & Support
+- **General Inquiries & Engineering**: `contacto@bess-solutions.cl` / `bessai@bess-solutions.cl`
+- **Security & PSIRT (Vulnerability Reporting)**: `security@bess-solutions.cl` (see [`SECURITY.md`](SECURITY.md))
+- **Community Discord**: [Discord Server](https://discord.gg/ZqpE8AZs)
+- **Technical Discussions**: [GitHub Discussions](https://github.com/bess-solutions/open-bess-edge/discussions)
+- **Organization & Maintainer**: [BESS Solutions](https://github.com/bess-solutions) — Santiago, Chile

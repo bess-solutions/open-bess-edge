@@ -45,6 +45,8 @@ class FFROutput:
     gain_kw_per_hz: float
     contingency: bool
     load_relief: bool
+    p_inertia_kw: float = 0.0
+    rocof_hz_s: float = 0.0
 
 
 @dataclass
@@ -84,6 +86,8 @@ class FFRDroopController:
         ramp_pct_per_min: float = 20.0,
         freq_invalid_hold_s: float = 1.0,
         enabled: bool = True,
+        k_inertia: float = 0.0,
+        filter_tc_s: float = 0.1,
     ) -> None:
         if not (math.isfinite(p_nominal_kw) and p_nominal_kw > 0):
             raise ValueError("p_nominal_kw debe ser > 0")
@@ -102,10 +106,15 @@ class FFRDroopController:
         self.hold_s = float(freq_invalid_hold_s)
         self.enabled = enabled
         self.gain = self.p_nom / (self.s * self.f0)
+        self.k_inertia = float(k_inertia)
+        self.filter_tc_s = float(filter_tc_s)
 
         self._t_last: Optional[float] = None
         self._base = 0.0
         self._droop = 0.0
+        self._inertia_kw = 0.0
+        self._rocof_filt = 0.0
+        self._last_f_hz: Optional[float] = None
         self._last_valid_f_t: Optional[float] = None
         self._contingency = False
         self._last_out = 0.0
@@ -119,6 +128,9 @@ class FFRDroopController:
         self._t_last = None
         self._base = base_kw
         self._droop = 0.0
+        self._inertia_kw = 0.0
+        self._rocof_filt = 0.0
+        self._last_f_hz = None
         self._last_out = base_kw
         self._applied_last = base_kw
 
@@ -152,12 +164,25 @@ class FFRDroopController:
 
         if not self.enabled:
             self._droop = 0.0
+            self._inertia_kw = 0.0
             status = "DISABLED"
         elif valid:
-            df = float(f_hz) - self.f0  # type: ignore[arg-type]
+            f_val = float(f_hz)  # type: ignore[arg-type]
+            df = f_val - self.f0
             active_df = self._active_df(df)
             self._last_valid_f_t = now
             self._droop = max(-self.p_nom, min(self.p_nom, -self.gain * active_df))
+
+            # Inercia sintética RoCoF (df/dt con filtro pasa-bajos de 1er orden)
+            if self.k_inertia > 0 and self._last_f_hz is not None and dt > 1e-4:
+                raw_rocof = (f_val - self._last_f_hz) / dt
+                alpha = dt / (self.filter_tc_s + dt)
+                self._rocof_filt += alpha * (raw_rocof - self._rocof_filt)
+                self._inertia_kw = max(-self.p_nom, min(self.p_nom, -self.k_inertia * self.p_nom * self._rocof_filt))
+            else:
+                self._inertia_kw = 0.0
+            self._last_f_hz = f_val
+
             # Alivio instantáneo simétrico de la base
             if active_df < 0 and self._base < 0:
                 self._base, load_relief = 0.0, True
@@ -181,15 +206,17 @@ class FFRDroopController:
                 status = "FREQ_INVALID_HOLD"
             else:
                 self._droop = 0.0
+                self._inertia_kw = 0.0
                 status = "FREQ_INVALID"
 
-        p = max(-self.p_nom, min(self.p_nom, self._base + self._droop))
+        p = max(-self.p_nom, min(self.p_nom, self._base + self._droop + self._inertia_kw))
         self._last_out = p
         self._update_aporte(now)
         return FFROutput(
             p_kw=p, p_base_kw=self._base, p_droop_kw=self._droop, status=status, df_hz=df,
             active_df_hz=active_df, gain_kw_per_hz=self.gain,
             contingency=self._contingency, load_relief=load_relief,
+            p_inertia_kw=self._inertia_kw, rocof_hz_s=self._rocof_filt,
         )
 
     # ------------------------------------------------------------------

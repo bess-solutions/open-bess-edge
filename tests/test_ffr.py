@@ -24,6 +24,11 @@ def test_droop_gain_matches_spec():
     assert o.gain_kw_per_hz == pytest.approx(666.6667, abs=1e-3)
     assert o.p_kw == pytest.approx(80.0, abs=1e-6) and o.status == "PRIMARY_DROOP_ACTIVE"
     assert c.update(1.0, 50.15, 0.0).p_kw == pytest.approx(-80.0, abs=1e-6)     # sobrefrecuencia: absorbe
+    # RoCoF inercia sintética ante caída rápida de frecuencia
+    ci = ctrl(k_inertia=2.0, filter_tc_s=0.05)
+    ci.update(0.0, 50.0, 0.0)
+    oi = ci.update(0.1, 49.90, 0.0)
+    assert oi.rocof_hz_s < 0.0 and oi.p_inertia_kw > 0.0 and oi.p_kw > oi.p_droop_kw
 
 
 def test_contingency_threshold_and_status():

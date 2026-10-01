@@ -1,6 +1,8 @@
 # Open BESS Edge v3
 
-Substation edge gateway for Battery Energy Storage Systems (BESS): reads telemetry via Modbus TCP, evaluates a *fail-closed* safety envelope, calculates frequency response (droop/FFR) and reactive power support (Volt/VAR), and writes verified P/Q setpoints to the PCS. Spanish version: `README.md`; parameters and conventions: `docs/spec/CONTROL.md`.
+[![English](https://img.shields.io/badge/Language-English-blue)](#) [![Español](https://img.shields.io/badge/Idioma-Español-orange)](README.es.md)
+
+Substation edge gateway for Battery Energy Storage Systems (BESS): acquires telemetry via Modbus TCP, evaluates a *fail-closed* safety envelope, calculates frequency response (droop/FFR and RoCoF synthetic inertia) and reactive power support (Volt/VAR with dynamic Q-priority during voltage sags), and writes verified P/Q setpoints to the PCS. Spanish version: [README.es.md](README.es.md); technical parameters and conventions: `docs/spec/CONTROL.md`.
 
 > **Honest Status.** Tested against emulators and an independent Modbus server. Pending physical bench homologation with real PCS hardware (formal criterion: 72-hour continuous test protocol with a commercial inverter such as Huawei SUN2000 or SMA Tripower, satisfying FFR <500 ms and zero spurious safety envelope trips). See `PROJECT_STATUS.md`.
 
@@ -19,7 +21,7 @@ open-bess-edge verify-audit /var/lib/open-bess-edge/audit.jsonl
 P + = discharge / grid injection, − = charge. Q + = capacitive (raises voltage). Conversion from each manufacturer's convention occurs exclusively within the profile (`sign`, `factor`).
 
 ## Control Loop
-`read → safety envelope → FFR/droop → Volt/VAR → limiter → write (+verification) → heartbeat → audit`
+`read → safety envelope → FFR/droop (+RoCoF) → Volt/VAR → limiter (P/Q priority) → write (+verification) → heartbeat → audit`
 
 Guarantees, each verified with automated tests (`tests/test_node.py`, `tests/test_fuzz_invariants.py`):
 - Start at 0 kW and validate `startup_valid_cycles` before operating.
@@ -45,7 +47,7 @@ Guarantees, each verified with automated tests (`tests/test_node.py`, `tests/tes
 | BESS-GUARD-091 | Grid meter (PCC) data stale/missing: output 0, recovers after N valid cycles |
 
 ## Device Profiles (`registry/`)
-A device profile permits **control** only if it declares an active power setpoint and required safety signals. Currently, vendor profiles operate in **monitor** mode at `unverified` tier (derived from register specifications without physical device validation).
+A device profile permits **control** only if it declares an active power setpoint and required safety signals. Commercial and utility-scale inverter profiles (Power Electronics HEM, Ingeteam Sun B, Huawei, SMA, etc.) operate in **monitor** mode at `unverified` tier (derived from technical register specifications without physical bench testing on real hardware).
 
 | Profile | Mode | Tier |
 |---|---|---|
@@ -55,6 +57,8 @@ A device profile permits **control** only if it declares an active power setpoin
 | `fronius_gen24_byd` | monitor | unverified |
 | `solaredge_storedge` | monitor | unverified |
 | `victron_multiplus2` | monitor | unverified |
+| `power_electronics_hem` | monitor | unverified |
+| `ingeteam_ingecon_sun_b` | monitor | unverified |
 | `open_bess_edge_meter_reference` | monitor | reference (PCC grid meter; project map) |
 
 ## Installation Context (BTM Peak Shaving)
@@ -66,3 +70,10 @@ Rule set validity (`VIGENTE`/`EN_EVALUACION`/`SUPUESTO`) is audited and exposed 
 
 ## Experimental Modules (`open_bess_edge.experimental`, Outside Control Loop)
 CAN/DBC (validated with `cantools`), IEC 60870-5-104 (interoperates on STARTDT and interrogation with `c104`; without t1/t2/t3 timers), and a GOOSE-like codec over UDP loopback (not Layer 2 GOOSE). No latency guarantees are claimed.
+
+## Contact & Support
+- **General Inquiries & Engineering**: `contacto@bess-solutions.cl` / `bessai@bess-solutions.cl`
+- **Security & PSIRT (Vulnerability Reporting)**: `security@bess-solutions.cl` (see [`SECURITY.md`](SECURITY.md))
+- **Community Discord**: [Discord Server](https://discord.gg/ZqpE8AZs)
+- **Technical Discussions**: [GitHub Discussions](https://github.com/bess-solutions/open-bess-edge/discussions)
+- **Organization & Maintainer**: [BESS Solutions](https://github.com/bess-solutions) — Santiago, Chile

@@ -120,3 +120,9 @@ def test_limiter_q_capability_reduces_with_p():
     assert c.q_kvar == pytest.approx(600.0) and c.q_clipped is False
     c = apply_limits(800.0, 700.0, verdict(p_discharge_max_kw=900), s_max_kva=1000.0, q_max_kvar=800.0)
     assert c.q_kvar == pytest.approx(600.0)
+    # En Q-Priority (LVRT NTSyCS Cap. 3-4 e IEEE 2800), Q se mantiene y P se recorta a sqrt(S^2 - Q^2)
+    cq = apply_limits(1000.0, 600.0, verdict(p_discharge_max_kw=1000.0), s_max_kva=1000.0, q_max_kvar=800.0, priority="Q")
+    assert cq.q_kvar == pytest.approx(600.0)
+    assert cq.p_kw == pytest.approx(800.0)  # sqrt(1000^2 - 600^2) = 800
+    assert cq.p_clipped is True
+    assert cq.reason == "CLIPPED"

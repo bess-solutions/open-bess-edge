@@ -17,16 +17,16 @@ Open BESS Edge is a **deterministic, fail-closed industrial edge gateway** runni
 
 - 🔌 **Acquires Telemetry** via **Modbus TCP** using vendor-agnostic register profiles (`registry/`).
 - 🛡️ **Enforces Fail-Closed Safety** in real-time via `SafetyEnvelope` (`BESS-GUARD-001` through `091`), immediately cutting setpoints to zero on abnormal cell voltages, temperatures, isolation loss, or telemetry staleness.
-- ⚡ **Executes Primary Frequency Response (FFR)** with configurable droop and deadband, designed to fulfill NTSyCS requirements with response budgets under 500 ms.
-- 🔄 **Provides Reactive Power Control Q(V)** with circular P-Q capability curves and voltage ramp limiters.
+- ⚡ **Executes Primary Frequency Response (FFR) & Synthetic Inertia (RoCoF)** with configurable droop and deadband, designed to fulfill NTSyCS / NT SSCC 2026 requirements with response budgets under 500 ms.
+- 🔄 **Provides Reactive Power Control Q(V)** with dynamic Q-Priority during voltage sags/swells (LVRT/FRT) and circular P-Q capability curves.
 - 🧪 **Includes Full In-Tree Physics Simulator** and deterministic harness running over real TCP loopback sockets for automated verification.
 
 ```mermaid
 graph TD
     A[BESS Inverter / PCS / BMS] -->|Modbus TCP| B[Open BESS Edge Gateway]
     B --> C[SafetyEnvelope - BESS-GUARD-001..091]
-    B --> D[FFR Droop Controller - NTSyCS]
-    B --> E[Volt-VAR Q V Limiter]
+    B --> D[FFR Droop + RoCoF Controller - NTSyCS]
+    B --> E[Volt-VAR Q V Limiter - Q-Priority LVRT]
     B --> F[Health & Diagnostic Server]
     C -->|Trip / Inhibit| A
     D -->|Active Power Setpoint| A
@@ -48,7 +48,8 @@ graph TD
     - Absolute separation of critical OT protection from cloud/EMS analytics.
 
 === "Standards-Aligned"
-    - **NTSyCS Cap. 3 & 4 (CEN Chile)**: FFR response within 500 ms, 3.0% droop, ±30 mHz deadband.
+    - **NTSyCS Cap. 3 & 4 (CEN Chile)**: FFR response within 500 ms, 3.0% droop, ±30 mHz deadband, and low-pass filtered RoCoF synthetic inertia.
+    - **Dynamic Grid Support**: Dynamic Q-Priority under LVRT fault conditions ($V < 0.90\text{ pu}$ or $V > 1.10\text{ pu}$).
     - **SEC RIC N°01/02**: Fail-safe hold upon communication loss.
     - **IEC 62443**: Defense-in-depth OT envelope, least privilege runtime, no cloud dependency for safety.
 

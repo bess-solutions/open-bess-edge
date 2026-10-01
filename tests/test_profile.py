@@ -126,7 +126,10 @@ def test_every_shipped_profile_is_either_valid_or_explicitly_not_modbus():
 
 
 def test_vendor_profiles_are_monitor_only_and_honest():
-    for name in ("huawei_sun2000", "sma_sunny_tripower", "fronius_gen24_byd", "solaredge_storedge", "victron_multiplus2"):
+    for name in (
+        "huawei_sun2000", "sma_sunny_tripower", "fronius_gen24_byd", "solaredge_storedge",
+        "victron_multiplus2", "power_electronics_hem", "ingeteam_ingecon_sun_b",
+    ):
         p = load_profile(name)
         assert not p.can_control_p and p.verification_level == "unverified"
         assert p.missing_signals(["cell_v_min_v", "isolation_kohm"])       # sin señales de celda => control prohibido

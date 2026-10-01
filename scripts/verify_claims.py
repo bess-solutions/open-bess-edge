@@ -30,6 +30,7 @@ def check(ok: bool, msg: str) -> None:
 
 readme = (ROOT / "README.md").read_text(encoding="utf-8")
 readme_en = (ROOT / "README.en.md").read_text(encoding="utf-8") if (ROOT / "README.en.md").exists() else ""
+readme_es = (ROOT / "README.es.md").read_text(encoding="utf-8") if (ROOT / "README.es.md").exists() else ""
 status = (ROOT / "PROJECT_STATUS.md").read_text(encoding="utf-8")
 
 # 1. Verificación de tests canónicos y opcionales
@@ -107,6 +108,7 @@ forbidden_cert_patterns: list[tuple[str, str]] = [
 docs_to_scan: list[tuple[str, str]] = [
     ("README.md", readme),
     ("README.en.md", readme_en),
+    ("README.es.md", readme_es),
     ("PROJECT_STATUS.md", status),
 ]
 

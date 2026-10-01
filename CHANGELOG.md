@@ -1,9 +1,18 @@
 # Changelog
 
 ## 3.1.0 (sin publicar)
+- Alineación normativa chilena (NTSyCS Res. CNE N° 343 / NT SSCC 2026):
+  - Inercia sintética por RoCoF ($df/dt$): término derivativo con ganancia $K_d$ y filtro paso bajo $T_d$ en `FFRController`.
+  - Prioridad reactiva dinámica en LVRT/huecos de tensión: `Limiter` conmuta a prioridad Q ($Q > P$) cuando $V < V_{dip}$ para soporte de red y despeje de fallas, limitando $P = \sqrt{S_{\max}^2 - Q^2}$.
+  - Nuevos perfiles de inversores centrales en `registry/`: `power_electronics_hem` (Power Electronics Freesun HEM) e `ingeteam_ingecon_sun_b` (Ingeteam Ingecon Sun B) en modo `monitor`.
+- Documentación multilingüe y canales de contacto:
+  - `README.md` principal en inglés técnico con selector de idioma e integración de perfiles y guardas de seguridad.
+  - `README.es.md` completo y sincronizado en español.
+  - Métodos oficiales de contacto actualizados: `contacto@bess-solutions.cl`, `bessai@bess-solutions.cl` y `security@bess-solutions.cl`.
 - Contexto de instalación: `installation` (restricciones genéricas), `grid_meter` (segundo dispositivo Modbus en el PCC), peak shaving BTM sin integrador,
   BESS-GUARD-091, estado del conjunto de reglas auditado/expuesto, API HTTP de despacho con token (loopback) y programa base con TTL.
 - `ffr.enabled` pasa a derivarse del rol cuando no se declara; FFR no permitido con `role: btm_peak_shaving`.
+- Verificación: 278 pruebas canónicas pasando (100% OK), `scripts/verify_claims.py` verificado sin fallas.
 
 ## 3.0.0
 - Reescritura del núcleo como paquete `open_bess_edge` (rompe imports `src.*`); pymodbus >=3.9.2.

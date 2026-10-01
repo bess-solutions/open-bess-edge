@@ -1,0 +1,116 @@
+{
+  "$schema": "https://bessai.io/schemas/device-profile/v2.json",
+  "profile_version": "2.0.0",
+  "device": {
+    "manufacturer": "Ingeteam",
+    "model": "Ingecon Sun B / STORAGE Power",
+    "description": "Inversor central utility-scale para plantas BESS (1.6 MW a 3.8 MW). Interfaz Modbus TCP para telemetría de planta.",
+    "firmware_reference": "Ingeteam Ingecon Sun B Series Modbus Register Map Rev 2.1 (2024)",
+    "protocol": "ModbusTCP",
+    "slave_id_default": 1
+  },
+  "connection": {
+    "byte_order": "BIG",
+    "word_order": "BIG",
+    "timeout_seconds": 3,
+    "retries": 3
+  },
+  "registers": {
+    "state": {
+      "address": 1,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 1.0,
+      "unit": "enum",
+      "description": "Estado del inversor: 0=Stop, 1=Ready, 2=Running, 3=Alarm, 4=Fault"
+    },
+    "grid_freq": {
+      "address": 10,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "Hz",
+      "description": "Frecuencia de red"
+    },
+    "grid_voltage": {
+      "address": 12,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 1.0,
+      "unit": "V",
+      "description": "Tensión de red RMS fase-fase"
+    },
+    "active_power": {
+      "address": 14,
+      "count": 2,
+      "type": "INT32",
+      "access": "RO",
+      "scale": 1.0,
+      "unit": "kW",
+      "description": "Potencia activa neta (+ inyección / - carga)"
+    },
+    "reactive_power": {
+      "address": 16,
+      "count": 2,
+      "type": "INT32",
+      "access": "RO",
+      "scale": 1.0,
+      "unit": "kvar",
+      "description": "Potencia reactiva neta (+ capacitivo / - inductivo)"
+    },
+    "dc_bus_v": {
+      "address": 20,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 1.0,
+      "unit": "V",
+      "description": "Tensión del bus DC"
+    },
+    "battery_soc": {
+      "address": 25,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 0.1,
+      "unit": "%",
+      "description": "Estado de carga agregado BESS"
+    },
+    "battery_soh": {
+      "address": 26,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 0.1,
+      "unit": "%",
+      "description": "Estado de salud agregado"
+    }
+  },
+  "canonical": {
+    "frequency_hz": {
+      "register": "grid_freq"
+    },
+    "v_grid_v": {
+      "register": "grid_voltage"
+    },
+    "p_kw": {
+      "register": "active_power"
+    },
+    "q_kvar": {
+      "register": "reactive_power"
+    },
+    "soc_pct": {
+      "register": "battery_soc"
+    },
+    "soh_pct": {
+      "register": "battery_soh"
+    }
+  },
+  "verification": {
+    "level": "unverified",
+    "notes": "Bindings de telemetría para PCS utility-scale Ingeteam Ingecon Sun B. Sin bindings de control ni señales de celda/aislamiento: modo monitor unverified."
+  }
+}

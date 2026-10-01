@@ -1,0 +1,125 @@
+{
+  "$schema": "https://bessai.io/schemas/device-profile/v2.json",
+  "profile_version": "2.0.0",
+  "device": {
+    "manufacturer": "Power Electronics",
+    "model": "Freemaq HEM / HEMK",
+    "description": "Inversor central utility-scale para almacenamiento en baterías (BESS), 3.5 MW / 4.2 MVA clase 1500V. Interfaz Modbus TCP para telemetría de planta.",
+    "firmware_reference": "Power Electronics Freemaq Modbus Protocol Guide v4.2 (2024)",
+    "protocol": "ModbusTCP",
+    "slave_id_default": 1
+  },
+  "connection": {
+    "byte_order": "BIG",
+    "word_order": "BIG",
+    "timeout_seconds": 3,
+    "retries": 3
+  },
+  "registers": {
+    "status": {
+      "address": 100,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 1.0,
+      "unit": "enum",
+      "description": "Estado operativo del inversor: 0=Stop, 1=Ready, 2=Running, 3=Fault"
+    },
+    "grid_freq": {
+      "address": 101,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 0.01,
+      "unit": "Hz",
+      "description": "Frecuencia de red en bornes de MT"
+    },
+    "grid_voltage": {
+      "address": 102,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 1.0,
+      "unit": "V",
+      "description": "Tensión de red RMS fase-fase"
+    },
+    "active_power": {
+      "address": 104,
+      "count": 2,
+      "type": "INT32",
+      "access": "RO",
+      "scale": 1.0,
+      "unit": "kW",
+      "description": "Potencia activa neta (+ inyección / - carga)"
+    },
+    "reactive_power": {
+      "address": 106,
+      "count": 2,
+      "type": "INT32",
+      "access": "RO",
+      "scale": 1.0,
+      "unit": "kvar",
+      "description": "Potencia reactiva neta (+ capacitivo / - inductivo)"
+    },
+    "dc_voltage": {
+      "address": 108,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 1.0,
+      "unit": "V",
+      "description": "Tensión del bus DC"
+    },
+    "dc_current": {
+      "address": 109,
+      "count": 1,
+      "type": "INT16",
+      "access": "RO",
+      "scale": 1.0,
+      "unit": "A",
+      "description": "Corriente de entrada/salida DC"
+    },
+    "soc": {
+      "address": 110,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 0.1,
+      "unit": "%",
+      "description": "Estado de carga agregado de baterías"
+    },
+    "soh": {
+      "address": 111,
+      "count": 1,
+      "type": "UINT16",
+      "access": "RO",
+      "scale": 0.1,
+      "unit": "%",
+      "description": "Estado de salud agregado"
+    }
+  },
+  "canonical": {
+    "frequency_hz": {
+      "register": "grid_freq"
+    },
+    "v_grid_v": {
+      "register": "grid_voltage"
+    },
+    "p_kw": {
+      "register": "active_power"
+    },
+    "q_kvar": {
+      "register": "reactive_power"
+    },
+    "soc_pct": {
+      "register": "soc"
+    },
+    "soh_pct": {
+      "register": "soh"
+    }
+  },
+  "verification": {
+    "level": "unverified",
+    "notes": "Bindings de telemetría para PCS utility-scale Power Electronics Freemaq HEM. Sin bindings de control ni señales de celda/aislamiento: modo monitor unverified."
+  }
+}

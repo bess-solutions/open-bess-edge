@@ -60,6 +60,8 @@ class FFRConfig(_Strict):
     contingency_threshold_hz: float = Field(0.30, gt=0, le=3.0)
     ramp_pct_per_min: float = Field(20.0, gt=0, le=10_000)
     freq_invalid_hold_s: float = Field(1.0, ge=0, le=60)
+    k_inertia: float = Field(0.0, ge=0.0, le=100.0)
+    filter_tc_s: float = Field(0.1, gt=0.0, le=10.0)
 
     @model_validator(mode="after")
     def _ordered(self) -> FFRConfig:

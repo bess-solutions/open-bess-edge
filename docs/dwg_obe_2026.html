@@ -618,9 +618,12 @@
       <span>● SEN FREQ: <b>50.000 Hz</b></span>
       <span>● FFR DEAD-BAND: <b>±0.030 Hz</b></span>
       <span>● DROOP SLOPE: <b>s = 3.0%</b></span>
+      <span>● ROCOF INERTIA: <b>df/dt FILTRADO</b></span>
+      <span>● LVRT FRT: <b>Q-PRIORITY AUTO</b></span>
+      <span>● UTILITY PCS: <b>POWER ELECTRONICS / INGETEAM</b></span>
       <span>● CONTINGENCIA: <b>Δf ≥ 300 mHz</b></span>
       <span>● RAMP LIMIT: <b>20% Pn/min</b></span>
-      <span>● BESS-GUARD: <b>ARMED &amp; INVIOLABLE</b></span>
+      <span>● BESS-GUARD: <b>ARMED &amp; INVIOLABLE (001-091)</b></span>
       <span>● FAIL-SAFE HOLD: <b>2.0s SAFE_STATE</b></span>
       <span>● TESTS: <b>278 / 278 PASS (100%)</b></span>
       <span>● COVERAGE: <b>82.0% FUZZING</b></span>
@@ -629,9 +632,12 @@
       <span>● SEN FREQ: <b>50.000 Hz</b></span>
       <span>● FFR DEAD-BAND: <b>±0.030 Hz</b></span>
       <span>● DROOP SLOPE: <b>s = 3.0%</b></span>
+      <span>● ROCOF INERTIA: <b>df/dt FILTRADO</b></span>
+      <span>● LVRT FRT: <b>Q-PRIORITY AUTO</b></span>
+      <span>● UTILITY PCS: <b>POWER ELECTRONICS / INGETEAM</b></span>
       <span>● CONTINGENCIA: <b>Δf ≥ 300 mHz</b></span>
       <span>● RAMP LIMIT: <b>20% Pn/min</b></span>
-      <span>● BESS-GUARD: <b>ARMED &amp; INVIOLABLE</b></span>
+      <span>● BESS-GUARD: <b>ARMED &amp; INVIOLABLE (001-091)</b></span>
       <span>● FAIL-SAFE HOLD: <b>2.0s SAFE_STATE</b></span>
       <span>● TESTS: <b>278 / 278 PASS (100%)</b></span>
       <span>● COVERAGE: <b>82.0% FUZZING</b></span>
@@ -731,7 +737,7 @@
       <div class="obj" data-reveal style="--d:.02s">
         <div class="num">OBJ.01</div>
         <h4>Interoperabilidad Zero-Lock-in</h4>
-        <p>Motor Modbus TCP con perfiles declarativos JSON (Huawei SUN2000, Deye, SMA, medidores Janitza/Schneider). Agregar hardware no requiere recompilar código.</p>
+        <p>Motor Modbus TCP con perfiles declarativos JSON (Power Electronics HEM, Ingeteam Sun B, Huawei SUN2000, SMA, medidores Janitza/Schneider). Agregar hardware no requiere recompilar código.</p>
       </div>
       <div class="obj" data-reveal style="--d:.08s">
         <div class="num">OBJ.02</div>
@@ -740,8 +746,8 @@
       </div>
       <div class="obj" data-reveal style="--d:.14s">
         <div class="num">OBJ.03</div>
-        <h4>Respuesta en Frecuencia NTSyCS (Chile)</h4>
-        <p>Controlador FFR/Droop primario con estatismo s=3%, banda muerta ±30 mHz, umbral de contingencia 300 mHz y alivio instantáneo simétrico de carga.</p>
+        <h4>Respuesta en Frecuencia NTSyCS &amp; Inercia Sintética</h4>
+        <p>Controlador FFR/Droop primario con estatismo s=3%, banda muerta ±30 mHz, contingencia 300 mHz, inercia sintética RoCoF (df/dt) y soporte dinámico con Q-Priority en LVRT conforme a NTSyCS / NT SSCC 2026.</p>
       </div>
       <div class="obj" data-reveal style="--d:.2s">
         <div class="num">OBJ.04</div>
@@ -853,9 +859,9 @@
             <rect class="arch-header-box" x="690" y="30" width="270" height="34" rx="8"/>
             <text class="node-title" x="706" y="52">03 // CORE &amp; SAFETY</text>
             <text class="node-badge" x="876" y="52">INVIOLABLE</text>
-            <text class="node-item highlight" x="706" y="86">● BESS-GUARD (Reglas 001-005)</text>
-            <text class="node-item" x="706" y="108">● FFR Droop s=3% (±30 mHz)</text>
-            <text class="node-item" x="706" y="130">● Rampa 20%/min &amp; Derating</text>
+            <text class="node-item highlight" x="706" y="86">● BESS-GUARD (Reglas 001-091)</text>
+            <text class="node-item" x="706" y="108">● FFR Droop s=3% + RoCoF</text>
+            <text class="node-item" x="706" y="130">● Volt/VAR Q-Priority en LVRT</text>
             <text class="node-item" x="706" y="152">● Ledger Criptográfico SHA-256</text>
             <text class="node-foot" x="706" y="190">ENVELOPE: HARD SAFETY LIMITS</text>
           </g>
@@ -1019,11 +1025,12 @@
         <div class="spec-card">
           <div class="eyebrow" style="margin-bottom:14px;">Cumplimiento y Estándares</div>
           <ul class="compliance-list">
-            <li><span>NTSyCS Cap. 3 (Chile)</span><span>Validado — Droop 3%, ±30 mHz</span></li>
-            <li><span>NTSyCS Cap. 4.2 (Rampas)</span><span>Validado — 20% Pn/min cuasiestac.</span></li>
+            <li><span>NTSyCS Cap. 3 &amp; 4 (Chile)</span><span>Validado — Droop 3%, ±30 mHz, RoCoF</span></li>
+            <li><span>Soporte Dinámico LVRT</span><span>Q-Priority en depresión de tensión</span></li>
+            <li><span>Perfiles Utility-Scale</span><span>Power Electronics HEM &amp; Ingeteam</span></li>
             <li><span>SEC RIC N° 01/02</span><span>Compliant — Fail-safe 2.0s hold</span></li>
             <li><span>NFPA 855 (Térmico)</span><span>Compliant — Trip 50°C / Derating 45°C</span></li>
-            <li><span>BESS-GUARD (001-005)</span><span>Inviolable — Límites de celda LFP</span></li>
+            <li><span>BESS-GUARD (001-091)</span><span>Inviolable — Límites de celda LFP</span></li>
             <li><span>Auditoría Criptográfica</span><span>SHA-256 Hash-chain inmutable</span></li>
           </ul>
         </div>

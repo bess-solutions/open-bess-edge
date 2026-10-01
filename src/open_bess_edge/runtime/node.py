@@ -119,6 +119,7 @@ class EdgeNode:
             p_nominal_kw=cfg.plant.p_nominal_kw, f_nominal_hz=cfg.grid.f_nominal_hz, droop_r=f.droop_r,
             deadband_hz=f.deadband_hz, contingency_threshold_hz=f.contingency_threshold_hz,
             ramp_pct_per_min=f.ramp_pct_per_min, freq_invalid_hold_s=f.freq_invalid_hold_s, enabled=cfg.ffr_enabled,
+            k_inertia=f.k_inertia, filter_tc_s=f.filter_tc_s,
         )
         v = cfg.volt_var
         self.vv = VoltVarController(
@@ -400,8 +401,15 @@ class EdgeNode:
             verdict_eff = dataclasses.replace(verdict, p_discharge_max_kw=min(verdict.p_discharge_max_kw, win.dis_max_kw),
                                               p_charge_max_kw=min(verdict.p_charge_max_kw, win.chg_max_kw))
         vv = self.vv.update(now, tel.v_grid_v, p_pre)
+        v_nom = self.cfg.plant.v_nominal_v
+        v_fault = (
+            tel.v_grid_v is not None and v_nom > 0 and
+            (tel.v_grid_v < 0.90 * v_nom or tel.v_grid_v > 1.10 * v_nom)
+        )
+        priority = "Q" if (v_fault and self.plant.profile.can_control_q) else "P"
         cmd = apply_limits(p_pre, vv.q_kvar, verdict_eff, s_max_kva=self.cfg.s_max_kva,
-                           q_max_kvar=self.cfg.volt_var.q_max_kvar if self.plant.profile.can_control_q else 0.0)
+                           q_max_kvar=self.cfg.volt_var.q_max_kvar if self.plant.profile.can_control_q else 0.0,
+                           priority=priority)
         if not self.plant.profile.can_control_q and abs(cmd.q_kvar) > 0:
             cmd = Command(cmd.p_kw, 0.0, cmd.p_clipped, True, cmd.reason)
         self.ffr.observe_applied(cmd.p_kw)
