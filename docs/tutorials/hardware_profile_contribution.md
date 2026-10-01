@@ -1,191 +1,129 @@
-# Guía para Contribuir Perfiles de Hardware al BESSAI Registry
+# Contributing Hardware Device Profiles to Open BESS Edge
 
-> **Audiencia**: Integradores, fabricantes de hardware, y la comunidad BESSAI  
-> **Nivel**: Intermedio  
-> **Tiempo estimado**: 1–3 horas por perfil
-
----
-
-## ¿Por qué contribuir un perfil?
-
-El **BESSAI Hardware Registry** (`registry/`) es la biblioteca de dispositivos compatibles con el gateway. Cada perfil JSON define:
-- La interfaz de comunicación del dispositivo (Modbus, CAN, REST, SunSpec)
-- Los registros/endpoints necesarios para leer estado y enviar comandos
-- El mapeo al modelo interno de BESSAI (`soc_pct`, `active_power_kw`, `temp_c`, etc.)
-- Los límites de seguridad del hardware
-
-Más perfiles = mayor ecosistema + mayor adopción del proyecto.
+> **Audience**: Systems integrators, inverter/BMS manufacturers, and open-source contributors  
+> **Skill Level**: Intermediate  
+> **Estimated Effort**: 1–2 hours per profile  
 
 ---
 
-## Paso 1: Revisar si ya existe el perfil
+## Why Contribute a Device Profile?
+
+The **Open BESS Edge Device Registry** ([`registry/`](../../registry/)) maintains vendor register definitions used by the gateway. Each JSON profile specifies:
+- The industrial protocol configuration (Modbus TCP, SunSpec, CAN)
+- Register maps and data types required for telemetry acquisition and setpoint dispatch
+- Signal bindings to the normalized internal model (`soc_pct`, `active_power_kw`, `temp_c`, etc.)
+- Physical safety envelope and capability constraints
+
+Expanding profile coverage directly increases out-of-the-box hardware interoperability.
+
+---
+
+## Step 1: Check Existing Registry Profiles
 
 ```bash
-# Buscar por fabricante o modelo
-ls registry/ | grep -i <fabricante>
+# Check existing profiles in registry
+ls registry/
 ```
 
-Si ya existe, considera mejorarlo abriendo una issue con la etiqueta `registry-improvement`.
+Verify whether your hardware model or family is already covered.
 
 ---
 
-## Paso 2: Reunir la documentación del fabricante
+## Step 2: Gather Manufacturer Technical Documentation
 
-Necesitas al menos uno de los siguientes:
+Obtain the official protocol specification from the manufacturer:
 
-| Protocolo | Documentación necesaria |
+| Protocol | Required Documentation |
 |---|---|
-| **Modbus RTU/TCP** | Mapa de registros completo con tipo, escala y descripción |
-| **SunSpec** | Model ID(s) implementados (ej. Model 103, Model 124) |
-| **CAN bus** | DBC file o tabla de frames/signals con CAN IDs |
-| **REST API** | Documentación de endpoints, autenticación, y esquema de respuesta |
-| **MQTT** | Tópicos, payload schema (JSON), y QoS |
+| **Modbus TCP / RTU** | Complete register address table with data types, scaling factors, endianness, and unit identifiers. |
+| **SunSpec** | Implemented SunSpec Model IDs (e.g., Model 701 DER Measurement, Model 702 DER Storage). |
+| **CAN Bus** | DBC file or frame/signal matrix defining arbitration IDs and scaling. |
 
 ---
 
-## Paso 3: Copiar la plantilla
+## Step 3: Profile Structure & Conventions
 
-```bash
-cp registry/TEMPLATE_interop_certification.json registry/<fabricante>_<modelo>.json
-```
-
-### Estructura mínima requerida
+Create `registry/<manufacturer>_<model>.json` using standard JSON syntax:
 
 ```json
 {
-  "$schema": "https://bessai.io/schemas/device-profile/v2.json",
-  "profile_version": "2.0.0",
-  "device": {
-    "manufacturer": "NombreFabricante",
-    "model": "ModeloExacto",
-    "description": "Descripción breve del dispositivo y su caso de uso",
-    "firmware_reference": "Nombre y versión del manual técnico",
-    "protocol": "ModbusTCP | CAN | HTTP_REST | SunSpec | MQTT"
-  },
-  "connection": { },
-  "registers": { },
-  "bessai_mapping": {
-    "soc_pct": "<registro_soc>",
-    "active_power_kw": {"register": "<registro_potencia>", "transform": "..."},
-    "temp_c": "<registro_temperatura>"
-  },
-  "safety_limits": {
-    "soc_min_pct": 10.0,
-    "soc_max_pct": 95.0,
-    "temp_min_c": -10.0,
-    "temp_max_c": 55.0
-  },
-  "interop_certification": {
-    "status": "community_validated | experimental_community | manufacturer_certified",
-    "tested_firmware": ["v1.0.0"],
-    "test_date": "YYYY-MM",
-    "contributor": "Tu nombre / organización"
+  "name": "vendor_model",
+  "manufacturer": "VendorName",
+  "model": "ModelIdentifier",
+  "version": "1.0.0",
+  "protocol": "modbus_tcp",
+  "endianness": "big",
+  "registers": {
+    "telemetry": [
+      {
+        "name": "battery_soc",
+        "address": 30001,
+        "type": "uint16",
+        "scale": 0.1,
+        "unit": "%",
+        "binding": "soc_pct"
+      },
+      {
+        "name": "active_power",
+        "address": 30002,
+        "type": "int16",
+        "scale": 1.0,
+        "unit": "kW",
+        "sign": 1.0,
+        "binding": "active_power_kw"
+      }
+    ],
+    "controls": [
+      {
+        "name": "active_power_setpoint",
+        "address": 40001,
+        "type": "int16",
+        "scale": 1.0,
+        "unit": "kW",
+        "sign": 1.0,
+        "binding": "active_power_setpoint_kw"
+      }
+    ]
   }
 }
 ```
 
-### Campos de `bessai_mapping` (obligatorios)
+### Universal Physical Convention
 
-| Campo | Tipo | Descripción |
-|---|---|---|
-| `soc_pct` | `string` o `object` | Estado de carga (0–100%) |
-| `active_power_kw` | `object` | Potencia activa en kW. Positivo = descarga. |
-| `temp_c` | `string` o `object` | Temperatura de batería en °C |
-| `dispatch_register` | `string` (opcional) | Registro para enviar setpoint de despacho |
+Strictly adhere to the global sign convention:
+* **Active Power (P):** `+` = discharge / injection; `−` = charge / import.
+* **Reactive Power (Q):** `+` = capacitive (boosts voltage); `−` = inductive (lowers voltage).
 
-### Transforms disponibles
-
-| Transform | Descripción |
-|---|---|
-| `divide_by_1000` | Convertir W → kW |
-| `negate_divide_by_1000` | Invertir signo + W → kW |
-| `multiply_by_10` | Aplicar escala ×10 |
-| `voltage_x_current_div_1000` | Calcular kW desde tensión × corriente |
+If the manufacturer uses inverted signs (e.g., positive for charging), set `"sign": -1.0` in the register mapping.
 
 ---
 
-## Paso 4: Validar el perfil
+## Step 4: Validate Profile Locally
+
+Verify profile loading and schema compliance using the CLI:
 
 ```bash
-# Instalar herramienta de validación (incluida en dev dependencies)
-pip install -e ".[dev]"
+# Inspect profile via CLI
+open-bess-edge profile-info <your_profile_name>
 
-# Validar esquema JSON
-python scripts/validate_registry_profile.py registry/<tu_perfil>.json
-
-# Si tienes el hardware disponible: test de conectividad en vivo
-python scripts/test_hardware_connect.py --profile registry/<tu_perfil>.json --host 192.168.x.x
-```
-
-### Pruebas de interoperabilidad (suite `tests/interop/`)
-
-```bash
-# Correr pruebas de validación estructural para todos los perfiles
-python -m pytest tests/interop/ -v
-
-# Tu nuevo perfil debe pasar todas las pruebas de schema validation
+# Execute tests to verify registry integrity
+pytest tests/test_profile.py -q
 ```
 
 ---
 
-## Paso 5: Abrir un Pull Request
+## Step 5: Submit a Pull Request
 
-1. **Fork** del repositorio en GitHub
-2. Crear rama: `git checkout -b registry/fabricante-modelo`
-3. Añadir el archivo JSON a `registry/`
-4. Correr las pruebas: `pytest tests/interop/ -v`
-5. Abrir PR con la plantilla de registro de hardware:
+1. Fork the repository on GitHub.
+2. Create a feature branch: `git checkout -b registry/add-<vendor-model>`
+3. Add your JSON profile to `registry/`.
+4. Ensure all tests pass: `make check`.
+5. Open a Pull Request referencing the manufacturer manual and test observations.
 
-```markdown
-## Nuevo perfil: <Fabricante> <Modelo>
+### Profile Validation Tiers
 
-**Fabricante**: ...
-**Modelo**: ...
-**Protocolo**: ModbusTCP | CAN | REST | SunSpec
-**Capacidad probada**: X kWh
-**Firmware probado**: vX.X.X
-**Hardware disponible para reproducir**: Sí / No (simulado)
-
-### Checklist
-- [ ] JSON válido contra `$schema`
-- [ ] `bessai_mapping` completo (soc_pct, active_power_kw, temp_c)
-- [ ] `safety_limits` definidos
-- [ ] `interop_certification.status` correcto
-- [ ] Pruebas interop pasan (`pytest tests/interop/ -v`)
-```
-
----
-
-## Niveles de certificación
-
-| Estado | Descripción | Requisito |
+| Tier | Criteria | Operational State |
 |---|---|---|
-| `experimental_community` | Funcionamiento parcial verificado | JSON válido + prueba básica de conectividad |
-| `community_validated` | Probado en hardware real, control bidireccional | Lectura SOC + despacho verificado + PR aprobado |
-| `manufacturer_certified` | Validado por el fabricante | Colaboración oficial con BESSAI Engineering Team |
-
----
-
-## Ejemplos de referencia
-
-Consulta estos perfiles existentes para inspirarte:
-
-| Perfil | Protocolo | Complejidad |
-|---|---|---|
-| [`victron_multiplus2.json`](../../registry/victron_multiplus2.json) | Modbus RTU | Media |
-| [`huawei_sun2000.json`](../../registry/huawei_sun2000.json) | Modbus TCP | Alta |
-| [`solaredge_storedge.json`](../../registry/solaredge_storedge.json) | SunSpec Model 124 | Alta |
-| [`byd_battery_box.json`](../../registry/byd_battery_box.json) | CAN bus | Avanzada |
-| [`tesla_powerwall3.json`](../../registry/tesla_powerwall3.json) | REST API | Avanzada |
-
----
-
-## ¿Necesitas ayuda?
-
-- Abre una [GitHub Discussion](https://github.com/bess-solutions/open-bess-edge/discussions) con la etiqueta `hardware-registry`
-- Incluye el manual del fabricante o la documentación de protocolo que tengas
-- El equipo de BESSAI puede ayudarte a mapear los registros
-
----
-
-*¿Tu empresa fabrica inversores o BMS y quieres certificación oficial? Escríbenos a `hello@bessai.io` para un proceso de certificación acelerado.*
+| `unverified` | Derived from technical manuals without physical hardware bench testing | Monitor-only |
+| `reference` | Maintained canonical project profiles with automated test suites | Full Control & Monitor |
+| `bench_verified` | Validated on physical bench with commercial PCS over 72h continuous test | Control Authorized |

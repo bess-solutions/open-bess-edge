@@ -1,29 +1,31 @@
-# ⚡ Quickstart: BESSAI en 5 Minutos (sin hardware)
+# Quickstart: Open BESS Edge in 5 Minutes (Hardware-Free)
 
-> **Objetivo:** Tener BESSAI Edge Gateway corriendo localmente, publicando métricas reales y visible en Grafana — **sin necesitar un inversor físico**.
+> **Objective:** Run Open BESS Edge Gateway locally, verify telemetry over Modbus TCP, and monitor metrics in Grafana — **without requiring physical inverter hardware**.
 
 ---
 
-## Requisitos
+## Prerequisites
 
-| Herramienta | Versión mínima | ¿Cómo verificar? |
+| Tool | Minimum Version | Verification Command |
 |---|---|---|
 | Docker Desktop | 24.x | `docker --version` |
 | Docker Compose | 2.x | `docker compose version` |
 | Git | 2.40+ | `git --version` |
 
-Eso es todo. **No necesitas Python, inversores ni credenciales de nube.**
+No cloud credentials or physical inverters required.
 
 ---
 
-## Paso 1 — Clonar el repositorio
+## Step 1 — Clone the Repository
 
 ```bash
 git clone https://github.com/bess-solutions/open-bess-edge.git
 cd open-bess-edge
 ```
 
-## Paso 2 — Levantar el stack completo (1 comando)
+---
+
+## Step 2 — Start the Stack
 
 ```bash
 docker compose -f infrastructure/docker/docker-compose.yml \
@@ -32,45 +34,46 @@ docker compose -f infrastructure/docker/docker-compose.yml \
   up --build -d
 ```
 
-Esto levanta **4 contenedores** automáticamente:
+This launches the local containers:
 
-| Contenedor | Rol | Puerto |
+| Container | Role | Exposed Port |
 |---|---|---|
-| `bessai-modbus-simulator` | Simula un inversor Huawei SUN2000 con datos reales | interno |
-| `bessai-gateway-sim` | Gateway BESSAI conectado al simulador | `8000` |
-| `bessai-prometheus` | Scraping de métricas cada 15s | `9090` |
-| `bessai-grafana` | Dashboard visual | `3000` |
+| `bessai-modbus-simulator` | Simulates an industrial BESS plant over Modbus TCP | Internal |
+| `bessai-gateway-sim` | Open BESS Edge Gateway connected to the simulator | `8000` |
+| `bessai-prometheus` | Scrapes telemetry and loop metrics every 15s | `9090` |
+| `bessai-grafana` | Visual operations dashboard | `3000` |
 
-> **Primera vez:** La descarga de imágenes tarda ~2-3 min. Las siguientes veces es instantáneo gracias al cache de Docker.
+---
 
-## Paso 3 — Verificar que todo está vivo
+## Step 3 — Verify Gateway Health
 
 ```bash
-# Health check del gateway
+# Check gateway health endpoint
 curl http://localhost:8000/health
-# Esperado: {"status": "ok", "uptime_s": ..., "site_id": "SITE-SIM-001"}
+# Expected output: {"status": "ok", "uptime_s": ..., "site_id": "SITE-SIM-001"}
 
-# Ver ciclos activos en métricas
+# Check active metrics scrape
 curl http://localhost:8000/metrics | grep bess_cycles_total
 ```
 
-## Paso 4 — Abrir Grafana
+---
 
-Navega a **http://localhost:3000** en tu navegador.
+## Step 4 — Open Grafana Dashboard
 
-- **Usuario:** `admin`
-- **Contraseña:** valor de `GF_SECURITY_ADMIN_PASSWORD` en tu `config/.env`
-  > Si es la primera vez, el valor por defecto del `.env.example` está indicado ahí como guía.
+Navigate to **http://localhost:3000** in your browser:
 
-Deberías ver el dashboard **BESSAI Main** con:
-- 📊 SOC (State of Charge) en tiempo real
-- ⚡ Potencia activa (kW) desde el simulador
-- 🔍 AI-IDS anomaly score
-- 💰 Métricas de arbitraje
+- **Username:** `admin`
+- **Password:** value of `GF_SECURITY_ADMIN_PASSWORD` in your `.env` (or defaults in `.env.example`).
 
-> 📊 Verás paneles en tiempo real de SOC, potencia (kW), AI-IDS anomaly score y métricas de arbitraje actualizándose cada 15 s.
+The **BESSAI Main** dashboard provides:
+- State of Charge (SOC) tracking
+- Active & Reactive power (kW / kVAR) from the plant model
+- Safety envelope evaluation & guard statuses
+- Latency and cycle execution histograms
 
-## Paso 5 — Detener el stack
+---
+
+## Step 5 — Stop the Stack
 
 ```bash
 docker compose -f infrastructure/docker/docker-compose.yml \
@@ -80,37 +83,28 @@ docker compose -f infrastructure/docker/docker-compose.yml \
 
 ---
 
-## ¿Qué sigue?
+## Next Steps
 
-| Quiero... | Lee esto |
+| I want to... | Read |
 |---|---|
-| Conectar a un inversor real | [`docs/local_development.md`](../local_development.md) |
-| Publicar a MQTT / Home Assistant | [`docs/tutorials/integration_homeassistant.md`](integration_homeassistant.md) |
-| Deploy en Raspberry Pi 4/5 | [`docs/quickstart_rpi.md`](../quickstart_rpi.md) |
-| Entender la arquitectura completa | [`docs/architecture.md`](../architecture.md) |
+| Connect to real inverter hardware | [`docs/tutorials/connecting_real_hardware.md`](connecting_real_hardware.md) |
+| Integrate with MQTT / Home Assistant | [`docs/tutorials/integration_homeassistant.md`](integration_homeassistant.md) |
+| Deploy on Raspberry Pi 4/5 | [`docs/quickstart_rpi.md`](../quickstart_rpi.md) |
+| Understand complete architecture | [`docs/architecture.md`](../architecture.md) |
 
 ---
 
-## Solución de problemas comunes
+## Troubleshooting
 
-**El gateway no conecta al simulador:**
+**Gateway does not connect to the simulator:**
 ```bash
 docker compose logs bessai-gateway-sim --tail=20
-# Si ves "Connection refused": espera 10s más, el simulador tarda en iniciar
+# If "Connection refused" appears, wait a few seconds while the simulator finishes binding port 502.
 ```
 
-**Puerto 3000 ya en uso:**
-```bash
-# Cambiar puerto de Grafana editando docker-compose.yml:
-# ports: ["3001:3000"]
+**Port 3000 is already allocated:**
+Adjust the host port in `docker-compose.yml`:
+```yaml
+ports:
+  - "3001:3000"
 ```
-
-**Grafana muestra "No data":**
-```bash
-# Verificar que Prometheus scrapeó métricas:
-curl http://localhost:9090/api/v1/query?query=up
-```
-
----
-
-> 💡 **Tip:** El simulador genera datos variados (SOC 20-95%, potencia ±500kW) para que los dashboards se vean con actividad real desde el primer minuto.

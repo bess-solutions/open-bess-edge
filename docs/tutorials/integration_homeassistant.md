@@ -1,37 +1,37 @@
-# 🏠 BESSAI + Home Assistant via MQTT
+# Open BESS Edge + Home Assistant via MQTT
 
-> **Objetivo:** Publicar telemetría BESS (SOC, potencia, temperatura) a Home Assistant en tiempo real, usando MQTT como bus de mensajería.
+> **Objective:** Stream real-time BESS telemetry (SOC, active power, cell temperatures, alarms) to Home Assistant using MQTT.
 
 ---
 
-## Arquitectura
+## System Architecture
 
-```
-[Inversor / Simulador]
+```text
+[Inverter / Simulated Plant]
         │  Modbus TCP
         ▼
-[BESSAI Edge Gateway]
-        │  MQTT paho-client
+[Open BESS Edge Gateway]
+        │  MQTT Client
         ▼
-[Mosquitto Broker]  ◄──── o cualquier broker compatible
+[Mosquitto Broker]  ◄──── or compatible broker (HiveMQ, EMQX)
         │
         ▼
-[Home Assistant]  →  Automations, Dashboards, Lovelace
+[Home Assistant]  →  Dashboards, Lovelace UI, Automation Engine
 ```
 
-**Compatibilidad de brokers:** Mosquitto · HiveMQ · EMQX · AWS IoT Core · Azure IoT Hub
+**Broker Compatibility:** Eclipse Mosquitto, HiveMQ, EMQX, AWS IoT Core, Azure IoT Hub.
 
 ---
 
-## Requisitos
+## Prerequisites
 
-- BESSAI Edge Gateway corriendo (ver [quickstart_5min.md](quickstart_5min.md))
-- Home Assistant (cualquier versión reciente)
-- Broker MQTT instalado (se usa Mosquitto en este tutorial)
+- Open BESS Edge Gateway running (see [Quickstart](quickstart_5min.md)).
+- Home Assistant (any recent release).
+- Accessible MQTT Broker.
 
 ---
 
-## Paso 1 — Instalar Mosquitto
+## Step 1 — Deploy Mosquitto Broker
 
 === "Linux / Raspberry Pi"
 ```bash
@@ -39,7 +39,7 @@ sudo apt install -y mosquitto mosquitto-clients
 sudo systemctl enable --now mosquitto
 ```
 
-=== "Docker (recomendado)"
+=== "Docker"
 ```bash
 docker run -d \
   --name mosquitto \
@@ -49,91 +49,78 @@ docker run -d \
 ```
 
 === "Home Assistant Add-on"
-En HA, ve a **Ajustes → Add-ons → Mosquitto broker** e instálalo con un clic.
+Navigate to **Settings → Add-ons → Mosquitto broker** and click Install.
 
 ---
 
-## Paso 2 — Configurar BESSAI para MQTT
+## Step 2 — Configure MQTT in Open BESS Edge
 
-Edita `config/.env` (copia desde `config/.env.example`):
+Configure your environment or YAML settings:
 
 ```env
-# MQTT — activar publisher
+# MQTT Publisher Configuration
 MQTT_ENABLED=true
-MQTT_BROKER_HOST=192.168.1.100   # IP de tu broker (o 'localhost')
+MQTT_BROKER_HOST=192.168.1.100   # Broker IP address (or 'localhost')
 MQTT_BROKER_PORT=1883
-MQTT_CLIENT_ID=bessai-edge-site1
+MQTT_CLIENT_ID=open-bess-edge-site1
 MQTT_SITE_ID=SITE-CL-001
 
-# Opcional — autenticación
-# MQTT_USERNAME=bessai
+# Optional Authentication
+# MQTT_USERNAME=bess
 # MQTT_PASSWORD=your_password
-
-# Opcional — TLS
-# MQTT_USE_TLS=true
-# MQTT_CA_CERT=/certs/ca.crt
 ```
 
-### Topics que publica BESSAI automáticamente
+### Published Telemetry Topics
 
-| Topic | Tipo | Frecuencia | Ejemplo de payload |
+| Topic Pattern | Payload Format | Publish Cadence | Example Content |
 |---|---|---|---|
-| `bessai/{site_id}/telemetry` | JSON | Cada ciclo (~5s) | `{"soc": 72.4, "power_kw": 120.5, ...}` |
-| `bessai/{site_id}/status` | JSON | En cambios | `{"connected": true, "mode": "discharge"}` |
-| `bessai/{site_id}/alarms` | JSON | En eventos | `{"level": "warning", "msg": "SOC < 20%"}` |
-| `bessai/{site_id}/heartbeat` | string | Cada 30s | `"2026-02-22T00:00:00Z"` |
+| `bessai/{site_id}/telemetry` | JSON | Periodic cycle (~5s) | `{"soc": 72.4, "power_kw": 120.5, ...}` |
+| `bessai/{site_id}/status` | JSON | On state transition | `{"connected": true, "mode": "discharge"}` |
+| `bessai/{site_id}/alarms` | JSON | On event trigger | `{"level": "warning", "msg": "SOC < 20%"}` |
+| `bessai/{site_id}/heartbeat` | ISO-8601 String | Every 30s | `"2026-09-30T12:00:00Z"` |
 
 ---
 
-## Paso 3 — Configurar Home Assistant
+## Step 3 — Home Assistant Configuration
 
-### 3a. Añadir integración MQTT en HA
+### 3a. Add MQTT Integration in Home Assistant
+Navigate to **Settings → Devices & Services → Add Integration → MQTT**:
+- **Broker:** IP address of Mosquitto
+- **Port:** 1883
+- **Credentials:** if authentication is enabled
 
-Ve a **Ajustes → Dispositivos y Servicios → + Añadir integración → MQTT**.
-
-Ingresa:
-- **Broker:** IP de Mosquitto
-- **Puerto:** 1883
-- **Usuario/contraseña:** si configuraste auth
-
-### 3b. Definir sensores MQTT en `configuration.yaml`
+### 3b. Define Entities in `configuration.yaml`
 
 ```yaml
 # configuration.yaml
 mqtt:
   sensor:
-    - name: "BESSAI SOC"
-      unique_id: bessai_soc_site1
+    - name: "BESS SOC"
+      unique_id: bess_soc_site1
       state_topic: "bessai/SITE-CL-001/telemetry"
       value_template: "{{ value_json.soc }}"
       unit_of_measurement: "%"
       device_class: battery
       icon: mdi:battery
 
-    - name: "BESSAI Power"
-      unique_id: bessai_power_site1
+    - name: "BESS Active Power"
+      unique_id: bess_power_site1
       state_topic: "bessai/SITE-CL-001/telemetry"
       value_template: "{{ value_json.power_kw }}"
       unit_of_measurement: "kW"
       device_class: power
       icon: mdi:lightning-bolt
 
-    - name: "BESSAI Temperature"
-      unique_id: bessai_temp_site1
+    - name: "BESS Max Temperature"
+      unique_id: bess_temp_site1
       state_topic: "bessai/SITE-CL-001/telemetry"
       value_template: "{{ value_json.temperature_c }}"
       unit_of_measurement: "°C"
       device_class: temperature
 
-    - name: "BESSAI AI-IDS Score"
-      unique_id: bessai_ids_site1
-      state_topic: "bessai/SITE-CL-001/telemetry"
-      value_template: "{{ value_json.ids_anomaly_score }}"
-      icon: mdi:shield-alert
-
   binary_sensor:
-    - name: "BESSAI Online"
-      unique_id: bessai_online_site1
+    - name: "BESS Gateway Online"
+      unique_id: bess_online_site1
       state_topic: "bessai/SITE-CL-001/status"
       value_template: "{{ value_json.connected }}"
       payload_on: "true"
@@ -141,21 +128,20 @@ mqtt:
       device_class: connectivity
 ```
 
-Luego reinicia HA: **Ajustes → Sistema → Reiniciar**.
+Reload Home Assistant YAML configuration via **Developer Tools → YAML → Manually configured MQTT entities**.
 
 ---
 
-## Paso 4 — Dashboard Lovelace
+## Step 4 — Lovelace UI Dashboard
 
-Añade una tarjeta tipo **Gauge** y **Entity** en tu dashboard:
+Add an entity card stack in your Lovelace dashboard:
 
 ```yaml
-# Dashboard Lovelace — tarjeta BESS
 type: vertical-stack
 cards:
   - type: gauge
-    entity: sensor.bessai_soc
-    name: BESSAI SOC
+    entity: sensor.bess_soc
+    name: Battery SOC
     min: 0
     max: 100
     severity:
@@ -164,55 +150,27 @@ cards:
       red: 0
 
   - type: entities
-    title: BESSAI Edge Gateway
+    title: Open BESS Edge Telemetry
     entities:
-      - sensor.bessai_power
-      - sensor.bessai_temperature
-      - sensor.bessai_ai_ids_score
-      - binary_sensor.bessai_online
+      - sensor.bess_active_power
+      - sensor.bess_max_temperature
+      - binary_sensor.bess_gateway_online
 ```
 
 ---
 
-## Paso 5 — Automatización: alerta cuando SOC < 20%
+## Step 5 — Verification & Troubleshooting
 
-```yaml
-# automations.yaml
-- alias: "BESSAI — Alerta SOC crítico"
-  trigger:
-    - platform: numeric_state
-      entity_id: sensor.bessai_soc
-      below: 20
-  action:
-    - service: notify.mobile_app
-      data:
-        title: "⚠️ BESS — SOC Crítico"
-        message: "SOC cayó a {{ states('sensor.bessai_soc') }}%"
-```
-
----
-
-## Verificación rápida
+Verify message flow from your shell:
 
 ```bash
-# Suscribirse a los topics desde terminal
 mosquitto_sub -h localhost -t "bessai/#" -v
-
-# Deberías ver mensajes cada ~5 segundos:
-# bessai/SITE-CL-001/telemetry {"soc": 72.4, "power_kw": 120.5, ...}
 ```
 
----
-
-## Solución de problemas
-
-| Problema | Causa probable | Solución |
+| Symptom | Probable Cause | Remedy |
 |---|---|---|
-| HA no recibe datos | Broker no accesible | `ping IP_BROKER` desde el host de HA |
-| Topic vacío | MQTT_ENABLED=false | Verificar `.env` |
-| Auth error | Credenciales incorrectas | Revisar `MQTT_USERNAME`/`MQTT_PASSWORD` |
-| TLS handshake fail | Certificado incorrecto | Verificar `MQTT_CA_CERT` path |
+| Home Assistant receives no updates | Broker network isolation | Verify firewall allows ingress on port 1883 |
+| Topic remains empty | `MQTT_ENABLED` is false | Verify setting in configuration |
+| Authentication rejected | Mismatched credentials | Confirm username/password in `configuration.yaml` |
 
----
-
-> 📖 **Referencia completa:** [`docs/mqtt_integration.md`](../mqtt_integration.md) — incluye configuración TLS mutuo, AWS IoT Core, y Azure IoT Hub.
+See [`docs/mqtt_integration.md`](../mqtt_integration.md) for mutual TLS (mTLS) and cloud IoT broker guides.

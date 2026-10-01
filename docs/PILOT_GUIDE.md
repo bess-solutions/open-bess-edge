@@ -1,33 +1,33 @@
-# Guía de Puesta en Servicio de Pilotos (Site Pilot Guide) — BESSAI Edge Gateway
+# Field Pilot Commissioning Guide — Open BESS Edge Gateway
 
-Esta guía detalla los pasos de ingeniería de campo para comisionar el BESSAI Edge Gateway en una instalación BESS piloto, validando la comunicación Modbus TCP con el inversor y la respuesta dinámica conforme a las exigencias del Coordinador Eléctrico Nacional (CEN) y la NTSyCS de Chile.
-
----
-
-## 1. Requisitos Previos en Terreno
-
-* **Hardware:** Raspberry Pi 4/5, IPC industrial o servidor local con Linux.
-* **Red OT:** Conexión Ethernet con visibilidad IP hacia el inversor o controlador de planta (ej. Huawei SmartLogger, SMA Data Manager).
-* **Entorno:** Python 3.10+ o Docker con Docker Compose.
+This engineering guide outlines procedures for commissioning the Open BESS Edge Gateway in pilot battery storage installations, validating Modbus TCP communication with inverters/PCS, and verifying dynamic grid support in compliance with Chilean grid standards (NTSyCS / Coordinador Eléctrico Nacional).
 
 ---
 
-## 2. Configuración del Sitio
+## 1. Field Requirements
 
-1. **Clonar el repositorio:**
+* **Hardware:** Industrial PC (IPC), DIN-rail edge computer, or Linux gateway (x86_64 or aarch64).
+* **OT Network:** Isolated Ethernet connection with direct IP visibility to the PCS inverter or plant controller (e.g., Huawei SmartLogger, SMA Data Manager, SunGrow controller).
+* **Software Environment:** Python 3.10+ (or containerized deployment via Docker Compose).
+
+---
+
+## 2. Gateway Setup & Configuration
+
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/bess-solutions/open-bess-edge.git
    cd open-bess-edge
    ```
 
-2. **Preparar entorno local:**
+2. **Initialize isolated environment:**
    ```bash
    python -m venv .venv
-   source .venv/bin/activate  # En Windows: .venv\Scripts\activate
-   pip install -r requirements.txt
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   pip install -e .
    ```
 
-3. **Configurar parámetros en `config/edge_config.yaml`:**
+3. **Configure site parameters in `config/edge_config.yaml`:**
    ```yaml
    site:
      id: "PILOT-CL-LINARES-01"
@@ -38,43 +38,53 @@ Esta guía detalla los pasos de ingeniería de campo para comisionar el BESSAI E
 
    grid_standards:
      nominal_frequency_hz: 50.0
-     deadband_hz: 0.030          # ±30 mHz según Estudio CEN CFyDR 2026
-     droop_percentage: 3.0       # Estatismo s = 3%
-     ffr_response_time_ms: 500   # Respuesta rápida FFR sub-500ms
+     deadband_hz: 0.030          # ±30 mHz deadband (CEN CFyDR standards)
+     droop_percentage: 3.0       # 3.0% droop characteristic
+     ffr_response_time_ms: 500   # Fast Frequency Response under 500 ms
+   ```
+
+4. **Validate configuration syntax:**
+   ```bash
+   open-bess-edge check-config config/edge_config.yaml
    ```
 
 ---
 
-## 3. Verificación Preflight de Controladores
+## 3. Preflight Quality & Safety Verification
 
-Antes de energizar o habilitar el lazo de consignas al inversor, ejecutar la suite de pruebas de cumplimiento:
+Before connecting to live plant equipment or enabling writes, execute the canonical test suite and claims verification:
 
 ```bash
-# Validar controladores FFR, Volt/VAR y envolvente de seguridad
-pytest tests/ -v --tb=short
+# Validate core test suite (278 tests)
+pytest -q
+
+# Run claims verification
+python scripts/verify_claims.py
 ```
 
-Debe confirmar **18/18 pruebas aprobadas** (100% pass rate).
+All 278 canonical core tests must pass.
 
 ---
 
-## 4. Conexión y Arranque del Gateway
+## 4. Gateway Execution & Telemetry Validation
 
-Ejecutar el nodo de borde en modo supervisión:
+Launch the edge node in execution mode:
 
 ```bash
-python -m src.edge_node --config config/edge_config.yaml
+open-bess-edge run --config config/edge_config.yaml
 ```
 
-Verificar en la salida de consola:
-1. Conexión exitosa al socket Modbus TCP del inversor.
-2. Lectura de tensión, corriente, potencia activa/reactiva y SoC.
-3. Evaluación de envolvente de seguridad en estado `NORMAL`.
+Verify the following in stdout/logs:
+1. Successful socket connection to the target Modbus TCP device.
+2. Initial state transitions: `INIT -> STARTING -> RUNNING`.
+3. Clean acquisition of cell voltages, string currents, active/reactive power, and SOC.
+4. `SafetyEnvelope` evaluates to `NORMAL` state with zero trips.
 
 ---
 
-## 5. Pruebas de Despacho y Estatismo en Sitio
+## 5. Frequency & Grid Support Validation
 
-Para simular o auditar el lazo FFR:
-* Inyectar un escalón de frecuencia en el simulador o esperar oscilaciones naturales del SEN.
-* Verificar que la consigna de potencia $\Delta P$ responda proporcionalmente al estatismo configurado ($s=3\%$) respetando la banda muerta de $\pm 30\text{ mHz}$.
+To audit the Fast Frequency Response (FFR / droop) loop:
+* Verify that frequency deviations exceeding $\pm 30\text{ mHz}$ trigger proportional active power adjustments $\Delta P$ corresponding to the configured $3\%$ droop slope.
+* Confirm that setpoint generation and dispatch completes within the 500 ms normative budget.
+* Verify that telemetry dropouts automatically trigger `BESS-GUARD-090` / `091`, clamping output setpoints to 0 kW.

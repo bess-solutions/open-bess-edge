@@ -1,5 +1,5 @@
-site_name: BESSAI Edge Gateway
-site_description: Open-source industrial BESS gateway — IEEE 2030.5, IEC 62443 SL-2, DRL arbitrage, mTLS OT, MQTT, ONNX edge inference.
+site_name: Open BESS Edge Gateway
+site_description: Deterministic industrial BESS gateway — fail-closed safety envelope, NTSyCS-compliant FFR/droop, and multi-vendor Modbus TCP integration.
 site_url: https://bess-solutions.github.io/open-bess-edge/
 repo_url: https://github.com/bess-solutions/open-bess-edge
 repo_name: bess-solutions/open-bess-edge
@@ -68,16 +68,17 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - "⚡ Operación & Despliegue":
+  - "⚡ Operations & Deployment":
     - Pilot Guide (Chile/CEN): PILOT_GUIDE.md
-    - Guía de Operaciones: OPERATIONS_GUIDE.md
-    - FAQ Técnica: FAQ.md
+    - Operations Guide: OPERATIONS_GUIDE.md
+    - Technical FAQ: FAQ.md
   - Getting Started:
     - Quick Start (5 min): tutorials/quickstart_5min.md
+    - Quick Start (10 min): quickstart.md
     - Local Development: local_development.md
     - Raspberry Pi 4/5: quickstart_rpi.md
   - Tutorials:
-    - Conectar Hardware Real: tutorials/connecting_real_hardware.md
+    - Connect Real Hardware: tutorials/connecting_real_hardware.md
     - MQTT + Home Assistant: tutorials/integration_homeassistant.md
     - MQTT Integration (full): mqtt_integration.md
   - Architecture:

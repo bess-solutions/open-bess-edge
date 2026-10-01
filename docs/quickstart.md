@@ -1,84 +1,75 @@
-# Guía de Inicio Rápido (Quick Start) — 10 Minutos
+# Quick Start Guide — Open BESS Edge Gateway
 
-Esta guía le permitirá poner en marcha el sistema **Open BESS Edge** y su servidor MCP utilizando el simulador Modbus en su máquina local en menos de 10 minutos.
-
----
-
-## 📋 Requisitos Previos
-
-* Python 3.10 o superior instalado en el sistema.
-* Git.
-* Un cliente MCP compatible (como **Claude Desktop**).
+Get the **Open BESS Edge** gateway up and running locally with the built-in physics simulator in under 10 minutes.
 
 ---
 
-## ⚡ Pasos de Instalación y Ejecución
+## 📋 Prerequisites
 
-### Paso 1: Clonar el Repositorio
+* **Python 3.10+** (Python 3.12 recommended).
+* **Git**.
+* Optional: **Docker** & **Docker Compose** for containerized deployment.
+
+---
+
+## ⚡ Step-by-Step Setup
+
+### Step 1: Clone the Repository
 ```bash
 git clone https://github.com/bess-solutions/open-bess-edge.git
 cd open-bess-edge
 ```
 
-### Paso 2: Crear e Inicializar el Entorno Virtual
-En Linux/macOS:
+### Step 2: Initialize Virtual Environment
+On Linux / macOS:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
-pip install -r mcp_server/requirements.txt
+pip install -e ".[dev]"
 ```
 
-En Windows (PowerShell):
+On Windows (PowerShell):
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python -m pip install -r mcp_server/requirements.txt
+python -m pip install -e ".[dev]"
 ```
 
-### Paso 3: Iniciar el Simulador Modbus TCP
-Para interactuar localmente con registros reales del BESS sin hardware físico, iniciamos el servidor de demostración en segundo plano:
-```bash
-python demo_server.py
-```
-El simulador levantará endpoints HTTP locales y un servicio simulador de variables en `http://localhost:8000/`.
+### Step 3: Run the In-Tree Simulation
+Execute the deterministic battery plant simulation over real loopback Modbus TCP:
 
-### Paso 4: Levantar el Servidor MCP
-Abra un nuevo terminal, reactive el entorno virtual y ejecute el servidor MCP en modo stdio:
 ```bash
-python mcp_server/server.py
+open-bess-edge simulate --duration 15
+```
+
+This runs a 1000 kW / 2000 kWh battery model with a dynamic 49.65 Hz under-frequency event, demonstrating the real-time Fast Frequency Response (FFR) droop calculation and setpoint dispatch.
+
+### Step 4: Validate Site Configuration
+Verify your deployment YAML configuration file:
+
+```bash
+open-bess-edge check-config config/edge_config.yaml
+```
+
+### Step 5: Inspect Vendor Device Profiles
+Explore the standardized register maps in the registry:
+
+```bash
+open-bess-edge profile-info open_bess_edge_reference
+open-bess-edge profile-info huawei_sun2000
+```
+
+### Step 6: Verify Test Suite
+Run the 278-test canonical suite:
+
+```bash
+pytest -q
 ```
 
 ---
 
-## 🔌 Conectar con Claude Desktop
+## 🔍 Next Steps
 
-Para integrar la capacidad de diagnóstico en lenguaje natural a Claude, configure su archivo `claude_desktop_config.json`:
-
-* **Ruta del archivo en Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-* **Ruta del archivo en macOS/Linux**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-
-Agregue el bloque de configuración del servidor:
-
-```json
-{
-  "mcpServers": {
-    "open-bess-edge": {
-      "command": "python",
-      "args": [
-        "C:/Users/lenovo/OneDrive/Desktop/02_Proyectos_Tech/01_BESS_Tech/open-bess-edge/mcp_server/server.py"
-      ],
-      "env": {
-        "PYTHONPATH": "C:/Users/lenovo/OneDrive/Desktop/02_Proyectos_Tech/01_BESS_Tech/open-bess-edge"
-      }
-    }
-  }
-}
-```
-
-*Nota: Modifique las rutas absolutas según la ubicación donde clonó el repositorio en su computadora.*
-
-Reinicie Claude Desktop. Ahora la IA dispondrá de las herramientas para interrogar el estado del BESS directamente.
+* **Industrial Operations:** Consult the [Operations Guide](OPERATIONS_GUIDE.md) for systemd and service sandboxing.
+* **Real Hardware Interfacing:** Follow the [Connecting Real Hardware Tutorial](tutorials/connecting_real_hardware.md).
+* **Field Pilot Commissioning:** See the [Site Pilot Guide](PILOT_GUIDE.md).

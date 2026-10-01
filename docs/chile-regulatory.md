@@ -1,43 +1,33 @@
-# Matriz de Cumplimiento Regulatorio (Chile & Internacional)
+# Regulatory Compliance Matrix (Chile SEN & International Standards)
 
-Esta matriz establece el cruzamiento formal entre las normativas regulatorias nacionales del Sistema Eléctrico Nacional (SEN) de Chile, estándares internacionales de interconexión, y sus implementaciones concretas dentro del ecosistema de software y hardware **Open BESS Edge**.
-
----
-
-## 1. NTSCS (Norma Técnica de Seguridad y Calidad de Servicio) — CNE Chile
-
-| Cláusula NTSCS | Exigencia Regulatoria | Implementación en Open BESS Edge | Mecanismo de Verificación |
-|:---|:---|:---|:---|
-| **Anexo Técnico IBR-GFM** | Capacidad de formar red (Grid-Forming) con inyección de corriente reactiva rápida ante caídas de voltaje. | `src/core/controllers/gfm_control.py`: Algoritmo de inercia sintética y lazo de control de voltaje rápido. | Ensayo de inyección de corriente reactiva en simulador hardware-in-the-loop (HIL). |
-| **Capítulo 3, Art. 3-8** | Parámetro de estatismo (droop) ajustable para regulación primaria de frecuencia (típicamente 5%). | `config/grid_params.json` (`gfm_droop_gain = 0.05`): Parámetro configurable dinámicamente vía Modbus. | Auditoría de registros Modbus y simulación en `pandapower`. |
-| **Anexo Técnico RT** | Soporte de bajo/alto voltaje (LVRT / HVRT) sin desconexión según curvas de despeje de fallas chilenas. | `src/core/protection/ride_through.py`: Perfil de desconexión por tiempo inverso adaptado a las curvas de la NTSCS. | Inyección de tensión AC mediante simulador de red secundario. |
-| **Art. 4-12** | Telecontrol y transmisión de telemetría en tiempo real hacia el Coordinador Eléctrico Nacional (CEN). | `mcp_server/server.py`: Herramienta `get_battery_health` que encapsula el Perfil Mínimo de Telemetría (SOC, SOH, P, Q). | Verificación de tramas IEC 60870-5-104 en Wireshark. |
+Cross-reference matrix linking Chilean National Electric System (SEN) grid codes and international standards to their concrete technical implementations within **Open BESS Edge**.
 
 ---
 
-## 2. Superintendencia de Electricidad y Combustibles (SEC) — RGR N°06 / 2024
+## 1. NTSyCS (Technical Norm for Service Security and Quality) — CNE / CEN Chile
 
-| Cláusula RGR N°06 | Exigencia Regulatoria | Implementación en Open BESS Edge | Mecanismo de Verificación |
+| NTSyCS Clause | Regulatory Requirement | Open BESS Edge Implementation | Verification Mechanism |
 |:---|:---|:---|:---|
-| **Art. 14.2 — Contención** | Distancia mínima y barreras físicas de contención para evitar la propagación térmica de incendios entre celdas/racks. | `docs/standards/open_bess_edge_standard_v1.md#2.2.1`: Especificación de diseño de separación física a 1.2 metros. | Planos de layout generados por el RAG de ingeniería de detalle. |
-| **Art. 14.4 — Ventilación** | Sistema de ventilación y extracción forzada para mantener la concentración de hidrógeno gaseoso por debajo del 1% (LEL). | `src/core/safety/gas_monitoring.py`: Lectura Modbus de sensores de gas H₂ / CO en compartimento de baterías. | Simulación de disparo del extractor forzado ante lectura > 0.8% H₂. |
-| **Art. 15.1 — Parada de Emergencia** | Dispositivo mecánico de parada de emergencia (EPO) que desconecte el interruptor principal AC y abra los contactores DC. | `src/core/safety/safety_loop.py`: Función `trigger_hard_emergency()` que manda señal de apertura vía contactos secos. | Prueba funcional física del circuito del lazo de seguridad (E-Stop). |
-| **Art. 16.3 — Registro de Fallas** | Trazabilidad completa de alarmas de sobrevoltaje, subvoltaje, sobretemperatura, y desbalances de celdas. | `mcp_server/server.py`: Herramienta `diagnose_faults` que lee el registro histórico de fallas y bitmaps de alarmas. | Inspección de base de datos local de eventos SQLite. |
+| **Cap. 3 & 4 — Frequency Control** | Fast Frequency Response (FFR) and Primary Frequency Control (droop $s=3\%$, deadband $\pm 30\text{ mHz}$). | [`open_bess_edge.control.ffr_droop`](file:///c:/Users/rodri/Desktop/open-bess-edge/src/open_bess_edge/control/ffr_droop.py): Proportional droop calculation with deadband filter and ramp limiter. | 278-test automated suite (`tests/test_ffr.py`) with simulated frequency steps under real loopback TCP sockets. |
+| **Cap. 4 — Voltage & Reactive Control** | Dynamic reactive power injection and absorption $Q(V)$ for local voltage support. | [`open_bess_edge.control.volt_var`](file:///c:/Users/rodri/Desktop/open-bess-edge/src/open_bess_edge/control/volt_var.py) and [`limiter`](file:///c:/Users/rodri/Desktop/open-bess-edge/src/open_bess_edge/control/limiter.py): Circular capability curve and Volt/VAR slope limiter. | Automated unit tests (`tests/test_volt_var_limiter.py`) verifying P-Q priority envelopes. |
+| **Cap. 6.1 — Telemetry to CEN** | Real-time telemetry reporting for active power, reactive power, voltages, and battery state. | [`open_bess_edge.runtime.audit`](file:///c:/Users/rodri/Desktop/open-bess-edge/src/open_bess_edge/runtime/audit.py) & Modbus telemetry engine. | Loopback audit logging and telemetry parsing verification. |
+| **Response Time Budget** | FFR execution budget under 500 ms from event inception to setpoint dispatch. | Monotonic clock scheduling with 100 ms loop cycle (`runtime.cycle_ms`). | Real-time loopback latency tests (`tests/test_latency_realtime.py`) validating p99 execution. |
 
 ---
 
-## 3. NCh Elec / RIC (Reglamento de Seguridad de Instalaciones de Consumo de Energía)
+## 2. Superintendencia de Electricidad y Combustibles (SEC) — RIC & RGR
 
-| Pliego / Artículo RIC | Exigencia Regulatoria | Implementación en Open BESS Edge | Mecanismo de Verificación |
+| SEC Standard / Article | Regulatory Safety Requirement | Open BESS Edge Implementation | Verification Mechanism |
 |:---|:---|:---|:---|
-| **RIC N° 04 — Conductores** | Selección de secciones y calibres de conductores según la corriente nominal y límites de caída de tensión (< 3%). | `docs/standards/open_bess_edge_standard_v1.md#3.3`: Mapeo de calibres basados en especificaciones LF Energy BDF. | Cálculo automatizado de caída de tensión en el script de detalle. |
-| **RIC N° 05 — Protecciones** | Coordinación de protecciones contra sobrecargas y cortocircuitos mediante relés y fusibles de acción rápida. | `docs/standards/open_bess_edge_standard_v1.md#7.2`: Nodos lógicos de protección IEC 61850 (PTOC, PTOV, PFRC). | Simulación de curvas de corriente vs tiempo en relé virtual. |
+| **RIC N° 01/02 — Communications** | Fail-safe behavior upon communication dropouts or signal staleness. | `BESS-GUARD-090` and `BESS-GUARD-091` in [`open_bess_edge.safety.envelope`](file:///c:/Users/rodri/Desktop/open-bess-edge/src/open_bess_edge/safety/envelope.py): Forces zero kW output if telemetry is stale. | Fault-injection tests (`tests/test_node.py`) simulating communication timeouts. |
+| **RGR Safety Envelope** | Electrical, thermal, and DC insulation boundaries for stationary batteries. | 12 active deterministic safety guards (`BESS-GUARD-001` through `010`) covering cell voltages, temperatures, string limits, and insulation resistance. | Comprehensive boundary testing (`tests/test_safety.py`). |
+| **Event Traceability** | Tamper-evident logging of abnormal alarms and safety trips. | Append-only JSONL audit trail with cryptographic hash chaining in `audit.py`. | CLI verification tool (`open-bess-edge verify-audit`). |
 
 ---
 
-## 4. IEEE 1547-2018 (Standard for Interconnection of Distributed Energy Resources)
+## 3. IEEE 1547-2018 (Interconnection of Distributed Energy Resources)
 
-| Sección IEEE 1547 | Exigencia Regulatoria | Implementación en Open BESS Edge | Mecanismo de Verificación |
+| IEEE 1547 Clause | Grid Support Requirement | Open BESS Edge Implementation | Verification Mechanism |
 |:---|:---|:---|:---|
-| **Sección 5.4 — Active Power** | Modulación de potencia activa en función de la sobrefrecuencia y subfrecuencia (Droop de frecuencia/vatios). | `src/core/controllers/active_power_derating.py`: Limitación dinámica de potencia activa según frecuencia de red. | Pruebas de inyección de frecuencia externa simulada. |
-| **Sección 8.2 — Anti-isla** | Detección de condición de isla no intencional y desconexión obligatoria en un lapso menor a 2.0 segundos. | `src/core/protection/anti_islanding.py`: Detección pasiva por ROCOF y activa por inyección de perturbación. | Ensayo de desconexión con carga acoplada en RTT. |
+| **Section 5.4 — Frequency-Watt** | Active power modulation as a function of grid overfrequency and underfrequency. | Continuous droop controller in `open_bess_edge.control.ffr_droop`. | Parameter sweep tests under varying droop slopes. |
+| **Section 5.3 — Voltage Regulation** | Volt-Reactive power mode and reactive power capability. | Volt/VAR piece-wise linear curve limiter in `open_bess_edge.control.volt_var`. | Automated P-Q circular envelope clipping tests. |

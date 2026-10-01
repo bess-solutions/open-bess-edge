@@ -1,177 +1,145 @@
-# 🔌 Conectar un Inversor Real a BESSAI
+# Connecting Real Inverter Hardware to Open BESS Edge
 
-> **Para quién:** Técnicos e ingenieros que ya tienen `docker compose --profile simulator up` funcionando y quieren conectar a un inversor Huawei SUN2000, SMA, Victron o Fronius real.
-> **Tiempo estimado:** 30-45 minutos
-
----
-
-## Requisitos previos
-
-- BESSAI corriendo en modo simulador (verificado con `curl http://localhost:8000/health`)
-- Acceso de red al inversor (misma LAN o VPN)
-- El puerto **502 TCP** no bloqueado entre host BESSAI y el inversor
-- Credenciales del inversor (si tiene auth habilitada)
+> **Audience:** Automation technicians and electrical engineers connecting Open BESS Edge Gateway to commercial inverters (e.g., Huawei SUN2000, SMA Sunny Tripower, Victron MultiPlus-II, Fronius GEN24).  
+> **Estimated Time:** 30–45 minutes.
 
 ---
 
-## Paso 1 — Identificar la IP del inversor
+## Prerequisites
 
-### Huawei SUN2000
-```bash
-# El inversor tiene un dongle WiFi o puerto Ethernet
-# Default: DHCP en red local. Buscar con nmap:
-nmap -p 502 192.168.1.0/24 --open
-# El host que responde en puerto 502 es el inversor
-```
+- Open BESS Edge running locally and verified (via `open-bess-edge check-config config/edge_config.yaml`).
+- IP network visibility from the edge gateway host to the inverter controller across the OT local area network.
+- **Port 502 TCP** accessible between the gateway host and the inverter/gateway logger.
+- Inverter administrative credentials (if authentication or Modbus TCP enablement is required).
 
-Alternativamente en la app **FusionSolar** → Dispositivo → Info de red.
+---
 
-### SMA Sunny Tripower
-```bash
-nmap -p 502 192.168.1.0/24 --open
-# SMA suele asignarse IP estática configurada en el display
-```
+## Step 1 — Identify the Inverter IP Address
 
-### Victron MultiPlus-II (via Venus OS)
-- IP accesible desde VRM Portal → Local access
-- Puerto Modbus: **502** (activar en Venus OS: Settings → Services → Modbus TCP)
+### Huawei SUN2000 / SmartLogger
+- Connected via Smart Dongle-WLAN-FE or SmartLogger Ethernet port.
+- Default: DHCP on local OT network or fixed static IP.
+- Identify the host responding on port 502:
+  ```bash
+  nmap -p 502 192.168.1.0/24 --open
+  ```
+- Alternatively, check the network interface in the **FusionSolar** portal/app.
+
+### SMA Sunny Tripower / Data Manager
+- Locate IP configured via the device web interface or front panel display.
+- Ensure Modbus TCP server is switched ON in inverter parameters.
+
+### Victron MultiPlus-II (via Venus OS / GX device)
+- Enable Modbus TCP in Venus OS: **Settings → Services → Modbus TCP**.
+- Port: **502**. Unit ID: 100 (or as configured for the system gateway).
 
 ### Fronius GEN24
-- IP visible en la interfaz web del inversor
-- Modbus TCP debe activarse: **Communication → Modbus TCP → Enable**
+- Accessible via local web UI.
+- Activate: **Communication → Modbus TCP → Enable** (Data format: Int+SF or float).
 
 ---
 
-## Paso 2 — Verificar conectividad Modbus
+## Step 2 — Verify Modbus TCP Connectivity
+
+Run a basic Python check to confirm the inverter socket accepts Modbus connections:
 
 ```bash
-# Instalar modpoll (herramienta de diagnóstico)
-pip install pymodbus
-
-# Test rápido Python (leer 1 registro del inversor):
-python3 - << 'EOF'
+python - << 'EOF'
 from pymodbus.client import ModbusTcpClient
+
 client = ModbusTcpClient("192.168.1.100", port=502, timeout=5)
-conn = client.connect()
-print(f"Conexión: {'OK' if conn else 'FALLÓ'}")
-if conn:
+connected = client.connect()
+print(f"Modbus Connection: {'SUCCESS' if connected else 'FAILED'}")
+if connected:
     result = client.read_holding_registers(40001, count=2, slave=1)
-    print(f"Registros 40001-40002: {result.registers if not result.isError() else result}")
+    print(f"Registers 40001-40002: {result.registers if not result.isError() else result}")
 client.close()
 EOF
 ```
 
-Si muestra registros → el inversor es accesible. Si `FALLÓ`, revisa firewall y Modbus habilitado en el inversor.
+If the connection is confirmed, proceed to profile configuration.
 
 ---
 
-## Paso 3 — Seleccionar el perfil del hardware
+## Step 3 — Select Device Profile
 
-BESSAI incluye 4 perfiles en `registry/`:
+Open BESS Edge includes standardized profiles in the [`registry/`](../../registry/) directory:
 
-| Archivo | Hardware |
-|---|---|
-| `registry/huawei_sun2000.json` | Huawei SUN2000 + LUNA2000 |
-| `registry/sma_sunny_tripower.json` | SMA Sunny Tripower |
-| `registry/victron_multiplus.json` | Victron MultiPlus-II (via Venus OS) |
-| `registry/fronius_gen24.json` | Fronius GEN24 + BYD |
-
-```bash
-# Ver qué registros incluye el perfil Huawei:
-cat registry/huawei_sun2000.json | python3 -m json.tool | head -40
-```
-
----
-
-## Paso 4 — Configurar el `.env`
-
-```bash
-cp config/.env.example config/.env
-```
-
-Edita `config/.env`:
-
-```env
-# ── OBLIGATORIO ──────────────────────────────────────────
-SITE_ID=SITE-ATACAMA-001          # Identificador único del sitio
-INVERTER_IP=192.168.1.100         # ← IP real del inversor
-INVERTER_PORT=502
-BESSAI_MODE=modbus                # real hardware (no simulator)
-
-# ── Perfil del hardware ───────────────────────────────────
-DRIVER_PROFILE_PATH=registry/huawei_sun2000.json  # ← cambiar si es SMA/Victron/Fronius
-
-# ── Opcional — GCP Pub/Sub ────────────────────────────────
-# GCP_PROJECT_ID=mi-proyecto-gcp
-# GCP_PUBSUB_TOPIC=bess-telemetria
-
-# ── Opcional — MQTT ──────────────────────────────────────
-# MQTT_ENABLED=true
-# MQTT_BROKER_HOST=192.168.1.200
-```
-
----
-
-## Paso 5 — Levantar en modo hardware real
-
-```bash
-# Sin simulador (conecta directo al inversor)
-docker compose -f infrastructure/docker/docker-compose.yml \
-  --profile monitoring \
-  up --build -d
-
-# Verificar que el gateway conectó:
-docker compose logs bessai-gateway --tail=30 -f
-```
-
-**Logs esperados:**
-```
-INFO  [ModbusDriver] Connected to 192.168.1.100:502 (Huawei SUN2000)
-INFO  [Gateway] Cycle 1: SOC=72.4% Power=120.5kW Temp=35.2°C
-INFO  [SafetyGuard] All constraints OK
-INFO  [PubSubPublisher] Published telemetry to bess-telemetry-dev
-```
-
-**Si ves `Connection refused` o `Timeout`:**
-```bash
-# (desde el host de BESSAI)
-nc -zv 192.168.1.100 502
-# Si falla: revisar el paso 2 de conectividad
-```
-
----
-
-## Paso 6 — Validar datos en Grafana
-
-http://localhost:3000 → dashboard **BESSAI Main**
-
-Deberías ver valores reales (no el rango simulado 20-95% SOC):
-- **SOC real** del estado actual de la batería
-- **Potencia real** (positivo = carga, negativo = descarga)
-- **Temperatura** real de las celdas
-
----
-
-## Paso 7 — Hardware no soportado
-
-Si tu inversor no está entre los perfiles existentes:
-
-1. Revisa si ya hay un issue abierto: [buscar en issues con etiqueta `hardware`](https://github.com/bess-solutions/open-bess-edge/issues?q=label%3Ahardware)
-2. Si no existe, abre uno con la etiqueta `hardware` describiendo tu inversor y adjunta el mapa de registros Modbus del fabricante
-3. Si tienes acceso al inversor físico, puedes contribuir el perfil JSON directamente: ver guía [hardware_profile_contribution.md](hardware_profile_contribution.md)
-
-> Las contribuciones de perfiles de hardware son las más valoradas por la comunidad — se mencionan explícitamente en las release notes.
-
----
-
-## Troubleshooting avanzado
-
-| Síntoma | Causa | Solución |
+| Profile File | Target Hardware | Operational Mode |
 |---|---|---|
-| `ModbusConnectionException` | IP incorrecta o puerto bloqueado | `nmap -p 502 IP_INVERSOR` |
-| Registros con valor `65535` | Slave ID incorrecto | Cambiar `MODBUS_SLAVE_ID` en `.env` |
-| SOC siempre `0.0%` | Perfil JSON incorrecto | Verificar `DRIVER_PROFILE_PATH` |
-| `TimeoutError` en todos los registros | Inversor en modo standby | Activar inversor y verificar Modbus habilitado |
-| Reintentos constantes | Auto-reconnect activo (normal) | Verificar con `GET /health` el uptime |
+| `registry/open_bess_edge_reference.json` | Project Reference Specification | Control (Active/Reactive) |
+| `registry/huawei_sun2000.json` | Huawei SUN2000 + LUNA2000 | Monitor (Unverified tier) |
+| `registry/sma_sunny_tripower.json` | SMA Sunny Tripower | Monitor (Unverified tier) |
+| `registry/victron_multiplus2.json` | Victron MultiPlus-II (Venus OS) | Monitor (Unverified tier) |
+| `registry/fronius_gen24_byd.json` | Fronius GEN24 + BYD Battery-Box | Monitor (Unverified tier) |
 
-> 📖 **Referencia completa:** [`docs/runbook.md`](../runbook.md) incluye checklist de producción, alertas Prometheus y procedimientos de escalada.
+Inspect profile details via the CLI:
+```bash
+open-bess-edge profile-info huawei_sun2000
+```
+
+---
+
+## Step 4 — Configure `config/edge_config.yaml`
+
+Configure your site deployment file:
+
+```yaml
+site:
+  id: "SITE-ATACAMA-001"
+  inverter_type: "huawei_sun2000"
+  modbus_host: "192.168.1.100"
+  modbus_port: 502
+  unit_id: 1
+
+runtime:
+  cycle_ms: 100
+  startup_valid_cycles: 5
+  comm_loss_hold_s: 2.0
+
+grid_standards:
+  nominal_frequency_hz: 50.0
+  deadband_hz: 0.030
+  droop_percentage: 3.0
+```
+
+Validate the file syntax:
+```bash
+open-bess-edge check-config config/edge_config.yaml
+```
+
+---
+
+## Step 5 — Launch the Gateway
+
+```bash
+open-bess-edge run --config config/edge_config.yaml
+```
+
+**Expected Log Progression:**
+```text
+INFO open_bess_edge.modbus.transport: Connected to 192.168.1.100:502
+INFO open_bess_edge.node: state INIT -> STARTING (STARTUP)
+INFO open_bess_edge.node: state STARTING -> RUNNING (VALIDATED)
+INFO open_bess_edge.safety.envelope: SafetyEnvelope evaluated: state=NORMAL trips=[]
+```
+
+---
+
+## Universal Physical Convention Reminder
+
+* **Active Power (P):** `+` = discharge / grid injection; `−` = charge / grid consumption.
+* **Reactive Power (Q):** `+` = capacitive (injects VAR, raises voltage); `−` = inductive (absorbs VAR, lowers voltage).
+
+Manufacturer-specific register conventions are mapped automatically using the `sign` and `factor` attributes in each profile.
+
+---
+
+## Troubleshooting
+
+| Symptom | Probable Cause | Action |
+|---|---|---|
+| `ModbusConnectionException` | Incorrect IP address or blocked port | Check routing and run `nmap -p 502 <INVERTER_IP>` |
+| Register values return `65535` | Inverted byte/word order or incorrect Slave Unit ID | Verify `unit_id` in YAML configuration |
+| SOC returns `0.0%` | Incorrect register offset | Inspect device register map against profile JSON |
+| Frequent link resets | Network latency or polling overload | Increase `runtime.cycle_ms` or inspect Ethernet switch |

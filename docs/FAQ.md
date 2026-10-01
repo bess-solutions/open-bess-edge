@@ -1,58 +1,65 @@
-# Open BESS Edge — Preguntas Frecuentes (FAQ)
+# Open BESS Edge — Frequently Asked Questions (FAQ)
 
-> Respuestas directas y técnicas sobre la arquitectura, alcance y despliegue de Open BESS Edge v3.
-
----
-
-## Integración y Soporte de Hardware
-
-### ¿Con qué inversores y sistemas BMS es compatible?
-
-Open BESS Edge utiliza perfiles JSON estandarizados en la carpeta [`registry/`](../registry/) para mapear registros Modbus TCP a señales canónicas. 
-
-Los perfiles incluidos son:
-- **`open_bess_edge_reference`**: Perfil canónico con capacidad de control activo y reactivo (P/Q) y verificación de latido (*heartbeat*).
-- **Perfiles vendor en modo monitor**: `huawei_sun2000`, `sma_sunny_tripower`, `fronius_gen24_byd`, `solaredge_storedge`, `victron_multiplus2`.
-
-> **Nota de honestidad técnica:** Los perfiles de fabricantes comerciales están definidos en modo *monitor-only* para lectura de telemetría hasta que completen el protocolo formal de homologación física en banco HIL (72 horas sin fallas).
+> Direct, technical answers regarding architecture, compliance, and industrial deployment of Open BESS Edge v3.
 
 ---
 
-### ¿Cuál es la latencia de respuesta ante contingencias de red?
+## Hardware Integration & Compatibility
 
-El ciclo de ejecución principal del gateway corre a **100 ms** (configurable mediante `runtime.cycle_ms`).
+### Which inverters and BMS controllers are supported?
 
-La respuesta a escalones de frecuencia para control FFR cumple con el presupuesto normativo de la NTSyCS (**< 500 ms** desde la detección del evento de frecuencia hasta la emisión del comando de setpoint al PCS sobre Modbus TCP).
+Open BESS Edge utilizes vendor-agnostic JSON profile maps in the [`registry/`](../registry/) directory to translate physical Modbus TCP register layouts into normalized internal signals.
 
----
+Current profiles include:
+- **`open_bess_edge_reference`**: Canonical industrial profile supporting bidirectional active/reactive power control (P/Q) and hardware watchdog heartbeat.
+- **Vendor profiles (monitor mode)**: `huawei_sun2000`, `sma_sunny_tripower`, `fronius_gen24_byd`, `solaredge_storedge`, `victron_multiplus2`.
 
-### ¿Requiere conexión a internet o servicios en la nube para operar?
-
-**No.** Open BESS Edge está diseñado para operar de manera **100% autónoma y determinista en el borde (OT)**:
-- Toda la lógica de protección (`SafetyEnvelope`, `BESS-GUARD-001..091`) se ejecuta localmente.
-- Si se pierde la comunicación con el medidor de red o con el PCS, el nodo entra de inmediato en estado seguro (`SAFE_STATE`) fijando la potencia en cero.
-- No existen dependencias de nube ni llamadas a APIs externas en el lazo de control crítico.
+> **Engineering Note:** Commercial vendor profiles are categorized strictly in *monitor-only* mode for telemetry collection until completing physical hardware-in-the-loop (HIL) bench qualification (72 hours of uninterrupted continuous operation without spurious trips).
 
 ---
 
-## Operación y Arquitectura
+## Response Times & Grid Codes
 
-### ¿Incluye modelos de Machine Learning (LLMs o DRL) en el gateway?
+### What is the contingency response latency?
 
-**No.** Open BESS Edge v3 se enfoca de manera estricta en el guardarraíl determinista de protección y control primario de frecuencia.
-- Los modelos de optimización de mercado, arbitraje o pronóstico pertenecen a sistemas superiores (EMS / Cloud) y pueden interactuar con el gateway mediante consignas de despacho limitadas por tiempo (TTL) y acotadas por la envolvente de seguridad física.
-- El gateway jamás delega la seguridad física ni el disparo a algoritmos de caja negra.
+The core execution cycle executes deterministically at **100 ms** (configurable via `runtime.cycle_ms`).
 
----
-
-### ¿Cómo se prueba el sistema sin hardware físico?
-
-El repositorio incluye un simulador determinista (`SimEnvironment` y `Harness`) acoplado por loopback TCP real. Esto permite ejecutar la suite de 278 pruebas canónicas simulando perturbaciones de frecuencia, transitorios térmicos, fallas de comunicación y desbalances de celdas sin requerir mocks en el driver Modbus.
+For Fast Frequency Response (FFR / droop control), the end-to-end response budget satisfies the Chilean NTSyCS grid standard requirements (**under 500 ms** from frequency step detection through setpoint dispatch over Modbus TCP).
 
 ---
 
-## Licencia y Uso
+## Autonomous Operation & Cloud Independence
 
-### ¿Bajo qué licencia se distribuye el código?
+### Does the gateway require an internet or cloud connection?
 
-Open BESS Edge se publica bajo la licencia de código abierto **Apache 2.0**. Puede ser utilizado, auditado e integrado libremente tanto en entornos de prueba como en instalaciones industriales.
+**No.** Open BESS Edge is engineered for **autonomous, deterministic local execution (OT edge)**:
+- All protective logic (`SafetyEnvelope`, `BESS-GUARD-001` through `091`) runs entirely on local compute.
+- If connectivity to the PCC grid meter or PCS inverter drops, the node immediately enters `SAFE_STATE`, clamping power setpoints to zero kW.
+- The critical control and safety loop has zero external cloud or API dependencies.
+
+---
+
+## Architecture & Algorithm Boundaries
+
+### Does the gateway execute machine learning or black-box models in the control loop?
+
+**No.** Open BESS Edge strictly enforces deterministic protection guardrails and primary grid support.
+- Market arbitrage, dispatch scheduling, and state-of-health forecasting models reside exclusively in higher-level supervisory layers (EMS / Cloud).
+- Supervisory systems communicate with the gateway via time-bounded (TTL) dispatch schedules constrained by the physical safety envelope.
+- Safety-critical trip actions are never delegated to stochastic or black-box algorithms.
+
+---
+
+## Hardware-Free Verification
+
+### How is the codebase validated without physical battery hardware?
+
+The repository includes a physics-informed simulation environment (`SimEnvironment` and `Harness`) running over real loopback TCP sockets. This enables automated execution of the 278-test canonical suite, exercising frequency contingencies, cell voltage/temperature imbalances, and communication link drops against real network sockets with zero driver-level mocks.
+
+---
+
+## Licensing & Governance
+
+### Under what license is Open BESS Edge distributed?
+
+Open BESS Edge is released under the permissive open-source **Apache License 2.0**. It can be audited, adapted, and integrated into industrial energy storage projects.

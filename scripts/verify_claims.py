@@ -110,6 +110,9 @@ docs_to_scan: list[tuple[str, str]] = [
     ("PROJECT_STATUS.md", status),
 ]
 
+if (ROOT / "README.es.md").exists():
+    docs_to_scan.append(("README.es.md", (ROOT / "README.es.md").read_text(encoding="utf-8")))
+
 if (ROOT / "GOVERNANCE.md").exists():
     docs_to_scan.append(("GOVERNANCE.md", (ROOT / "GOVERNANCE.md").read_text(encoding="utf-8")))
 
