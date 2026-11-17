@@ -1,6 +1,6 @@
 # Open BESS Edge v3 — imagen mínima, usuario no-root.
 # Nota: esta imagen NO fue construida en el entorno de desarrollo (sin daemon Docker); el CI la construye.
-FROM python:3.12-slim AS build
+FROM python:3.15-slim AS build
 WORKDIR /src
 COPY pyproject.toml README.md LICENSE ./
 COPY src ./src
@@ -8,7 +8,7 @@ COPY registry ./registry
 COPY data ./data
 RUN pip install --no-cache-dir build && python -m build --wheel --outdir /dist
 
-FROM python:3.12-slim
+FROM python:3.15-slim
 RUN useradd --system --uid 10001 --home /app obe && mkdir -p /app/config /app/data /var/lib/open-bess-edge \
     && chown -R obe /var/lib/open-bess-edge
 COPY --from=build /dist/*.whl /tmp/
